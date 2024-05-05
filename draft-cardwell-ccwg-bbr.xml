@@ -6,42 +6,12 @@
 
 <title abbrev="BBR">BBR Congestion Control</title>
 
-<author fullname="Neal Cardwell" initials="N." surname="Cardwell">
- <organization>Google</organization>
+<author fullname="Neal Cardwell" initials="N." surname="Cardwell"  role="editor">
+ <organization showOnFrontPage="true">Google</organization>
  <address>
  <email> ncardwell@google.com </email>
  </address>
 </author>
-
-<author fullname="Yuchung Cheng" initials="Y." surname="Cheng">
- <organization>Google</organization>
- <address>
- <email> ycheng@google.com </email>
- </address>
-</author>
-
-<author fullname="Soheil Hassas Yeganeh" initials="S." surname="Hassas Yeganeh">
- <organization>Google</organization>
- <address>
- <email> soheil@google.com </email>
- </address>
-</author>
-
-<author fullname="Ian Swett" initials="I." surname="Swett">
- <organization>Google</organization>
- <address>
- <email> ianswett@google.com </email>
- </address>
-</author>
-
-
-<author fullname="Van Jacobson" initials="V." surname="Jacobson">
- <organization>Google</organization>
- <address>
- <email> vanj@google.com </email>
- </address>
-</author>
-
 
 <date month="May" day="5" year="2024" />
 
