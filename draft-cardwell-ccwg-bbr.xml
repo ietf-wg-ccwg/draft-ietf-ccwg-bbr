@@ -951,9 +951,9 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
    * RTTs and loss */
   BBRInflightWithHeadroom():
     if (BBR.inflight_hi == Infinity)
-      return Infinity 
+      return Infinity
     headroom = max(1, BBRHeadroom * BBR.inflight_hi)
-      return max(BBR.inflight_hi - headroom, 
+      return max(BBR.inflight_hi - headroom,
                  BBRMinPipeCwnd)
 
   /* Raise inflight_hi slope if appropriate. */
@@ -984,7 +984,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
       /* end of samples from bw probing phase */
       if (IsInAProbeBWState() and !rs.is_app_limited)
         BBRAdvanceMaxBwFilter()
-    
+
     if (!CheckInflightTooHigh())
       /* Loss rate is safe. Adjust upper bounds upward. */
       if (BBR.inflight_hi == Infinity or BBR.bw_hi == Infinity)
@@ -994,7 +994,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
       if (rs.delivery_rate &gt; BBR.bw_hi)
         BBR.bw_hi = rs.bw
       if (BBR.state == ProbeBW_UP)
-        BBRProbeInflightHiUpward()    
+        BBRProbeInflightHiUpward()
 </artwork></figure>
 
 </section>
@@ -1055,7 +1055,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <figure><artwork>
   BBRUpdateMinRTT()
-    BBR.probe_rtt_expired = 
+    BBR.probe_rtt_expired =
       Now() &gt; BBR.probe_rtt_min_stamp + ProbeRTTInterval
     if (rs.rtt &gt;= 0 and
         (rs.rtt &lt; BBR.probe_rtt_min_delay or
@@ -1274,7 +1274,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 <figure><artwork>
   BBRUpdateMaxBw()
     BBRUpdateRound()
-    if (rs.delivery_rate &gt;= BBR.max_bw || !rs.is_app_limited) 
+    if (rs.delivery_rate &gt;= BBR.max_bw || !rs.is_app_limited)
         BBR.max_bw = update_windowed_max_filter(
                       filter=BBR.MaxBwFilter,
                       value=rs.delivery_rate,
@@ -1462,7 +1462,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
                   (1 - BBRLossThresh)
     /* At what inflight value did losses cross BBRLossThresh? */
     inflight = inflight_prev + lost_prefix
-    return inflight    
+    return inflight
 </artwork></figure>
 
 </section>
@@ -1701,7 +1701,7 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
       if (BBR.state == ProbeBW_UP)
       inflight += 2*SMSS
     return inflight
-    
+
   BBRInflight(gain):
     inflight = BBRBDPMultiple(gain)
     return BBRQuantizationBudget(inflight)
@@ -1842,7 +1842,7 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
     else if (BBR.state == ProbeRTT or
              BBR.state == ProbeBW_CRUISE)
       cap = BBRInflightWithHeadroom()
-    
+
     /* apply inflight_lo (possibly infinite): */
     cap = min(cap, BBR.inflight_lo)
     cap = max(cap, BBRMinPipeCwnd)
@@ -2183,7 +2183,7 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
 <format type='PDF' target='https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf' />
 </reference>
 
-                                     
+
 
 
 <reference anchor='draft-romo-iccrg-ccid5' target='https://tools.ietf.org/html/draft-romo-iccrg-ccid5'>
