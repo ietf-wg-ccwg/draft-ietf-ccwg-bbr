@@ -118,34 +118,22 @@ Table of Contents
                Samples
        4.5.5.  Updating the BBR.max_bw Max Filter
        4.5.6.  Tracking Time for the BBR.max_bw Max Filter
-     4.6.  BBR.min_rtt: Estimated Minimum Round-Trip Time
-       4.6.1.  Round-Trip Time Samples for Estimating BBR.min_rtt
-       4.6.2.  BBR.min_rtt Min Filter
-     4.7.  BBR.offload_budget
-     4.8.  BBR.extra_acked
-     4.9.  Updating the Model Upon Packet Loss
-       4.9.1.  Probing for Bandwidth In Startup
-       4.9.2.  Probing for Bandwidth In ProbeBW
-       4.9.3.  When not Probing for Bandwidth
-   5.  Updating Control Parameters
-     5.1.  Summary of Control Behavior in the State Machine
-     5.2.  Pacing Rate: BBR.pacing_rate
-     5.3.  Send Quantum: BBR.send_quantum
-     5.4.  Congestion Window
-       5.4.1.  Initial cwnd
-       5.4.2.  Computing BBR.max_inflight
-       5.4.3.  Minimum cwnd for Pipelining
-       5.4.4.  Modulating cwnd in Loss Recovery
-       5.4.5.  Modulating cwnd in ProbeRTT
-       5.4.6.  Core cwnd Adjustment Mechanism
-       5.4.7.  Bounding cwnd Based on Recent Congestion
-   6.  Implementation Status
-   7.  Security Considerations
-   8.  IANA Considerations
-   9.  Acknowledgments
-   10. References
-     10.1.  Normative References
-     10.2.  Informative References
+       4.5.7.  BBR.min_rtt: Estimated Minimum Round-Trip Time
+       4.5.8.  BBR.offload_budget
+       4.5.9.  BBR.extra_acked
+       4.5.10. Updating the Model Upon Packet Loss
+     4.6.  Updating Control Parameters
+       4.6.1.  Summary of Control Behavior in the State Machine
+       4.6.2.  Pacing Rate: BBR.pacing_rate
+       4.6.3.  Send Quantum: BBR.send_quantum
+       4.6.4.  Congestion Window
+   5.  Implementation Status
+   6.  Security Considerations
+   7.  IANA Considerations
+   8.  Acknowledgments
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
    Author's Address
 
 1.  Introduction
@@ -2429,7 +2417,7 @@ Table of Contents
      BBRAdvanceMaxBwFilter():
        BBR.cycle_count++
 
-4.6.  BBR.min_rtt: Estimated Minimum Round-Trip Time
+4.5.7.  BBR.min_rtt: Estimated Minimum Round-Trip Time
 
    BBR.min_rtt is BBR's estimate of the round-trip propagation delay of
    the path over which a transport connection is sending.  The path's
@@ -2441,7 +2429,7 @@ Table of Contents
    connection, so BBR continually estimates BBR.min_rtt using recent
    round-trip delay samples.
 
-4.6.1.  Round-Trip Time Samples for Estimating BBR.min_rtt
+4.5.7.1.  Round-Trip Time Samples for Estimating BBR.min_rtt
 
    For every data packet a connection sends, BBR calculates an RTT
    sample that measures the time interval from sending a data packet
@@ -2469,7 +2457,7 @@ Table of Contents
    the minimum among such potential RTT samples; i.e., BBR calculates
    the RTT using the data packet with the latest transmission time.
 
-4.6.2.  BBR.min_rtt Min Filter
+4.5.7.2.  BBR.min_rtt Min Filter
 
    RTT samples tend to be above the round-trip propagation delay of the
    path, due to "noise" introduced by random variation in physical
@@ -2518,7 +2506,7 @@ Table of Contents
    estimation into the ProbeRTT state machine, so this document
    discusses that approach in the ProbeRTT section.
 
-4.7.  BBR.offload_budget
+4.5.8.  BBR.offload_budget
 
    BBR.offload_budget is the estimate of the minimum volume of data
    necessary to achieve full throughput using sender (TSO/GSO) and
@@ -2536,7 +2524,7 @@ Table of Contents
    *  1 quantum being reassembled or otherwise remaining unacknowledged
       due to the receiver host's LRO/GRO/delayed-ACK engine
 
-4.8.  BBR.extra_acked
+4.5.9.  BBR.extra_acked
 
    BBR.extra_acked is a volume of data that is the estimate of the
    recent degree of aggregation in the network path.  For each ACK, the
@@ -2580,7 +2568,7 @@ Table of Contents
            time=BBR.round_count,
            window_length=BBRExtraAckedFilterLen)
 
-4.9.  Updating the Model Upon Packet Loss
+4.5.10.  Updating the Model Upon Packet Loss
 
    In every state, BBR responds to (filtered) congestion signals,
    including loss.  The response to those congestion signals depends on
@@ -2588,12 +2576,12 @@ Table of Contents
    infer depends on what the flow was doing when the flow experienced
    the signal.
 
-4.9.1.  Probing for Bandwidth In Startup
+4.5.10.1.  Probing for Bandwidth In Startup
 
    In Startup, if the congestion signals meet the Startup exit criteria,
    the flow exits Startup and enters Drain.
 
-4.9.2.  Probing for Bandwidth In ProbeBW
+4.5.10.2.  Probing for Bandwidth In ProbeBW
 
    BBR searches for the maximum volume of data that can be sensibly
    placed in-flight in the network.  A key precondition is that the flow
@@ -2688,7 +2676,7 @@ Table of Contents
        inflight = inflight_prev + lost_prefix
        return inflight
 
-4.9.3.  When not Probing for Bandwidth
+4.5.10.3.  When not Probing for Bandwidth
 
    When not explicitly accelerating to probe for bandwidth (Drain,
    ProbeRTT, ProbeBW_DOWN, ProbeBW_CRUISE), BBR responds to loss by
@@ -2782,12 +2770,12 @@ Table of Contents
      BBRBoundBWForModel():
        BBR.bw = min(BBR.max_bw, BBR.bw_lo, BBR.bw_hi)
 
-5.  Updating Control Parameters
+4.6.  Updating Control Parameters
 
    BBR uses three distinct but interrelated control parameters: pacing
    rate, send quantum, and congestion window (cwnd).
 
-5.1.  Summary of Control Behavior in the State Machine
+4.6.1.  Summary of Control Behavior in the State Machine
 
    The following table summarizes how BBR modulates the control
    parameters in each state.  In the table below, the semantics of the
@@ -2841,7 +2829,7 @@ Table of Contents
                   |        |        |      | bw_lo  | inflight_lo
    ---------------+--------+--------+------+--------+-----------------
 
-5.2.  Pacing Rate: BBR.pacing_rate
+4.6.2.  Pacing Rate: BBR.pacing_rate
 
    To help match the packet-arrival rate to the bottleneck bandwidth
    available to the flow, BBR paces data packets.  Pacing enforces a
@@ -2896,7 +2884,7 @@ Table of Contents
    maintaining high utilization, the BBRPacingMarginPercent constant of
    1 aims to cause BBR to pace at 1% below the bw, on average.
 
-5.3.  Send Quantum: BBR.send_quantum
+4.6.3.  Send Quantum: BBR.send_quantum
 
    In order to amortize per-packet overheads involved in the sending
    process (host CPU, NIC processing, and interrupt processing delays),
@@ -2935,7 +2923,7 @@ Table of Contents
    users, a BBR implementation SHOULD attempt to use the smallest
    feasible quanta.
 
-5.4.  Congestion Window
+4.6.4.  Congestion Window
 
    The congestion window, or cwnd, controls the maximum volume of data
    BBR allows in flight in the network at any time.  It is the maximum
@@ -2956,7 +2944,7 @@ Table of Contents
    its cwnd accordingly.  The following sections describe the various
    considerations that impact cwnd.
 
-5.4.1.  Initial cwnd
+4.6.4.1.  Initial cwnd
 
    BBR generally uses measurements to build a model of the network path
    and then adapts control decisions to the path based on that model.
@@ -2966,7 +2954,7 @@ Table of Contents
    initialization, BBR uses the transport sender implementation's
    initial congestion window (e.g. from [RFC6298] for TCP).
 
-5.4.2.  Computing BBR.max_inflight
+4.6.4.2.  Computing BBR.max_inflight
 
    The BBR BBR.max_inflight is the upper bound on the volume of data BBR
    allows in flight.  This bound is always in place, and dominates when
@@ -3011,7 +2999,7 @@ Table of Contents
    quanta in flight on the sending and receiving hosts to reach high
    throughput even in environments using offload mechanisms.
 
-5.4.3.  Minimum cwnd for Pipelining
+4.6.4.3.  Minimum cwnd for Pipelining
 
    For BBR.max_inflight, BBR imposes a floor of BBRMinPipeCwnd (4
    packets, i.e. 4 * SMSS).  This floor helps ensure that even at very
@@ -3021,7 +3009,7 @@ Table of Contents
    2 data packets in flight and ACKs for at least 2 data packets on the
    path from receiver to sender.
 
-5.4.4.  Modulating cwnd in Loss Recovery
+4.6.4.4.  Modulating cwnd in Loss Recovery
 
    BBR interprets loss as a hint that there may be recent changes in
    path behavior that are not yet fully reflected in its model of the
@@ -3104,7 +3092,7 @@ Table of Contents
      BBRRestoreCwnd():
        cwnd = max(cwnd, BBR.prior_cwnd)
 
-5.4.5.  Modulating cwnd in ProbeRTT
+4.6.4.5.  Modulating cwnd in ProbeRTT
 
    If BBR decides it needs to enter the ProbeRTT state (see the
    "ProbeRTT" section below), its goal is to quickly reduce the volume
@@ -3122,7 +3110,7 @@ Table of Contents
        if (BBR.state == ProbeRTT)
          cwnd = min(cwnd, BBRProbeRTTCwnd())
 
-5.4.6.  Core cwnd Adjustment Mechanism
+4.6.4.6.  Core cwnd Adjustment Mechanism
 
    The network path and traffic traveling over it can make sudden
    dramatic changes.  To adapt to these changes smoothly and robustly,
@@ -3164,7 +3152,7 @@ Table of Contents
    pipelining even with small BDPs (see the "Minimum cwnd for
    Pipelining" section, above).
 
-5.4.7.  Bounding cwnd Based on Recent Congestion
+4.6.4.7.  Bounding cwnd Based on Recent Congestion
 
    Finally, BBR bounds the cwnd based on recent congestion, as outlined
    in the "Volume Cap" column of the table in the "Summary of Control
@@ -3184,7 +3172,7 @@ Table of Contents
        cap = max(cap, BBRMinPipeCwnd)
        cwnd = min(cwnd, cap)
 
-6.  Implementation Status
+5.  Implementation Status
 
    This section records the status of known implementations of the
    algorithm defined by this specification at the time of posting of
@@ -3291,14 +3279,14 @@ Table of Contents
 
       -  Last updated: October 5, 2021
 
-7.  Security Considerations
+6.  Security Considerations
 
    This proposal makes no changes to the underlying security of
    transport protocols or congestion control algorithms.  BBR shares the
    same security considerations as the existing standard congestion
    control algorithm [RFC5681].
 
-8.  IANA Considerations
+7.  IANA Considerations
 
    This document has no IANA actions.  Here we are using that phrase,
    suggested by [RFC5226], because BBR does not modify or extend the
@@ -3310,7 +3298,7 @@ Table of Contents
    Note to RFC Editor: this section may be removed on publication as an
    RFC.
 
-9.  Acknowledgments
+8.  Acknowledgments
 
    The authors are grateful to Len Kleinrock for his work on the theory
    underlying congestion control.  We are indebted to Larry Brakmo for
@@ -3330,9 +3318,9 @@ Table of Contents
    Zheng, Jonathan Morton, Matt Olson, and Junho Choi for feedback and
    suggestions on earlier versions of this document.
 
-10.  References
+9.  References
 
-10.1.  Normative References
+9.1.  Normative References
 
    [RFC2018]  Mathis, M. and J. Mahdavi, "TCP Selective Acknowledgment
               Options", RFC 2018, October 1996,
@@ -3397,7 +3385,7 @@ Table of Contents
               DOI 10.17487/RFC9000, May 2021,
               <https://www.rfc-editor.org/info/rfc9000>.
 
-10.2.  Informative References
+9.2.  Informative References
 
    [A15]      Abrahamsson, M., "TCP ACK suppression", IETF AQM mailing
               list , November 2015, <https://www.ietf.org/mail-
