@@ -1602,7 +1602,6 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 </artwork></figure>
 
 </section>
-</section>
 <section title="BBR.min_rtt: Estimated Minimum Round-Trip Time" anchor="bbrminrtt-estimated-minimum-round-trip-time">
 
 <t>BBR.min_rtt is BBR's estimate of the round-trip propagation delay of the path over which a transport connection is sending. The path's round-trip propagation delay determines the minimum amount of time over which the connection must be willing to sustain transmissions at the BBR.bw rate, and thus the minimum amount of data needed in-flight, for the connection to reach full utilization (a "Full Pipe"). The round-trip propagation delay can vary over the life of a connection, so BBR continually estimates BBR.min_rtt using recent round-trip delay samples.</t>
@@ -1861,6 +1860,7 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 </section>
 </section>
 </section>
+
 <section title="Updating Control Parameters" anchor="updating-control-parameters">
 
 <t>BBR uses three distinct but interrelated control parameters: pacing rate, send quantum, and congestion window (cwnd).</t>
@@ -2160,6 +2160,8 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
 
 </section>
 </section>
+</section>
+
 </section>
 
 <section title="Implementation Status" anchor="implementation-status">
