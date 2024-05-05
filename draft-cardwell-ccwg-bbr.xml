@@ -1419,13 +1419,23 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>Here rs.tx_in_flight is the amount of data that was estimated to be in flight when the most recently ACKed packet was sent. And the BBRBeta (0.7x) bound is to try to ensure that BBR does not react more dramatically than CUBIC's 0.7x multiplicative decrease factor.</t>
 
-<t>Some loss detection algorithms, including algorithms like RACK <xref target="RFC8985"/> that delay loss marking while waiting for potential reordering to resolve, may mark packets as lost long after the loss itself happened. In such cases, the tx_in_flight for the delivered sequence range that allowed the loss to be detected may be considerably smaller than the tx_in_flight of the lost packet itself. In such cases using the former tx_in_flight rather than the latter can cause BBR.inflight_hi to be significantly underestimated. To avoid such issues, BBR processes each loss detection event to more precisely estimate the volume of in-flight data at which loss rates cross BBRLossThresh, noting that this may have happened mid-way through some packet. To estimate this value, we can solve for "lost_prefix" in the following equation, where inflight_prev represents the volume of in-flight data preceding this packet, lost_prev represents the data lost among that previous in-flight data:</t>
+<t>Some loss detection algorithms, including algorithms like RACK <xref target="RFC8985"/> that delay loss marking while waiting for potential reordering to resolve, may mark packets as lost long after the loss itself happened. In such cases, the tx_in_flight for the delivered sequence range that allowed the loss to be detected may be considerably smaller than the tx_in_flight of the lost packet itself. In such cases using the former tx_in_flight rather than the latter can cause BBR.inflight_hi to be significantly underestimated. To avoid such issues, BBR processes each loss detection event to more precisely estimate the volume of in-flight data at which loss rates cross BBRLossThresh, noting that this may have happened mid-way through some packet. To estimate this value, we can solve for "lost_prefix" in the following way, where inflight_prev represents the volume of in-flight data preceding this packet, and lost_prev represents the data lost among that previous in-flight data.</t>
 
+<t>First we start with:</t>
 <figure><artwork>
-    lost                     /  inflight                     &gt;= BBRLossThresh                                                                                       
-   (lost_prev + lost_prefix) / (inflight_prev + lost_prefix) &gt;= BBRLossThresh
-   /* solving for lost_prefix we arrive at: */
-   lost_prefix = (BBRLossThresh * inflight_prev - lost_prev) / (1 - BBRLossThresh)                                                                                       
+  lost / inflight &gt;= BBRLossThresh
+</artwork></figure>
+
+<t>Expanding this, we get:</t>
+<figure><artwork>
+  (lost_prev + lost_prefix) /    &gt;= BBRLossThresh
+  (inflight_prev + lost_prefix)
+</artwork></figure>
+
+<t>Solving for lost_prefix, we arrive at:</t>
+<figure><artwork>
+  lost_prefix &gt;= (BBRLossThresh * inflight_prev - lost_prev) /
+                    (1 - BBRLossThresh)
 </artwork></figure>
 
 <t>In pseudocode:</t>
@@ -1568,31 +1578,31 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 <t>The control behavior can be summarized as follows. Upon processing each ACK, BBR uses the values in the table below to compute BBR.bw in BBRBoundBWForModel(), and the cwnd in BBRBoundCwndForModel():</t>
 
 <figure><artwork>
-+-----------------+--------+--------+------+--------+------------------+
-| State           | Tactic | Pacing | Cwnd | Rate   | Volume           |
-|                 |        | Gain   | Gain | Cap    | Cap              |
-+-----------------+--------+--------+------+--------+------------------+
-| Startup         | accel  | 2.77   | 2    |        |                  |
-|                 |        |        |      |        |                  |
-+-----------------+--------+--------+------+--------+------------------+
-| Drain           | decel  | 0.5    | 2    | bw_hi, | inflight_hi,     |
-|                 |        |        |      | bw_lo  | inflight_lo      |
-+-----------------+--------+--------+------+--------+------------------+
-| ProbeBW_DOWN    | decel  | 0.9    | 2    | bw_hi, | inflight_hi,     |
-|                 |        |        |      | bw_lo  | inflight_lo      |
-+-----------------+--------+--------+------+--------+------------------+
-| ProbeBW_CRUISE  | cruise | 1.0    | 2    | bw_hi, | 0.85*inflight_hi |
-|                 |        |        |      | bw_lo  | inflight_lo      |
-+-----------------+--------+--------+------+--------+------------------+
-| ProbeBW_REFILL  | accel  | 1.0    | 2    | bw_hi  | inflight_hi      |
-|                 |        |        |      |        |                  |
-+-----------------+--------+--------+------+--------+------------------+
-| ProbeBW_UP      | accel  | 1.25   | 2    | bw_hi  | inflight_hi      |
-|                 |        |        |      |        |                  |
-+-----------------+--------+--------+------+--------+------------------+
-| ProbeRTT        | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi |
-|                 |        |        |      | bw_lo  | inflight_lo      |
-+-----------------+--------+--------+------+--------+------------------+
+---------------+--------+--------+------+--------+-----------------
+State          | Tactic | Pacing | Cwnd | Rate   | Volume
+               |        | Gain   | Gain | Cap    | Cap
+---------------+--------+--------+------+--------+-----------------
+Startup        | accel  | 2.77   | 2    |        |
+               |        |        |      |        |
+---------------+--------+--------+------+--------+-----------------
+Drain          | decel  | 0.5    | 2    | bw_hi, | inflight_hi,
+               |        |        |      | bw_lo  | inflight_lo
+---------------+--------+--------+------+--------+-----------------
+ProbeBW_DOWN   | decel  | 0.9    | 2    | bw_hi, | inflight_hi,
+               |        |        |      | bw_lo  | inflight_lo
+---------------+--------+--------+------+--------+-----------------
+ProbeBW_CRUISE | cruise | 1.0    | 2    | bw_hi, | 0.85*inflight_hi
+               |        |        |      | bw_lo  | inflight_lo
+---------------+--------+--------+------+--------+-----------------
+ProbeBW_REFILL | accel  | 1.0    | 2    | bw_hi  | inflight_hi
+               |        |        |      |        |
+---------------+--------+--------+------+--------+-----------------
+ProbeBW_UP     | accel  | 1.25   | 2    | bw_hi  | inflight_hi
+               |        |        |      |        |
+---------------+--------+--------+------+--------+-----------------
+ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
+               |        |        |      | bw_lo  | inflight_lo
+---------------+--------+--------+------+--------+-----------------
 </artwork></figure>
 
 </section>
