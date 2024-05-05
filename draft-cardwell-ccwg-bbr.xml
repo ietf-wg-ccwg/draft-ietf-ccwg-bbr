@@ -1,9 +1,5 @@
 <?xml version="1.0" ?>
-<!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
-]>
-<?rfc toc="yes"?>
-<?rfc compact="yes"?>
-<rfc ipr="trust200902" category="exp" docName="draft-cardwell-ccwg-bbr-latest">
+<rfc ipr="trust200902" category="exp" docName="draft-cardwell-ccwg-bbr-latest" submissionType="IETF" tocInclude="true" sortRefs="true" symRefs="true">
 <front>
 
 <!-- For a template see: https://tools.ietf.org/tools/templates/mib-doc-template-xml.txt -->
@@ -47,7 +43,7 @@
 </author>
 
 
-<date month="March" day="7" year="2022" />
+<date month="May" day="5" year="2024" />
 
 <area>IRTF</area>
 <workgroup> Internet Congestion Control Research Group </workgroup>
@@ -56,7 +52,7 @@
  <keyword>QUIC</keyword>
 
 <abstract><t>
-This document specifies the BBR congestion control algorithm. BBR ("Bottleneck Bandwidth and Round-trip propagation time") uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path. BBR then uses this model to control both how fast it sends data and the maximum volume of data it allows in flight in the network at any time. Relative to loss-based congestion control algorithms such as Reno [RFC5681] or CUBIC [RFC8312], BBR offers substantially higher throughput for bottlenecks with shallow buffers or random losses, and substantially lower queueing delays for bottlenecks with deep buffers (avoiding "bufferbloat"). BBR can be implemented in any transport protocol that supports packet-delivery acknowledgment. Thus far, open source implementations are available for TCP [RFC793] and QUIC [RFC9000]. This document specifies version 2 of the BBR algorithm, also sometimes referred to as BBRv2 or bbr2.
+This document specifies the BBR congestion control algorithm. BBR ("Bottleneck Bandwidth and Round-trip propagation time") uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path. BBR then uses this model to control both how fast it sends data and the maximum volume of data it allows in flight in the network at any time. Relative to loss-based congestion control algorithms such as Reno <xref target="RFC5681"/> or CUBIC <xref target="RFC8312"/>, BBR offers substantially higher throughput for bottlenecks with shallow buffers or random losses, and substantially lower queueing delays for bottlenecks with deep buffers (avoiding "bufferbloat"). BBR can be implemented in any transport protocol that supports packet-delivery acknowledgment. Thus far, open source implementations are available for TCP <xref target="RFC793"/> and QUIC <xref target="RFC9000"/>. This document specifies version 2 of the BBR algorithm, also sometimes referred to as BBRv2 or bbr2.
 </t></abstract>
 
 </front>
@@ -64,7 +60,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 <middle>
 <section title="Introduction" anchor="introduction">
 
-<t>The Internet has traditionally used loss-based congestion control algorithms like Reno ([Jac88], [Jac90], [WS95] [RFC5681]) and CUBIC ([HRX08], [RFC8312]). These algorithms worked well for many years because they were sufficiently well-matched to the prevalent range of bandwidth-delay products and degrees of buffering in Internet paths. As the Internet has evolved, loss-based congestion control is increasingly problematic in several important scenarios:</t>
+<t>The Internet has traditionally used loss-based congestion control algorithms like Reno (<xref target="Jac88"/>, <xref target="Jac90"/>, <xref target="WS95"/> <xref target="RFC5681"/>) and CUBIC (<xref target="HRX08"/>, <xref target="RFC8312"/>). These algorithms worked well for many years because they were sufficiently well-matched to the prevalent range of bandwidth-delay products and degrees of buffering in Internet paths. As the Internet has evolved, loss-based congestion control is increasingly problematic in several important scenarios:</t>
 
 <t><list style="numbers">
 <t>Shallow buffers: In shallow buffers, packet loss can happen even when a link has low utilization. With high-speed, long-haul links employing commodity switches with shallow buffers, loss-based congestion control can cause abysmal throughput because it overreacts, multiplicatively decreasing the sending rate upon packet loss, and only slowly growing its sending rate thereafter. This can happen even if the packet loss arises from transient traffic bursts  when the link is mostly idle. </t>
@@ -75,11 +71,11 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 </list></t>
 
-<t>In both the shallow-buffer (1.) or dynamic-traffic (3.) scenarios mentioned above it is difficult to achieve full throughput with loss-based congestion control in practice: for CUBIC, sustaining 10Gbps over 100ms RTT needs a packet loss rate below 0.000003% (i.e., more than 40 seconds between packet losses), and over a 100ms RTT path a more feasible loss rate like 1% can only sustain at most 3 Mbps  [RFC8312]. These limitations apply no matter what the bottleneck link is capable of or what the connection's fair share is. Furthermore,  failure to reach the fair share can cause poor throughpout and poor tail latency for latency-sensitive applications.</t>
+<t>In both the shallow-buffer (1.) or dynamic-traffic (3.) scenarios mentioned above it is difficult to achieve full throughput with loss-based congestion control in practice: for CUBIC, sustaining 10Gbps over 100ms RTT needs a packet loss rate below 0.000003% (i.e., more than 40 seconds between packet losses), and over a 100ms RTT path a more feasible loss rate like 1% can only sustain at most 3 Mbps  <xref target="RFC8312"/>. These limitations apply no matter what the bottleneck link is capable of or what the connection's fair share is. Furthermore,  failure to reach the fair share can cause poor throughpout and poor tail latency for latency-sensitive applications.</t>
 
 <t>The BBR ("Bottleneck Bandwidth and Round-trip propagation time") congestion control algorithm is a model-based algorithm that takes an approach different from loss-based congestion control: BBR uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path, including its estimated available bandwidth, bandwidth-delay product, and the maximum volume of data that the connection can place in-flight in the network without causing excessive queue pressure. It then uses this model in order to guide its control behavior in seeking high throughput and low queue pressure.</t>
 
-<t>This document describes the current version of the BBR algorithm, BBRv2. The previous version of the algorithm,  BBRv1, was described previously at a high level [CCGHJ16][CCGHJ17]. The implications of BBR in allowing high utilization of high-speed networks with shallow buffers have been discussed in other work [MM19]. Active work on the BBR algorithm is continuing.</t>
+<t>This document describes the current version of the BBR algorithm, BBRv2. The previous version of the algorithm,  BBRv1, was described previously at a high level <xref target="CCGHJ16"/><xref target="CCGHJ17"/>. The implications of BBR in allowing high utilization of high-speed networks with shallow buffers have been discussed in other work <xref target="MM19"/>. Active work on the BBR algorithm is continuing.</t>
 
 <t>This document is organized as follows. Section 2 provides various definitions that will be used throughout this document. Section 3 provides an overview of the design of the BBR algorithm, and section 4 describes the BBR algorithm in detail, including BBR's network path model, control parameters, and state machine. Section 5 describes the implementation status, section 6 describes security considerations, section 7 notes that there are no IANA considerations, and section 8 closes with Acknowledgments.</t>
 
@@ -88,7 +84,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>This document defines state variables and constants for the BBR algorithm.</t>
 
-<t>The variables starting with C, P, or rs not defined below are defined in [draft-cheng-iccrg-delivery-rate-estimation].</t>
+<t>The variables starting with C, P, or rs not defined below are defined in <xref target="draft-cheng-iccrg-delivery-rate-estimation"/>.</t>
 
 <section title="Transport Connection State" anchor="transport-connection-state">
 
@@ -118,7 +114,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>rs.rtt: The RTT sample calculated based on the most recently-sent segment of the segments that have just been ACKed.</t>
 
-<t>rs.newly_acked: The volume of data cumulatively or selectively acknowledged upon the ACK that was just received. (This quantity is referred to as "DeliveredData" in [RFC6937].)</t>
+<t>rs.newly_acked: The volume of data cumulatively or selectively acknowledged upon the ACK that was just received. (This quantity is referred to as "DeliveredData" in <xref target="RFC6937"/>.)</t>
 
 <t>rs.newly_lost: The volume of data newly marked lost upon the ACK that was just received.</t>
 
@@ -149,7 +145,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>BBR.cwnd_gain: The dynamic gain factor used to scale the estimated BDP to produce a congestion window (cwnd).</t>
 
-<t>BBRStartupPacingGain: A constant specifying the minimum gain value for calculating the pacing rate that will allow the sending rate to double each round (4*ln(2) ~= 2.77) [BBRStartupPacingGain]; used in Startup mode for BBR.pacing_gain.</t>
+<t>BBRStartupPacingGain: A constant specifying the minimum gain value for calculating the pacing rate that will allow the sending rate to double each round (4*ln(2) ~= 2.77) <xref target="BBRStartupPacingGain"/>; used in Startup mode for BBR.pacing_gain.</t>
 
 <t>BBRStartupCwndGain: A constant specifying the minimum gain value for calculating the cwnd that will allow the sending rate to double each round (2.0); used in Startup mode for BBR.cwnd_gain.</t>
 
@@ -186,7 +182,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>The data rate model parameters together estimate both the sending rate required to reach the full bandwidth available to the flow (BBR.max_bw), and the maximum pacing rate control parameter that is consistent with the queue pressure objective (BBR.bw).</t>
 
-<t>BBR.max_bw: The windowed maximum recent bandwidth sample – obtained using the BBR delivery rate sampling algorithm [draft-cheng-iccrg-delivery-rate-estimation] – measured during the current or previous bandwidth probing cycle (or during Startup, if the flow is still in that state). (Part of the long-term model.)</t>
+<t>BBR.max_bw: The windowed maximum recent bandwidth sample – obtained using the BBR delivery rate sampling algorithm <xref target="draft-cheng-iccrg-delivery-rate-estimation"/> – measured during the current or previous bandwidth probing cycle (or during Startup, if the flow is still in that state). (Part of the long-term model.)</t>
 
 <t>BBR.bw_hi: The long-term maximum sending bandwidth that the algorithm estimates will produce acceptable queue pressure, based on signals in the current or previous bandwidth probing cycle, as measured by loss. (Part of the long-term model.)</t>
 
@@ -274,7 +270,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>BBR.probe_rtt_expired: A boolean recording whether the BBR.probe_rtt_min_delay has expired and is due for a refresh with an application idle period or a transition into ProbeRTT state.</t>
 
-<t>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC2119].</t>
+<t>The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in <xref target="RFC2119"/>.</t>
 
 </section>
 </section>
@@ -300,7 +296,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>These goals are in tension: sending faster improves the odds of achieving (1) but reduces the odds of achieving (2), while sending slower improves the odds of achieving (2) but reduces the odds of achieving (1). Thus the algorithm cannot maximize throughput or minimize queue pressure independently, and must jointly optimize both.</t>
 
-<t>To try to achieve these goals, and seek an operating point with high throughput and low delay [K79] [GK81], BBR aims to adapt its sending process to match the network delivery process, in two dimensions:</t>
+<t>To try to achieve these goals, and seek an operating point with high throughput and low delay <xref target="K79"/> <xref target="GK81"/>, BBR aims to adapt its sending process to match the network delivery process, in two dimensions:</t>
 
 <t><list style="numbers">
 <t>data rate: the rate at which the flow sends data should ideally match the rate at which the network delivers the flow's data (the available bottleneck bandwidth)</t>
@@ -393,7 +389,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 </section>
 <section title="Environment and Usage" anchor="environment-and-usage">
 
-<t>BBR is a congestion control algorithm that is agnostic to transport-layer and link-layer technologies, requires only sender-side changes, and does not require changes in the network. Open source implementations of BBR are available for the TCP [RFC793] and QUIC [RFC9000] transport protocols, and these implementations have been used in production for a large volume of Internet traffic. An open source implementation of BBR is also available for DCCP [RFC4340] [draft-romo-iccrg-ccid5].</t>
+<t>BBR is a congestion control algorithm that is agnostic to transport-layer and link-layer technologies, requires only sender-side changes, and does not require changes in the network. Open source implementations of BBR are available for the TCP <xref target="RFC793"/> and QUIC <xref target="RFC9000"/> transport protocols, and these implementations have been used in production for a large volume of Internet traffic. An open source implementation of BBR is also available for DCCP <xref target="RFC4340"/> <xref target="draft-romo-iccrg-ccid5"/>.</t>
 
 </section>
 </section>
@@ -568,7 +564,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>When a BBR flow starts up, it performs its first (and most rapid) sequential probe/drain process in the Startup and Drain states. Network link bandwidths currently span a range of at least 11 orders of magnitude, from a few bps to 200 Gbps. To quickly learn BBR.max_bw, given this huge range to explore, BBR's Startup state does an exponential search of the rate space, doubling the sending rate each round. This finds BBR.max_bw in O(log_2(BDP)) round trips.</t>
 
-<t>To achieve this rapid probing in the smoothest possible fashion, in Startup BBR uses the minimum gain values that will allow the sending rate to double each round: in Startup BBR sets BBR.pacing_gain to BBRStartupPacingGain (2.77) [BBRStartupPacingGain] and BBR.cwnd_gain to BBRStartupCwndGain (2).</t>
+<t>To achieve this rapid probing in the smoothest possible fashion, in Startup BBR uses the minimum gain values that will allow the sending rate to double each round: in Startup BBR sets BBR.pacing_gain to BBRStartupPacingGain (2.77) <xref target="BBRStartupPacingGain"/> and BBR.cwnd_gain to BBRStartupCwndGain (2).</t>
 
 <t>When initializing a connection, or upon any later entry into Startup mode, BBR executes the following BBREnterStartup() steps:</t>
 
@@ -605,7 +601,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
     BBR.full_bw_count = 0
 </artwork></figure>
 
-<t>Once per round trip, upon an ACK that acknowledges new data, and when the delivery rate sample is not application-limited (see [draft-cheng-iccrg-delivery-rate-estimation]), BBR runs the "full pipe" estimator, if needed:</t>
+<t>Once per round trip, upon an ACK that acknowledges new data, and when the delivery rate sample is not application-limited (see <xref target="draft-cheng-iccrg-delivery-rate-estimation"/>), BBR runs the "full pipe" estimator, if needed:</t>
 
 <figure><artwork>
   BBRCheckStartupFullBandwidth():
@@ -645,7 +641,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 </section>
 <section title="Drain" anchor="drain">
 
-<t>Upon exiting Startup, BBR enters its Drain state. In Drain, BBR aims to quickly drain any queue created in Startup by switching to a pacing_gain well below 1.0, until any estimated queue has been drained. It uses a pacing_gain that is the inverse of the value used during Startup, chosen to try to drain the queue in one round [BBRDrainPacingGain]:</t>
+<t>Upon exiting Startup, BBR enters its Drain state. In Drain, BBR aims to quickly drain any queue created in Startup by switching to a pacing_gain well below 1.0, until any estimated queue has been drained. It uses a pacing_gain that is the inverse of the value used during Startup, chosen to try to drain the queue in one round <xref target="BBRDrainPacingGain"/>:</t>
 
 <figure><artwork>
   BBREnterDrain():
@@ -1046,7 +1042,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>Upon transmitting each packet, BBR (or the associated transport protocol) stores in per-packet data the wall-clock scheduled transmission time of the packet in packet.departure_time (see the "Pacing Rate: BBR.pacing_rate" section for how this is calculated).</t>
 
-<t>For every ACK that newly acknowledges some data (whether cumulatively or selectively), the sender's BBR implementation (or the associated transport protocol implementation) attempts to calculate an RTT sample. The sender MUST consider any potential retransmission ambiguities that can arise in some transport protocols. If some of the acknowledged data was not retransmitted, or some of the data was retransmitted but the sender can still unambiguously determine the RTT of the data (e.g. if the transport supports [RFC7323] TCP timestamps or an equivalent mechanism), then the sender calculates an RTT sample, rs.rtt, as follows:</t>
+<t>For every ACK that newly acknowledges some data (whether cumulatively or selectively), the sender's BBR implementation (or the associated transport protocol implementation) attempts to calculate an RTT sample. The sender MUST consider any potential retransmission ambiguities that can arise in some transport protocols. If some of the acknowledged data was not retransmitted, or some of the data was retransmitted but the sender can still unambiguously determine the RTT of the data (e.g. if the transport supports <xref target="RFC7323"/> TCP timestamps or an equivalent mechanism), then the sender calculates an RTT sample, rs.rtt, as follows:</t>
 
 <figure><artwork>
   rs.rtt = Now() - packet.departure_time
@@ -1159,7 +1155,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>When restarting from idle in ProbeBW states, BBR leaves its cwnd as-is and paces packets at exactly BBR.bw, aiming to return as quickly as possible to its target operating point of rate balance and a full pipe. Specifically, if the flow's BBR.state is ProbeBW, and the flow is application-limited, and there are no packets in flight currently, then at the moment the flow sends one or more packets BBR sets BBR.pacing_rate to exactly BBR.bw. More precisely, the BBR algorithm takes the following steps in BBRHandleRestartFromIdle() before sending a packet for a flow.</t>
 
-<t>The "Restarting Idle Connections" section of [RFC5681] suggests restarting from idle by slow-starting from the initial window. However, this approach was assuming a congestion control algorithm that had no estimate of the bottleneck bandwidth and no pacing, and thus resorted to relying on slow-starting driven by an ACK clock. The long (log_2(BDP)*RTT) delays required to reach full utilization with that "slow start after idle" approach caused many large deployments to disable this mechanism, resulting in a "BDP-scale line-rate burst" approach instead. Instead of these two approaches, BBR restarts by pacing at BBR.bw, typically achieving approximate rate balance and a full pipe after only one BBR.min_rtt has elapsed.</t>
+<t>The "Restarting Idle Connections" section of <xref target="RFC5681"/> suggests restarting from idle by slow-starting from the initial window. However, this approach was assuming a congestion control algorithm that had no estimate of the bottleneck bandwidth and no pacing, and thus resorted to relying on slow-starting driven by an ACK clock. The long (log_2(BDP)*RTT) delays required to reach full utilization with that "slow start after idle" approach caused many large deployments to disable this mechanism, resulting in a "BDP-scale line-rate burst" approach instead. Instead of these two approaches, BBR restarts by pacing at BBR.bw, typically achieving approximate rate balance and a full pipe after only one BBR.min_rtt has elapsed.</t>
 
 </section>
 <section title="Checking for ProberRTT Completion" anchor="checking-for-proberrtt-completion">
@@ -1212,13 +1208,13 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
     BBR.round_count = 0
 </artwork></figure>
 
-<t>Upon sending each packet, the rate estimation algorithm [draft-cheng-iccrg-delivery-rate-estimation] records the amount of data thus far acknowledged as delivered:</t>
+<t>Upon sending each packet, the rate estimation algorithm <xref target="draft-cheng-iccrg-delivery-rate-estimation"/> records the amount of data thus far acknowledged as delivered:</t>
 
 <figure><artwork>
   packet.delivered = C.delivered
 </artwork></figure>
 
-<t>Upon receiving an ACK for a given data packet, the rate estimation algorithm [draft-cheng-iccrg-delivery-rate-estimation] updates the amount of data thus far acknowledged as delivered:</t>
+<t>Upon receiving an ACK for a given data packet, the rate estimation algorithm <xref target="draft-cheng-iccrg-delivery-rate-estimation"/> updates the amount of data thus far acknowledged as delivered:</t>
 
 <figure><artwork>
     C.delivered += packet.size
@@ -1247,7 +1243,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <section title="Delivery Rate Samples for Estimating BBR.max_bw" anchor="delivery-rate-samples-for-estimating-bbrmaxbw">
 
-<t>Since calculating delivery rate samples is subtle, and the samples are useful independent of congestion control, the approach BBR uses for measuring each single delivery rate sample is specified in a separate Internet Draft [draft-cheng-iccrg-delivery-rate-estimation].</t>
+<t>Since calculating delivery rate samples is subtle, and the samples are useful independent of congestion control, the approach BBR uses for measuring each single delivery rate sample is specified in a separate Internet Draft <xref target="draft-cheng-iccrg-delivery-rate-estimation"/>.</t>
 
 </section>
 <section title="BBR.max_bw Max Filter" anchor="bbrmaxbw-max-filter">
@@ -1268,12 +1264,12 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 </section>
 <section title="BBR.max_bw and Application-limited Delivery Rate Samples" anchor="bbrmaxbw-and-application-limited-delivery-rate-samples">
 
-<t>Transmissions can be application-limited, meaning the transmission rate is limited by the application rather than the congestion control algorithm. This is quite common because of request/response traffic. When there is a transmission opportunity but no data to send, the delivery rate sampler marks the corresponding bandwidth sample(s) as application-limited [draft-cheng-iccrg-delivery-rate-estimation]. The BBR.max_bw estimator carefully decides which samples to include in the bandwidth model to ensure that BBR.max_bw reflects network limits, not application limits. By default, the estimator discards application-limited samples, since by definition they reflect application limits. However, the estimator does use application-limited samples if the measured delivery rate happens to be larger than the current BBR.max_bw estimate, since this indicates the current BBR.Max_bw estimate is too low.</t>
+<t>Transmissions can be application-limited, meaning the transmission rate is limited by the application rather than the congestion control algorithm. This is quite common because of request/response traffic. When there is a transmission opportunity but no data to send, the delivery rate sampler marks the corresponding bandwidth sample(s) as application-limited <xref target="draft-cheng-iccrg-delivery-rate-estimation"/>. The BBR.max_bw estimator carefully decides which samples to include in the bandwidth model to ensure that BBR.max_bw reflects network limits, not application limits. By default, the estimator discards application-limited samples, since by definition they reflect application limits. However, the estimator does use application-limited samples if the measured delivery rate happens to be larger than the current BBR.max_bw estimate, since this indicates the current BBR.Max_bw estimate is too low.</t>
 
 </section>
 <section title="Updating the BBR.max_bw Max Filter" anchor="updating-the-bbrmaxbw-max-filter">
 
-<t>For every ACK that acknowledges some data packets as delivered, BBR invokes BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows (here rs.delivery_rate is the delivery rate sample obtained from the ACK that is being processed, as specified in [draft-cheng-iccrg-delivery-rate-estimation]):</t>
+<t>For every ACK that acknowledges some data packets as delivered, BBR invokes BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows (here rs.delivery_rate is the delivery rate sample obtained from the ACK that is being processed, as specified in <xref target="draft-cheng-iccrg-delivery-rate-estimation"/>):</t>
 
 <figure><artwork>
   BBRUpdateMaxBw()
@@ -1306,7 +1302,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>For every data packet a connection sends, BBR calculates an RTT sample that measures the time interval from sending a data packet until that packet is acknowledged.</t>
 
-<t>For the most part, the same considerations and mechanisms that apply to RTT estimation for the purposes of retransmission timeout calculations [RFC6298] apply to BBR RTT samples. Namely, BBR does not use RTT samples based on the transmission time of retransmitted packets, since these are ambiguous, and thus unreliable. Also, BBR calculates RTT samples using both cumulative and selective acknowledgments (if the transport supports [RFC2018] SACK options or an equivalent mechanism), or transport-layer timestamps (if the transport supports [RFC7323] TCP timestamps or an equivalent mechanism).</t>
+<t>For the most part, the same considerations and mechanisms that apply to RTT estimation for the purposes of retransmission timeout calculations <xref target="RFC6298"/> apply to BBR RTT samples. Namely, BBR does not use RTT samples based on the transmission time of retransmitted packets, since these are ambiguous, and thus unreliable. Also, BBR calculates RTT samples using both cumulative and selective acknowledgments (if the transport supports <xref target="RFC2018"/> SACK options or an equivalent mechanism), or transport-layer timestamps (if the transport supports <xref target="RFC7323"/> TCP timestamps or an equivalent mechanism).</t>
 
 <t>The only divergence from RTT estimation for retransmission timeouts is in the case where a given acknowledgment ACKs more than one data packet. In order to be conservative and schedule long timeouts to avoid spurious retransmissions, the maximum among such potential RTT samples is typically used for computing retransmission timeouts; i.e., SRTT is typically calculated using the data packet with the earliest transmission time. By contrast, in order for BBR to try to reach the minimum amount of data in flight to fill the pipe, BBR uses the minimum among such potential RTT samples; i.e., BBR calculates the RTT using the data packet with the latest transmission time.</t>
 
@@ -1423,7 +1419,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>Here rs.tx_in_flight is the amount of data that was estimated to be in flight when the most recently ACKed packet was sent. And the BBRBeta (0.7x) bound is to try to ensure that BBR does not react more dramatically than CUBIC's 0.7x multiplicative decrease factor.</t>
 
-<t>Some loss detection algorithms, including algorithms like RACK [RFC8985] that delay loss marking while waiting for potential reordering to resolve, may mark packets as lost long after the loss itself happened. In such cases, the tx_in_flight for the delivered sequence range that allowed the loss to be detected may be considerably smaller than the tx_in_flight of the lost packet itself. In such cases using the former tx_in_flight rather than the latter can cause BBR.inflight_hi to be significantly underestimated. To avoid such issues, BBR processes each loss detection event to more precisely estimate the volume of in-flight data at which loss rates cross BBRLossThresh, noting that this may have happened mid-way through some packet. To estimate this value, we can solve for "lost_prefix" in the following equation, where inflight_prev represents the volume of in-flight data preceding this packet, lost_prev represents the data lost among that previous in-flight data:</t>
+<t>Some loss detection algorithms, including algorithms like RACK <xref target="RFC8985"/> that delay loss marking while waiting for potential reordering to resolve, may mark packets as lost long after the loss itself happened. In such cases, the tx_in_flight for the delivered sequence range that allowed the loss to be detected may be considerably smaller than the tx_in_flight of the lost packet itself. In such cases using the former tx_in_flight rather than the latter can cause BBR.inflight_hi to be significantly underestimated. To avoid such issues, BBR processes each loss detection event to more precisely estimate the volume of in-flight data at which loss rates cross BBRLossThresh, noting that this may have happened mid-way through some packet. To estimate this value, we can solve for "lost_prefix" in the following equation, where inflight_prev represents the volume of in-flight data preceding this packet, lost_prev represents the data lost among that previous in-flight data:</t>
 
 <figure><artwork>
     lost                     /  inflight                     &gt;= BBRLossThresh                                                                                       
@@ -1615,7 +1611,7 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 
 <t>To adapt to the bottleneck, in general BBR sets the pacing rate to be proportional to bw, with a dynamic gain, or scaling factor of proportionality, called pacing_gain.</t>
 
-<t>When a BBR flow starts it has no bw estimate (bw is 0). So in this case it sets an initial pacing rate based on the transport sender implementation's initial congestion window ("InitialCwnd", e.g. from [RFC6928]), the initial SRTT (smoothed round-trip time) after the first non-zero RTT sample, and the initial pacing_gain:</t>
+<t>When a BBR flow starts it has no bw estimate (bw is 0). So in this case it sets an initial pacing rate based on the transport sender implementation's initial congestion window ("InitialCwnd", e.g. from <xref target="RFC6928"/>), the initial SRTT (smoothed round-trip time) after the first non-zero RTT sample, and the initial pacing_gain:</t>
 
 <figure><artwork>
   BBRInitPacingRate():
@@ -1672,7 +1668,7 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 
 <section title="Initial cwnd" anchor="initial-cwnd">
 
-<t>BBR generally uses measurements to build a model of the network path and then adapts control decisions to the path based on that model. As such, the selection of the initial cwnd is considered to be outside the scope of the BBR algorithm, since at initialization there are no measurements yet upon which BBR can operate. Thus, at initialization, BBR uses the transport sender implementation's initial congestion window (e.g. from [RFC6298] for TCP).</t>
+<t>BBR generally uses measurements to build a model of the network path and then adapts control decisions to the path based on that model. As such, the selection of the initial cwnd is considered to be outside the scope of the BBR algorithm, since at initialization there are no measurements yet upon which BBR can operate. Thus, at initialization, BBR uses the transport sender implementation's initial congestion window (e.g. from <xref target="RFC6298"/> for TCP).</t>
 
 </section>
 <section title="Computing BBR.max_inflight" anchor="computing-bbrmaxinflight">
@@ -1707,7 +1703,7 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
     BBR.max_inflight = BBRQuantizationBudget(inflight)
 </artwork></figure>
 
-<t>The "estimated_bdp" term tries to allow enough packets in flight to fully utilize the estimated BDP of the path, by allowing the flow to send at BBR.bw for a duration of BBR.min_rtt. Scaling up the BDP by BBR.cwnd_gain bounds in-flight data to a small multiple of the BDP, to handle common network and receiver behavior, such as delayed, stretched, or aggregated ACKs [A15]. The "quanta" term allows enough quanta in flight on the sending and receiving hosts to reach high throughput even in environments using offload mechanisms.</t>
+<t>The "estimated_bdp" term tries to allow enough packets in flight to fully utilize the estimated BDP of the path, by allowing the flow to send at BBR.bw for a duration of BBR.min_rtt. Scaling up the BDP by BBR.cwnd_gain bounds in-flight data to a small multiple of the BDP, to handle common network and receiver behavior, such as delayed, stretched, or aggregated ACKs <xref target="A15"/>. The "quanta" term allows enough quanta in flight on the sending and receiving hosts to reach high throughput even in environments using offload mechanisms.</t>
 
 </section>
 <section title="Minimum cwnd for Pipelining" anchor="minimum-cwnd-for-pipelining">
@@ -1849,9 +1845,9 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 </section>
 <section title="Implementation Status" anchor="implementation-status">
 
-<t>This section records the status of known implementations of the algorithm defined by this specification at the time of posting of this Internet-Draft, and is based on a proposal described in [RFC7942]. The description of implementations in this section is intended to assist the IETF in its decision processes in progressing drafts to RFCs. Please note that the listing of any individual implementation here does not imply endorsement by the IETF. Furthermore, no effort has been spent to verify the information presented here that was supplied by IETF contributors. This is not intended as, and must not be construed to be, a catalog of available implementations or their features.  Readers are advised to note that other implementations may exist.</t>
+<t>This section records the status of known implementations of the algorithm defined by this specification at the time of posting of this Internet-Draft, and is based on a proposal described in <xref target="RFC7942"/>. The description of implementations in this section is intended to assist the IETF in its decision processes in progressing drafts to RFCs. Please note that the listing of any individual implementation here does not imply endorsement by the IETF. Furthermore, no effort has been spent to verify the information presented here that was supplied by IETF contributors. This is not intended as, and must not be construed to be, a catalog of available implementations or their features.  Readers are advised to note that other implementations may exist.</t>
 
-<t>According to [RFC7942], "this will allow reviewers and working groups to assign due consideration to documents that have the benefit of running code, which may serve as evidence of valuable experimentation and feedback that have made the implemented protocols more mature.  It is up to the individual working groups to use this information as they see fit".</t>
+<t>According to <xref target="RFC7942"/>, "this will allow reviewers and working groups to assign due consideration to documents that have the benefit of running code, which may serve as evidence of valuable experimentation and feedback that have made the implemented protocols more mature.  It is up to the individual working groups to use this information as they see fit".</t>
 
 <t>As of the time of writing, the following implementations of BBR have been publicly released:</t>
 
@@ -1906,25 +1902,26 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 </section>
 <section title="Security Considerations" anchor="security-considerations">
 
-<t>This proposal makes no changes to the underlying security of transport protocols or congestion control algorithms. BBR shares the same security considerations as the existing standard congestion control algorithm [RFC5681].</t>
+<t>This proposal makes no changes to the underlying security of transport protocols or congestion control algorithms. BBR shares the same security considerations as the existing standard congestion control algorithm <xref target="RFC5681"/>.</t>
 
 </section>
 <section title="IANA Considerations" anchor="iana-considerations">
 
-<t>This document has no IANA actions. Here we are using that phrase, suggested by [RFC5226], because BBR does not modify or extend the wire format of any network protocol, nor does it add new dependencies on assigned numbers. BBR involves only a change to the congestion control algorithm of a transport sender, and does not involve changes in the network, the receiver, or any network protocol.</t>
+<t>This document has no IANA actions. Here we are using that phrase, suggested by <xref target="RFC5226"/>, because BBR does not modify or extend the wire format of any network protocol, nor does it add new dependencies on assigned numbers. BBR involves only a change to the congestion control algorithm of a transport sender, and does not involve changes in the network, the receiver, or any network protocol.</t>
 
 <t>Note to RFC Editor: this section may be removed on publication as an RFC.</t>
 
 </section>
 <section title="Acknowledgments" anchor="acknowledgments">
 
-<t>The authors are grateful to Len Kleinrock for his work on the theory underlying congestion control. We are indebted to Larry Brakmo for pioneering work on the Vegas [BP95] and New Vegas [B15] congestion control algorithms, which presaged many elements of BBR, and for Larry's advice and guidance during BBR's early development. The authors would also like to thank Kevin Yang, Priyaranjan Jha, Yousuk Seung, Luke Hsiao for their work on TCP BBR; Jana Iyengar, Victor Vasiliev, Bin Wu for their work on QUIC BBR; and Matt Mathis for his research work on the BBR algorithm and its implications [MM19]. We would also like to thank C. Stephen Gunn, Eric Dumazet, Nandita Dukkipati, Pawel Jurczyk, Biren Roy, David Wetherall, Amin Vahdat, Leonidas Kontothanassis, and the YouTube, google.com, Bandwidth Enforcer, and Google SRE teams for their invaluable help and support. We would like to thank Randall R. Stewart, Jim Warner, Loganaden Velvindron, Hiren Panchasara, Adrian Zapletal, and Christian Huitema for feedback and suggestions on earlier versions of this document.</t>
+<t>The authors are grateful to Len Kleinrock for his work on the theory underlying congestion control. We are indebted to Larry Brakmo for pioneering work on the Vegas <xref target="BP95"/> and New Vegas <xref target="B15"/> congestion control algorithms, which presaged many elements of BBR, and for Larry's advice and guidance during BBR's early development. The authors would also like to thank Kevin Yang, Priyaranjan Jha, Yousuk Seung, Luke Hsiao for their work on TCP BBR; Jana Iyengar, Victor Vasiliev, Bin Wu for their work on QUIC BBR; and Matt Mathis for his research work on the BBR algorithm and its implications <xref target="MM19"/>. We would also like to thank C. Stephen Gunn, Eric Dumazet, Nandita Dukkipati, Pawel Jurczyk, Biren Roy, David Wetherall, Amin Vahdat, Leonidas Kontothanassis, and the YouTube, google.com, Bandwidth Enforcer, and Google SRE teams for their invaluable help and support. We would like to thank Randall R. Stewart, Jim Warner, Loganaden Velvindron, Hiren Panchasara, Adrian Zapletal, and Christian Huitema for feedback and suggestions on earlier versions of this document.</t>
 
 </section>
 </middle>
 
 <back>
 <references title="Normative References">
+
 
 <reference anchor='RFC793'><front>
 <title>Transmission Control Protocol</title>
@@ -2063,6 +2060,39 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 <seriesInfo name="DOI" value="10.17487/RFC4340"/>
 </reference>
 
+<!-- http://xml.resource.org/public/rfc/bibxml/reference.RFC.6928.xml -->
+<reference anchor="RFC6928" target="https://www.rfc-editor.org/info/rfc6928">
+<front>
+<title>Increasing TCP's Initial Window</title>
+<author fullname="J. Chu" initials="J." surname="Chu"/>
+<author fullname="N. Dukkipati" initials="N." surname="Dukkipati"/>
+<author fullname="Y. Cheng" initials="Y." surname="Cheng"/>
+<author fullname="M. Mathis" initials="M." surname="Mathis"/>
+<date month="April" year="2013"/>
+<abstract>
+<t>This document proposes an experiment to increase the permitted TCP initial window (IW) from between 2 and 4 segments, as specified in RFC 3390, to 10 segments with a fallback to the existing recommendation when performance issues are detected. It discusses the motivation behind the increase, the advantages and disadvantages of the higher initial window, and presents results from several large-scale experiments showing that the higher initial window improves the overall performance of many web services without resulting in a congestion collapse. The document closes with a discussion of usage and deployment for further experimental purposes recommended by the IETF TCP Maintenance and Minor Extensions (TCPM) working group.</t>
+</abstract>
+</front>
+<seriesInfo name="RFC" value="6928"/>
+<seriesInfo name="DOI" value="10.17487/RFC6928"/>
+</reference>
+
+<!-- http://xml.resource.org/public/rfc/bibxml/reference.RFC.6937.xml -->
+<reference anchor="RFC6937" target="https://www.rfc-editor.org/info/rfc6937">
+<front>
+<title>Proportional Rate Reduction for TCP</title>
+<author fullname="M. Mathis" initials="M." surname="Mathis"/>
+<author fullname="N. Dukkipati" initials="N." surname="Dukkipati"/>
+<author fullname="Y. Cheng" initials="Y." surname="Cheng"/>
+<date month="May" year="2013"/>
+<abstract>
+<t>This document describes an experimental Proportional Rate Reduction (PRR) algorithm as an alternative to the widely deployed Fast Recovery and Rate-Halving algorithms. These algorithms determine the amount of data sent by TCP during loss recovery. PRR minimizes excess window adjustments, and the actual window size at the end of recovery will be as close as possible to the ssthresh, as determined by the congestion control algorithm.</t>
+</abstract>
+</front>
+<seriesInfo name="RFC" value="6937"/>
+<seriesInfo name="DOI" value="10.17487/RFC6937"/>
+</reference>
+
 </references>
 
 <references title="Informative References">
@@ -2161,6 +2191,7 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 <format type='TXT' target='https://tools.ietf.org/html/draft-romo-iccrg-ccid5' />
 </reference>
 
+<!-- An unused reference we might want to cite:
 <reference anchor='DC13' target='https://www.ietf.org/proceedings/88/slides/slides-88-tcpm-9.pdf'>
 <front>
 <title>TSO, fair queuing, pacing: three's a charm</title>
@@ -2172,6 +2203,7 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 </front>
 <seriesInfo name='IETF 88' value='' />
 </reference>
+-->
 
 <reference anchor='A15'  target='https://www.ietf.org/mail-archive/web/aqm/current/msg01480.html'>
 <front>
