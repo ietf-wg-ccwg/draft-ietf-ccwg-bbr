@@ -11,7 +11,7 @@ else
 endif
 
 quickhtml:
-	xml2rfc --html draft-cardwell-ccwg-bbr.xml
+	xml2rfc -q --rfc-base-url https://www.rfc-editor.org/rfc/ --id-base-url https://datatracker.ietf.org/doc/html/ --cache=.xmlrfc2cache --html --css=lib/v3.css --metadata-js-url=/dev/null draft-cardwell-ccwg-bbr.xml -o draft-cardwell-ccwg-bbr.html
 
 quicktxt:
 	xml2rfc -q --rfc-base-url https://www.rfc-editor.org/rfc/ --id-base-url https://datatracker.ietf.org/doc/html/ --cache=.xmlrfc2cache --text --no-pagination draft-cardwell-ccwg-bbr.xml -o draft-cardwell-ccwg-bbr.txt
