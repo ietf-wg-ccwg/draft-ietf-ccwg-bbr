@@ -1025,8 +1025,8 @@ Table of Contents
    bandwidth.  To do this, the flow sequentially cycles through all
    three tactics: trying to send faster than, slower than, and at the
    same rate as the network delivery process.  To achieve this, a BBR
-   flow in ProbeBW mode cycles through the four Probe bw states – DOWN,
-   CRUISE, REFILL, and UP – described below in turn.
+   flow in ProbeBW mode cycles through the four Probe bw states (DOWN,
+   CRUISE, REFILL, and UP) described below in turn.
 
 4.3.3.1.  ProbeBW_DOWN
 
@@ -1144,7 +1144,7 @@ Table of Contents
       bold over time.  The initial caution is motivated by the fact that
       a given BBR flow may be sharing a shallow buffer with thousands of
       other flows, so that the buffer space available to the flow may be
-      quite tight – even just a single packet.  The increasingly rapid
+      quite tight (even just a single packet).  The increasingly rapid
       growth over time is motivated by the fact that in a high-speed WAN
       the increase in available bandwidth (and thus the estimated BDP)
       may require the flow to grow the volume of its inflight data by up
@@ -1470,7 +1470,7 @@ Table of Contents
 
    To help probe for BBR.min_rtt, on an as-needed basis BBR flows enter
    the ProbeRTT state to try to cooperate to periodically drain the
-   bottleneck queue – and thus improve their BBR.min_rtt estimate of the
+   bottleneck queue, and thus improve their BBR.min_rtt estimate of the
    unloaded two-way propagation delay.
 
    A critical point is that before BBR raises its BBR.min_rtt estimate
