@@ -661,7 +661,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 </section>
 <section title="ProbeBW" anchor="probebw">
 
-<t>Long-lived BBR flows tend to spend the vast majority of their time in the ProbeBW states. In the ProbeBW states, a BBR flow sequentially accelerates, decelerates, and cruises, to measure the network path, improve its operating point (increase throughput and reduce queue pressure), and converge toward a more fair allocation of bottleneck bandwidth. To do this, the flow sequentially cycles through all three tactics: trying to send faster than, slower than, and at the same rate as the network delivery process. To achieve this, a BBR flow in ProbeBW mode cycles through the four Probe bw states – DOWN, CRUISE, REFILL, and UP – described below in turn.</t>
+<t>Long-lived BBR flows tend to spend the vast majority of their time in the ProbeBW states. In the ProbeBW states, a BBR flow sequentially accelerates, decelerates, and cruises, to measure the network path, improve its operating point (increase throughput and reduce queue pressure), and converge toward a more fair allocation of bottleneck bandwidth. To do this, the flow sequentially cycles through all three tactics: trying to send faster than, slower than, and at the same rate as the network delivery process. To achieve this, a BBR flow in ProbeBW mode cycles through the four Probe bw states (DOWN, CRUISE, REFILL, and UP) described below in turn.</t>
 
 <section title="ProbeBW_DOWN" anchor="probebwdown">
 
@@ -706,7 +706,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 <t><list style="symbols">
 <t>bw_hi: The flow raises bw_hi to the latest measured bandwidth sample if the latest measured bandwidth sample is above bw_hi and the loss rate for the sample is not above the BBRLossThresh.</t>
 
-<t>inflight_hi: The flow raises inflight_hi in ProbeBW_UP in a manner that is slow and cautious at first, but increasingly rapid and bold over time. The initial caution is motivated by the fact that a given BBR flow may be sharing a shallow buffer with thousands of other flows, so that the buffer space available to the flow may be quite tight – even just a single packet.  The increasingly rapid growth over time is motivated by the fact that in a high-speed WAN the increase in available bandwidth (and thus the estimated BDP) may require the flow to grow the volume of its inflight data by up to O(1,000,000); even a quite typical BDP like 10Gbps * 100ms is 82,563 packets. BBR takes an approach where the additive increase to BBR.inflight_hi exponentially doubles each round trip; in each successive round trip, inflight_hi grows by 1, 2, 4, 8, 16, etc, with the increases spread uniformly across the entire round trip. This helps allow BBR to utilize a larger BDP in O(log(BDP)) round trips, meeting the design goal for scalable utilization of newly-available bandwidth.</t>
+<t>inflight_hi: The flow raises inflight_hi in ProbeBW_UP in a manner that is slow and cautious at first, but increasingly rapid and bold over time. The initial caution is motivated by the fact that a given BBR flow may be sharing a shallow buffer with thousands of other flows, so that the buffer space available to the flow may be quite tight (even just a single packet).  The increasingly rapid growth over time is motivated by the fact that in a high-speed WAN the increase in available bandwidth (and thus the estimated BDP) may require the flow to grow the volume of its inflight data by up to O(1,000,000); even a quite typical BDP like 10Gbps * 100ms is 82,563 packets. BBR takes an approach where the additive increase to BBR.inflight_hi exponentially doubles each round trip; in each successive round trip, inflight_hi grows by 1, 2, 4, 8, 16, etc, with the increases spread uniformly across the entire round trip. This helps allow BBR to utilize a larger BDP in O(log(BDP)) round trips, meeting the design goal for scalable utilization of newly-available bandwidth.</t>
 
 </list></t>
 
@@ -1003,7 +1003,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <section title="ProbeRTT Overview" anchor="probertt-overview">
 
-<t>To help probe for BBR.min_rtt, on an as-needed basis BBR flows enter the ProbeRTT state to try to cooperate to periodically drain the bottleneck queue – and thus improve their BBR.min_rtt estimate of the unloaded two-way propagation delay.</t>
+<t>To help probe for BBR.min_rtt, on an as-needed basis BBR flows enter the ProbeRTT state to try to cooperate to periodically drain the bottleneck queue, and thus improve their BBR.min_rtt estimate of the unloaded two-way propagation delay.</t>
 
 <t>A critical point is that before BBR raises its BBR.min_rtt estimate (which would in turn raise its maximum permissible cwnd), it first enters ProbeRTT to try to make a concerted and coordinated effort to drain the bottleneck queue and make a robust BBR.min_rtt measurement. This allows the BBR.min_rtt estimates of ensembles of BBR flows to converge  avoiding feedback loops of ever-increasing queues and RTT samples.</t>
 
@@ -1355,7 +1355,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>The BBR.extra_acked thus reflects the recently-measured magnitude of data and ACK aggregation effects such as batching and slotting at shared-medium L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms (TSO, GSO, LRO, GRO), and end host or middlebox ACK decimation/thinning. </t>
 
-<t>​​BBR augments its cwnd by BBR.extra_acked to allow the connection to keep sending during inter-ACK silences, to an extent that matches the recently measured degree of aggregation.</t>
+<t>BBR augments its cwnd by BBR.extra_acked to allow the connection to keep sending during inter-ACK silences, to an extent that matches the recently measured degree of aggregation.</t>
 
 <t>More precisely, this is computed as:</t>
 
