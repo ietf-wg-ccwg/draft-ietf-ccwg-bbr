@@ -2,13 +2,10 @@
 
 
 
-Internet Congestion Control Research Group                   N. Cardwell
-Internet-Draft                                                  Y. Cheng
-Intended status: Experimental                          S. Hassas Yeganeh
-Expires: 6 November 2024                                        I. Swett
-                                                             V. Jacobson
-                                                                  Google
-                                                              5 May 2024
+Internet Congestion Control Research Group              N. Cardwell, Ed.
+Internet-Draft                                                    Google
+Intended status: Experimental                                 5 May 2024
+Expires: 6 November 2024
 
 
                          BBR Congestion Control
@@ -149,7 +146,7 @@ Table of Contents
    10. References
      10.1.  Normative References
      10.2.  Informative References
-   Authors' Addresses
+   Author's Address
 
 1.  Introduction
 
@@ -3475,28 +3472,8 @@ Table of Contents
    [WS95]     Wright, G. and W. Stevens, "TCP/IP Illustrated, Volume 2:
               The Implementation", Addison-Wesley , 1995.
 
-Authors' Addresses
+Author's Address
 
-   Neal Cardwell
+   Neal Cardwell (editor)
    Google
    Email: ncardwell@google.com
-
-
-   Yuchung Cheng
-   Google
-   Email: ycheng@google.com
-
-
-   Soheil Hassas Yeganeh
-   Google
-   Email: soheil@google.com
-
-
-   Ian Swett
-   Google
-   Email: ianswett@google.com
-
-
-   Van Jacobson
-   Google
-   Email: vanj@google.com

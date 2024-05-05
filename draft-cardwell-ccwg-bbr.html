@@ -6,10 +6,6 @@
 <meta content="initial-scale=1.0" name="viewport">
 <title>BBR Congestion Control</title>
 <meta content="Neal Cardwell" name="author">
-<meta content="Yuchung Cheng" name="author">
-<meta content="Soheil Hassas Yeganeh" name="author">
-<meta content="Ian Swett" name="author">
-<meta content="Van Jacobson" name="author">
 <meta content="
        
 This document specifies the BBR congestion control algorithm. BBR (&quot;Bottleneck Bandwidth and Round-trip propagation time&quot;) uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path. BBR then uses this model to control both how fast it sends data and the maximum volume of data it allows in flight in the network at any time. Relative to loss-based congestion control algorithms such as Reno   or CUBIC  , BBR offers substantially higher throughput for bottlenecks with shallow buffers or random losses, and substantially lower queueing delays for bottlenecks with deep buffers (avoiding &quot;bufferbloat&quot;). BBR can be implemented in any transport protocol that supports packet-delivery acknowledgment. Thus far, open source implementations are available for TCP   and QUIC  . This document specifies version 2 of the BBR algorithm, also sometimes referred to as BBRv2 or bbr2.
@@ -1036,7 +1032,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <td class="right">May 2024</td>
 </tr></thead>
 <tfoot><tr>
-<td class="left">Cardwell, et al.</td>
+<td class="left">Cardwell</td>
 <td class="center">Expires 6 November 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
@@ -1056,26 +1052,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
 <dd class="expires"><time datetime="2024-11-06">6 November 2024</time></dd>
-<dt class="label-authors">Authors:</dt>
+<dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
-      <div class="author-name">N. Cardwell</div>
-<div class="org">Google</div>
+      <div class="author-name">N. Cardwell, <span class="editor">Ed.</span>
 </div>
-<div class="author">
-      <div class="author-name">Y. Cheng</div>
-<div class="org">Google</div>
-</div>
-<div class="author">
-      <div class="author-name">S. Hassas Yeganeh</div>
-<div class="org">Google</div>
-</div>
-<div class="author">
-      <div class="author-name">I. Swett</div>
-<div class="org">Google</div>
-</div>
-<div class="author">
-      <div class="author-name">V. Jacobson</div>
 <div class="org">Google</div>
 </div>
 </dd>
@@ -1417,7 +1398,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
-            <p id="section-toc.1-1.11.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.11.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
 </li>
         </ul>
 </nav>
@@ -4148,47 +4129,15 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
 </section>
 <div id="authors-addresses">
 <section id="appendix-A">
-      <h2 id="name-authors-addresses">
-<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
       </h2>
 <address class="vcard">
-        <div dir="auto" class="left"><span class="fn nameRole">Neal Cardwell</span></div>
+        <div dir="auto" class="left"><span class="fn nameRole">Neal Cardwell (<span class="role">editor</span>)</span></div>
 <div dir="auto" class="left"><span class="org">Google</span></div>
 <div class="email">
 <span>Email:</span>
 <a href="mailto:ncardwell@google.com" class="email">ncardwell@google.com</a>
-</div>
-</address>
-<address class="vcard">
-        <div dir="auto" class="left"><span class="fn nameRole">Yuchung Cheng</span></div>
-<div dir="auto" class="left"><span class="org">Google</span></div>
-<div class="email">
-<span>Email:</span>
-<a href="mailto:ycheng@google.com" class="email">ycheng@google.com</a>
-</div>
-</address>
-<address class="vcard">
-        <div dir="auto" class="left"><span class="fn nameRole">Soheil Hassas Yeganeh</span></div>
-<div dir="auto" class="left"><span class="org">Google</span></div>
-<div class="email">
-<span>Email:</span>
-<a href="mailto:soheil@google.com" class="email">soheil@google.com</a>
-</div>
-</address>
-<address class="vcard">
-        <div dir="auto" class="left"><span class="fn nameRole">Ian Swett</span></div>
-<div dir="auto" class="left"><span class="org">Google</span></div>
-<div class="email">
-<span>Email:</span>
-<a href="mailto:ianswett@google.com" class="email">ianswett@google.com</a>
-</div>
-</address>
-<address class="vcard">
-        <div dir="auto" class="left"><span class="fn nameRole">Van Jacobson</span></div>
-<div dir="auto" class="left"><span class="org">Google</span></div>
-<div class="email">
-<span>Email:</span>
-<a href="mailto:vanj@google.com" class="email">vanj@google.com</a>
 </div>
 </address>
 </section>
