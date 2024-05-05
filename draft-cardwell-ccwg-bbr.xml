@@ -182,7 +182,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>The data rate model parameters together estimate both the sending rate required to reach the full bandwidth available to the flow (BBR.max_bw), and the maximum pacing rate control parameter that is consistent with the queue pressure objective (BBR.bw).</t>
 
-<t>BBR.max_bw: The windowed maximum recent bandwidth sample – obtained using the BBR delivery rate sampling algorithm <xref target="draft-cheng-iccrg-delivery-rate-estimation"/> – measured during the current or previous bandwidth probing cycle (or during Startup, if the flow is still in that state). (Part of the long-term model.)</t>
+<t>BBR.max_bw: The windowed maximum recent bandwidth sample, obtained using the BBR delivery rate sampling algorithm <xref target="draft-cheng-iccrg-delivery-rate-estimation"/>, measured during the current or previous bandwidth probing cycle (or during Startup, if the flow is still in that state). (Part of the long-term model.)</t>
 
 <t>BBR.bw_hi: The long-term maximum sending bandwidth that the algorithm estimates will produce acceptable queue pressure, based on signals in the current or previous bandwidth probing cycle, as measured by loss. (Part of the long-term model.)</t>
 
