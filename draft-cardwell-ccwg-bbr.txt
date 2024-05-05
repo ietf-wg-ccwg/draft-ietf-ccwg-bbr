@@ -345,9 +345,9 @@ Table of Contents
    (BBR.max_bw), and the maximum pacing rate control parameter that is
    consistent with the queue pressure objective (BBR.bw).
 
-   BBR.max_bw: The windowed maximum recent bandwidth sample – obtained
+   BBR.max_bw: The windowed maximum recent bandwidth sample, obtained
    using the BBR delivery rate sampling algorithm
-   [draft-cheng-iccrg-delivery-rate-estimation] – measured during the
+   [draft-cheng-iccrg-delivery-rate-estimation], measured during the
    current or previous bandwidth probing cycle (or during Startup, if
    the flow is still in that state).  (Part of the long-term model.)
 
