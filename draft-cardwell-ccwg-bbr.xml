@@ -117,7 +117,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>BBRStartupPacingGain: A constant specifying the minimum gain value for calculating the pacing rate that will allow the sending rate to double each round (4*ln(2) ~= 2.77) <xref target="BBRStartupPacingGain"/>; used in Startup mode for BBR.pacing_gain.</t>
 
-<t>BBRStartupCwndGain: A constant specifying the minimum gain value for calculating the cwnd that will allow the sending rate to double each round (2.0); used in Startup mode for BBR.cwnd_gain.</t>
+<t>BBRStartupCwndGain: A constant specifying the minimum gain value for calculating the cwnd that will allow the sending rate to double each round (2.0) <xref target="BBRStartupCwndGain"/>; used in Startup mode for BBR.cwnd_gain.</t>
 
 <t>BBR.packet_conservation: A boolean indicating whether BBR is currently using packet conservation dynamics to bound cwnd.</t>
 
@@ -534,7 +534,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>When a BBR flow starts up, it performs its first (and most rapid) sequential probe/drain process in the Startup and Drain states. Network link bandwidths currently span a range of at least 11 orders of magnitude, from a few bps to 200 Gbps. To quickly learn BBR.max_bw, given this huge range to explore, BBR's Startup state does an exponential search of the rate space, doubling the sending rate each round. This finds BBR.max_bw in O(log_2(BDP)) round trips.</t>
 
-<t>To achieve this rapid probing in the smoothest possible fashion, in Startup BBR uses the minimum gain values that will allow the sending rate to double each round: in Startup BBR sets BBR.pacing_gain to BBRStartupPacingGain (2.77) <xref target="BBRStartupPacingGain"/> and BBR.cwnd_gain to BBRStartupCwndGain (2).</t>
+<t>To achieve this rapid probing in the smoothest possible fashion, in Startup BBR uses the minimum gain values that will allow the sending rate to double each round: in Startup BBR sets BBR.pacing_gain to BBRStartupPacingGain (2.77) <xref target="BBRStartupPacingGain"/> and BBR.cwnd_gain to BBRStartupCwndGain (2) <xref target="BBRStartupCwndGain"/>.</t>
 
 <t>When initializing a connection, or upon any later entry into Startup mode, BBR executes the following BBREnterStartup() steps:</t>
 
@@ -2524,6 +2524,19 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
 <date year='2019' month='October' />
 </front>
 <seriesInfo name='Computer Communication Review, vol. 49, no. 5, pp. 63-68' value='' />
+</reference>
+
+<reference anchor='BBRStartupCwndGain'>
+<front>
+<title>BBR Startup cwnd  Gain: a Derivation</title>
+<author initials="I." surname="Swett" fullname="Ian Swett"></author>
+<author initials='N.' surname='Cardwell' fullname='Neal Cardwell'></author>
+<author initials='Y.' surname='Cheng' fullname='Yuchung Cheng'></author>
+<author initials='S.' surname='Hassas Yeganeh' fullname='Soheil Hassas Yeganeh'></author>
+<author initials='V.' surname='Jacobson' fullname='Van Jacobson'></author>
+<date year='2018' month='Jul' />
+</front>
+<format type='PDF' target='https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_startup_cwnd_gain.pdf' />
 </reference>
 
 <reference anchor='BBRStartupPacingGain'>
