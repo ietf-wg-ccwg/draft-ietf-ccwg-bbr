@@ -299,7 +299,8 @@ Table of Contents
 
    BBRStartupCwndGain: A constant specifying the minimum gain value for
    calculating the cwnd that will allow the sending rate to double each
-   round (2.0); used in Startup mode for BBR.cwnd_gain.
+   round (2.0) [BBRStartupCwndGain]; used in Startup mode for
+   BBR.cwnd_gain.
 
    BBR.packet_conservation: A boolean indicating whether BBR is
    currently using packet conservation dynamics to bound cwnd.
@@ -894,7 +895,7 @@ Table of Contents
    Startup BBR uses the minimum gain values that will allow the sending
    rate to double each round: in Startup BBR sets BBR.pacing_gain to
    BBRStartupPacingGain (2.77) [BBRStartupPacingGain] and BBR.cwnd_gain
-   to BBRStartupCwndGain (2).
+   to BBRStartupCwndGain (2) [BBRStartupCwndGain].
 
    When initializing a connection, or upon any later entry into Startup
    mode, BBR executes the following BBREnterStartup() steps:
@@ -3400,6 +3401,13 @@ Table of Contents
               Jacobson, "BBR Drain Pacing Gain: a Derivation", September
               2021, <https://github.com/google/bbr/blob/master/Documenta
               tion/startup/gain/analysis/bbr_drain_gain.pdf>.
+
+   [BBRStartupCwndGain]
+              Swett, I., Cardwell, N., Cheng, Y., Hassas Yeganeh, S.,
+              and V. Jacobson, "BBR Startup cwnd Gain: a Derivation",
+              July 2018, <https://github.com/google/bbr/blob/master/Docu
+              mentation/startup/gain/analysis/
+              bbr_startup_cwnd_gain.pdf>.
 
    [BBRStartupPacingGain]
               Cardwell, N., Cheng, Y., Hassas Yeganeh, S., and V.
