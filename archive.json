@@ -1,0 +1,14 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2024-05-07T01:04:49.928596+00:00",
+  "repo": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
+  "labels": [
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    }
+  ],
+  "issues": [],
+  "pulls": []
+}
