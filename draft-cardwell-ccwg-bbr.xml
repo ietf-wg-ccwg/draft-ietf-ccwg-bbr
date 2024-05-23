@@ -13,7 +13,14 @@
  </address>
 </author>
 
-<date month="May" day="5" year="2024" />
+<author fullname="Ian Swett" initials="I." surname="Swett"  role="editor">
+ <organization showOnFrontPage="true">Google</organization>
+ <address>
+ <email> ianswett@google.com </email>
+ </address>
+</author>
+
+<date month="May" day="23" year="2024" />
 
 <area>IRTF</area>
 <workgroup> Internet Congestion Control Research Group </workgroup>
