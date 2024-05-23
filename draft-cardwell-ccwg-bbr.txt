@@ -3,9 +3,9 @@
 
 
 Internet Congestion Control Research Group              N. Cardwell, Ed.
-Internet-Draft                                                    Google
-Intended status: Experimental                                 5 May 2024
-Expires: 6 November 2024
+Internet-Draft                                             I. Swett, Ed.
+Intended status: Experimental                                     Google
+Expires: 24 November 2024                                    23 May 2024
 
 
                          BBR Congestion Control
@@ -44,7 +44,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 November 2024.
+   This Internet-Draft will expire on 24 November 2024.
 
 Copyright Notice
 
@@ -134,7 +134,7 @@ Table of Contents
    9.  References
      9.1.  Normative References
      9.2.  Informative References
-   Author's Address
+   Authors' Addresses
 
 1.  Introduction
 
@@ -3468,8 +3468,13 @@ Table of Contents
    [WS95]     Wright, G. and W. Stevens, "TCP/IP Illustrated, Volume 2:
               The Implementation", Addison-Wesley , 1995.
 
-Author's Address
+Authors' Addresses
 
    Neal Cardwell (editor)
    Google
    Email: ncardwell@google.com
+
+
+   Ian Swett (editor)
+   Google
+   Email: ianswett@google.com
