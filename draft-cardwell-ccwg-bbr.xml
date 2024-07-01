@@ -20,7 +20,14 @@
  </address>
 </author>
 
-<date month="May" day="23" year="2024" />
+<author fullname="Joseph Beshay" initials="J." surname="Beshay"  role="editor">
+ <organization showOnFrontPage="true">Meta</organization>
+ <address>
+ <email> jbeshay@meta.com </email>
+ </address>
+</author>
+
+<date month="Jul" day="1" year="2024" />
 
 <area>IRTF</area>
 <workgroup> Internet Congestion Control Research Group </workgroup>
