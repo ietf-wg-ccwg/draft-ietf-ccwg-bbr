@@ -5,7 +5,9 @@
 Internet Congestion Control Research Group              N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 24 November 2024                                    23 May 2024
+Expires: 2 January 2025                                   J. Beshay, Ed.
+                                                                    Meta
+                                                             1 July 2024
 
 
                          BBR Congestion Control
@@ -44,7 +46,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 November 2024.
+   This Internet-Draft will expire on 2 January 2025.
 
 Copyright Notice
 
@@ -3478,3 +3480,8 @@ Authors' Addresses
    Ian Swett (editor)
    Google
    Email: ianswett@google.com
+
+
+   Joseph Beshay (editor)
+   Meta
+   Email: jbeshay@meta.com
