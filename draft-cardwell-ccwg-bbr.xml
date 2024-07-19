@@ -241,7 +241,8 @@ BBR.cwnd_gain.</t>
 
 <t>BBR.ExtraACKedFilter: the max filter tracking the recent maximum degree of aggregation in the path.</t>
 
-<t>BBRExtraAckedFilterLen = The window length of the BBR.ExtraACKedFilter max filter window: 10  (in units of packet-timed round trips).</t>
+<t>BBRExtraAckedFilterLen = The window length of the BBR.ExtraACKedFilter max
+filter window in steady-state: 10 (in units of packet-timed round trips).</t>
 
 </section>
 <section title="Startup Parameters and State" anchor="startup-parameters-and-state">
@@ -1775,12 +1776,16 @@ process.</t>
     BBR.extra_acked_delivered += rs.newly_acked
     extra = BBR.extra_acked_delivered - expected_delivered
     extra = min(extra, cwnd)
+    if (BBR.full_bw_reached)
+      filter_len = BBRExtraAckedFilterLen
+    else
+      filter_len = 1  /* in Startup, just remember 1 round */
     BBR.extra_acked =
       update_windowed_max_filter(
         filter=BBR.ExtraACKedFilter,
         value=extra,
         time=BBR.round_count,
-        window_length=BBRExtraAckedFilterLen)
+        window_length=filter_len)
 </artwork></figure>
 
 </section>
