@@ -1497,7 +1497,7 @@ algorithm is continuing.</t>
 
   /* Update rs when a packet is SACKed or ACKed. */
   UpdateRateSample(Packet P, RateSample rs):
-    if P.delivered_time == 0
+    if (P.delivered_time == 0)
       return /* P already SACKed */
 
     C.delivered += P.data_length
