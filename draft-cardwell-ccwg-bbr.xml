@@ -36,7 +36,20 @@
  <keyword>QUIC</keyword>
 
 <abstract><t>
-This document specifies the BBR congestion control algorithm. BBR ("Bottleneck Bandwidth and Round-trip propagation time") uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path. BBR then uses this model to control both how fast it sends data and the maximum volume of data it allows in flight in the network at any time. Relative to loss-based congestion control algorithms such as Reno <xref target="RFC5681"/> or CUBIC <xref target="RFC8312"/>, BBR offers substantially higher throughput for bottlenecks with shallow buffers or random losses, and substantially lower queueing delays for bottlenecks with deep buffers (avoiding "bufferbloat"). BBR can be implemented in any transport protocol that supports packet-delivery acknowledgment. Thus far, open source implementations are available for TCP <xref target="RFC9293"/> and QUIC <xref target="RFC9000"/>. This document specifies version 2 of the BBR algorithm, also sometimes referred to as BBRv2 or bbr2.
+This document specifies the BBR congestion control algorithm. BBR ("Bottleneck
+Bandwidth and Round-trip propagation time") uses recent measurements of a
+transport connection's delivery rate, round-trip time, and packet loss rate to
+build an explicit model of the network path. BBR then uses this model to
+control both how fast it sends data and the maximum volume of data it allows in
+flight in the network at any time. Relative to loss-based congestion control
+algorithms such as Reno <xref target="RFC5681"/> or CUBIC <xref
+target="RFC8312"/>, BBR offers substantially higher throughput for bottlenecks
+with shallow buffers or random losses, and substantially lower queueing delays
+for bottlenecks with deep buffers (avoiding "bufferbloat"). BBR can be
+implemented in any transport protocol that supports packet-delivery
+acknowledgment. Thus far, open source implementations are available for TCP
+<xref target="RFC9293"/> and QUIC <xref target="RFC9000"/>. This document
+specifies version 3 of the BBR algorithm, BBRv3.
 </t></abstract>
 
 </front>
@@ -59,7 +72,12 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
 
 <t>The BBR ("Bottleneck Bandwidth and Round-trip propagation time") congestion control algorithm is a model-based algorithm that takes an approach different from loss-based congestion control: BBR uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path, including its estimated available bandwidth, bandwidth-delay product, and the maximum volume of data that the connection can place in-flight in the network without causing excessive queue pressure. It then uses this model in order to guide its control behavior in seeking high throughput and low queue pressure.</t>
 
-<t>This document describes the current version of the BBR algorithm, BBRv2. The previous version of the algorithm,  BBRv1, was described previously at a high level <xref target="CCGHJ16"/><xref target="CCGHJ17"/>. The implications of BBR in allowing high utilization of high-speed networks with shallow buffers have been discussed in other work <xref target="MM19"/>. Active work on the BBR algorithm is continuing.</t>
+<t>This document describes the current version of the BBR algorithm, BBRv3. The
+original version of the algorithm, BBRv1, was described previously at a high
+level <xref target="CCGHJ16"/><xref target="CCGHJ17"/>. The implications of BBR
+in allowing high utilization of high-speed networks with shallow buffers have
+been discussed in other work <xref target="MM19"/>. Active work on the BBR
+algorithm is continuing.</t>
 
 <t>This document is organized as follows. Section 2 provides various definitions that will be used throughout this document. Section 3 provides an overview of the design of the BBR algorithm, and section 4 describes the BBR algorithm in detail, including BBR's network path model, control parameters, and state machine. Section 5 describes the implementation status, section 6 describes security considerations, section 7 notes that there are no IANA considerations, and section 8 closes with Acknowledgments.</t>
 
@@ -2184,7 +2202,8 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
 
 <t>According to <xref target="RFC7942"/>, "this will allow reviewers and working groups to assign due consideration to documents that have the benefit of running code, which may serve as evidence of valuable experimentation and feedback that have made the implemented protocols more mature.  It is up to the individual working groups to use this information as they see fit".</t>
 
-<t>As of the time of writing, the following implementations of BBR have been publicly released:</t>
+<t>As of the time of writing, the following implementations of BBRv3 have been
+publicly released:</t>
 
 <t><list style="symbols">
 <t>Linux TCP
@@ -2193,9 +2212,9 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
 <t>Source code URL:
 
 <list style="symbols">
-<t>https://github.com/google/bbr/blob/v2alpha/README.md</t>
+<t>https://github.com/google/bbr/blob/v3/README.md</t>
 
-<t>https://github.com/google/bbr/blob/v2alpha/net/ipv4/tcp_bbr2.c</t>
+<t>https://github.com/google/bbr/blob/v3/net/ipv4/tcp_bbr.c</t>
 
 </list></t>
 <t>Source: Google</t>
@@ -2206,7 +2225,7 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
 
 <t>Contact: https://groups.google.com/d/forum/bbr-dev</t>
 
-<t>Last updated: August 21, 2021</t>
+<t>Last updated: November 22, 2023</t>
 
 </list></t>
 <t>QUIC
