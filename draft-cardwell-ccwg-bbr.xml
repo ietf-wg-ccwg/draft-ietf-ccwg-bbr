@@ -722,7 +722,12 @@ runs:</t>
 </section>
 <section title="ProbeBW_UP" anchor="probebwup">
 
-<t>After ProbeBW_REFILL refills the pipe, ProbeBW_UP probes for possible increases in available bandwidth by using a BBR.pacing_gain of 1.25, sending faster than the current estimated available bandwidth.</t>
+<t>After ProbeBW_REFILL refills the pipe, ProbeBW_UP probes for possible
+increases in available bandwidth by raising the sending rate, using a
+BBR.pacing_gain of 1.25, to send faster than the current estimated available
+bandwidth. It also raises the cwnd_gain to 2.25, to ensure that the flow can
+send faster than it had been, even if cwnd was previously limiting the sending
+process.</t>
 
 <t>If the flow has not set BBR.inflight_hi or BBR.bw_hi, it tries to raise the volume of in-flight data to at least BBR.pacing_gain * BBR.bdp = 1.25 * BBR.bdp; note that this may take more than BBR.min_rtt if BBR.min_rtt is small (e.g. on a LAN).</t>
 
@@ -1971,7 +1976,7 @@ ProbeBW_CRUISE | cruise | 1.0    | 2    | bw_hi, | 0.85*inflight_hi
 ProbeBW_REFILL | accel  | 1.0    | 2    | bw_hi  | inflight_hi
                |        |        |      |        |
 ---------------+--------+--------+------+--------+-----------------
-ProbeBW_UP     | accel  | 1.25   | 2    | bw_hi  | inflight_hi
+ProbeBW_UP     | accel  | 1.25   | 2.25 | bw_hi  | inflight_hi
                |        |        |      |        |
 ---------------+--------+--------+------+--------+-----------------
 ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
