@@ -673,7 +673,12 @@ runs:</t>
 
 </list></t>
 
-<t>If these criteria are all met, then BBRCheckStartupHighLoss() sets BBR.full_bw_reached = true and exits Startup and enters Drain.</t>
+<t>If these criteria are all met, then BBRCheckStartupHighLoss() takes the
+following steps. First, it sets BBR.full_bw_reached = true. Then it sets
+BBR.inflight_hi to its estimate of a safe level of in-flight data suggested by
+these losses, which is max(BBR.bdp, BBR.inflight_latest), where
+BBR.inflight_latest is the max delivered volume of data (rs.delivered) over the
+last round trip. Finally, it exits Startup and enters Drain.</t>
 
 <t>The algorithm waits until all three criteria are met to filter out noise from burst losses, and to try to ensure the bottleneck is fully utilized on a sustained basis, and the full bottleneck bandwidth has been measured, before attempting to drain the level of in-flight data to the estimated BDP.</t>
 
