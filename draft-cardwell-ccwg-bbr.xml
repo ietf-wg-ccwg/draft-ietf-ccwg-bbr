@@ -669,7 +669,7 @@ runs:</t>
 
 <t>The loss rate over the time scale of a single full round trip exceeds BBRLossThresh (2%).</t>
 
-<t>There are at least BBRStartupFullLossCnt=3 discontiguous sequence ranges lost in that round trip.</t>
+<t>There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges lost in that round trip.</t>
 
 </list></t>
 
