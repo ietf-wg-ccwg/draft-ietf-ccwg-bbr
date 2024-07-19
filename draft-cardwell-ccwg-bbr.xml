@@ -242,7 +242,9 @@ algorithm is continuing.</t>
 </section>
 <section title="Startup Parameters and State" anchor="startup-parameters-and-state">
 
-<t>BBR.filled_pipe: A boolean that records whether BBR estimates that it has ever fully utilized its available bandwidth ("filled the pipe").</t>
+<t>BBR.full_bw_reached: A boolean that records whether BBR estimates that it has ever fully utilized its available bandwidth over the lifetime of the connection.</t>
+
+<t>BBR.full_bw_now: A boolean that records whether BBR estimates that it has fully utilized its available bandwidth since it most recetly started looking.</t>
 
 <t>BBR.full_bw: A recent baseline BBR.max_bw to estimate if BBR has "filled the pipe" in Startup.</t>
 
@@ -500,10 +502,11 @@ algorithm is continuing.</t>
     BBR.idle_restart = false
     BBR.extra_acked_interval_start = Now()
     BBR.extra_acked_delivered = 0
+    BBR.full_bw_reached = false
     BBRResetCongestionSignals()
     BBRResetLowerBounds()
     BBRInitRoundCounting()
-    BBRInitFullPipe()
+    BBRResetFullBW()
     BBRInitPacingRate()
     BBREnterStartup()
 </artwork></figure>
@@ -532,6 +535,7 @@ algorithm is continuing.</t>
     BBRUpdateLatestDeliverySignals()
     BBRUpdateCongestionSignals()
     BBRUpdateACKAggregation()
+    BBRCheckFullBWReached()
     BBRCheckStartupDone()
     BBRCheckDrain()
     BBRUpdateProbeBWCyclePhase()
@@ -583,40 +587,59 @@ algorithm is continuing.</t>
 
 <figure><artwork>
   BBRCheckStartupDone():
-    BBRCheckStartupFullBandwidth()
     BBRCheckStartupHighLoss()
-    if (BBR.state == Startup and BBR.filled_pipe)
+    if (BBR.state == Startup and BBR.full_bw_reached)
       BBREnterDrain()
 </artwork></figure>
 
 </section>
 <section title="Exiting Startup Based on Bandwidth Plateau" anchor="exiting-startup-based-on-bandwidth-plateau">
 
-<t>During Startup, BBR estimates whether the pipe is full by looking for a plateau in the BBR.max_bw estimate. The output of this "full pipe" estimator is tracked in BBR.filled_pipe, a boolean that records whether BBR estimates that it has ever fully utilized its available bandwidth ("filled the pipe"). If BBR notices that there are several (three) rounds where attempts to double the delivery rate actually result in little increase (less than 25 percent), then it estimates that it has reached BBR.max_bw, sets BBR.filled_pipe to true, exits Startup and enters Drain.</t>
+<t>At various points in the lifetime of a connection, BBR runs a simple state
+machine to estimate whether an accelerating sending rate has saturated the
+available per-flow bandwidth ("filled the pipe") by looking for a plateau in
+the measured rs.delivery_rate. BBR stores the output of the current full-pipe
+estimation process in the BBR.full_bw_now boolean, and stores in
+BBR.full_bw_reached, a boolean that records whether BBR estimates that it has
+ever fully utilized its available bandwidth, over the lifetime of the
+connection.</t>
 
-<t>Upon connection initialization the full pipe estimator runs:</t>
+<t>The full pipe estimator works as follows: if BBR notices that there are
+several (three) non-application-limited rounds where attempts to significantly
+increase the delivery rate actually result in little increase (less than 25
+percent), then it estimates that it has fully utilized the per-flow available
+bandwidth, and sets both BBR.full_bw_now and BBR.full_bw_reached to true.</t>
+
+<t> The BBR.full_bw_now boolean is used to exit ProbeBW_UP based on bandwidth
+utilization, and BBR.full_bw_reached is used to decide when to exit Startup and
+enter Drain.</t>
+
+<t>Upon starting a full pipe detection process, the following initialization
+runs:</t>
 
 <figure><artwork>
-  BBRInitFullPipe():
-    BBR.filled_pipe = false
+  BBRResetFullBW():
     BBR.full_bw = 0
     BBR.full_bw_count = 0
+    BBR.full_bw_now = 0
 </artwork></figure>
 
-<t>Once per round trip, upon an ACK that acknowledges new data, and when the delivery rate sample is not application-limited (see <xref target="delivery-rate-samples"/>), BBR runs the "full pipe" estimator, if needed:</t>
+<t>While running the full pipe detection process, once per round trip, upon an ACK that acknowledges new data, and when the delivery rate sample is not application-limited (see <xref target="delivery-rate-samples"/>), BBR runs the "full pipe" estimator:</t>
 
 <figure><artwork>
-  BBRCheckStartupFullBandwidth():
-    if BBR.filled_pipe or
-       !BBR.round_start or rs.is_app_limited
+  BBRCheckFullBWReached():
+    if (BBR.full_bw_now or rs.is_app_limited)
       return  /* no need to check for a full pipe now */
-    if (BBR.max_bw &gt;= BBR.full_bw * 1.25)  /* still growing? */
-      BBR.full_bw = BBR.max_bw    /* record new baseline level */
-      BBR.full_bw_count = 0
+    if (rs.delivery_rate &gt;= BBR.full_bw * 1.25)  /* bw still growing? */
+      BBRResetFullBW()
+      BBR.full_bw = rs.delivery_rate  /* record new baseline bw level */
       return
-    BBR.full_bw_count++ /* another round w/o much growth */
-    if (BBR.full_bw_count &gt;= 3)
-      BBR.filled_pipe = true
+    if (!BBR.round_start)
+      return
+    BBR.full_bw_count++   /* another round w/o much growth */
+    BBR.full_bw_now = (BBR.full_bw_count &gt;= 3)
+    if (BBR.full_bw_now)
+      BBR.full_bw_reached = true
 </artwork></figure>
 
 <t>BBR waits three rounds to have solid evidence that the sender is not detecting a delivery-rate plateau that was temporarily imposed by the receive window. Allowing three rounds provides time for the receiver's receive-window auto-tuning to open up the receive window and for the BBR sender to realize that BBR.max_bw should be higher: in the first round the receive-window auto-tuning algorithm grows the receive window; in the second round the sender fills the higher receive window; in the third round the sender gets higher delivery-rate samples. This three-round threshold was validated by YouTube experimental data.</t>
@@ -635,7 +658,7 @@ algorithm is continuing.</t>
 
 </list></t>
 
-<t>If these criteria are all met, then BBRCheckStartupHighLoss() sets BBR.filled_pipe = true and exits Startup and enters Drain.</t>
+<t>If these criteria are all met, then BBRCheckStartupHighLoss() sets BBR.full_bw_reached = true and exits Startup and enters Drain.</t>
 
 <t>The algorithm waits until all three criteria are met to filter out noise from burst losses, and to try to ensure the bottleneck is fully utilized on a sustained basis, and the full bottleneck bandwidth has been measured, before attempting to drain the level of in-flight data to the estimated BDP.</t>
 
@@ -889,6 +912,8 @@ algorithm is continuing.</t>
     BBRStartRound()
     BBR.cycle_stamp = Now() /* start wall clock */
     BBR.state = ProbeBW_UP
+    BBRResetFullBW()
+    BBR.full_bw = rs.delivery_rate
     BBRRaiseInflightHiSlope()
 </artwork></figure>
 
@@ -897,7 +922,7 @@ algorithm is continuing.</t>
 <figure><artwork>
   /* The core state machine logic for ProbeBW: */
   BBRUpdateProbeBWCyclePhase():
-    if (!BBR.filled_pipe)
+    if (!BBR.full_bw_reached)
       return  /* only handling steady-state behavior here */
     BBRAdaptUpperBounds()
     if (!IsInAProbeBWState())
@@ -1141,7 +1166,7 @@ algorithm is continuing.</t>
 <figure><artwork>
   BBRExitProbeRTT():
     BBRResetLowerBounds()
-    if (BBR.filled_pipe)
+    if (BBR.full_bw_reached)
       BBRStartProbeBW_DOWN()
       BBRStartProbeBW_CRUISE()
     else
@@ -1970,12 +1995,20 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
     BBR.pacing_rate =  BBRStartupPacingGain * nominal_bandwidth
 </artwork></figure>
 
-<t>After initialization, on each data ACK BBR updates its pacing rate to be proportional to bw, as long as it estimates that it has filled the pipe (BBR.filled_pipe is true; see the "Startup" section for details), or doing so increases the pacing rate. Limiting the pacing rate updates in this way helps the connection probe robustly for bandwidth until it estimates it has reached its full available bandwidth ("filled the pipe"). In particular, this prevents the pacing rate from being reduced when the connection has only seen application-limited bandwidth samples. BBR updates the pacing rate on each ACK by executing the BBRSetPacingRate() step as follows:</t>
+<t>After initialization, on each data ACK BBR updates its pacing rate to be
+proportional to bw, as long as it estimates that it has filled the pipe
+(BBR.full_bw_reached is true; see the "Startup" section for details), or doing
+so increases the pacing rate. Limiting the pacing rate updates in this way
+helps the connection probe robustly for bandwidth until it estimates it has
+reached its full available bandwidth ("filled the pipe"). In particular, this
+prevents the pacing rate from being reduced when the connection has only seen
+application-limited bandwidth samples. BBR updates the pacing rate on each ACK
+by executing the BBRSetPacingRate() step as follows:</t>
 
 <figure><artwork>
   BBRSetPacingRateWithGain(pacing_gain):
     rate = pacing_gain * bw * (100 - BBRPacingMarginPercent) / 100
-    if (BBR.filled_pipe || rate &gt; BBR.pacing_rate)
+    if (BBR.full_bw_reached || rate &gt; BBR.pacing_rate)
       BBR.pacing_rate = rate
 
   BBRSetPacingRate():
@@ -2157,7 +2190,7 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
     BBRUpdateMaxInflight()
     BBRModulateCwndForRecovery()
     if (!BBR.packet_conservation) {
-      if (BBR.filled_pipe)
+      if (BBR.full_bw_reached)
         cwnd = min(cwnd + rs.newly_acked, BBR.max_inflight)
       else if (cwnd &lt; BBR.max_inflight || C.delivered &lt; InitialCwnd)
         cwnd = cwnd + rs.newly_acked
@@ -2167,7 +2200,17 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
     BBRBoundCwndForModel()
 </artwork></figure>
 
-<t>There are several considerations embodied in the logic above. If BBR has measured enough samples to achieve confidence that it has filled the pipe (see the description of BBR.filled_pipe in the "Startup" section below), then it increases its cwnd based on the number of packets delivered, while bounding its cwnd to be no larger than the BBR.max_inflight adapted to the estimated BDP. Otherwise, if the cwnd is below the BBR.max_inflight, or the sender has marked so little data delivered (less than InitialCwnd) that it does not yet judge its BBR.max_bw estimate and BBR.max_inflight as useful, then it increases cwnd without bounding it to be below BBR.max_inflight. Finally, BBR imposes a floor of BBRMinPipeCwnd in order to allow pipelining even with small BDPs (see the "Minimum cwnd for Pipelining" section, above).</t>
+<t>There are several considerations embodied in the logic above. If BBR has
+measured enough samples to achieve confidence that it has filled the pipe (see
+the description of BBR.full_bw_reached in the "Startup" section below), then it
+increases its cwnd based on the number of packets delivered, while bounding its
+cwnd to be no larger than the BBR.max_inflight adapted to the estimated
+BDP. Otherwise, if the cwnd is below the BBR.max_inflight, or the sender has
+marked so little data delivered (less than InitialCwnd) that it does not yet
+judge its BBR.max_bw estimate and BBR.max_inflight as useful, then it increases
+cwnd without bounding it to be below BBR.max_inflight. Finally, BBR imposes a
+floor of BBRMinPipeCwnd in order to allow pipelining even with small BDPs (see
+the "Minimum cwnd for Pipelining" section, above).</t>
 
 </section>
 <section title="Bounding cwnd Based on Recent Congestion" anchor="bounding-cwnd-based-on-recent-congestion">
