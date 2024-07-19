@@ -28,8 +28,9 @@ Abstract
    bottlenecks with deep buffers (avoiding "bufferbloat").  BBR can be
    implemented in any transport protocol that supports packet-delivery
    acknowledgment.  Thus far, open source implementations are available
-   for TCP [RFC793] and QUIC [RFC9000].  This document specifies version
-   2 of the BBR algorithm, also sometimes referred to as BBRv2 or bbr2.
+   for TCP [RFC9293] and QUIC [RFC9000].  This document specifies
+   version 2 of the BBR algorithm, also sometimes referred to as BBRv2
+   or bbr2.
 
 Status of This Memo
 
@@ -683,7 +684,7 @@ Table of Contents
    BBR is a congestion control algorithm that is agnostic to transport-
    layer and link-layer technologies, requires only sender-side changes,
    and does not require changes in the network.  Open source
-   implementations of BBR are available for the TCP [RFC793] and QUIC
+   implementations of BBR are available for the TCP [RFC9293] and QUIC
    [RFC9000] transport protocols, and these implementations have been
    used in production for a large volume of Internet traffic.  An open
    source implementation of BBR is also available for DCCP [RFC4340]
@@ -1837,7 +1838,7 @@ Table of Contents
 
    This algorithm can be implemented in any transport protocol that
    supports packet-delivery acknowledgment (so far, implementations are
-   available for TCP [RFC793] and QUIC [RFC9000]).  This algorithm
+   available for TCP [RFC9293] and QUIC [RFC9000]).  This algorithm
    requires a small amount of added logic on the sender, and requires
    that the sender maintain a small amount of additional per-packet
    state for packets sent but not yet delivered.  In the most general
@@ -2024,7 +2025,7 @@ Table of Contents
 
 4.5.2.2.3.1.  Considerations Related to Receiver Flow Control Limits
 
-   In some cases receiver flow control limits (such as the TCP [RFC793]
+   In some cases receiver flow control limits (such as the TCP [RFC9293]
    advertised receive window, RCV.WND) are the factor limiting the
    delivery rate.  This algorithm treats cases where the delivery rate
    was constrained by such conditions the same as it treats cases where
@@ -2306,7 +2307,7 @@ Table of Contents
    perfectly robust to retransmissions, because the starting packet, P,
    for the sample can be unambiguously retrieved.
 
-   If the transport protocol, like TCP [RFC793], has ambiguous ACKs for
+   If the transport protocol, like TCP [RFC9293], has ambiguous ACKs for
    retransmitted sequence ranges, then the following approaches MAY be
    used:
 
@@ -3368,9 +3369,6 @@ Table of Contents
               Scheffenegger, "TCP Extensions for High Performance",
               September 2014.
 
-   [RFC793]   Postel, J., "Transmission Control Protocol", September
-              1981.
-
    [RFC7942]  Sheffer, Y. and A. Farrel, "Improving Awareness of Running
               Code: The Implementation Status Section", July 2016.
 
@@ -3387,6 +3385,10 @@ Table of Contents
               Multiplexed and Secure Transport", RFC 9000,
               DOI 10.17487/RFC9000, May 2021,
               <https://www.rfc-editor.org/info/rfc9000>.
+
+   [RFC9293]  Eddy, W., Ed., "Transmission Control Protocol (TCP)",
+              STD 7, RFC 9293, DOI 10.17487/RFC9293, August 2022,
+              <https://www.rfc-editor.org/info/rfc9293>.
 
 9.2.  Informative References
 

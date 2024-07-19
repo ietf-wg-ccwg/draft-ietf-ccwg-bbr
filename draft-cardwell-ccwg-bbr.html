@@ -13,13 +13,13 @@
 This document specifies the BBR congestion control algorithm. BBR (&quot;Bottleneck Bandwidth and Round-trip propagation time&quot;) uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path. BBR then uses this model to control both how fast it sends data and the maximum volume of data it allows in flight in the network at any time. Relative to loss-based congestion control algorithms such as Reno   or CUBIC  , BBR offers substantially higher throughput for bottlenecks with shallow buffers or random losses, and substantially lower queueing delays for bottlenecks with deep buffers (avoiding &quot;bufferbloat&quot;). BBR can be implemented in any transport protocol that supports packet-delivery acknowledgment. Thus far, open source implementations are available for TCP   and QUIC  . This document specifies version 2 of the BBR algorithm, also sometimes referred to as BBRv2 or bbr2.
  
     " name="description">
-<meta content="xml2rfc 3.21.0" name="generator">
+<meta content="xml2rfc 3.22.0" name="generator">
 <meta content="Congestion Control" name="keyword">
 <meta content="TCP" name="keyword">
 <meta content="QUIC" name="keyword">
 <meta content="draft-cardwell-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.21.0
+  xml2rfc 3.22.0
     Python 3.12.3
     ConfigArgParse 1.7
     google-i18n-address 3.1.0
@@ -29,9 +29,8 @@ This document specifies the BBR congestion control algorithm. BBR (&quot;Bottlen
     platformdirs 4.2.2
     pycountry 22.3.5
     PyYAML 6.0.1
-    requests 2.31.0
+    requests 2.32.3
     setuptools 69.5.1
-    six 1.16.0
     wcwidth 0.2.13
 -->
 <link href="draft-cardwell-ccwg-bbr.xml" rel="alternate" type="application/rfc+xml">
@@ -1078,7 +1077,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">
-This document specifies the BBR congestion control algorithm. BBR ("Bottleneck Bandwidth and Round-trip propagation time") uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path. BBR then uses this model to control both how fast it sends data and the maximum volume of data it allows in flight in the network at any time. Relative to loss-based congestion control algorithms such as Reno <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> or CUBIC <span>[<a href="#RFC8312" class="cite xref">RFC8312</a>]</span>, BBR offers substantially higher throughput for bottlenecks with shallow buffers or random losses, and substantially lower queueing delays for bottlenecks with deep buffers (avoiding "bufferbloat"). BBR can be implemented in any transport protocol that supports packet-delivery acknowledgment. Thus far, open source implementations are available for TCP <span>[<a href="#RFC793" class="cite xref">RFC793</a>]</span> and QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>. This document specifies version 2 of the BBR algorithm, also sometimes referred to as BBRv2 or bbr2.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+This document specifies the BBR congestion control algorithm. BBR ("Bottleneck Bandwidth and Round-trip propagation time") uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path. BBR then uses this model to control both how fast it sends data and the maximum volume of data it allows in flight in the network at any time. Relative to loss-based congestion control algorithms such as Reno <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> or CUBIC <span>[<a href="#RFC8312" class="cite xref">RFC8312</a>]</span>, BBR offers substantially higher throughput for bottlenecks with shallow buffers or random losses, and substantially lower queueing delays for bottlenecks with deep buffers (avoiding "bufferbloat"). BBR can be implemented in any transport protocol that supports packet-delivery acknowledgment. Thus far, open source implementations are available for TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span> and QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>. This document specifies version 2 of the BBR algorithm, also sometimes referred to as BBRv2 or bbr2.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
@@ -1753,7 +1752,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
         <h3 id="name-environment-and-usage">
 <a href="#section-3.6" class="section-number selfRef">3.6. </a><a href="#name-environment-and-usage" class="section-name selfRef">Environment and Usage</a>
         </h3>
-<p id="section-3.6-1">BBR is a congestion control algorithm that is agnostic to transport-layer and link-layer technologies, requires only sender-side changes, and does not require changes in the network. Open source implementations of BBR are available for the TCP <span>[<a href="#RFC793" class="cite xref">RFC793</a>]</span> and QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span> transport protocols, and these implementations have been used in production for a large volume of Internet traffic. An open source implementation of BBR is also available for DCCP <span>[<a href="#RFC4340" class="cite xref">RFC4340</a>]</span> <span>[<a href="#draft-romo-iccrg-ccid5" class="cite xref">draft-romo-iccrg-ccid5</a>]</span>.<a href="#section-3.6-1" class="pilcrow">¶</a></p>
+<p id="section-3.6-1">BBR is a congestion control algorithm that is agnostic to transport-layer and link-layer technologies, requires only sender-side changes, and does not require changes in the network. Open source implementations of BBR are available for the TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span> and QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span> transport protocols, and these implementations have been used in production for a large volume of Internet traffic. An open source implementation of BBR is also available for DCCP <span>[<a href="#RFC4340" class="cite xref">RFC4340</a>]</span> <span>[<a href="#draft-romo-iccrg-ccid5" class="cite xref">draft-romo-iccrg-ccid5</a>]</span>.<a href="#section-3.6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2743,7 +2742,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
               <h6 id="name-requirements">
 <a href="#section-4.5.2.2.1" class="section-number selfRef">4.5.2.2.1. </a><a href="#name-requirements" class="section-name selfRef">Requirements</a>
               </h6>
-<p id="section-4.5.2.2.1-1">This algorithm can be implemented in any transport protocol that supports packet-delivery acknowledgment (so far, implementations are available for TCP <span>[<a href="#RFC793" class="cite xref">RFC793</a>]</span> and QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>). This algorithm requires a small amount of added logic on the sender, and requires that the sender maintain a small amount of additional per-packet state for packets sent but not yet delivered. In the most general case it requires high-precision (microsecond-granularity or better) timestamps on the sender (though millisecond-granularity may suffice for lower bandwidths). It does not require any receiver or network changes. While selective acknowledgments for out-of-order data (e.g., <span>[<a href="#RFC2018" class="cite xref">RFC2018</a>]</span>) are not required, such a mechanism is highly recommended for accurate estimation during reordering and loss recovery phases.<a href="#section-4.5.2.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.2.1-1">This algorithm can be implemented in any transport protocol that supports packet-delivery acknowledgment (so far, implementations are available for TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span> and QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>). This algorithm requires a small amount of added logic on the sender, and requires that the sender maintain a small amount of additional per-packet state for packets sent but not yet delivered. In the most general case it requires high-precision (microsecond-granularity or better) timestamps on the sender (though millisecond-granularity may suffice for lower bandwidths). It does not require any receiver or network changes. While selective acknowledgments for out-of-order data (e.g., <span>[<a href="#RFC2018" class="cite xref">RFC2018</a>]</span>) are not required, such a mechanism is highly recommended for accurate estimation during reordering and loss recovery phases.<a href="#section-4.5.2.2.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="estimating-delivery-rate">
@@ -2868,7 +2867,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
                 <h6 id="name-considerations-related-to-r">
 <a href="#section-4.5.2.2.3.1" class="section-number selfRef">4.5.2.2.3.1. </a><a href="#name-considerations-related-to-r" class="section-name selfRef">Considerations Related to Receiver Flow Control Limits</a>
                 </h6>
-<p id="section-4.5.2.2.3.1-1">In some cases receiver flow control limits (such as the TCP <span>[<a href="#RFC793" class="cite xref">RFC793</a>]</span> advertised receive window, RCV.WND) are the factor limiting the delivery rate. This algorithm treats cases where the delivery rate was constrained by such conditions the same as it treats cases where the delivery rate is constrained by in-network bottlenecks. That is, it treats receiver bottlenecks the same as network bottlenecks. This has a conceptual symmetry and has worked well in practice for congestion control and telemetry purposes.<a href="#section-4.5.2.2.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.2.3.1-1">In some cases receiver flow control limits (such as the TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span> advertised receive window, RCV.WND) are the factor limiting the delivery rate. This algorithm treats cases where the delivery rate was constrained by such conditions the same as it treats cases where the delivery rate is constrained by in-network bottlenecks. That is, it treats receiver bottlenecks the same as network bottlenecks. This has a conceptual symmetry and has worked well in practice for congestion control and telemetry purposes.<a href="#section-4.5.2.2.3.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3091,7 +3090,7 @@ This document specifies the BBR congestion control algorithm. BBR ("Bottleneck B
               </h6>
 <p id="section-4.5.2.4.4-1">There are several possible approaches for handling cases where a delivery rate sample is based on an ACK or SACK for a retransmitted packet.<a href="#section-4.5.2.4.4-1" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.4.4-2">If the transport protocol supports unambiguous ACKs for retransmitted data sequence ranges (as in QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>) then the algorithm is perfectly robust to retransmissions, because the starting packet, P, for the sample can be unambiguously retrieved.<a href="#section-4.5.2.4.4-2" class="pilcrow">¶</a></p>
-<p id="section-4.5.2.4.4-3">If the transport protocol, like TCP <span>[<a href="#RFC793" class="cite xref">RFC793</a>]</span>, has ambiguous ACKs for retransmitted sequence ranges, then the following approaches MAY be used:<a href="#section-4.5.2.4.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.4.4-3">If the transport protocol, like TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>, has ambiguous ACKs for retransmitted sequence ranges, then the following approaches MAY be used:<a href="#section-4.5.2.4.4-3" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.5.2.4.4-4">
 <li id="section-4.5.2.4.4-4.1">
                   <p id="section-4.5.2.4.4-4.1.1">The sender MAY choose to filter out implausible delivery rate samples, as described in the GenerateRateSample() step in the "Upon receiving an ACK" section, by discarding samples whose rs.interval is lower than the minimum RTT seen on the connection.<a href="#section-4.5.2.4.4-4.1.1" class="pilcrow">¶</a></p>
@@ -4007,10 +4006,6 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
         <dd>
 <span class="refAuthor">Borman, D.</span>, <span class="refAuthor">Braden, B.</span>, <span class="refAuthor">Jacobson, V.</span>, and <span class="refAuthor">R. Scheffenegger</span>, <span class="refTitle">"TCP Extensions for High Performance"</span>, <time datetime="2014-09" class="refDate">September 2014</time>. </dd>
 <dd class="break"></dd>
-<dt id="RFC793">[RFC793]</dt>
-        <dd>
-<span class="refAuthor">Postel, J.</span>, <span class="refTitle">"Transmission Control Protocol"</span>, <time datetime="1981-09" class="refDate">September 1981</time>. </dd>
-<dd class="break"></dd>
 <dt id="RFC7942">[RFC7942]</dt>
         <dd>
 <span class="refAuthor">Sheffer, Y.</span> and <span class="refAuthor">A. Farrel</span>, <span class="refTitle">"Improving Awareness of Running Code: The Implementation Status Section"</span>, <time datetime="2016-07" class="refDate">July 2016</time>. </dd>
@@ -4024,8 +4019,12 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_hi, | 0.85*inflight_hi
 <span class="refAuthor">Cheng, Y.</span>, <span class="refAuthor">Cardwell, N.</span>, <span class="refAuthor">Dukkipati, N.</span>, and <span class="refAuthor">P. Jha</span>, <span class="refTitle">"The RACK-TLP Loss Detection Algorithm for TCP"</span>, <span class="seriesInfo">RFC 8985</span>, <span class="seriesInfo">DOI 10.17487/RFC8985</span>, <time datetime="2021-02" class="refDate">February 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8985">https://www.rfc-editor.org/info/rfc8985</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9000">[RFC9000]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Iyengar, J., Ed.</span> and <span class="refAuthor">M. Thomson, Ed.</span>, <span class="refTitle">"QUIC: A UDP-Based Multiplexed and Secure Transport"</span>, <span class="seriesInfo">RFC 9000</span>, <span class="seriesInfo">DOI 10.17487/RFC9000</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9000">https://www.rfc-editor.org/info/rfc9000</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9293">[RFC9293]</dt>
+      <dd>
+<span class="refAuthor">Eddy, W., Ed.</span>, <span class="refTitle">"Transmission Control Protocol (TCP)"</span>, <span class="seriesInfo">STD 7</span>, <span class="seriesInfo">RFC 9293</span>, <span class="seriesInfo">DOI 10.17487/RFC9293</span>, <time datetime="2022-08" class="refDate">August 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9293">https://www.rfc-editor.org/info/rfc9293</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
