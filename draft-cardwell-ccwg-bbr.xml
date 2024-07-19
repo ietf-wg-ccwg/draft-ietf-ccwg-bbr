@@ -147,9 +147,15 @@ algorithm is continuing.</t>
 
 <t>BBR.cwnd_gain: The dynamic gain factor used to scale the estimated BDP to produce a congestion window (cwnd).</t>
 
-<t>BBRStartupPacingGain: A constant specifying the minimum gain value for calculating the pacing rate that will allow the sending rate to double each round (4*ln(2) ~= 2.77) <xref target="BBRStartupPacingGain"/>; used in Startup mode for BBR.pacing_gain.</t>
+<t>BBRStartupPacingGain: A constant specifying the minimum gain value for
+calculating the pacing rate that will allow the sending rate to double each
+round (4 * ln(2) ~= 2.77) <xref target="BBRStartupPacingGain"/>; used in
+Startup mode for BBR.pacing_gain.</t>
 
-<t>BBRStartupCwndGain: A constant specifying the minimum gain value for calculating the cwnd that will allow the sending rate to double each round (2.0) <xref target="BBRStartupCwndGain"/>; used in Startup mode for BBR.cwnd_gain.</t>
+<t>BBRStartupCwndGain: A constant specifying the minimum gain value for
+calculating the cwnd that will allow the sending rate to double each round (2)
+<xref target="BBRStartupCwndGain"/>; used in Startup mode for
+BBR.cwnd_gain.</t>
 
 <t>BBR.packet_conservation: A boolean indicating whether BBR is currently using packet conservation dynamics to bound cwnd.</t>
 
@@ -570,7 +576,11 @@ algorithm is continuing.</t>
 
 <t>When a BBR flow starts up, it performs its first (and most rapid) sequential probe/drain process in the Startup and Drain states. Network link bandwidths currently span a range of at least 11 orders of magnitude, from a few bps to 200 Gbps. To quickly learn BBR.max_bw, given this huge range to explore, BBR's Startup state does an exponential search of the rate space, doubling the sending rate each round. This finds BBR.max_bw in O(log_2(BDP)) round trips.</t>
 
-<t>To achieve this rapid probing in the smoothest possible fashion, in Startup BBR uses the minimum gain values that will allow the sending rate to double each round: in Startup BBR sets BBR.pacing_gain to BBRStartupPacingGain (2.77) <xref target="BBRStartupPacingGain"/> and BBR.cwnd_gain to BBRStartupCwndGain (2) <xref target="BBRStartupCwndGain"/>.</t>
+<t>To achieve this rapid probing smoothly, in Startup BBR uses the minimum gain
+values that will allow the sending rate to double each round: in Startup BBR
+sets BBR.pacing_gain to BBRStartupPacingGain (2.77) <xref
+target="BBRStartupPacingGain"/> and BBR.cwnd_gain to BBRStartupCwndGain (2)
+<xref target="BBRStartupCwndGain"/>.</t>
 
 <t>When initializing a connection, or upon any later entry into Startup mode, BBR executes the following BBREnterStartup() steps:</t>
 
@@ -581,7 +591,12 @@ algorithm is continuing.</t>
     BBR.cwnd_gain = BBRStartupCwndGain
 </artwork></figure>
 
-<t>As BBR grows its sending rate rapidly, it obtains higher delivery rate samples, BBR.max_bw increases, and the pacing rate and cwnd both adapt by smoothly growing in proportion. Once the pipe is full, a queue typically forms, but the cwnd_gain bounds any queue to (cwnd_gain - 1) * estimated_BDP, which is approximately (2.77 - 1) * estimated_BDP = 1.77 * estimated_BDP. The immediately following Drain state is designed to quickly drain that queue.</t>
+<t>As BBR grows its sending rate rapidly, it obtains higher delivery rate
+samples, BBR.max_bw increases, and the pacing rate and cwnd both adapt by
+smoothly growing in proportion. Once the pipe is full, a queue typically forms,
+but the cwnd_gain bounds any queue to (cwnd_gain - 1) * estimated_BDP, which is
+approximately (2 - 1) * estimated_BDP = estimated_BDP. The immediately
+following Drain state is designed to quickly drain that queue.</t>
 
 <t>During Startup, BBR estimates whether the pipe is full using two estimators. The first looks for a plateau in the BBR.max_bw estimate. The second looks for packet loss. The following subsections discuss these estimators.</t>
 
@@ -1968,7 +1983,7 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
 State          | Tactic | Pacing | Cwnd | Rate   | Volume
                |        | Gain   | Gain | Cap    | Cap
 ---------------+--------+--------+------+--------+-----------------
-Startup        | accel  | 2.77   | 2    |        |
+Startup        | accel  | 2.77   | 2    | N/A    | N/A
                |        |        |      |        |
 ---------------+--------+--------+------+--------+-----------------
 Drain          | decel  | 0.5    | 2    | bw_hi, | inflight_hi,
