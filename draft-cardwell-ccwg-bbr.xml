@@ -911,9 +911,9 @@ runs:</t>
     BBR.ack_phase = ACKS_PROBE_STARTING
     BBRStartRound()
     BBR.cycle_stamp = Now() /* start wall clock */
-    BBR.state = ProbeBW_UP
     BBRResetFullBW()
     BBR.full_bw = rs.delivery_rate
+    BBR.state = ProbeBW_UP
     BBRRaiseInflightHiSlope()
 </artwork></figure>
 
@@ -947,8 +947,7 @@ runs:</t>
         BBRStartProbeBW_UP()
 
     ProbeBW_UP:
-      if (BBRHasElapsedInPhase(BBR.min_rtt) and
-          inflight &gt; BBRInflight(BBR.max_bw, 1.25))
+      if (BBRCheckTimeToGoDown())
         BBRStartProbeBW_DOWN()
 </artwork></figure>
 
@@ -968,6 +967,15 @@ runs:</t>
       return false /* not enough headroom */
     if (inflight &lt;= BBRInflight(BBR.max_bw, 1.0))
       return true  /* inflight &lt;= estimated BDP */
+
+  /* Time to transition from UP to DOWN? */
+  BBRCheckTimeToGoDown():
+    if (is_cwnd_limited and cwnd >= BBR.inflight_hi)
+      BBRResetFullBW()   /* bw is limited by inflight_hi */
+      BBR.full_bw = rs.delivery_rate
+    else if (BBR.full_bw_now)
+      return true  /* we estimate we've fully used path bw */
+    return false
 
   BBRHasElapsedInPhase(interval):
     return Now() &gt; BBR.cycle_stamp + interval
