@@ -690,7 +690,14 @@ runs:</t>
 
 <section title="ProbeBW_DOWN" anchor="probebwdown">
 
-<t>In the ProbeBW_DOWN phase of the cycle, a BBR flow pursues the deceleration tactic, to try to send slower than the network is delivering data, to reduce the amount of data in flight, with all of the standard motivations for the deceleration tactic (discussed in "State Machine Tactics", above).  It does this by switching to a BBR.pacing_gain of 0.9, sending at 90% of BBR.bw. The pacing_gain value of 0.9 is derived based on the ProbeBW_UP pacing gain of 1.25, as the minimum pacing_gain value that allows bandwidth-based convergence to approximate fairness.</t>
+<t>In the ProbeBW_DOWN phase of the cycle, a BBR flow pursues the deceleration
+tactic, to try to send slower than the network is delivering data, to reduce
+the amount of data in flight, with all of the standard motivations for the
+deceleration tactic (discussed in "State Machine Tactics", above).  It does
+this by switching to a BBR.pacing_gain of 0.90, sending at 90% of BBR.bw. The
+pacing_gain value of 0.90 is derived based on the ProbeBW_UP pacing gain of
+1.25, as the minimum pacing_gain value that allows bandwidth-based convergence
+to approximate fairness.</t>
 
 <t>Exit conditions: The flow exits this phase and enters CRUISE when the flow estimates that  both of the following conditions have been met:</t>
 
@@ -1967,7 +1974,7 @@ Startup        | accel  | 2.77   | 2    |        |
 Drain          | decel  | 0.5    | 2    | bw_hi, | inflight_hi,
                |        |        |      | bw_lo  | inflight_lo
 ---------------+--------+--------+------+--------+-----------------
-ProbeBW_DOWN   | decel  | 0.9    | 2    | bw_hi, | inflight_hi,
+ProbeBW_DOWN   | decel  | 0.90   | 2    | bw_hi, | inflight_hi,
                |        |        |      | bw_lo  | inflight_lo
 ---------------+--------+--------+------+--------+-----------------
 ProbeBW_CRUISE | cruise | 1.0    | 2    | bw_hi, | 0.85*inflight_hi
