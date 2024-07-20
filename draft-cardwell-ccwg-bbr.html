@@ -1054,7 +1054,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <div id="internal-metadata" class="document-information">
 <dl id="identifiers">
 <dt class="label-workgroup">Workgroup:</dt>
-<dd class="workgroup">Internet Congestion Control Research Group</dd>
+<dd class="workgroup">CCWG</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
 <dd class="internet-draft">draft-cardwell-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
@@ -1506,6 +1506,16 @@ algorithm is continuing.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <p id="section-2.5-1">BBR.pacing_gain: The dynamic gain factor used to scale BBR.bw to produce BBR.pacing_rate.<a href="#section-2.5-1" class="pilcrow">¶</a></p>
 <p id="section-2.5-2">BBRPacingMarginPercent: The static discount factor of 1% used to scale BBR.bw to produce BBR.pacing_rate.<a href="#section-2.5-2" class="pilcrow">¶</a></p>
 <p id="section-2.5-3">BBR.next_departure_time: The earliest pacing departure time for the next packet BBR schedules for transmission.<a href="#section-2.5-3" class="pilcrow">¶</a></p>
+<p id="section-2.5-4">BBRStartupPacingGain: A constant specifying the minimum gain value for
+calculating the pacing rate that will allow the sending rate to double each
+round (4 * ln(2) ~= 2.77) <span>[<a href="#BBRStartupPacingGain" class="cite xref">BBRStartupPacingGain</a>]</span>; used in
+Startup mode for BBR.pacing_gain.<a href="#section-2.5-4" class="pilcrow">¶</a></p>
+<p id="section-2.5-5">BBRDrainPacingGain: A constant specifying the pacing gain value used in
+Drain mode, to attempt to drain the estimated queue at the bottleneck link in
+one round-trip or less. As noted in <span>[<a href="#BBRDrainPacingGain" class="cite xref">BBRDrainPacingGain</a>]</span>, any
+value at or below 1 / BBRStartupCwndGain = 1 / 2 = 0.5 will theoretically
+achieve this. BBR uses the value 0.35, which has been shown to offer good
+performance on YouTube, when compared with other alternatives.<a href="#section-2.5-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="cwnd-state-and-parameters">
@@ -1514,14 +1524,9 @@ algorithm is continuing.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <a href="#section-2.6" class="section-number selfRef">2.6. </a><a href="#name-cwnd-state-and-parameters" class="section-name selfRef">cwnd State and Parameters</a>
         </h3>
 <p id="section-2.6-1">BBR.cwnd_gain: The dynamic gain factor used to scale the estimated BDP to produce a congestion window (cwnd).<a href="#section-2.6-1" class="pilcrow">¶</a></p>
-<p id="section-2.6-2">BBRStartupPacingGain: A constant specifying the minimum gain value for
-calculating the pacing rate that will allow the sending rate to double each
-round (4 * ln(2) ~= 2.77) <span>[<a href="#BBRStartupPacingGain" class="cite xref">BBRStartupPacingGain</a>]</span>; used in
-Startup mode for BBR.pacing_gain.<a href="#section-2.6-2" class="pilcrow">¶</a></p>
-<p id="section-2.6-3">BBRStartupCwndGain: A constant specifying the minimum gain value for
-calculating the cwnd that will allow the sending rate to double each round (2)
-<span>[<a href="#BBRStartupCwndGain" class="cite xref">BBRStartupCwndGain</a>]</span>; used in Startup mode for
-BBR.cwnd_gain.<a href="#section-2.6-3" class="pilcrow">¶</a></p>
+<p id="section-2.6-2">BBRDefaultCwndGain: A constant specifying the minimum gain value that allows
+the sending rate to double each round (2) <span>[<a href="#BBRStartupCwndGain" class="cite xref">BBRStartupCwndGain</a>]</span>. Used by default in most phases for
+BBR.cwnd_gain.<a href="#section-2.6-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="general-algorithm-state">
@@ -2066,7 +2071,7 @@ doubling the sending rate each round. This finds BBR.max_bw in O(log_2(BDP))
 round trips.<a href="#section-4.3.1.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.3.1.1-2">To achieve this rapid probing smoothly, in Startup BBR uses the minimum gain
 values that will allow the sending rate to double each round: in Startup BBR
-sets BBR.pacing_gain to BBRStartupPacingGain (2.77) <span>[<a href="#BBRStartupPacingGain" class="cite xref">BBRStartupPacingGain</a>]</span> and BBR.cwnd_gain to BBRStartupCwndGain (2)
+sets BBR.pacing_gain to BBRStartupPacingGain (2.77) <span>[<a href="#BBRStartupPacingGain" class="cite xref">BBRStartupPacingGain</a>]</span> and BBR.cwnd_gain to BBRDefaultCwndGain (2)
 <span>[<a href="#BBRStartupCwndGain" class="cite xref">BBRStartupCwndGain</a>]</span>.<a href="#section-4.3.1.1-2" class="pilcrow">¶</a></p>
 <p id="section-4.3.1.1-3">When initializing a connection, or upon any later entry into Startup mode, BBR executes the following BBREnterStartup() steps:<a href="#section-4.3.1.1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.1.1-4">
@@ -2074,7 +2079,7 @@ sets BBR.pacing_gain to BBRStartupPacingGain (2.77) <span>[<a href="#BBRStartupP
   BBREnterStartup():
     BBR.state = Startup
     BBR.pacing_gain = BBRStartupPacingGain
-    BBR.cwnd_gain = BBRStartupCwndGain
+    BBR.cwnd_gain = BBRDefaultCwndGain
 </pre><a href="#section-4.3.1.1-4" class="pilcrow">¶</a>
 </div>
 <p id="section-4.3.1.1-5">As BBR grows its sending rate rapidly, it obtains higher delivery rate
@@ -2094,26 +2099,26 @@ following Drain state is designed to quickly drain that queue.<a href="#section-
 </div>
 </section>
 </div>
-<div id="exiting-startup-based-on-bandwidth-plateau">
+<div id="exiting-acceleration-based-on-bandwidth-plateau">
 <section id="section-4.3.1.2">
-            <h5 id="name-exiting-startup-based-on-ba">
-<a href="#section-4.3.1.2" class="section-number selfRef">4.3.1.2. </a><a href="#name-exiting-startup-based-on-ba" class="section-name selfRef">Exiting Startup Based on Bandwidth Plateau</a>
+            <h5 id="name-exiting-acceleration-based-">
+<a href="#section-4.3.1.2" class="section-number selfRef">4.3.1.2. </a><a href="#name-exiting-acceleration-based-" class="section-name selfRef">Exiting Acceleration Based on Bandwidth Plateau</a>
             </h5>
-<p id="section-4.3.1.2-1">At various points in the lifetime of a connection, BBR runs a state machine
-to estimate whether an accelerating sending rate has saturated the available
-per-flow bandwidth ("filled the pipe") by looking for a plateau in the measured
-rs.delivery_rate. BBR stores the output of the current full-pipe estimation
-process in the BBR.full_bw_now boolean, and stores in BBR.full_bw_reached, a
-boolean that records whether BBR estimates that it has ever fully utilized its
-available bandwidth, over the lifetime of the connection.<a href="#section-4.3.1.2-1" class="pilcrow">¶</a></p>
-<p id="section-4.3.1.2-2">The full pipe estimator works as follows: if BBR notices that there are
-several (three) non-application-limited rounds where attempts to significantly
-increase the delivery rate actually result in little increase (less than 25
-percent), then it estimates that it has fully utilized the per-flow available
-bandwidth, and sets both BBR.full_bw_now and BBR.full_bw_reached to true.<a href="#section-4.3.1.2-2" class="pilcrow">¶</a></p>
-<p id="section-4.3.1.2-3"> The BBR.full_bw_now boolean is used to exit ProbeBW_UP based on bandwidth
-utilization, and BBR.full_bw_reached is used to decide when to exit Startup and
-enter Drain.<a href="#section-4.3.1.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.1.2-1">At various points in the lifetime of a connection, including Startup and
+ProbeBW_UP, BBR runs a state machine to estimate whether an accelerating
+sending rate has saturated the available per-flow bandwidth ("filled the pipe")
+by looking for a plateau in the measured rs.delivery_rate.<a href="#section-4.3.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.1.2-2">BBR records the output of the current full-pipe estimation process in the
+boolean BBR.full_bw_now, and uses BBR.full_bw_now to exit ProbeBW_UP. BBR
+records in the boolean BBR.full_bw_reached whether BBR estimates that it has
+ever fully utilized its available bandwidth (over the lifetime of the
+connection), and uses BBR.full_bw_reached to decide when to exit Startup and
+enter Drain.<a href="#section-4.3.1.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.3.1.2-3">The full pipe estimator works as follows: if BBR counts several (three)
+non-application-limited rounds where attempts to significantly increase the
+delivery rate actually result in little increase (less than 25 percent), then
+it estimates that it has fully utilized the per-flow available bandwidth, and
+sets both BBR.full_bw_now and BBR.full_bw_reached to true.<a href="#section-4.3.1.2-3" class="pilcrow">¶</a></p>
 <p id="section-4.3.1.2-4">Upon starting a full pipe detection process, the following initialization
 runs:<a href="#section-4.3.1.2-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.1.2-5">
@@ -2150,16 +2155,21 @@ runs:<a href="#section-4.3.1.2-4" class="pilcrow">¶</a></p>
             <h5 id="name-exiting-startup-based-on-pa">
 <a href="#section-4.3.1.3" class="section-number selfRef">4.3.1.3. </a><a href="#name-exiting-startup-based-on-pa" class="section-name selfRef">Exiting Startup Based on Packet Loss</a>
             </h5>
-<p id="section-4.3.1.3-1">A second method BBR uses for estimating the bottleneck is full is by looking at sustained packet losses Specifically  for a case where the following criteria are all met:<a href="#section-4.3.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.1.3-1">A second method BBR uses for estimating the bottleneck is full is by looking
+at sustained packet losses. Specifically, in Startup, BBRCheckStartupHighLoss()
+checks whether all of the following criteria are all met:<a href="#section-4.3.1.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.1.3-2.1">
-                <p id="section-4.3.1.3-2.1.1">The connection has been in fast recovery for at least one full round trip.<a href="#section-4.3.1.3-2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.1.3-2.1.1">The connection has been in fast recovery for at least one full packet-timed
+round trip.<a href="#section-4.3.1.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.1.3-2.2">
-                <p id="section-4.3.1.3-2.2.1">The loss rate over the time scale of a single full round trip exceeds BBRLossThresh (2%).<a href="#section-4.3.1.3-2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.1.3-2.2.1">The loss rate over the time scale of a single full round trip exceeds
+BBRLossThresh (2%).<a href="#section-4.3.1.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.1.3-2.3">
-                <p id="section-4.3.1.3-2.3.1">There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges lost in that round trip.<a href="#section-4.3.1.3-2.3.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.1.3-2.3.1">There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges
+lost in that round trip.<a href="#section-4.3.1.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 <p id="section-4.3.1.3-3">If these criteria are all met, then BBRCheckStartupHighLoss() takes the
@@ -2178,20 +2188,28 @@ last round trip. Finally, it exits Startup and enters Drain.<a href="#section-4.
           <h4 id="name-drain">
 <a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-drain" class="section-name selfRef">Drain</a>
           </h4>
-<p id="section-4.3.2-1">Upon exiting Startup, BBR enters its Drain state. In Drain, BBR aims to quickly drain any queue created in Startup by switching to a pacing_gain well below 1.0, until any estimated queue has been drained. It uses a pacing_gain that is the inverse of the value used during Startup, chosen to try to drain the queue in one round <span>[<a href="#BBRDrainPacingGain" class="cite xref">BBRDrainPacingGain</a>]</span>:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-1">Upon exiting Startup, BBR enters its Drain state. In Drain, BBR aims to
+quickly drain any queue at the bottleneck link that was created in Startup by
+switching to a pacing_gain well below 1.0, until any estimated queue has been
+drained. It uses a pacing_gain of BBRDrainPacingGain = 0.35, chosen via
+analysis <span>[<a href="#BBRDrainPacingGain" class="cite xref">BBRDrainPacingGain</a>]</span> and experimentation (on YouTube)
+to try to drain the queue in less than one round-trip:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.2-2">
 <pre>
   BBREnterDrain():
     BBR.state = Drain
-    BBR.pacing_gain = 1/BBRStartupCwndGain  /* pace slowly */
-    BBR.cwnd_gain = BBRStartupCwndGain      /* maintain cwnd */
+    BBR.pacing_gain = BBRDrainPacingGain    /* pace slowly */
+    BBR.cwnd_gain = BBRDefaultCwndGain      /* maintain cwnd */
 </pre><a href="#section-4.3.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.2-3">In Drain, when the amount of data in flight is less than or equal to the estimated BDP, meaning BBR estimates that the queue has been fully drained, then BBR exits Drain and enters ProbeBW. To implement this, upon every ACK BBR executes:<a href="#section-4.3.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-3">In Drain, when the amount of data in flight is less than or equal to the
+estimated BDP, meaning BBR estimates that the queue at the bottleneck link has
+been fully drained, then BBR exits Drain and enters ProbeBW. To implement this,
+upon every ACK BBR executes:<a href="#section-4.3.2-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.2-4">
 <pre>
   BBRCheckDrainDone():
-    if (BBR.state == Drain and packets_in_flight &lt;= BBRInflight(1.0))
+    if (BBR.state == Drain and C.pipe &lt;= BBRInflight(1.0))
       BBREnterProbeBW()  /* BBR estimates the queue was drained */
 </pre><a href="#section-4.3.2-4" class="pilcrow">¶</a>
 </div>
@@ -2275,10 +2293,19 @@ those limits and then gradually increases the upper volume bound
                 <p id="section-4.3.3.4-4.1.1">inflight_hi: The flow raises inflight_hi in ProbeBW_UP in a manner that is slow and cautious at first, but increasingly rapid and bold over time. The initial caution is motivated by the fact that a given BBR flow may be sharing a shallow buffer with thousands of other flows, so that the buffer space available to the flow may be quite tight (even just a single packet).  The increasingly rapid growth over time is motivated by the fact that in a high-speed WAN the increase in available bandwidth (and thus the estimated BDP) may require the flow to grow the volume of its inflight data by up to O(1,000,000); even a quite typical BDP like 10Gbps * 100ms is 82,563 packets. BBR takes an approach where the additive increase to BBR.inflight_hi exponentially doubles each round trip; in each successive round trip, inflight_hi grows by 1, 2, 4, 8, 16, etc, with the increases spread uniformly across the entire round trip. This helps allow BBR to utilize a larger BDP in O(log(BDP)) round trips, meeting the design goal for scalable utilization of newly-available bandwidth.<a href="#section-4.3.3.4-4.1.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-<p id="section-4.3.3.4-5">Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and transitions to ProbeBW_DOWN to try to drain the bottleneck queue when any of the following conditions are met:<a href="#section-4.3.3.4-5" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.4-5">Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and
+transitions to ProbeBW_DOWN to try to drain the bottleneck queue when either of
+the following conditions are met:<a href="#section-4.3.3.4-5" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.3.3.4-6">
 <li id="section-4.3.3.4-6.1">
-                <p id="section-4.3.3.4-6.1.1">Estimated queue: The flow has been in ProbeBW_UP for at least 1*min_rtt, and the estimated queue is high enough that the flow judges it has robustly probed for available bandwidth (packets_in_flight &gt; 1.25 * BBR.bdp).<a href="#section-4.3.3.4-6.1.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.4-6.1.1">Bandwidth saturation: BBRIsTimeToGoDown() (see below) uses the "full pipe"
+estimator (see <a href="#exiting-acceleration-based-on-bandwidth-plateau" class="auto internal xref">Section 4.3.1.2</a>) to estimate whether
+the flow has saturated the available per-flow bandwidth ("filled the pipe"), by
+looking for a plateau in the measured rs.delivery_rate. If, during this
+process, the volume of data is constrained (flow becomes cwnd-limited while
+cwnd is limited by BBR.inflight_hi), then the flow cannot fully explore the
+available bandwidth, and so it resets the "full pipe" estimator by calling
+BBRResetFullBW().<a href="#section-4.3.3.4-6.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-4.3.3.4-6.2">
                 <p id="section-4.3.3.4-6.2.1">Loss: The current loss rate exceeds BBRLossThresh (2%).<a href="#section-4.3.3.4-6.2.1" class="pilcrow">¶</a></p>
@@ -2441,6 +2468,7 @@ those limits and then gradually increases the upper volume bound
 <div class="alignLeft art-text artwork" id="section-4.3.3.6-3">
 <pre>
   BBREnterProbeBW():
+    BBR.cwnd_gain = BBRDefaultCwndGain
     BBRStartProbeBW_DOWN()
 </pre><a href="#section-4.3.3.6-3" class="pilcrow">¶</a>
 </div>
@@ -2698,7 +2726,7 @@ those limits and then gradually increases the upper volume bound
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
     if (BBR.probe_rtt_done_stamp == 0 and
-        packets_in_flight &lt;= BBRProbeRTTCwnd())
+        C.pipe &lt;= BBRProbeRTTCwnd())
       /* Wait for at least ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
         Now() + ProbeRTTDuration
@@ -2721,7 +2749,7 @@ those limits and then gradually increases the upper volume bound
 
   MarkConnectionAppLimited():
     C.app_limited =
-      (C.delivered + packets_in_flight) ? : 1
+      (C.delivered + C.pipe) ? : 1
 </pre><a href="#section-4.3.4.4-5" class="pilcrow">¶</a>
 </div>
 </section>
@@ -2783,7 +2811,7 @@ those limits and then gradually increases the upper volume bound
 <div class="alignLeft art-text artwork" id="section-4.4.3-2">
 <pre>
   BBRHandleRestartFromIdle():
-    if (packets_in_flight == 0 and C.app_limited)
+    if (C.pipe == 0 and C.app_limited)
       BBR.idle_restart = true
          BBR.extra_acked_interval_start = Now()
       if (IsInAProbeBWState())
@@ -3821,7 +3849,7 @@ cwnd using the normal approach outlined below in "cwnd Adjustment Mechanism" in
 <pre>
   BBROnEnterRTO():
     BBRSaveCwnd()
-    cwnd = packets_in_flight + 1
+    cwnd = C.pipe + 1
 </pre><a href="#section-4.6.4.4-7" class="pilcrow">¶</a>
 </div>
 <p id="section-4.6.4.4-8">Upon entering Fast Recovery:<a href="#section-4.6.4.4-8" class="pilcrow">¶</a></p>

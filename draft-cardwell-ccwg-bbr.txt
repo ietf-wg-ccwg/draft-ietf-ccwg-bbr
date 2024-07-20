@@ -2,7 +2,7 @@
 
 
 
-Internet Congestion Control Research Group              N. Cardwell, Ed.
+CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
 Expires: 20 January 2025                                  J. Beshay, Ed.
@@ -290,19 +290,27 @@ Table of Contents
    BBR.next_departure_time: The earliest pacing departure time for the
    next packet BBR schedules for transmission.
 
-2.6.  cwnd State and Parameters
-
-   BBR.cwnd_gain: The dynamic gain factor used to scale the estimated
-   BDP to produce a congestion window (cwnd).
-
    BBRStartupPacingGain: A constant specifying the minimum gain value
    for calculating the pacing rate that will allow the sending rate to
    double each round (4 * ln(2) ~= 2.77) [BBRStartupPacingGain]; used in
    Startup mode for BBR.pacing_gain.
 
-   BBRStartupCwndGain: A constant specifying the minimum gain value for
-   calculating the cwnd that will allow the sending rate to double each
-   round (2) [BBRStartupCwndGain]; used in Startup mode for
+   BBRDrainPacingGain: A constant specifying the pacing gain value used
+   in Drain mode, to attempt to drain the estimated queue at the
+   bottleneck link in one round-trip or less.  As noted in
+   [BBRDrainPacingGain], any value at or below 1 / BBRStartupCwndGain =
+   1 / 2 = 0.5 will theoretically achieve this.  BBR uses the value
+   0.35, which has been shown to offer good performance on YouTube, when
+   compared with other alternatives.
+
+2.6.  cwnd State and Parameters
+
+   BBR.cwnd_gain: The dynamic gain factor used to scale the estimated
+   BDP to produce a congestion window (cwnd).
+
+   BBRDefaultCwndGain: A constant specifying the minimum gain value that
+   allows the sending rate to double each round (2)
+   [BBRStartupCwndGain].  Used by default in most phases for
    BBR.cwnd_gain.
 
 2.7.  General Algorithm State
@@ -894,7 +902,7 @@ Table of Contents
    To achieve this rapid probing smoothly, in Startup BBR uses the
    minimum gain values that will allow the sending rate to double each
    round: in Startup BBR sets BBR.pacing_gain to BBRStartupPacingGain
-   (2.77) [BBRStartupPacingGain] and BBR.cwnd_gain to BBRStartupCwndGain
+   (2.77) [BBRStartupPacingGain] and BBR.cwnd_gain to BBRDefaultCwndGain
    (2) [BBRStartupCwndGain].
 
    When initializing a connection, or upon any later entry into Startup
@@ -903,7 +911,7 @@ Table of Contents
      BBREnterStartup():
        BBR.state = Startup
        BBR.pacing_gain = BBRStartupPacingGain
-       BBR.cwnd_gain = BBRStartupCwndGain
+       BBR.cwnd_gain = BBRDefaultCwndGain
 
    As BBR grows its sending rate rapidly, it obtains higher delivery
    rate samples, BBR.max_bw increases, and the pacing rate and cwnd both
@@ -923,27 +931,27 @@ Table of Contents
        if (BBR.state == Startup and BBR.full_bw_reached)
          BBREnterDrain()
 
-4.3.1.2.  Exiting Startup Based on Bandwidth Plateau
+4.3.1.2.  Exiting Acceleration Based on Bandwidth Plateau
 
-   At various points in the lifetime of a connection, BBR runs a state
-   machine to estimate whether an accelerating sending rate has
-   saturated the available per-flow bandwidth ("filled the pipe") by
-   looking for a plateau in the measured rs.delivery_rate.  BBR stores
-   the output of the current full-pipe estimation process in the
-   BBR.full_bw_now boolean, and stores in BBR.full_bw_reached, a boolean
-   that records whether BBR estimates that it has ever fully utilized
-   its available bandwidth, over the lifetime of the connection.
+   At various points in the lifetime of a connection, including Startup
+   and ProbeBW_UP, BBR runs a state machine to estimate whether an
+   accelerating sending rate has saturated the available per-flow
+   bandwidth ("filled the pipe") by looking for a plateau in the
+   measured rs.delivery_rate.
 
-   The full pipe estimator works as follows: if BBR notices that there
-   are several (three) non-application-limited rounds where attempts to
+   BBR records the output of the current full-pipe estimation process in
+   the boolean BBR.full_bw_now, and uses BBR.full_bw_now to exit
+   ProbeBW_UP.  BBR records in the boolean BBR.full_bw_reached whether
+   BBR estimates that it has ever fully utilized its available bandwidth
+   (over the lifetime of the connection), and uses BBR.full_bw_reached
+   to decide when to exit Startup and enter Drain.
+
+   The full pipe estimator works as follows: if BBR counts several
+   (three) non-application-limited rounds where attempts to
    significantly increase the delivery rate actually result in little
    increase (less than 25 percent), then it estimates that it has fully
    utilized the per-flow available bandwidth, and sets both
    BBR.full_bw_now and BBR.full_bw_reached to true.
-
-   The BBR.full_bw_now boolean is used to exit ProbeBW_UP based on
-   bandwidth utilization, and BBR.full_bw_reached is used to decide when
-   to exit Startup and enter Drain.
 
    Upon starting a full pipe detection process, the following
    initialization runs:
@@ -986,11 +994,12 @@ Table of Contents
 4.3.1.3.  Exiting Startup Based on Packet Loss
 
    A second method BBR uses for estimating the bottleneck is full is by
-   looking at sustained packet losses Specifically for a case where the
-   following criteria are all met:
+   looking at sustained packet losses.  Specifically, in Startup,
+   BBRCheckStartupHighLoss() checks whether all of the following
+   criteria are all met:
 
    *  The connection has been in fast recovery for at least one full
-      round trip.
+      packet-timed round trip.
 
    *  The loss rate over the time scale of a single full round trip
       exceeds BBRLossThresh (2%).
@@ -1015,24 +1024,25 @@ Table of Contents
 4.3.2.  Drain
 
    Upon exiting Startup, BBR enters its Drain state.  In Drain, BBR aims
-   to quickly drain any queue created in Startup by switching to a
-   pacing_gain well below 1.0, until any estimated queue has been
-   drained.  It uses a pacing_gain that is the inverse of the value used
-   during Startup, chosen to try to drain the queue in one round
-   [BBRDrainPacingGain]:
+   to quickly drain any queue at the bottleneck link that was created in
+   Startup by switching to a pacing_gain well below 1.0, until any
+   estimated queue has been drained.  It uses a pacing_gain of
+   BBRDrainPacingGain = 0.35, chosen via analysis [BBRDrainPacingGain]
+   and experimentation (on YouTube) to try to drain the queue in less
+   than one round-trip:
 
      BBREnterDrain():
        BBR.state = Drain
-       BBR.pacing_gain = 1/BBRStartupCwndGain  /* pace slowly */
-       BBR.cwnd_gain = BBRStartupCwndGain      /* maintain cwnd */
+       BBR.pacing_gain = BBRDrainPacingGain    /* pace slowly */
+       BBR.cwnd_gain = BBRDefaultCwndGain      /* maintain cwnd */
 
    In Drain, when the amount of data in flight is less than or equal to
-   the estimated BDP, meaning BBR estimates that the queue has been
-   fully drained, then BBR exits Drain and enters ProbeBW.  To implement
-   this, upon every ACK BBR executes:
+   the estimated BDP, meaning BBR estimates that the queue at the
+   bottleneck link has been fully drained, then BBR exits Drain and
+   enters ProbeBW.  To implement this, upon every ACK BBR executes:
 
      BBRCheckDrainDone():
-       if (BBR.state == Drain and packets_in_flight <= BBRInflight(1.0))
+       if (BBR.state == Drain and C.pipe <= BBRInflight(1.0))
          BBREnterProbeBW()  /* BBR estimates the queue was drained */
 
 4.3.3.  ProbeBW
@@ -1177,12 +1187,17 @@ Table of Contents
 
    Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and
    transitions to ProbeBW_DOWN to try to drain the bottleneck queue when
-   any of the following conditions are met:
+   either of the following conditions are met:
 
-   1.  Estimated queue: The flow has been in ProbeBW_UP for at least
-       1*min_rtt, and the estimated queue is high enough that the flow
-       judges it has robustly probed for available bandwidth
-       (packets_in_flight > 1.25 * BBR.bdp).
+   1.  Bandwidth saturation: BBRIsTimeToGoDown() (see below) uses the
+       "full pipe" estimator (see Section 4.3.1.2) to estimate whether
+       the flow has saturated the available per-flow bandwidth ("filled
+       the pipe"), by looking for a plateau in the measured
+       rs.delivery_rate.  If, during this process, the volume of data is
+       constrained (flow becomes cwnd-limited while cwnd is limited by
+       BBR.inflight_hi), then the flow cannot fully explore the
+       available bandwidth, and so it resets the "full pipe" estimator
+       by calling BBRResetFullBW().
 
    2.  Loss: The current loss rate exceeds BBRLossThresh (2%).
 
@@ -1346,6 +1361,7 @@ Table of Contents
    Upon entering ProbeBW, BBR executes:
 
      BBREnterProbeBW():
+       BBR.cwnd_gain = BBRDefaultCwndGain
        BBRStartProbeBW_DOWN()
 
    The core logic for entering each state:
@@ -1652,7 +1668,7 @@ Table of Contents
        /* Ignore low rate samples during ProbeRTT: */
        MarkConnectionAppLimited()
        if (BBR.probe_rtt_done_stamp == 0 and
-           packets_in_flight <= BBRProbeRTTCwnd())
+           C.pipe <= BBRProbeRTTCwnd())
          /* Wait for at least ProbeRTTDuration to elapse: */
          BBR.probe_rtt_done_stamp =
            Now() + ProbeRTTDuration
@@ -1675,7 +1691,7 @@ Table of Contents
 
      MarkConnectionAppLimited():
        C.app_limited =
-         (C.delivered + packets_in_flight) ? : 1
+         (C.delivered + C.pipe) ? : 1
 
 4.3.4.5.  Exiting ProbeRTT
 
@@ -1745,7 +1761,7 @@ Table of Contents
    BBRHandleRestartFromIdle() before sending a packet for a flow:
 
      BBRHandleRestartFromIdle():
-       if (packets_in_flight == 0 and C.app_limited)
+       if (C.pipe == 0 and C.app_limited)
          BBR.idle_restart = true
             BBR.extra_acked_interval_start = Now()
          if (IsInAProbeBWState())
@@ -3062,7 +3078,7 @@ Table of Contents
 
      BBROnEnterRTO():
        BBRSaveCwnd()
-       cwnd = packets_in_flight + 1
+       cwnd = C.pipe + 1
 
    Upon entering Fast Recovery:
 
