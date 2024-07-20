@@ -157,8 +157,6 @@ calculating the cwnd that will allow the sending rate to double each round (2)
 <xref target="BBRStartupCwndGain"/>; used in Startup mode for
 BBR.cwnd_gain.</t>
 
-<t>BBR.packet_conservation: A boolean indicating whether BBR is currently using packet conservation dynamics to bound cwnd.</t>
-
 </section>
 <section title="General Algorithm State" anchor="general-algorithm-state">
 
@@ -2139,51 +2137,37 @@ by executing the BBRSetPacingRate() step as follows:</t>
 
 <t>BBR interprets loss as a hint that there may be recent changes in path behavior that are not yet fully reflected in its model of the path, and thus it needs to be more conservative.</t>
 
-<t>Upon a retransmission timeout (RTO), BBR conservatively reduces cwnd to a value that will allow 1 SMSS to be transmitted. Then BBR gradually increases cwnd using the normal approach outlined below in "Core cwnd Adjustment Mechanism".</t>
+<t>Upon a retransmission timeout (RTO), BBR conservatively reduces cwnd to a
+value that will allow 1 SMSS to be transmitted. Then BBR gradually increases
+cwnd using the normal approach outlined below in "cwnd Adjustment Mechanism" in
+<xref target="cwnd-adjustment-mechanism"/>.</t>
 
-<t>When a BBR sender detects packet loss but there are still packets in flight, on the first round of the loss-repair process BBR temporarily reduces the cwnd to match the current delivery rate as ACKs arrive. On second and later rounds of loss repair, it ensures the sending rate never exceeds twice the current delivery rate as ACKs arrive.</t>
+<t>When a BBR sender is in Fast Recovery it uses the response described in
+"Updating the Model Upon Packet Loss" in <xref
+target="updating-the-model-upon-packet-loss"/>.</t>
 
 <t>When BBR exits loss recovery it restores the cwnd to the "last known good" value that cwnd held before entering recovery. This applies equally whether the flow exits loss recovery because it finishes repairing all losses or because it executes an "undo" event after inferring that a loss recovery event was spurious.</t>
 
-<t>There are several ways to implement this high-level design for updating cwnd in loss recovery. One is as follows:</t>
+<t>The high-level design for updating cwnd in loss recovery is as follows:</t>
 
 <t>Upon retransmission timeout (RTO):</t>
 
 <figure><artwork>
   BBROnEnterRTO():
-    BBR.prior_cwnd = BBRSaveCwnd()
+    BBRSaveCwnd()
     cwnd = packets_in_flight + 1
 </artwork></figure>
 
-<t>Upon entering Fast Recovery, set cwnd to the number of packets still in flight (allowing at least one for a fast retransmit):</t>
+<t>Upon entering Fast Recovery:</t>
 
 <figure><artwork>
   BBROnEnterFastRecovery():
-    BBR.prior_cwnd = BBRSaveCwnd()
-    cwnd = packets_in_flight + max(rs.newly_acked, 1)
-    BBR.packet_conservation = true
-</artwork></figure>
-
-<t>Upon every ACK in Fast Recovery, run the following BBRModulateCwndForRecovery() steps, which help ensure packet conservation on the first round of recovery, and sending at no more than twice the current delivery rate on later rounds of recovery (given that "rs.newly_acked" packets were newly marked ACKed or SACKed and "rs.newly_lost" were newly marked lost):</t>
-
-<figure><artwork>
-  BBRModulateCwndForRecovery():
-    if (rs.newly_lost &gt; 0)
-      cwnd = max(cwnd - rs.newly_lost, 1)
-    if (BBR.packet_conservation)
-      cwnd = max(cwnd, packets_in_flight + rs.newly_acked)
-</artwork></figure>
-
-<t>After one round-trip in Fast Recovery:</t>
-
-<figure><artwork>
-  BBR.packet_conservation = false
+    BBRSaveCwnd()
 </artwork></figure>
 
 <t>Upon exiting loss recovery (RTO recovery or Fast Recovery), either by repairing all losses or undoing recovery, BBR restores the best-known cwnd value we had upon entering loss recovery:</t>
 
 <figure><artwork>
-  BBR.packet_conservation = false
   BBRRestoreCwnd()
 </artwork></figure>
 
@@ -2194,9 +2178,9 @@ by executing the BBRSetPacingRate() step as follows:</t>
 <figure><artwork>
   BBRSaveCwnd():
     if (!InLossRecovery() and BBR.state != ProbeRTT)
-      return cwnd
+      BBR.prior_cwnd = cwnd
     else
-      return max(BBR.prior_cwnd, cwnd)
+      BBR.prior_cwnd = max(BBR.prior_cwnd, cwnd)
 
   BBRRestoreCwnd():
     cwnd = max(cwnd, BBR.prior_cwnd)
@@ -2219,7 +2203,7 @@ by executing the BBRSetPacingRate() step as follows:</t>
 </artwork></figure>
 
 </section>
-<section title="Core cwnd Adjustment Mechanism" anchor="core-cwnd-adjustment-mechanism">
+<section title="cwnd Adjustment Mechanism" anchor="cwnd-adjustment-mechanism">
 
 <t>The network path and traffic traveling over it can make sudden dramatic changes. To adapt to these changes smoothly and robustly, and reduce packet losses in such cases, BBR uses a conservative strategy. When cwnd is above the BBR.max_inflight derived from BBR's path model, BBR cuts the cwnd immediately to the BBR.max_inflight. When cwnd is below BBR.max_inflight, BBR raises the cwnd gradually and cautiously, increasing cwnd by no more than the amount of data acknowledged (cumulatively or selectively) upon each ACK.</t>
 
@@ -2228,14 +2212,11 @@ by executing the BBRSetPacingRate() step as follows:</t>
 <figure><artwork>
   BBRSetCwnd():
     BBRUpdateMaxInflight()
-    BBRModulateCwndForRecovery()
-    if (!BBR.packet_conservation) {
-      if (BBR.full_bw_reached)
-        cwnd = min(cwnd + rs.newly_acked, BBR.max_inflight)
-      else if (cwnd &lt; BBR.max_inflight || C.delivered &lt; InitialCwnd)
-        cwnd = cwnd + rs.newly_acked
-      cwnd = max(cwnd, BBRMinPipeCwnd)
-    }
+    if (BBR.full_bw_reached)
+      cwnd = min(cwnd + rs.newly_acked, BBR.max_inflight)
+    else if (cwnd &lt; BBR.max_inflight || C.delivered &lt; InitialCwnd)
+      cwnd = cwnd + rs.newly_acked
+    cwnd = max(cwnd, BBRMinPipeCwnd)
     BBRBoundCwndForProbeRTT()
     BBRBoundCwndForModel()
 </artwork></figure>
