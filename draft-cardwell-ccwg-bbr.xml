@@ -43,7 +43,7 @@ build an explicit model of the network path. BBR then uses this model to
 control both how fast it sends data and the maximum volume of data it allows in
 flight in the network at any time. Relative to loss-based congestion control
 algorithms such as Reno <xref target="RFC5681"/> or CUBIC <xref
-target="RFC8312"/>, BBR offers substantially higher throughput for bottlenecks
+target="RFC9438"/>, BBR offers substantially higher throughput for bottlenecks
 with shallow buffers or random losses, and substantially lower queueing delays
 for bottlenecks with deep buffers (avoiding "bufferbloat"). BBR can be
 implemented in any transport protocol that supports packet-delivery
@@ -57,7 +57,14 @@ specifies version 3 of the BBR algorithm, BBRv3.
 <middle>
 <section title="Introduction" anchor="introduction">
 
-<t>The Internet has traditionally used loss-based congestion control algorithms like Reno (<xref target="Jac88"/>, <xref target="Jac90"/>, <xref target="WS95"/> <xref target="RFC5681"/>) and CUBIC (<xref target="HRX08"/>, <xref target="RFC8312"/>). These algorithms worked well for many years because they were sufficiently well-matched to the prevalent range of bandwidth-delay products and degrees of buffering in Internet paths. As the Internet has evolved, loss-based congestion control is increasingly problematic in several important scenarios:</t>
+<t>The Internet has traditionally used loss-based congestion control algorithms
+like Reno (<xref target="Jac88"/>, <xref target="Jac90"/>, <xref
+target="WS95"/> <xref target="RFC5681"/>) and CUBIC (<xref target="HRX08"/>,
+<xref target="RFC9438"/>). These algorithms worked well for many years because
+they were sufficiently well-matched to the prevalent range of bandwidth-delay
+products and degrees of buffering in Internet paths. As the Internet has
+evolved, loss-based congestion control is increasingly problematic in several
+important scenarios:</t>
 
 <t><list style="numbers">
 <t>Shallow buffers: In shallow buffers, packet loss can happen even when a link has low utilization. With high-speed, long-haul links employing commodity switches with shallow buffers, loss-based congestion control can cause abysmal throughput because it overreacts, multiplicatively decreasing the sending rate upon packet loss, and only slowly growing its sending rate thereafter. This can happen even if the packet loss arises from transient traffic bursts  when the link is mostly idle. </t>
@@ -68,7 +75,15 @@ specifies version 3 of the BBR algorithm, BBRv3.
 
 </list></t>
 
-<t>In both the shallow-buffer (1.) or dynamic-traffic (3.) scenarios mentioned above it is difficult to achieve full throughput with loss-based congestion control in practice: for CUBIC, sustaining 10Gbps over 100ms RTT needs a packet loss rate below 0.000003% (i.e., more than 40 seconds between packet losses), and over a 100ms RTT path a more feasible loss rate like 1% can only sustain at most 3 Mbps  <xref target="RFC8312"/>. These limitations apply no matter what the bottleneck link is capable of or what the connection's fair share is. Furthermore,  failure to reach the fair share can cause poor throughpout and poor tail latency for latency-sensitive applications.</t>
+<t>In both the shallow-buffer (1.) or dynamic-traffic (3.) scenarios mentioned
+above it is difficult to achieve full throughput with loss-based congestion
+control in practice: for CUBIC, sustaining 10Gbps over 100ms RTT needs a packet
+loss rate below 0.000003% (i.e., more than 40 seconds between packet losses),
+and over a 100ms RTT path a more feasible loss rate like 1% can only sustain at
+most 3 Mbps <xref target="RFC9438"/>. These limitations apply no matter what
+the bottleneck link is capable of or what the connection's fair share
+is. Furthermore, failure to reach the fair share can cause poor throughpout and
+poor tail latency for latency-sensitive applications.</t>
 
 <t>The BBR ("Bottleneck Bandwidth and Round-trip propagation time") congestion control algorithm is a model-based algorithm that takes an approach different from loss-based congestion control: BBR uses recent measurements of a transport connection's delivery rate,  round-trip time, and packet loss rate to build an explicit model of the network path, including its estimated available bandwidth, bandwidth-delay product, and the maximum volume of data that the connection can place in-flight in the network without causing excessive queue pressure. It then uses this model in order to guide its control behavior in seeking high throughput and low queue pressure.</t>
 
@@ -2489,17 +2504,23 @@ publicly released:</t>
 <author initials='A.' surname='Farrel' fullname='Adrian Farrel'></author>
 <date year='2016' month='July' />
 </front></reference>
-<reference anchor='RFC8312' target='https://tools.ietf.org/html/rfc8312'>
+
+
+<!-- http://xml.resource.org/public/rfc/bibxml/reference.RFC.9438.xml -->
+<reference anchor="RFC9438" target="https://www.rfc-editor.org/info/rfc9438">
 <front>
-<title>CUBIC for Fast Long-Distance Networks</title>
-<author initials='I.' surname="Rhee" fullname='Injong Rhee'></author>
-<author initials='L.' surname="Xu" fullname='Lisong Xu'></author>
-<author initials='S.' surname="Ha" fullname='Sangtae Ha'></author>
-<author initials="A." surname="Zimmermann" fullname="Alexander Zimmermann"></author>
-<author initials="L." surname="Eggert" fullname="Lars Eggert"></author>
-<author initials="R." surname="Scheffenegger" fullname="Richard Scheffenegger"></author>
-<date year='2018' month='February' />
-</front></reference>
+<title>CUBIC for Fast and Long-Distance Networks</title>
+<author fullname="L. Xu" initials="L." surname="Xu"/>
+<author fullname="S. Ha" initials="S." surname="Ha"/>
+<author fullname="I. Rhee" initials="I." surname="Rhee"/>
+<author fullname="V. Goel" initials="V." surname="Goel"/>
+<author fullname="L. Eggert" initials="L." role="editor" surname="Eggert"/>
+<date month="August" year="2023"/>
+</front>
+<seriesInfo name="RFC" value="9438"/>
+<seriesInfo name="DOI" value="10.17487/RFC9438"/>
+</reference>
+
 
 <reference anchor="RFC8985" target="https://www.rfc-editor.org/info/rfc8985">
 <front>
