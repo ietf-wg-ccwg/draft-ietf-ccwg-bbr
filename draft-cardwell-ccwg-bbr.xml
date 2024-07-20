@@ -663,7 +663,7 @@ following Drain state is designed to quickly drain that queue.</t>
 </artwork></figure>
 
 </section>
-<section title="Exiting Startup Based on Bandwidth Plateau" anchor="exiting-startup-based-on-bandwidth-plateau">
+<section title="Exiting Acceleration Based on Bandwidth Plateau" anchor="exiting-acceleration-based-on-bandwidth-plateau">
 
 <t>At various points in the lifetime of a connection, including Startup and
 ProbeBW_UP, BBR runs a state machine to estimate whether an accelerating
@@ -844,10 +844,21 @@ those limits and then gradually increases the upper volume bound
 
 </list></t>
 
-<t>Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and transitions to ProbeBW_DOWN to try to drain the bottleneck queue when any of the following conditions are met: </t>
+<t>Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and
+transitions to ProbeBW_DOWN to try to drain the bottleneck queue when either of
+the following conditions are met: </t>
 
 <t><list style="numbers">
-<t>Estimated queue: The flow has been in ProbeBW_UP for at least 1*min_rtt, and the estimated queue is high enough that the flow judges it has robustly probed for available bandwidth (C.pipe &gt; 1.25 * BBR.bdp).</t>
+
+<t>Bandwidth saturation: BBRIsTimeToGoDown() (see below) uses the "full pipe"
+estimator (see <xref
+target="exiting-acceleration-based-on-bandwidth-plateau"/>) to estimate whether
+the flow has saturated the available per-flow bandwidth ("filled the pipe"), by
+looking for a plateau in the measured rs.delivery_rate. If, during this
+process, the volume of data is constrained (flow becomes cwnd-limited while
+cwnd is limited by BBR.inflight_hi), then the flow cannot fully explore the
+available bandwidth, and so it resets the "full pipe" estimator by calling
+BBRResetFullBW().</t>
 
 <t>Loss: The current loss rate exceeds BBRLossThresh (2%).</t>
 
