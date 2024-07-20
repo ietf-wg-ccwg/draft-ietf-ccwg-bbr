@@ -658,23 +658,23 @@ following Drain state is designed to quickly drain that queue.</t>
 </section>
 <section title="Exiting Startup Based on Bandwidth Plateau" anchor="exiting-startup-based-on-bandwidth-plateau">
 
-<t>At various points in the lifetime of a connection, BBR runs a state machine
-to estimate whether an accelerating sending rate has saturated the available
-per-flow bandwidth ("filled the pipe") by looking for a plateau in the measured
-rs.delivery_rate. BBR stores the output of the current full-pipe estimation
-process in the BBR.full_bw_now boolean, and stores in BBR.full_bw_reached, a
-boolean that records whether BBR estimates that it has ever fully utilized its
-available bandwidth, over the lifetime of the connection.</t>
+<t>At various points in the lifetime of a connection, including Startup and
+ProbeBW_UP, BBR runs a state machine to estimate whether an accelerating
+sending rate has saturated the available per-flow bandwidth ("filled the pipe")
+by looking for a plateau in the measured rs.delivery_rate.</t>
 
-<t>The full pipe estimator works as follows: if BBR notices that there are
-several (three) non-application-limited rounds where attempts to significantly
-increase the delivery rate actually result in little increase (less than 25
-percent), then it estimates that it has fully utilized the per-flow available
-bandwidth, and sets both BBR.full_bw_now and BBR.full_bw_reached to true.</t>
-
-<t> The BBR.full_bw_now boolean is used to exit ProbeBW_UP based on bandwidth
-utilization, and BBR.full_bw_reached is used to decide when to exit Startup and
+<t>BBR records the output of the current full-pipe estimation process in the
+boolean BBR.full_bw_now, and uses BBR.full_bw_now to exit ProbeBW_UP. BBR
+records in the boolean BBR.full_bw_reached whether BBR estimates that it has
+ever fully utilized its available bandwidth (over the lifetime of the
+connection), and uses BBR.full_bw_reached to decide when to exit Startup and
 enter Drain.</t>
+
+<t>The full pipe estimator works as follows: if BBR counts several (three)
+non-application-limited rounds where attempts to significantly increase the
+delivery rate actually result in little increase (less than 25 percent), then
+it estimates that it has fully utilized the per-flow available bandwidth, and
+sets both BBR.full_bw_now and BBR.full_bw_reached to true.</t>
 
 <t>Upon starting a full pipe detection process, the following initialization
 runs:</t>
@@ -709,14 +709,20 @@ runs:</t>
 </section>
 <section title="Exiting Startup Based on Packet Loss" anchor="exiting-startup-based-on-packet-loss">
 
-<t>A second method BBR uses for estimating the bottleneck is full is by looking at sustained packet losses Specifically  for a case where the following criteria are all met:</t>
+<t>A second method BBR uses for estimating the bottleneck is full is by looking
+at sustained packet losses. Specifically, in Startup, BBRCheckStartupHighLoss()
+checks whether all of the following criteria are all met:</t>
 
 <t><list style="symbols">
-<t>The connection has been in fast recovery for at least one full round trip.</t>
 
-<t>The loss rate over the time scale of a single full round trip exceeds BBRLossThresh (2%).</t>
+<t>The connection has been in fast recovery for at least one full packet-timed
+round trip.</t>
 
-<t>There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges lost in that round trip.</t>
+<t>The loss rate over the time scale of a single full round trip exceeds
+BBRLossThresh (2%).</t>
+
+<t>There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges
+lost in that round trip.</t>
 
 </list></t>
 
