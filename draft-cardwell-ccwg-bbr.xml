@@ -767,7 +767,7 @@ upon every ACK BBR executes:</t>
 
 <figure><artwork>
   BBRCheckDrainDone():
-    if (BBR.state == Drain and packets_in_flight &lt;= BBRInflight(1.0))
+    if (BBR.state == Drain and C.pipe &lt;= BBRInflight(1.0))
       BBREnterProbeBW()  /* BBR estimates the queue was drained */
 </artwork></figure>
 
@@ -847,7 +847,7 @@ those limits and then gradually increases the upper volume bound
 <t>Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and transitions to ProbeBW_DOWN to try to drain the bottleneck queue when any of the following conditions are met: </t>
 
 <t><list style="numbers">
-<t>Estimated queue: The flow has been in ProbeBW_UP for at least 1*min_rtt, and the estimated queue is high enough that the flow judges it has robustly probed for available bandwidth (packets_in_flight &gt; 1.25 * BBR.bdp).</t>
+<t>Estimated queue: The flow has been in ProbeBW_UP for at least 1*min_rtt, and the estimated queue is high enough that the flow judges it has robustly probed for available bandwidth (C.pipe &gt; 1.25 * BBR.bdp).</t>
 
 <t>Loss: The current loss rate exceeds BBRLossThresh (2%).</t>
 
@@ -1242,7 +1242,7 @@ those limits and then gradually increases the upper volume bound
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
     if (BBR.probe_rtt_done_stamp == 0 and
-        packets_in_flight &lt;= BBRProbeRTTCwnd())
+        C.pipe &lt;= BBRProbeRTTCwnd())
       /* Wait for at least ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
         Now() + ProbeRTTDuration
@@ -1265,7 +1265,7 @@ those limits and then gradually increases the upper volume bound
 
   MarkConnectionAppLimited():
     C.app_limited =
-      (C.delivered + packets_in_flight) ? : 1
+      (C.delivered + C.pipe) ? : 1
 </artwork></figure>
 
 </section>
@@ -1312,7 +1312,7 @@ those limits and then gradually increases the upper volume bound
 
 <figure><artwork>
   BBRHandleRestartFromIdle():
-    if (packets_in_flight == 0 and C.app_limited)
+    if (C.pipe == 0 and C.app_limited)
       BBR.idle_restart = true
          BBR.extra_acked_interval_start = Now()
       if (IsInAProbeBWState())
@@ -2234,7 +2234,7 @@ target="updating-the-model-upon-packet-loss"/>.</t>
 <figure><artwork>
   BBROnEnterRTO():
     BBRSaveCwnd()
-    cwnd = packets_in_flight + 1
+    cwnd = C.pipe + 1
 </artwork></figure>
 
 <t>Upon entering Fast Recovery:</t>
