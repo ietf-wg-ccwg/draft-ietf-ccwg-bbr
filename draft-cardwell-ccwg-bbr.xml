@@ -164,19 +164,26 @@ algorithm is continuing.</t>
 
 <t>BBR.next_departure_time: The earliest pacing departure time for the next packet BBR schedules for transmission.</t>
 
-</section>
-<section title="cwnd State and Parameters" anchor="cwnd-state-and-parameters">
-
-<t>BBR.cwnd_gain: The dynamic gain factor used to scale the estimated BDP to produce a congestion window (cwnd).</t>
-
 <t>BBRStartupPacingGain: A constant specifying the minimum gain value for
 calculating the pacing rate that will allow the sending rate to double each
 round (4 * ln(2) ~= 2.77) <xref target="BBRStartupPacingGain"/>; used in
 Startup mode for BBR.pacing_gain.</t>
 
-<t>BBRStartupCwndGain: A constant specifying the minimum gain value for
-calculating the cwnd that will allow the sending rate to double each round (2)
-<xref target="BBRStartupCwndGain"/>; used in Startup mode for
+<t>BBRDrainPacingGain: A constant specifying the pacing gain value used in
+Drain mode, to attempt to drain the estimated queue at the bottleneck link in
+one round-trip or less. As noted in <xref target="BBRDrainPacingGain"/>, any
+value at or below 1 / BBRStartupCwndGain = 1 / 2 = 0.5 will theoretically
+achieve this. BBR uses the value 0.35, which has been shown to offer good
+performance on YouTube, when compared with other alternatives.</t>
+
+</section>
+<section title="cwnd State and Parameters" anchor="cwnd-state-and-parameters">
+
+<t>BBR.cwnd_gain: The dynamic gain factor used to scale the estimated BDP to produce a congestion window (cwnd).</t>
+
+<t>BBRDefaultCwndGain: A constant specifying the minimum gain value that allows
+the sending rate to double each round (2) <xref
+target="BBRStartupCwndGain"/>. Used by default in most phases for
 BBR.cwnd_gain.</t>
 
 </section>
@@ -627,7 +634,7 @@ round trips.</t>
 <t>To achieve this rapid probing smoothly, in Startup BBR uses the minimum gain
 values that will allow the sending rate to double each round: in Startup BBR
 sets BBR.pacing_gain to BBRStartupPacingGain (2.77) <xref
-target="BBRStartupPacingGain"/> and BBR.cwnd_gain to BBRStartupCwndGain (2)
+target="BBRStartupPacingGain"/> and BBR.cwnd_gain to BBRDefaultCwndGain (2)
 <xref target="BBRStartupCwndGain"/>.</t>
 
 <t>When initializing a connection, or upon any later entry into Startup mode, BBR executes the following BBREnterStartup() steps:</t>
@@ -636,7 +643,7 @@ target="BBRStartupPacingGain"/> and BBR.cwnd_gain to BBRStartupCwndGain (2)
   BBREnterStartup():
     BBR.state = Startup
     BBR.pacing_gain = BBRStartupPacingGain
-    BBR.cwnd_gain = BBRStartupCwndGain
+    BBR.cwnd_gain = BBRDefaultCwndGain
 </artwork></figure>
 
 <t>As BBR grows its sending rate rapidly, it obtains higher delivery rate
@@ -739,16 +746,24 @@ last round trip. Finally, it exits Startup and enters Drain.</t>
 </section>
 <section title="Drain" anchor="drain">
 
-<t>Upon exiting Startup, BBR enters its Drain state. In Drain, BBR aims to quickly drain any queue created in Startup by switching to a pacing_gain well below 1.0, until any estimated queue has been drained. It uses a pacing_gain that is the inverse of the value used during Startup, chosen to try to drain the queue in one round <xref target="BBRDrainPacingGain"/>:</t>
+<t>Upon exiting Startup, BBR enters its Drain state. In Drain, BBR aims to
+quickly drain any queue at the bottleneck link that was created in Startup by
+switching to a pacing_gain well below 1.0, until any estimated queue has been
+drained. It uses a pacing_gain of BBRDrainPacingGain = 0.35, chosen via
+analysis <xref target="BBRDrainPacingGain"/> and experimentation (on YouTube)
+to try to drain the queue in less than one round-trip:</t>
 
 <figure><artwork>
   BBREnterDrain():
     BBR.state = Drain
-    BBR.pacing_gain = 1/BBRStartupCwndGain  /* pace slowly */
-    BBR.cwnd_gain = BBRStartupCwndGain      /* maintain cwnd */
+    BBR.pacing_gain = BBRDrainPacingGain    /* pace slowly */
+    BBR.cwnd_gain = BBRDefaultCwndGain      /* maintain cwnd */
 </artwork></figure>
 
-<t>In Drain, when the amount of data in flight is less than or equal to the estimated BDP, meaning BBR estimates that the queue has been fully drained, then BBR exits Drain and enters ProbeBW. To implement this, upon every ACK BBR executes:</t>
+<t>In Drain, when the amount of data in flight is less than or equal to the
+estimated BDP, meaning BBR estimates that the queue at the bottleneck link has
+been fully drained, then BBR exits Drain and enters ProbeBW. To implement this,
+upon every ACK BBR executes:</t>
 
 <figure><artwork>
   BBRCheckDrainDone():
@@ -975,6 +990,7 @@ those limits and then gradually increases the upper volume bound
 
 <figure><artwork>
   BBREnterProbeBW():
+    BBR.cwnd_gain = BBRDefaultCwndGain
     BBRStartProbeBW_DOWN()
 </artwork></figure>
 
