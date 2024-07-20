@@ -2430,9 +2430,6 @@ publicly released:</t>
 <title>Transmission Control Protocol (TCP)</title>
 <author fullname="W. Eddy" initials="W." role="editor" surname="Eddy"/>
 <date month="August" year="2022"/>
-<abstract>
-<t>This document specifies the Transmission Control Protocol (TCP). TCP is an important transport-layer protocol in the Internet protocol stack, and it has continuously evolved over decades of use and growth of the Internet. Over this time, a number of changes have been made to TCP as it was specified in RFC 793, though these have only been documented in a piecemeal fashion. This document collects and brings those changes together with the protocol specification from RFC 793. This document obsoletes RFC 793, as well as RFCs 879, 2873, 6093, 6429, 6528, and 6691 that updated parts of RFC 793. It updates RFCs 1011 and 1122, and it should be considered as a replacement for the portions of those documents dealing with TCP requirements. It also updates RFC 5961 by adding a small clarification in reset handling while in the SYN-RECEIVED state. The TCP header control bits from RFC 793 have also been updated based on RFC 3168.</t>
-</abstract>
 </front>
 <seriesInfo name="STD" value="7"/>
 <seriesInfo name="RFC" value="9293"/>
@@ -2586,9 +2583,6 @@ publicly released:</t>
 <author fullname="Y. Cheng" initials="Y." surname="Cheng"/>
 <author fullname="M. Mathis" initials="M." surname="Mathis"/>
 <date month="April" year="2013"/>
-<abstract>
-<t>This document proposes an experiment to increase the permitted TCP initial window (IW) from between 2 and 4 segments, as specified in RFC 3390, to 10 segments with a fallback to the existing recommendation when performance issues are detected. It discusses the motivation behind the increase, the advantages and disadvantages of the higher initial window, and presents results from several large-scale experiments showing that the higher initial window improves the overall performance of many web services without resulting in a congestion collapse. The document closes with a discussion of usage and deployment for further experimental purposes recommended by the IETF TCP Maintenance and Minor Extensions (TCPM) working group.</t>
-</abstract>
 </front>
 <seriesInfo name="RFC" value="6928"/>
 <seriesInfo name="DOI" value="10.17487/RFC6928"/>
@@ -2605,9 +2599,6 @@ publicly released:</t>
 <author fullname="M. Kojo" initials="M." surname="Kojo"/>
 <author fullname="Y. Nishida" initials="Y." surname="Nishida"/>
 <date month="August" year="2012"/>
-<abstract>
-<t>This document presents a conservative loss recovery algorithm for TCP that is based on the use of the selective acknowledgment (SACK) TCP option. The algorithm presented in this document conforms to the spirit of the current congestion control specification (RFC 5681), but allows TCP senders to recover more effectively when multiple segments are lost from a single flight of data. This document obsoletes RFC 3517 and describes changes from it.</t>
-</abstract>
 </front>
 <seriesInfo name="RFC" value="6675"/>
 <seriesInfo name="DOI" value="10.17487/RFC6675"/>
@@ -2621,9 +2612,6 @@ publicly released:</t>
 <author fullname="N. Dukkipati" initials="N." surname="Dukkipati"/>
 <author fullname="Y. Cheng" initials="Y." surname="Cheng"/>
 <date month="May" year="2013"/>
-<abstract>
-<t>This document describes an experimental Proportional Rate Reduction (PRR) algorithm as an alternative to the widely deployed Fast Recovery and Rate-Halving algorithms. These algorithms determine the amount of data sent by TCP during loss recovery. PRR minimizes excess window adjustments, and the actual window size at the end of recovery will be as close as possible to the ssthresh, as determined by the congestion control algorithm.</t>
-</abstract>
 </front>
 <seriesInfo name="RFC" value="6937"/>
 <seriesInfo name="DOI" value="10.17487/RFC6937"/>
