@@ -2071,12 +2071,9 @@ by executing the BBRSetPacingRate() step as follows:</t>
 
 <figure><artwork>
   BBRSetSendQuantum():
-    if (BBR.pacing_rate &lt; 1.2 Mbps)
-      floor = 1 * SMSS
-    else
-      floor = 2 * SMSS
-    BBR.send_quantum = min(BBR.pacing_rate * 1ms, 64KBytes)
-    BBR.send_quantum = max(BBR.send_quantum, floor)
+    BBR.send_quantum = BBR.pacing_rate * 1ms
+    BBR.send_quantum = min(BBR.send_quantum, 64 KBytes)
+    BBR.send_quantum = max(BBR.send_quantum, 2 * SMSS)
 </artwork></figure>
 
 <t>A BBR implementation MAY use alternate approaches to select a BBR.send_quantum, as appropriate for the CPU overheads anticipated for senders and receivers, and buffering considerations anticipated in the network path. However, for the sake of the network and other users, a BBR implementation SHOULD attempt to use the smallest feasible quanta.</t>
