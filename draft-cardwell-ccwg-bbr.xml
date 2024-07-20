@@ -907,7 +907,7 @@ those limits and then gradually increases the upper volume bound
 
 <figure><artwork>
   /* Is it time to transition from DOWN or CRUISE to REFILL? */
-  BBRCheckTimeToProbeBW():
+  BBRIsTimeToProbeBW():
     if (BBRHasElapsedInPhase(BBR.bw_probe_wait) ||
         BBRIsRenoCoexistenceProbeTime())
       BBRStartProbeBW_REFILL()
@@ -996,13 +996,13 @@ those limits and then gradually increases the upper volume bound
     switch (state)
 
     ProbeBW_DOWN:
-      if (BBRCheckTimeToProbeBW())
+      if (BBRIsTimeToProbeBW())
         return /* already decided state transition */
-      if (BBRCheckTimeToCruise())
+      if (BBRIsTimeToCruise())
         BBRStartProbeBW_CRUISE()
 
     ProbeBW_CRUISE:
-      if (BBRCheckTimeToProbeBW())
+      if (BBRIsTimeToProbeBW())
         return /* already decided state transition */
 
     ProbeBW_REFILL:
@@ -1012,7 +1012,7 @@ those limits and then gradually increases the upper volume bound
         BBRStartProbeBW_UP()
 
     ProbeBW_UP:
-      if (BBRCheckTimeToGoDown())
+      if (BBRIsTimeToGoDown())
         BBRStartProbeBW_DOWN()
 </artwork></figure>
 
@@ -1027,14 +1027,14 @@ those limits and then gradually increases the upper volume bound
             state == ProbeBW_UP)
 
   /* Time to transition from DOWN to CRUISE? */
-  BBRCheckTimeToCruise():
+  BBRIsTimeToCruise():
     if (inflight &gt; BBRInflightWithHeadroom())
       return false /* not enough headroom */
     if (inflight &lt;= BBRInflight(BBR.max_bw, 1.0))
       return true  /* inflight &lt;= estimated BDP */
 
   /* Time to transition from UP to DOWN? */
-  BBRCheckTimeToGoDown():
+  BBRIsTimeToGoDown():
     if (is_cwnd_limited and cwnd >= BBR.inflight_hi)
       BBRResetFullBW()   /* bw is limited by inflight_hi */
       BBR.full_bw = rs.delivery_rate
