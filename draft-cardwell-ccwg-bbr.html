@@ -1303,13 +1303,10 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
                 <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-restarting-from-idle" class="internal xref">Restarting From Idle</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.1">
-                    <p id="section-toc.1-1.4.2.4.2.1.1"><a href="#section-4.4.1" class="auto internal xref">4.4.1</a>.  <a href="#name-setting-pacing-rate-in-prob" class="internal xref">Setting Pacing Rate in ProbeBW</a></p>
+                    <p id="section-toc.1-1.4.2.4.2.1.1"><a href="#section-4.4.1" class="auto internal xref">4.4.1</a>.  <a href="#name-actions-when-restarting-fro" class="internal xref">Actions when Restarting from Idle</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.2">
-                    <p id="section-toc.1-1.4.2.4.2.2.1"><a href="#section-4.4.2" class="auto internal xref">4.4.2</a>.  <a href="#name-checking-for-proberrtt-comp" class="internal xref">Checking for ProberRTT Completion</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.3">
-                    <p id="section-toc.1-1.4.2.4.2.3.1"><a href="#section-4.4.3" class="auto internal xref">4.4.3</a>.  <a href="#name-logic" class="internal xref">Logic</a></p>
+                    <p id="section-toc.1-1.4.2.4.2.2.1"><a href="#section-4.4.2" class="auto internal xref">4.4.2</a>.  <a href="#name-comparison-with-previous-ap" class="internal xref">Comparison with Previous Approaches</a></p>
 </li>
                 </ul>
 </li>
@@ -2903,41 +2900,53 @@ packet in packet.departure_time (see "Pacing Rate: BBR.pacing_rate" in <a href="
         <h3 id="name-restarting-from-idle">
 <a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-restarting-from-idle" class="section-name selfRef">Restarting From Idle</a>
         </h3>
-<div id="setting-pacing-rate-in-probebw">
+<div id="actions-when-restarting-from-idle">
 <section id="section-4.4.1">
-          <h4 id="name-setting-pacing-rate-in-prob">
-<a href="#section-4.4.1" class="section-number selfRef">4.4.1. </a><a href="#name-setting-pacing-rate-in-prob" class="section-name selfRef">Setting Pacing Rate in ProbeBW</a>
+          <h4 id="name-actions-when-restarting-fro">
+<a href="#section-4.4.1" class="section-number selfRef">4.4.1. </a><a href="#name-actions-when-restarting-fro" class="section-name selfRef">Actions when Restarting from Idle</a>
           </h4>
-<p id="section-4.4.1-1">When restarting from idle in ProbeBW states, BBR leaves its cwnd as-is and paces packets at exactly BBR.bw, aiming to return as quickly as possible to its target operating point of rate balance and a full pipe. Specifically, if the flow's BBR.state is ProbeBW, and the flow is application-limited, and there are no packets in flight currently, then at the moment the flow sends one or more packets BBR sets BBR.pacing_rate to exactly BBR.bw. More precisely, the BBR algorithm takes the following steps in BBRHandleRestartFromIdle() before sending a packet for a flow.<a href="#section-4.4.1-1" class="pilcrow">¶</a></p>
-<p id="section-4.4.1-2">The "Restarting Idle Connections" section of <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> suggests restarting from idle by slow-starting from the initial window. However, this approach was assuming a congestion control algorithm that had no estimate of the bottleneck bandwidth and no pacing, and thus resorted to relying on slow-starting driven by an ACK clock. The long (log_2(BDP)*RTT) delays required to reach full utilization with that "slow start after idle" approach caused many large deployments to disable this mechanism, resulting in a "BDP-scale line-rate burst" approach instead. Instead of these two approaches, BBR restarts by pacing at BBR.bw, typically achieving approximate rate balance and a full pipe after only one BBR.min_rtt has elapsed.<a href="#section-4.4.1-2" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="checking-for-proberrtt-completion">
-<section id="section-4.4.2">
-          <h4 id="name-checking-for-proberrtt-comp">
-<a href="#section-4.4.2" class="section-number selfRef">4.4.2. </a><a href="#name-checking-for-proberrtt-comp" class="section-name selfRef">Checking for ProberRTT Completion</a>
-          </h4>
-<p id="section-4.4.2-1">As an optimization, when restarting from idle BBR checks to see if the connection is in ProbeRTT and has met the exit conditions for ProbeRTT. If a connection goes idle during ProbeRTT then often it will have met those exit conditions by the time it restarts, so that the connection can restore the cwnd to its full value before it starts transmitting a new flight of data.<a href="#section-4.4.2-1" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="logic">
-<section id="section-4.4.3">
-          <h4 id="name-logic">
-<a href="#section-4.4.3" class="section-number selfRef">4.4.3. </a><a href="#name-logic" class="section-name selfRef">Logic</a>
-          </h4>
-<p id="section-4.4.3-1">The BBR algorithm takes the following steps in BBRHandleRestartFromIdle() before sending a packet for a flow:<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.4.3-2">
+<p id="section-4.4.1-1">When restarting from idle in ProbeBW states, BBR leaves its cwnd as-is and
+paces packets at exactly BBR.bw, aiming to return as quickly as possible to its
+target operating point of rate balance and a full pipe. Specifically, if the
+flow's BBR.state is ProbeBW, and the flow is application-limited, and there are
+no packets in flight currently, then before the flow sends one or more packets
+BBR sets BBR.pacing_rate to exactly BBR.bw.<a href="#section-4.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.1-2">Also, when restarting from idle BBR checks to see if the connection is in
+ProbeRTT and has met the exit conditions for ProbeRTT. If a connection goes
+idle during ProbeRTT then often it will have met those exit conditions by the
+time it restarts, so that the connection can restore the cwnd to its full value
+before it starts transmitting a new flight of data.<a href="#section-4.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.4.1-3">More precisely, the BBR algorithm takes the following steps in
+BBRHandleRestartFromIdle() before sending a packet for a flow:<a href="#section-4.4.1-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.4.1-4">
 <pre>
   BBRHandleRestartFromIdle():
     if (C.pipe == 0 and C.app_limited)
       BBR.idle_restart = true
-         BBR.extra_acked_interval_start = Now()
+      BBR.extra_acked_interval_start = Now()
       if (IsInAProbeBWState())
         BBRSetPacingRateWithGain(1)
       else if (BBR.state == ProbeRTT)
         BBRCheckProbeRTTDone()
-</pre><a href="#section-4.4.3-2" class="pilcrow">¶</a>
+</pre><a href="#section-4.4.1-4" class="pilcrow">¶</a>
 </div>
+</section>
+</div>
+<div id="previous-idle-restart">
+<section id="section-4.4.2">
+          <h4 id="name-comparison-with-previous-ap">
+<a href="#section-4.4.2" class="section-number selfRef">4.4.2. </a><a href="#name-comparison-with-previous-ap" class="section-name selfRef">Comparison with Previous Approaches</a>
+          </h4>
+<p id="section-4.4.2-1">The "Restarting Idle Connections" section of <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span>
+suggests restarting from idle by slow-starting from the initial
+window. However, this approach was assuming a congestion control algorithm that
+had no estimate of the bottleneck bandwidth and no pacing, and thus resorted to
+relying on slow-starting driven by an ACK clock. The long (log_2(BDP)*RTT)
+delays required to reach full utilization with that "slow start after idle"
+approach caused many large deployments to disable this mechanism, resulting in
+a "BDP-scale line-rate burst" approach instead. Instead of these two
+approaches, BBR restarts by pacing at BBR.bw, typically achieving approximate
+rate balance and a full pipe after only one BBR.min_rtt has elapsed.<a href="#section-4.4.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>

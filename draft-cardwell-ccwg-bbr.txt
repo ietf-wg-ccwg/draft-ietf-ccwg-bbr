@@ -109,9 +109,8 @@ Table of Contents
        4.3.3.  ProbeBW
        4.3.4.  ProbeRTT
      4.4.  Restarting From Idle
-       4.4.1.  Setting Pacing Rate in ProbeBW
-       4.4.2.  Checking for ProberRTT Completion
-       4.4.3.  Logic
+       4.4.1.  Actions when Restarting from Idle
+       4.4.2.  Comparison with Previous Approaches
      4.5.  Updating Network Path Model Parameters
        4.5.1.  BBR.round_count: Tracking Packet-Timed Round Trips
        4.5.2.  BBR.max_bw: Estimated Maximum Bandwidth
@@ -1728,17 +1727,36 @@ Table of Contents
 
 4.4.  Restarting From Idle
 
-4.4.1.  Setting Pacing Rate in ProbeBW
+4.4.1.  Actions when Restarting from Idle
 
    When restarting from idle in ProbeBW states, BBR leaves its cwnd as-
    is and paces packets at exactly BBR.bw, aiming to return as quickly
    as possible to its target operating point of rate balance and a full
    pipe.  Specifically, if the flow's BBR.state is ProbeBW, and the flow
    is application-limited, and there are no packets in flight currently,
-   then at the moment the flow sends one or more packets BBR sets
-   BBR.pacing_rate to exactly BBR.bw.  More precisely, the BBR algorithm
-   takes the following steps in BBRHandleRestartFromIdle() before
-   sending a packet for a flow.
+   then before the flow sends one or more packets BBR sets
+   BBR.pacing_rate to exactly BBR.bw.
+
+   Also, when restarting from idle BBR checks to see if the connection
+   is in ProbeRTT and has met the exit conditions for ProbeRTT.  If a
+   connection goes idle during ProbeRTT then often it will have met
+   those exit conditions by the time it restarts, so that the connection
+   can restore the cwnd to its full value before it starts transmitting
+   a new flight of data.
+
+   More precisely, the BBR algorithm takes the following steps in
+   BBRHandleRestartFromIdle() before sending a packet for a flow:
+
+     BBRHandleRestartFromIdle():
+       if (C.pipe == 0 and C.app_limited)
+         BBR.idle_restart = true
+         BBR.extra_acked_interval_start = Now()
+         if (IsInAProbeBWState())
+           BBRSetPacingRateWithGain(1)
+         else if (BBR.state == ProbeRTT)
+           BBRCheckProbeRTTDone()
+
+4.4.2.  Comparison with Previous Approaches
 
    The "Restarting Idle Connections" section of [RFC5681] suggests
    restarting from idle by slow-starting from the initial window.
@@ -1751,29 +1769,6 @@ Table of Contents
    line-rate burst" approach instead.  Instead of these two approaches,
    BBR restarts by pacing at BBR.bw, typically achieving approximate
    rate balance and a full pipe after only one BBR.min_rtt has elapsed.
-
-4.4.2.  Checking for ProberRTT Completion
-
-   As an optimization, when restarting from idle BBR checks to see if
-   the connection is in ProbeRTT and has met the exit conditions for
-   ProbeRTT.  If a connection goes idle during ProbeRTT then often it
-   will have met those exit conditions by the time it restarts, so that
-   the connection can restore the cwnd to its full value before it
-   starts transmitting a new flight of data.
-
-4.4.3.  Logic
-
-   The BBR algorithm takes the following steps in
-   BBRHandleRestartFromIdle() before sending a packet for a flow:
-
-     BBRHandleRestartFromIdle():
-       if (C.pipe == 0 and C.app_limited)
-         BBR.idle_restart = true
-            BBR.extra_acked_interval_start = Now()
-         if (IsInAProbeBWState())
-           BBRSetPacingRateWithGain(1)
-         else if (BBR.state == ProbeRTT)
-           BBRCheckProbeRTTDone()
 
 4.5.  Updating Network Path Model Parameters
 
