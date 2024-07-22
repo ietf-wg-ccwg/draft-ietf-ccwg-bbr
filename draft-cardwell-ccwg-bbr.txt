@@ -933,13 +933,13 @@ Table of Contents
 
 4.3.1.2.  Exiting Acceleration Based on Bandwidth Plateau
 
-   At various points in the lifetime of a connection, including Startup
-   and ProbeBW_UP, BBR runs a state machine to estimate whether an
-   accelerating sending rate has saturated the available per-flow
-   bandwidth ("filled the pipe") by looking for a plateau in the
+   In phases where BBR is accelerating to probe the available bandwidth
+   - Startup and ProbeBW_UP - BBR runs a state machine to estimate
+   whether an accelerating sending rate has saturated the available per-
+   flow bandwidth ("filled the pipe") by looking for a plateau in the
    measured rs.delivery_rate.
 
-   BBR records the output of the current full-pipe estimation process in
+   BBR tracks the status of the current full-pipe estimation process in
    the boolean BBR.full_bw_now, and uses BBR.full_bw_now to exit
    ProbeBW_UP.  BBR records in the boolean BBR.full_bw_reached whether
    BBR estimates that it has ever fully utilized its available bandwidth
@@ -961,10 +961,10 @@ Table of Contents
        BBR.full_bw_count = 0
        BBR.full_bw_now = 0
 
-   While running the full pipe detection process, once per round trip,
-   upon an ACK that acknowledges new data, and when the delivery rate
-   sample is not application-limited (see Section 4.5.2.1), BBR runs the
-   "full pipe" estimator:
+   While running the full pipe detection process, upon an ACK that
+   acknowledges new data, and when the delivery rate sample is not
+   application-limited (see Section 4.5.2.1), BBR runs the "full pipe"
+   estimator:
 
   BBRCheckFullBWReached():
     if (BBR.full_bw_now or rs.is_app_limited)
@@ -993,8 +993,8 @@ Table of Contents
 
 4.3.1.3.  Exiting Startup Based on Packet Loss
 
-   A second method BBR uses for estimating the bottleneck is full is by
-   looking at sustained packet losses.  Specifically, in Startup,
+   A second method BBR uses for estimating the bottleneck is full in
+   Startup is by looking at packet losses.  Specifically,
    BBRCheckStartupHighLoss() checks whether all of the following
    criteria are all met:
 
@@ -1064,18 +1064,20 @@ Table of Contents
    deceleration tactic, to try to send slower than the network is
    delivering data, to reduce the amount of data in flight, with all of
    the standard motivations for the deceleration tactic (discussed in
-   "State Machine Tactics", above).  It does this by switching to a
-   BBR.pacing_gain of 0.90, sending at 90% of BBR.bw.  The pacing_gain
-   value of 0.90 is derived based on the ProbeBW_UP pacing gain of 1.25,
-   as the minimum pacing_gain value that allows bandwidth-based
-   convergence to approximate fairness.
+   "State Machine Tactics" in Section 4.1.3).  It does this by switching
+   to a BBR.pacing_gain of 0.90, sending at 90% of BBR.bw.  The
+   pacing_gain value of 0.90 is derived based on the ProbeBW_UP pacing
+   gain of 1.25, as the minimum pacing_gain value that allows bandwidth-
+   based convergence to approximate fairness, and validated through
+   experiments.
 
-   Exit conditions: The flow exits this phase and enters CRUISE when the
-   flow estimates that both of the following conditions have been met:
+   Exit conditions: The flow exits the ProbeBW_DOWN phase and enters
+   CRUISE when the flow estimates that both of the following conditions
+   have been met:
 
    *  There is free headroom: If inflight_hi is set, then BBR remains in
-      DOWN at least until the volume of in-flight data is less than or
-      equal to a target calculated based on (1 -
+      ProbeBW_DOWN at least until the volume of in-flight data is less
+      than or equal to a target calculated based on (1 -
       BBRHeadroom)*BBR.inflight_hi.  The goal of this constraint is to
       ensure that in cases where loss signals suggest an upper limit on
       the volume of in-flight data, then the flow attempts to leave some
@@ -1084,19 +1086,19 @@ Table of Contents
       by cross traffic (both for convergence of bandwidth shares and for
       burst tolerance).
 
-   *  The volume of in-flight data is less than or equal to BBR.BDP,
+   *  The volume of in-flight data is less than or equal to BBR.bdp,
       i.e. the flow estimates that it has drained any queue at the
       bottleneck.
 
 4.3.3.2.  ProbeBW_CRUISE
 
    In the ProbeBW_CRUISE phase of the cycle, a BBR flow pursues the
-   "cruising" tactic (discussed in "State Machine Tactics", above),
-   attempting to send at the same rate the network is delivering data.
-   It tries to match the sending rate to the flow's current available
-   bandwidth, to try to achieve high utilization of the available
-   bandwidth without increasing queue pressure.  It does this by
-   switching to a pacing_gain of 1.0, sending at 100% of BBR.bw.
+   "cruising" tactic (discussed in "State Machine Tactics" in
+   Section 4.1.3), attempting to send at the same rate the network is
+   delivering data.  It tries to match the sending rate to the flow's
+   current available bandwidth, to try to achieve high utilization of
+   the available bandwidth without increasing queue pressure.  It does
+   this by switching to a pacing_gain of 1.0, sending at 100% of BBR.bw.
    Notably, while in this state it responds to concrete congestion
    signals (loss) by reducing BBR.bw_lo and BBR.inflight_lo, because
    these signals suggest that the available bandwidth and deliverable
@@ -2829,8 +2831,8 @@ Table of Contents
    *  State: the state in the BBR state machine, as depicted in the
       "State Transition Diagram" section above.
 
-   *  Tactic: The tactic chosen from the "State Machine Tactics"
-      subsection above: "accel" refers to acceleration, "decel" to
+   *  Tactic: The tactic chosen from the "State Machine Tactics" in
+      Section 4.1.3: "accel" refers to acceleration, "decel" to
       deceleration, and "cruise" to cruising.
 
    *  Pacing Gain: the value used for BBR.pacing_gain in the given

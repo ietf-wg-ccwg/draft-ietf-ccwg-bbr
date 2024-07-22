@@ -2104,11 +2104,12 @@ following Drain state is designed to quickly drain that queue.<a href="#section-
             <h5 id="name-exiting-acceleration-based-">
 <a href="#section-4.3.1.2" class="section-number selfRef">4.3.1.2. </a><a href="#name-exiting-acceleration-based-" class="section-name selfRef">Exiting Acceleration Based on Bandwidth Plateau</a>
             </h5>
-<p id="section-4.3.1.2-1">At various points in the lifetime of a connection, including Startup and
-ProbeBW_UP, BBR runs a state machine to estimate whether an accelerating
-sending rate has saturated the available per-flow bandwidth ("filled the pipe")
-by looking for a plateau in the measured rs.delivery_rate.<a href="#section-4.3.1.2-1" class="pilcrow">¶</a></p>
-<p id="section-4.3.1.2-2">BBR records the output of the current full-pipe estimation process in the
+<p id="section-4.3.1.2-1">In phases where BBR is accelerating to probe the available bandwidth -
+Startup and ProbeBW_UP - BBR runs a state machine to estimate whether an
+accelerating sending rate has saturated the available per-flow bandwidth
+("filled the pipe") by looking for a plateau in the measured
+rs.delivery_rate.<a href="#section-4.3.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.1.2-2">BBR tracks the status of the current full-pipe estimation process in the
 boolean BBR.full_bw_now, and uses BBR.full_bw_now to exit ProbeBW_UP. BBR
 records in the boolean BBR.full_bw_reached whether BBR estimates that it has
 ever fully utilized its available bandwidth (over the lifetime of the
@@ -2129,7 +2130,10 @@ runs:<a href="#section-4.3.1.2-4" class="pilcrow">¶</a></p>
     BBR.full_bw_now = 0
 </pre><a href="#section-4.3.1.2-5" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.1.2-6">While running the full pipe detection process, once per round trip, upon an ACK that acknowledges new data, and when the delivery rate sample is not application-limited (see <a href="#delivery-rate-samples" class="auto internal xref">Section 4.5.2.1</a>), BBR runs the "full pipe" estimator:<a href="#section-4.3.1.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.3.1.2-6">While running the full pipe detection process, upon an ACK that acknowledges
+new data, and when the delivery rate sample is not application-limited (see
+<a href="#delivery-rate-samples" class="auto internal xref">Section 4.5.2.1</a>), BBR runs the "full pipe"
+estimator:<a href="#section-4.3.1.2-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.1.2-7">
 <pre>
   BBRCheckFullBWReached():
@@ -2155,9 +2159,9 @@ runs:<a href="#section-4.3.1.2-4" class="pilcrow">¶</a></p>
             <h5 id="name-exiting-startup-based-on-pa">
 <a href="#section-4.3.1.3" class="section-number selfRef">4.3.1.3. </a><a href="#name-exiting-startup-based-on-pa" class="section-name selfRef">Exiting Startup Based on Packet Loss</a>
             </h5>
-<p id="section-4.3.1.3-1">A second method BBR uses for estimating the bottleneck is full is by looking
-at sustained packet losses. Specifically, in Startup, BBRCheckStartupHighLoss()
-checks whether all of the following criteria are all met:<a href="#section-4.3.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.1.3-1">A second method BBR uses for estimating the bottleneck is full in Startup is
+by looking at packet losses. Specifically, BBRCheckStartupHighLoss() checks
+whether all of the following criteria are all met:<a href="#section-4.3.1.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.1.3-2.1">
                 <p id="section-4.3.1.3-2.1.1">The connection has been in fast recovery for at least one full packet-timed
@@ -2229,18 +2233,28 @@ upon every ACK BBR executes:<a href="#section-4.3.2-3" class="pilcrow">¶</a></p
 <p id="section-4.3.3.1-1">In the ProbeBW_DOWN phase of the cycle, a BBR flow pursues the deceleration
 tactic, to try to send slower than the network is delivering data, to reduce
 the amount of data in flight, with all of the standard motivations for the
-deceleration tactic (discussed in "State Machine Tactics", above).  It does
-this by switching to a BBR.pacing_gain of 0.90, sending at 90% of BBR.bw. The
-pacing_gain value of 0.90 is derived based on the ProbeBW_UP pacing gain of
-1.25, as the minimum pacing_gain value that allows bandwidth-based convergence
-to approximate fairness.<a href="#section-4.3.3.1-1" class="pilcrow">¶</a></p>
-<p id="section-4.3.3.1-2">Exit conditions: The flow exits this phase and enters CRUISE when the flow estimates that  both of the following conditions have been met:<a href="#section-4.3.3.1-2" class="pilcrow">¶</a></p>
+deceleration tactic (discussed in "State Machine Tactics" in <a href="#state-machine-tactics" class="auto internal xref">Section 4.1.3</a>). It does this by switching to a
+BBR.pacing_gain of 0.90, sending at 90% of BBR.bw. The pacing_gain value of
+0.90 is derived based on the ProbeBW_UP pacing gain of 1.25, as the minimum
+pacing_gain value that allows bandwidth-based convergence to approximate
+fairness, and validated through experiments.<a href="#section-4.3.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.1-2">Exit conditions: The flow exits the ProbeBW_DOWN phase and enters CRUISE
+when the flow estimates that both of the following conditions have been
+met:<a href="#section-4.3.3.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.3.1-3.1">
-                <p id="section-4.3.3.1-3.1.1">There is free headroom: If inflight_hi is set, then BBR remains in DOWN at least until the volume of in-flight data is less than or equal to a target calculated based on (1 - BBRHeadroom)*BBR.inflight_hi. The goal of this constraint is to ensure that in cases where loss signals suggest an upper limit on the volume of in-flight data, then the flow attempts to leave some free headroom in the path (e.g. free space in the bottleneck buffer or free time slots in the bottleneck link) that can be used by cross traffic (both for convergence of bandwidth shares and for burst tolerance).<a href="#section-4.3.3.1-3.1.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.1-3.1.1">There is free headroom: If inflight_hi is set, then BBR remains in
+ProbeBW_DOWN at least until the volume of in-flight data is less than or equal
+to a target calculated based on (1 - BBRHeadroom)*BBR.inflight_hi. The goal of
+this constraint is to ensure that in cases where loss signals suggest an upper
+limit on the volume of in-flight data, then the flow attempts to leave some
+free headroom in the path (e.g. free space in the bottleneck buffer or free
+time slots in the bottleneck link) that can be used by cross traffic (both for
+convergence of bandwidth shares and for burst tolerance).<a href="#section-4.3.3.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.3.1-3.2">
-                <p id="section-4.3.3.1-3.2.1">The volume of in-flight data is less than or equal to BBR.BDP, i.e. the flow estimates that it has drained any queue at the bottleneck.<a href="#section-4.3.3.1-3.2.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.3.1-3.2.1">The volume of in-flight data is less than or equal to BBR.bdp, i.e. the flow
+estimates that it has drained any queue at the bottleneck.<a href="#section-4.3.3.1-3.2.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </section>
@@ -2250,7 +2264,17 @@ to approximate fairness.<a href="#section-4.3.3.1-1" class="pilcrow">¶</a></p>
             <h5 id="name-probebw_cruise">
 <a href="#section-4.3.3.2" class="section-number selfRef">4.3.3.2. </a><a href="#name-probebw_cruise" class="section-name selfRef">ProbeBW_CRUISE</a>
             </h5>
-<p id="section-4.3.3.2-1">In the ProbeBW_CRUISE phase of the cycle, a BBR flow pursues the "cruising" tactic (discussed in "State Machine Tactics", above), attempting to send at the same rate the network is delivering data. It tries to match the sending rate to the flow's current available bandwidth, to try to achieve high utilization of the available bandwidth without increasing queue pressure. It does this by switching to a pacing_gain of 1.0, sending at 100% of BBR.bw. Notably, while in this state it responds to concrete congestion signals (loss) by reducing BBR.bw_lo and BBR.inflight_lo, because these signals suggest that the available bandwidth and deliverable volume of in-flight data have likely reduced, and the flow needs to change to adapt, slowing down to match the latest delivery process.<a href="#section-4.3.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.2-1">In the ProbeBW_CRUISE phase of the cycle, a BBR flow pursues the "cruising"
+tactic (discussed in "State Machine Tactics" in <a href="#state-machine-tactics" class="auto internal xref">Section 4.1.3</a>), attempting to send at the same rate the
+network is delivering data. It tries to match the sending rate to the flow's
+current available bandwidth, to try to achieve high utilization of the
+available bandwidth without increasing queue pressure. It does this by
+switching to a pacing_gain of 1.0, sending at 100% of BBR.bw. Notably, while in
+this state it responds to concrete congestion signals (loss) by reducing
+BBR.bw_lo and BBR.inflight_lo, because these signals suggest that the available
+bandwidth and deliverable volume of in-flight data have likely reduced, and the
+flow needs to change to adapt, slowing down to match the latest delivery
+process.<a href="#section-4.3.3.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.3.3.2-2">Exit conditions: The connection adaptively holds this state until it decides that it is time to probe for bandwidth, at which time it enters ProbeBW_REFILL (see "Time Scale for Bandwidth Probing", below).<a href="#section-4.3.3.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -3650,7 +3674,8 @@ inflight_lo     = max( inflight_latest, BBRBeta * inflight_lo )
               <p id="section-4.6.1-2.1.1">State: the state in the BBR state machine, as depicted in the "State Transition Diagram" section above.<a href="#section-4.6.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.6.1-2.2">
-              <p id="section-4.6.1-2.2.1">Tactic: The tactic chosen from the "State Machine Tactics" subsection above: "accel" refers to acceleration, "decel" to deceleration, and "cruise" to cruising.<a href="#section-4.6.1-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-4.6.1-2.2.1">Tactic: The tactic chosen from the "State Machine Tactics" in <a href="#state-machine-tactics" class="auto internal xref">Section 4.1.3</a>: "accel" refers to acceleration, "decel" to
+deceleration, and "cruise" to cruising.<a href="#section-4.6.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.6.1-2.3">
               <p id="section-4.6.1-2.3.1">Pacing Gain: the value used for BBR.pacing_gain in the given state.<a href="#section-4.6.1-2.3.1" class="pilcrow">¶</a></p>
