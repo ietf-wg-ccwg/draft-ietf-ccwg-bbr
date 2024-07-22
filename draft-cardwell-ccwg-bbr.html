@@ -2713,14 +2713,39 @@ sustain its achievable throughput.<a href="#section-4.3.3.5.3-4.2.1" class="pilc
             <h5 id="name-probertt-overview">
 <a href="#section-4.3.4.1" class="section-number selfRef">4.3.4.1. </a><a href="#name-probertt-overview" class="section-name selfRef">ProbeRTT Overview</a>
             </h5>
-<p id="section-4.3.4.1-1">To help probe for BBR.min_rtt, on an as-needed basis BBR flows enter the ProbeRTT state to try to cooperate to periodically drain the bottleneck queue, and thus improve their BBR.min_rtt estimate of the unloaded two-way propagation delay.<a href="#section-4.3.4.1-1" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.1-2">A critical point is that before BBR raises its BBR.min_rtt estimate (which would in turn raise its maximum permissible cwnd), it first enters ProbeRTT to try to make a concerted and coordinated effort to drain the bottleneck queue and make a robust BBR.min_rtt measurement. This allows the BBR.min_rtt estimates of ensembles of BBR flows to converge  avoiding feedback loops of ever-increasing queues and RTT samples.<a href="#section-4.3.4.1-2" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.1-3">The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once every ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating by setting its cwnd_gain to BBRProbeRTTCwndGain = 0.5 to reduce its volume of inflight data to half of its estimated BDP, to try to allow the flow to measure the unloaded two-way propagation delay.<a href="#section-4.3.4.1-3" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.1-4">There are two main motivations for making the MinRTTFilterLen roughly twice the ProbeRTTInterval. First, this ensures that during a ProbeRTT episode the flow will "remember" the BBR.min_rtt value it measured during the previous ProbeRTT episode, providing a robust bdp estimate for the cwnd = 0.5*bdp calculation, increasing the likelihood of fully draining the bottleneck queue. Second, this allows the flow's BBR.min_rtt filter window to generally include RTT samples from two ProbeTT episodes, providing a more robust estimate.<a href="#section-4.3.4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1-1">To help probe for BBR.min_rtt, on an as-needed basis BBR flows enter the
+ProbeRTT state to try to cooperate to periodically drain the bottleneck queue,
+and thus improve their BBR.min_rtt estimate of the unloaded two-way propagation
+delay.<a href="#section-4.3.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1-2">A critical point is that before BBR raises its BBR.min_rtt
+estimate (which would in turn raise its maximum permissible cwnd), it first
+enters ProbeRTT to try to make a concerted and coordinated effort to drain the
+bottleneck queue and make a robust BBR.min_rtt measurement. This allows the
+BBR.min_rtt estimates of ensembles of BBR flows to converge, avoiding feedback
+loops of ever-increasing queues and RTT samples.<a href="#section-4.3.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1-3">The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
+every ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating by
+setting its cwnd_gain to BBRProbeRTTCwndGain = 0.5 to reduce its volume of
+inflight data to half of its estimated BDP, to try to measure the unloaded
+two-way propagation delay.<a href="#section-4.3.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1-4">There are two main motivations for making the MinRTTFilterLen roughly twice
+the ProbeRTTInterval. First, this ensures that during a ProbeRTT episode the
+flow will "remember" the BBR.min_rtt value it measured during the previous
+ProbeRTT episode, providing a robust BDP estimate for the cwnd = 0.5*BDP
+calculation, increasing the likelihood of fully draining the bottleneck
+queue. Second, this allows the flow's BBR.min_rtt filter window to generally
+include RTT samples from two ProbeTT episodes, providing a more robust
+estimate.<a href="#section-4.3.4.1-4" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.1-5">The algorithm for ProbeRTT is as follows:<a href="#section-4.3.4.1-5" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.1-6"></p>
-<p id="section-4.3.4.1-7">Entry conditions: In any state other than ProbeRTT itself, if the BBR.probe_rtt_min_delay estimate has not been updated (i.e., by getting a lower RTT measurement) for more than ProbeRTTInterval = 5 seconds, then BBR enters ProbeRTT and reduces the BBR.cwnd_gain to BBRProbeRTTCwndGain = 0.5.<a href="#section-4.3.4.1-7" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.1-8">Exit conditions: After maintaining the volume of in-flight data at BBRProbeRTTCwndGain*BBR.bdp for at least ProbeRTTDuration (200 ms) and at least one round trip, BBR leaves ProbeRTT and transitions to ProbeBW if it estimates the pipe was filled already, or Startup otherwise.<a href="#section-4.3.4.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1-7">Entry conditions: In any state other than ProbeRTT itself, if the
+BBR.probe_rtt_min_delay estimate has not been updated (i.e., by getting a lower
+RTT measurement) for more than ProbeRTTInterval = 5 seconds, then BBR enters
+ProbeRTT and reduces the BBR.cwnd_gain to BBRProbeRTTCwndGain = 0.5.<a href="#section-4.3.4.1-7" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.1-8">Exit conditions: After maintaining the volume of in-flight data at
+BBRProbeRTTCwndGain*BBR.bdp for at least ProbeRTTDuration (200 ms) and at least
+one packet-timed round trip, BBR leaves ProbeRTT and transitions to ProbeBW if
+it estimates the pipe was filled already, or Startup otherwise.<a href="#section-4.3.4.1-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probertt-design-rationale">
@@ -2736,8 +2761,18 @@ sustain its achievable throughput.<a href="#section-4.3.3.5.3-4.2.1" class="pilc
 </pre><a href="#section-4.3.4.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-4.3.4.2-3">As discussed above, BBR's BBR.min_rtt filter window, MinRTTFilterLen, and time interval between ProbeRTT states, ProbeRTTInterval, work in concert. BBR uses a MinRTTFilterLen equal to or longer than ProbeRTTInterval to allow the filter window to include at least one ProbeRTT.<a href="#section-4.3.4.2-3" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.2-4">To allow coordination with other BBR flows, each flow MUST use the standard ProbeRTTInterval of 5 secs.<a href="#section-4.3.4.2-4" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.2-5">An ProbeRTTInterval of 5 secs is short enough to allow quick convergence if traffic levels or routes change, but long enough so that interactive applications (e.g., Web, remote procedure calls, video chunks) often have natural silences or low-rate periods within the window where the flow's rate is low enough for long enough to drain its queue in the bottleneck. Then the BBR.probe_rtt_min_delay filter opportunistically picks up these measurements, and the BBR.probe_rtt_min_delay estimate refreshes without requiring ProbeRTT. This way, flows typically need only pay the 2 percent throughput penalty if there are multiple bulk flows busy sending over the entire ProbeRTTInterval window.<a href="#section-4.3.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-4">To allow coordination with other BBR flows, each BBR flow MUST use the
+standard ProbeRTTInterval of 5 secs.<a href="#section-4.3.4.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.2-5">A ProbeRTTInterval of 5 secs is short enough to allow quick convergence if
+traffic levels or routes change, but long enough so that interactive
+applications (e.g., Web, remote procedure calls, video chunks) often have
+natural silences or low-rate periods within the window where the flow's rate is
+low enough for long enough to drain its queue in the bottleneck. Then the
+BBR.probe_rtt_min_delay filter opportunistically picks up these measurements,
+and the BBR.probe_rtt_min_delay estimate refreshes without requiring
+ProbeRTT. This way, flows typically need only pay the 2 percent throughput
+penalty if there are multiple bulk flows busy sending over the entire
+ProbeRTTInterval window.<a href="#section-4.3.4.2-5" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.2-6">As an optimization, when restarting from idle and finding that the BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the idleness is deemed a sufficient attempt to coordinate to drain the queue.<a href="#section-4.3.4.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2746,7 +2781,9 @@ sustain its achievable throughput.<a href="#section-4.3.3.5.3-4.2.1" class="pilc
             <h5 id="name-calculating-the-rsrtt-rtt-s">
 <a href="#section-4.3.4.3" class="section-number selfRef">4.3.4.3. </a><a href="#name-calculating-the-rsrtt-rtt-s" class="section-name selfRef">Calculating the rs.rtt RTT Sample</a>
             </h5>
-<p id="section-4.3.4.3-1">Upon transmitting each packet, BBR (or the associated transport protocol) stores in per-packet data the wall-clock scheduled transmission time of the packet in packet.departure_time (see the "Pacing Rate: BBR.pacing_rate" section for how this is calculated).<a href="#section-4.3.4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.3-1">Upon transmitting each packet, BBR (or the associated transport protocol)
+stores in per-packet data the wall-clock scheduled transmission time of the
+packet in packet.departure_time (see "Pacing Rate: BBR.pacing_rate" in <a href="#pacing-rate-bbrpacingrate" class="auto internal xref">Section 4.6.2</a> for how this is calculated).<a href="#section-4.3.4.3-1" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.3-2">For every ACK that newly acknowledges some data (whether cumulatively or selectively), the sender's BBR implementation (or the associated transport protocol implementation) attempts to calculate an RTT sample. The sender MUST consider any potential retransmission ambiguities that can arise in some transport protocols. If some of the acknowledged data was not retransmitted, or some of the data was retransmitted but the sender can still unambiguously determine the RTT of the data (e.g. if the transport supports <span>[<a href="#RFC7323" class="cite xref">RFC7323</a>]</span> TCP timestamps or an equivalent mechanism), then the sender calculates an RTT sample, rs.rtt, as follows:<a href="#section-4.3.4.3-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.4.3-3">
 <pre>

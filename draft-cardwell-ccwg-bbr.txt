@@ -1527,21 +1527,20 @@ Table of Contents
    enters ProbeRTT to try to make a concerted and coordinated effort to
    drain the bottleneck queue and make a robust BBR.min_rtt measurement.
    This allows the BBR.min_rtt estimates of ensembles of BBR flows to
-   converge avoiding feedback loops of ever-increasing queues and RTT
+   converge, avoiding feedback loops of ever-increasing queues and RTT
    samples.
 
    The ProbeRTT state works in concert with BBR.min_rtt estimation.  Up
    to once every ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT,
    decelerating by setting its cwnd_gain to BBRProbeRTTCwndGain = 0.5 to
    reduce its volume of inflight data to half of its estimated BDP, to
-   try to allow the flow to measure the unloaded two-way propagation
-   delay.
+   try to measure the unloaded two-way propagation delay.
 
    There are two main motivations for making the MinRTTFilterLen roughly
    twice the ProbeRTTInterval.  First, this ensures that during a
    ProbeRTT episode the flow will "remember" the BBR.min_rtt value it
-   measured during the previous ProbeRTT episode, providing a robust bdp
-   estimate for the cwnd = 0.5*bdp calculation, increasing the
+   measured during the previous ProbeRTT episode, providing a robust BDP
+   estimate for the cwnd = 0.5*BDP calculation, increasing the
    likelihood of fully draining the bottleneck queue.  Second, this
    allows the flow's BBR.min_rtt filter window to generally include RTT
    samples from two ProbeTT episodes, providing a more robust estimate.
@@ -1557,9 +1556,9 @@ Table of Contents
 
    Exit conditions: After maintaining the volume of in-flight data at
    BBRProbeRTTCwndGain*BBR.bdp for at least ProbeRTTDuration (200 ms)
-   and at least one round trip, BBR leaves ProbeRTT and transitions to
-   ProbeBW if it estimates the pipe was filled already, or Startup
-   otherwise.
+   and at least one packet-timed round trip, BBR leaves ProbeRTT and
+   transitions to ProbeBW if it estimates the pipe was filled already,
+   or Startup otherwise.
 
 4.3.4.2.  ProbeRTT Design Rationale
 
@@ -1582,10 +1581,10 @@ Table of Contents
    ProbeRTTInterval to allow the filter window to include at least one
    ProbeRTT.
 
-   To allow coordination with other BBR flows, each flow MUST use the
-   standard ProbeRTTInterval of 5 secs.
+   To allow coordination with other BBR flows, each BBR flow MUST use
+   the standard ProbeRTTInterval of 5 secs.
 
-   An ProbeRTTInterval of 5 secs is short enough to allow quick
+   A ProbeRTTInterval of 5 secs is short enough to allow quick
    convergence if traffic levels or routes change, but long enough so
    that interactive applications (e.g., Web, remote procedure calls,
    video chunks) often have natural silences or low-rate periods within
@@ -1606,8 +1605,8 @@ Table of Contents
 
    Upon transmitting each packet, BBR (or the associated transport
    protocol) stores in per-packet data the wall-clock scheduled
-   transmission time of the packet in packet.departure_time (see the
-   "Pacing Rate: BBR.pacing_rate" section for how this is calculated).
+   transmission time of the packet in packet.departure_time (see "Pacing
+   Rate: BBR.pacing_rate" in Section 4.6.2 for how this is calculated).
 
    For every ACK that newly acknowledges some data (whether cumulatively
    or selectively), the sender's BBR implementation (or the associated
