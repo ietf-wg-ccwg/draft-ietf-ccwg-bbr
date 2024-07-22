@@ -1843,7 +1843,14 @@ all of the following conditions:</t>
 </section>
 <section title="Detecting application-limited phases" anchor="detecting-application-limited-phases">
 
-<t>An application-limited phase starts when the connection decides to send more data, at a point in time when the connection has run out of data.  Some decisions to send more data are triggered by the application writing more data to the connection, and some are triggered by loss detection (during ACK processing or upon the triggering of a timer) estimating that some sequence ranges need to be retransmitted. To detect all such cases, the algorithm calls CheckIfApplicationLimited() to check for application-limited behavior in the following situations:</t>
+<t>An application-limited phase starts when the connection decides to send more
+data, at a point in time when the connection had previously run out of data.
+Some decisions to send more data are triggered by the application writing more
+data to the connection, and some are triggered by loss detection (during ACK
+processing or upon the triggering of a timer) estimating that some sequence
+ranges need to be retransmitted. To detect all such cases, the algorithm calls
+CheckIfApplicationLimited() to check for application-limited behavior in the
+following situations:</t>
 
 <t><list style="symbols">
 <t>The sending application asks the transport layer to send more data; i.e., upon each write from the application, before new application data is enqueued in the transport send buffer or transmitted.</t>
@@ -2053,7 +2060,9 @@ all of the following conditions:</t>
 
 <section title="Probing for Bandwidth In Startup" anchor="probing-for-bandwidth-in-startup">
 
-<t>In Startup, if the congestion signals meet the Startup exit criteria, the flow exits Startup and enters Drain.</t>
+<t>In Startup, if the congestion signals meet the Startup exit criteria, the
+flow exits Startup and enters Drain (see <xref
+target="exiting-startup-based-on-packet-loss"/>).</t>
 
 </section>
 <section title="Probing for Bandwidth In ProbeBW" anchor="probing-for-bandwidth-in-probebw">
@@ -2085,7 +2094,21 @@ all of the following conditions:</t>
 
 <t>Here rs.tx_in_flight is the amount of data that was estimated to be in flight when the most recently ACKed packet was sent. And the BBRBeta (0.7x) bound is to try to ensure that BBR does not react more dramatically than CUBIC's 0.7x multiplicative decrease factor.</t>
 
-<t>Some loss detection algorithms, including algorithms like RACK <xref target="RFC8985"/> that delay loss marking while waiting for potential reordering to resolve, may mark packets as lost long after the loss itself happened. In such cases, the tx_in_flight for the delivered sequence range that allowed the loss to be detected may be considerably smaller than the tx_in_flight of the lost packet itself. In such cases using the former tx_in_flight rather than the latter can cause BBR.inflight_hi to be significantly underestimated. To avoid such issues, BBR processes each loss detection event to more precisely estimate the volume of in-flight data at which loss rates cross BBRLossThresh, noting that this may have happened mid-way through some packet. To estimate this value, we can solve for "lost_prefix" in the following way, where inflight_prev represents the volume of in-flight data preceding this packet, and lost_prev represents the data lost among that previous in-flight data.</t>
+<t>Some loss detection algorithms, including algorithms like RACK <xref
+target="RFC8985"/> that delay loss marking while waiting for potential
+reordering to resolve, may mark packets as lost long after the loss itself
+happened. In such cases, the tx_in_flight for the delivered sequence range that
+allowed the loss to be detected may be considerably smaller than the
+tx_in_flight of the lost packet itself. In such cases using the former
+tx_in_flight rather than the latter can cause BBR.inflight_hi to be
+significantly underestimated. To avoid such issues, BBR processes each loss
+detection event to more precisely estimate the volume of in-flight data at
+which loss rates cross BBRLossThresh, noting that this may have happened
+mid-way through some TSO/GSO offload burst (represented as a "packet" in the
+pseudocode in this document). To estimate this threshold volume of data, we can
+solve for "lost_prefix" in the following way, where inflight_prev represents
+the volume of in-flight data preceding this packet, and lost_prev represents
+the data lost among that previous in-flight data.</t>
 
 <t>First we start with:</t>
 <figure><artwork>
@@ -2107,7 +2130,13 @@ all of the following conditions:</t>
 <t>In pseudocode:</t>
 
 <figure><artwork>
+  BBRNoteLoss()
+    if (!BBR.loss_in_round)   /* first loss in this round trip? */
+      BBR.loss_round_delivered = C.delivered
+    BBR.loss_in_round = 1
+
   BBRHandleLostPacket(packet):
+    BBRNoteLoss()
     if (!BBR.bw_probe_samples)
       return /* not a packet sent while probing bandwidth */
     rs.tx_in_flight = packet.tx_in_flight /* inflight at transmit */
@@ -2177,11 +2206,9 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
   /* Update congestion state on every ACK */
   BBRUpdateCongestionSignals():
     BBRUpdateMaxBw()
-    if (rs.losses &gt; 0)
-      BBR.loss_in_round = 1
     if (!BBR.loss_round_start)
       return  /* wait until end of round trip */
-    BBRAdaptLowerBoundsFromCongestion()
+    BBRAdaptLowerBoundsFromCongestion()  /* once per round, adapt */
     BBR.loss_in_round = 0
 
   /* Once per round-trip respond to congestion */
