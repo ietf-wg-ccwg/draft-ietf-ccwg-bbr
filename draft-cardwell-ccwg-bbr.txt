@@ -1786,16 +1786,16 @@ Table of Contents
 
 4.5.1.  BBR.round_count: Tracking Packet-Timed Round Trips
 
-   Several aspects of the BBR algorithm depend on counting the progress
-   of "packet-timed" round trips, which start at the transmission of
-   some segment, and then end at the acknowledgement of that segment.
-   BBR.round_count is a count of the number of these "packet-timed"
-   round trips elapsed so far.  BBR uses this virtual BBR.round_count
-   because it is more robust than using wall clock time.  In particular,
-   arbitrary intervals of wall clock time can elapse due to application
-   idleness, variations in RTTs, or timer delays for retransmission
-   timeouts, causing wall-clock-timed model parameter estimates to "time
-   out" or to be "forgotten" too quickly to provide robustness.
+   Several aspects of BBR depend on counting the progress of "packet-
+   timed" round trips, which start at the transmission of some segment,
+   and then end at the acknowledgement of that segment.  BBR.round_count
+   is a count of the number of these "packet-timed" round trips elapsed
+   so far.  BBR uses this virtual BBR.round_count because it is more
+   robust than using wall clock time.  In particular, arbitrary
+   intervals of wall clock time can elapse due to application idleness,
+   variations in RTTs, or timer delays for retransmission timeouts,
+   causing wall-clock-timed model parameter estimates to "time out" or
+   to be "forgotten" too quickly to provide robustness.
 
    BBR counts packet-timed round trips by recording state about a
    sentinel packet, and waiting for an ACK of any data packet that was
@@ -1808,14 +1808,14 @@ Table of Contents
        BBR.round_start = false
        BBR.round_count = 0
 
-   Upon sending each packet, the rate estimation algorithm
+   Upon sending each packet, the rate estimation algorithm in
    Section 4.5.2.1 records the amount of data thus far acknowledged as
    delivered:
 
      packet.delivered = C.delivered
 
    Upon receiving an ACK for a given data packet, the rate estimation
-   algorithm Section 4.5.2.1 updates the amount of data thus far
+   algorithm in Section 4.5.2.1 updates the amount of data thus far
    acknowledged as delivered:
 
        C.delivered += packet.size
@@ -2017,8 +2017,8 @@ Table of Contents
    In application-limited phases the transmission rate is limited by the
    sending application rather than the congestion control algorithm.
    Modern transport protocol connections are often application-limited,
-   either due to request/response workloads (e.g.  Web traffic, RPC
-   traffic) or because the sender transmits data in chunks (e.g.
+   either due to request/response workloads (e.g., Web traffic, RPC
+   traffic) or because the sender transmits data in chunks (e.g.,
    adaptive streaming video).
 
    Knowing whether a delivery rate sample was application-limited is
@@ -2034,10 +2034,10 @@ Table of Contents
    limited if there was some moment during the sampled flight of data
    packets when there was no data ready to send.
 
-   An application-limited phase starts when the sending application
-   requests to send new data, or the connection's retransmission
-   mechanisms decide to retransmit data, and the connection meets all of
-   the following conditions:
+   The algorithm detects that an application-limited phase has started
+   when the sending application requests to send new data, or the
+   connection's retransmission mechanisms decide to retransmit data, and
+   the connection meets all of the following conditions:
 
    1.  The transport send buffer has less than one SMSS of unsent data
        available to send.
@@ -2184,7 +2184,7 @@ Table of Contents
    was able to deliver those packets completely in the sampling interval
    between now and the next ACK.
 
-   Upon each packet transmission, the sender executes the following
+   After each packet transmission, the sender executes the following
    steps:
 
      SendPacket(Packet P):
@@ -2249,18 +2249,27 @@ Table of Contents
        C.delivered_time = Now()
 
        /* Update info using the newest packet: */
-       if (P.delivered > rs.prior_delivered)
+       if (!rs.has_data or IsNewestPacket(P, rs))
+         rs.has_data         = true
          rs.prior_delivered  = P.delivered
          rs.prior_time       = P.delivered_time
          rs.is_app_limited   = P.is_app_limited
          rs.send_elapsed     = P.sent_time - P.first_sent_time
          rs.ack_elapsed      = C.delivered_time - P.delivered_time
+         rs.last_end_seq     = P.end_seq
          C.first_sent_time   = P.sent_time
 
        /* Mark the packet as delivered once it's SACKed to
         * avoid being used again when it's cumulatively acked.
         */
        P.delivered_time = 0
+
+     /* Is the given Packet the most recently sent packet
+      * that has been delivered? */
+     IsNewestPacket(Packet P, RateSample rs):
+       return (P.sent_time > C.first_sent_time or
+               (P.sent_time == C.first_sent_time and
+                after(P.end_seq, rs.last_end_seq))
 
 4.5.2.3.4.  Detecting application-limited phases
 
