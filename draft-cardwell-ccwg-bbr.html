@@ -3352,7 +3352,14 @@ all of the following conditions:<a href="#section-4.5.2.2.3-4" class="pilcrow">�
               <h6 id="name-detecting-application-limit">
 <a href="#section-4.5.2.3.4" class="section-number selfRef">4.5.2.3.4. </a><a href="#name-detecting-application-limit" class="section-name selfRef">Detecting application-limited phases</a>
               </h6>
-<p id="section-4.5.2.3.4-1">An application-limited phase starts when the connection decides to send more data, at a point in time when the connection has run out of data.  Some decisions to send more data are triggered by the application writing more data to the connection, and some are triggered by loss detection (during ACK processing or upon the triggering of a timer) estimating that some sequence ranges need to be retransmitted. To detect all such cases, the algorithm calls CheckIfApplicationLimited() to check for application-limited behavior in the following situations:<a href="#section-4.5.2.3.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.3.4-1">An application-limited phase starts when the connection decides to send more
+data, at a point in time when the connection had previously run out of data.
+Some decisions to send more data are triggered by the application writing more
+data to the connection, and some are triggered by loss detection (during ACK
+processing or upon the triggering of a timer) estimating that some sequence
+ranges need to be retransmitted. To detect all such cases, the algorithm calls
+CheckIfApplicationLimited() to check for application-limited behavior in the
+following situations:<a href="#section-4.5.2.3.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.5.2.3.4-2.1">
                   <p id="section-4.5.2.3.4-2.1.1">The sending application asks the transport layer to send more data; i.e., upon each write from the application, before new application data is enqueued in the transport send buffer or transmitted.<a href="#section-4.5.2.3.4-2.1.1" class="pilcrow">¶</a></p>
@@ -3616,7 +3623,8 @@ all of the following conditions:<a href="#section-4.5.2.2.3-4" class="pilcrow">�
             <h5 id="name-probing-for-bandwidth-in-st">
 <a href="#section-4.5.10.1" class="section-number selfRef">4.5.10.1. </a><a href="#name-probing-for-bandwidth-in-st" class="section-name selfRef">Probing for Bandwidth In Startup</a>
             </h5>
-<p id="section-4.5.10.1-1">In Startup, if the congestion signals meet the Startup exit criteria, the flow exits Startup and enters Drain.<a href="#section-4.5.10.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.5.10.1-1">In Startup, if the congestion signals meet the Startup exit criteria, the
+flow exits Startup and enters Drain (see <a href="#exiting-startup-based-on-packet-loss" class="auto internal xref">Section 4.3.1.3</a>).<a href="#section-4.5.10.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probing-for-bandwidth-in-probebw">
@@ -3650,7 +3658,20 @@ all of the following conditions:<a href="#section-4.5.2.2.3-4" class="pilcrow">�
 </pre><a href="#section-4.5.10.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-4.5.10.2-3">Here rs.tx_in_flight is the amount of data that was estimated to be in flight when the most recently ACKed packet was sent. And the BBRBeta (0.7x) bound is to try to ensure that BBR does not react more dramatically than CUBIC's 0.7x multiplicative decrease factor.<a href="#section-4.5.10.2-3" class="pilcrow">¶</a></p>
-<p id="section-4.5.10.2-4">Some loss detection algorithms, including algorithms like RACK <span>[<a href="#RFC8985" class="cite xref">RFC8985</a>]</span> that delay loss marking while waiting for potential reordering to resolve, may mark packets as lost long after the loss itself happened. In such cases, the tx_in_flight for the delivered sequence range that allowed the loss to be detected may be considerably smaller than the tx_in_flight of the lost packet itself. In such cases using the former tx_in_flight rather than the latter can cause BBR.inflight_hi to be significantly underestimated. To avoid such issues, BBR processes each loss detection event to more precisely estimate the volume of in-flight data at which loss rates cross BBRLossThresh, noting that this may have happened mid-way through some packet. To estimate this value, we can solve for "lost_prefix" in the following way, where inflight_prev represents the volume of in-flight data preceding this packet, and lost_prev represents the data lost among that previous in-flight data.<a href="#section-4.5.10.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.5.10.2-4">Some loss detection algorithms, including algorithms like RACK <span>[<a href="#RFC8985" class="cite xref">RFC8985</a>]</span> that delay loss marking while waiting for potential
+reordering to resolve, may mark packets as lost long after the loss itself
+happened. In such cases, the tx_in_flight for the delivered sequence range that
+allowed the loss to be detected may be considerably smaller than the
+tx_in_flight of the lost packet itself. In such cases using the former
+tx_in_flight rather than the latter can cause BBR.inflight_hi to be
+significantly underestimated. To avoid such issues, BBR processes each loss
+detection event to more precisely estimate the volume of in-flight data at
+which loss rates cross BBRLossThresh, noting that this may have happened
+mid-way through some TSO/GSO offload burst (represented as a "packet" in the
+pseudocode in this document). To estimate this threshold volume of data, we can
+solve for "lost_prefix" in the following way, where inflight_prev represents
+the volume of in-flight data preceding this packet, and lost_prev represents
+the data lost among that previous in-flight data.<a href="#section-4.5.10.2-4" class="pilcrow">¶</a></p>
 <p id="section-4.5.10.2-5">First we start with:<a href="#section-4.5.10.2-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.5.10.2-6">
 <pre>
@@ -3674,7 +3695,13 @@ all of the following conditions:<a href="#section-4.5.2.2.3-4" class="pilcrow">�
 <p id="section-4.5.10.2-11">In pseudocode:<a href="#section-4.5.10.2-11" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.5.10.2-12">
 <pre>
+  BBRNoteLoss()
+    if (!BBR.loss_in_round)   /* first loss in this round trip? */
+      BBR.loss_round_delivered = C.delivered
+    BBR.loss_in_round = 1
+
   BBRHandleLostPacket(packet):
+    BBRNoteLoss()
     if (!BBR.bw_probe_samples)
       return /* not a packet sent while probing bandwidth */
     rs.tx_in_flight = packet.tx_in_flight /* inflight at transmit */
@@ -3743,11 +3770,9 @@ inflight_lo     = max( inflight_latest, BBRBeta * inflight_lo )
   /* Update congestion state on every ACK */
   BBRUpdateCongestionSignals():
     BBRUpdateMaxBw()
-    if (rs.losses &gt; 0)
-      BBR.loss_in_round = 1
     if (!BBR.loss_round_start)
       return  /* wait until end of round trip */
-    BBRAdaptLowerBoundsFromCongestion()
+    BBRAdaptLowerBoundsFromCongestion()  /* once per round, adapt */
     BBR.loss_in_round = 0
 
   /* Once per round-trip respond to congestion */
