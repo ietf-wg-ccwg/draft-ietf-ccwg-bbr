@@ -1429,27 +1429,29 @@ target="pacing-rate-bbrpacingrate"/> for how this is calculated).</t>
 </section>
 <section title="Restarting From Idle" anchor="restarting-from-idle">
 
-<section title="Setting Pacing Rate in ProbeBW" anchor="setting-pacing-rate-in-probebw">
+<section title="Actions when Restarting from Idle" anchor="actions-when-restarting-from-idle">
 
-<t>When restarting from idle in ProbeBW states, BBR leaves its cwnd as-is and paces packets at exactly BBR.bw, aiming to return as quickly as possible to its target operating point of rate balance and a full pipe. Specifically, if the flow's BBR.state is ProbeBW, and the flow is application-limited, and there are no packets in flight currently, then at the moment the flow sends one or more packets BBR sets BBR.pacing_rate to exactly BBR.bw. More precisely, the BBR algorithm takes the following steps in BBRHandleRestartFromIdle() before sending a packet for a flow.</t>
+<t>When restarting from idle in ProbeBW states, BBR leaves its cwnd as-is and
+paces packets at exactly BBR.bw, aiming to return as quickly as possible to its
+target operating point of rate balance and a full pipe. Specifically, if the
+flow's BBR.state is ProbeBW, and the flow is application-limited, and there are
+no packets in flight currently, then before the flow sends one or more packets
+BBR sets BBR.pacing_rate to exactly BBR.bw.</t>
 
-<t>The "Restarting Idle Connections" section of <xref target="RFC5681"/> suggests restarting from idle by slow-starting from the initial window. However, this approach was assuming a congestion control algorithm that had no estimate of the bottleneck bandwidth and no pacing, and thus resorted to relying on slow-starting driven by an ACK clock. The long (log_2(BDP)*RTT) delays required to reach full utilization with that "slow start after idle" approach caused many large deployments to disable this mechanism, resulting in a "BDP-scale line-rate burst" approach instead. Instead of these two approaches, BBR restarts by pacing at BBR.bw, typically achieving approximate rate balance and a full pipe after only one BBR.min_rtt has elapsed.</t>
+<t>Also, when restarting from idle BBR checks to see if the connection is in
+ProbeRTT and has met the exit conditions for ProbeRTT. If a connection goes
+idle during ProbeRTT then often it will have met those exit conditions by the
+time it restarts, so that the connection can restore the cwnd to its full value
+before it starts transmitting a new flight of data.</t>
 
-</section>
-<section title="Checking for ProberRTT Completion" anchor="checking-for-proberrtt-completion">
-
-<t>As an optimization, when restarting from idle BBR checks to see if the connection is in ProbeRTT and has met the exit conditions for ProbeRTT. If a connection goes idle during ProbeRTT then often it will have met those exit conditions by the time it restarts, so that the connection can restore the cwnd to its full value before it starts transmitting a new flight of data.</t>
-
-</section>
-<section title="Logic" anchor="logic">
-
-<t>The BBR algorithm takes the following steps in BBRHandleRestartFromIdle() before sending a packet for a flow:</t>
+<t>More precisely, the BBR algorithm takes the following steps in
+BBRHandleRestartFromIdle() before sending a packet for a flow:</t>
 
 <figure><artwork>
   BBRHandleRestartFromIdle():
     if (C.pipe == 0 and C.app_limited)
       BBR.idle_restart = true
-         BBR.extra_acked_interval_start = Now()
+      BBR.extra_acked_interval_start = Now()
       if (IsInAProbeBWState())
         BBRSetPacingRateWithGain(1)
       else if (BBR.state == ProbeRTT)
@@ -1457,7 +1459,23 @@ target="pacing-rate-bbrpacingrate"/> for how this is calculated).</t>
 </artwork></figure>
 
 </section>
+
+<section title="Comparison with Previous Approaches" anchor="previous-idle-restart">
+
+<t>The "Restarting Idle Connections" section of <xref target="RFC5681"/>
+suggests restarting from idle by slow-starting from the initial
+window. However, this approach was assuming a congestion control algorithm that
+had no estimate of the bottleneck bandwidth and no pacing, and thus resorted to
+relying on slow-starting driven by an ACK clock. The long (log_2(BDP)*RTT)
+delays required to reach full utilization with that "slow start after idle"
+approach caused many large deployments to disable this mechanism, resulting in
+a "BDP-scale line-rate burst" approach instead. Instead of these two
+approaches, BBR restarts by pacing at BBR.bw, typically achieving approximate
+rate balance and a full pipe after only one BBR.min_rtt has elapsed.</t>
+
 </section>
+</section>
+
 <section title="Updating Network Path Model Parameters" anchor="updating-network-path-model-parameters">
 
 <t>BBR is a model-based congestion control algorithm: it is based on an explicit model of the network path over which a transport flow travels. The following is a summary of each parameter, including its meaning and how the algorithm calculates and uses its value. We can group the parameter into three groups:</t>
