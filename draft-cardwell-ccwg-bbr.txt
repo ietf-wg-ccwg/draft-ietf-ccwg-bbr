@@ -965,19 +965,19 @@ Table of Contents
    application-limited (see Section 4.5.2.1), BBR runs the "full pipe"
    estimator:
 
-  BBRCheckFullBWReached():
-    if (BBR.full_bw_now or rs.is_app_limited)
-      return  /* no need to check for a full pipe now */
-    if (rs.delivery_rate >= BBR.full_bw * 1.25)  /* bw still growing? */
-      BBRResetFullBW()
-      BBR.full_bw = rs.delivery_rate  /* record new baseline bw level */
-      return
-    if (!BBR.round_start)
-      return
-    BBR.full_bw_count++   /* another round w/o much growth */
-    BBR.full_bw_now = (BBR.full_bw_count >= 3)
-    if (BBR.full_bw_now)
-      BBR.full_bw_reached = true
+     BBRCheckFullBWReached():
+       if (BBR.full_bw_now or rs.is_app_limited)
+         return  /* no need to check for a full pipe now */
+       if (rs.delivery_rate >= BBR.full_bw * 1.25)
+         BBRResetFullBW()       /* bw is still growing, so reset */
+         BBR.full_bw = rs.delivery_rate  /* record new baseline bw */
+         return
+       if (!BBR.round_start)
+         return
+       BBR.full_bw_count++   /* another round w/o much growth */
+       BBR.full_bw_now = (BBR.full_bw_count >= 3)
+       if (BBR.full_bw_now)
+         BBR.full_bw_reached = true
 
    BBR waits three rounds to have solid evidence that the sender is not
    detecting a delivery-rate plateau that was temporarily imposed by the

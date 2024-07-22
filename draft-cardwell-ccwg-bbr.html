@@ -2136,9 +2136,9 @@ estimator:<a href="#section-4.3.1.2-6" class="pilcrow">¶</a></p>
   BBRCheckFullBWReached():
     if (BBR.full_bw_now or rs.is_app_limited)
       return  /* no need to check for a full pipe now */
-    if (rs.delivery_rate &gt;= BBR.full_bw * 1.25)  /* bw still growing? */
-      BBRResetFullBW()
-      BBR.full_bw = rs.delivery_rate  /* record new baseline bw level */
+    if (rs.delivery_rate &gt;= BBR.full_bw * 1.25)
+      BBRResetFullBW()       /* bw is still growing, so reset */
+      BBR.full_bw = rs.delivery_rate  /* record new baseline bw */
       return
     if (!BBR.round_start)
       return
