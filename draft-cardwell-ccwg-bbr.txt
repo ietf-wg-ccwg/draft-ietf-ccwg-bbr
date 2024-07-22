@@ -1106,9 +1106,9 @@ Table of Contents
    change to adapt, slowing down to match the latest delivery process.
 
    Exit conditions: The connection adaptively holds this state until it
-   decides that it is time to probe for bandwidth, at which time it
-   enters ProbeBW_REFILL (see "Time Scale for Bandwidth Probing",
-   below).
+   decides that it is time to probe for bandwidth (see "Time Scale for
+   Bandwidth Probing", in Section 4.3.3.5), at which time it enters
+   ProbeBW_REFILL.
 
 4.3.3.3.  ProbeBW_REFILL
 
@@ -1118,38 +1118,40 @@ Table of Contents
 
    To do this, BBR first resets the short-term model parameters bw_lo
    and inflight_lo, setting both to "Infinity".  This is the key moment
-   in the BBR time scale strategy (see "Time Scale Strategy", above)
-   where the flow pivots, discarding its conservative short-term bw_lo
-   and inflight_lo parameters and beginning to robustly probe the
-   bottleneck's long-term available bandwidth.  During this time
-   inflight_hi, if set, constrains the connection.
+   in the BBR time scale strategy (see "Time Scale Strategy",
+   Section 3.4.2.3) where the flow pivots, discarding its conservative
+   short-term bw_lo and inflight_lo parameters and beginning to robustly
+   probe the bottleneck's long-term available bandwidth.  During this
+   time the estimated bandwidth and inflight_hi, if set, constrain the
+   connection.
 
    During ProbeBW_REFILL BBR uses a BBR.pacing_gain of 1.0, to send at a
    rate that matches the current estimated available bandwidth, for one
    packet-timed round trip.  The goal is to fully utilize the bottleneck
    link before transitioning into ProbeBW_UP and significantly
-   increasing the chances of causing a loss signal.  The motivating
-   insight is that, as soon as a flow starts acceleration, sending
-   faster than the available bandwidth, it will start building a queue
-   at the bottleneck.  And if the buffer is shallow enough, then the
-   flow can cause loss signals very shortly after the first accelerating
-   packets arrive at the bottleneck.  If the flow were to neglect to
-   fill the pipe before it causes this loss signal, then these very
-   quick signals of excess queue could cause the flow's estimate of the
-   path's capacity (i.e. inflight_hi) to significantly underestimate.
-   In particular, if the flow were to transition directly from
+   increasing the chances of causing loss.  The motivating insight is
+   that, as soon as a flow starts acceleration, sending faster than the
+   available bandwidth, it will start building a queue at the
+   bottleneck.  And if the buffer is shallow enough, then the flow can
+   cause loss signals very shortly after the first accelerating packets
+   arrive at the bottleneck.  If the flow were to neglect to fill the
+   pipe before it causes this loss signal, then these very quick signals
+   of excess queue could cause the flow's estimate of the path's
+   capacity (i.e. inflight_hi) to significantly underestimate.  In
+   particular, if the flow were to transition directly from
    ProbeBW_CRUISE to ProbeBW_UP, the volume of in-flight data (at the
    time the first accelerating packets were sent) may often be still
    very close to the volume of in-flight data maintained in CRUISE,
    which may be only (1 - BBRHeadroom)*inflight_hi.
 
    Exit conditions: The flow exits ProbeBW_REFILL after one packet-timed
-   round trip, and enters UP.  This is because after one full round trip
-   of sending in ProbeBW_REFILL the flow (if not application-limited)
-   has had an opportunity to place as many packets in flight as its
-   BBR.bw estimate permits.  And correspondingly, at this point the flow
-   starts to see bandwidth samples reflecting its ProbeBW_REFILL
-   behavior, which may be putting too much data in flight.
+   round trip, and enters ProbeBW_UP.  This is because after one full
+   round trip of sending in ProbeBW_REFILL the flow (if not application-
+   limited) has had an opportunity to place as many packets in flight as
+   its BBR.bw and inflight_hi permit.  Correspondingly, at this point
+   the flow starts to see bandwidth samples reflecting its
+   ProbeBW_REFILL behavior, which may be putting too much data in
+   flight.
 
 4.3.3.4.  ProbeBW_UP
 
@@ -1160,32 +1162,32 @@ Table of Contents
    that the flow can send faster than it had been, even if cwnd was
    previously limiting the sending process.
 
-   If the flow has not set BBR.inflight_hi, it tries to raise the volume
-   of in-flight data to at least BBR.pacing_gain * BBR.bdp = 1.25 *
-   BBR.bdp; note that this may take more than BBR.min_rtt if BBR.min_rtt
-   is small (e.g. on a LAN).
+   If the flow has not set BBR.inflight_hi, it implicitly tries to raise
+   the volume of in-flight data to at least BBR.pacing_gain * BBR.bdp =
+   1.25 * BBR.bdp.
 
-   If the flow has set BBR.inflight_hi, it moves to an operating point
-   based on those limits and then gradually increases the upper volume
-   bound (BBR.inflight_hi) using the following approach:
+   If the flow has set BBR.inflight_hi and encounters that limit, it
+   then gradually increases the upper volume bound (BBR.inflight_hi)
+   using the following approach:
 
    *  inflight_hi: The flow raises inflight_hi in ProbeBW_UP in a manner
       that is slow and cautious at first, but increasingly rapid and
       bold over time.  The initial caution is motivated by the fact that
       a given BBR flow may be sharing a shallow buffer with thousands of
       other flows, so that the buffer space available to the flow may be
-      quite tight (even just a single packet).  The increasingly rapid
-      growth over time is motivated by the fact that in a high-speed WAN
-      the increase in available bandwidth (and thus the estimated BDP)
-      may require the flow to grow the volume of its inflight data by up
-      to O(1,000,000); even a quite typical BDP like 10Gbps * 100ms is
-      82,563 packets.  BBR takes an approach where the additive increase
-      to BBR.inflight_hi exponentially doubles each round trip; in each
-      successive round trip, inflight_hi grows by 1, 2, 4, 8, 16, etc,
-      with the increases spread uniformly across the entire round trip.
-      This helps allow BBR to utilize a larger BDP in O(log(BDP)) round
-      trips, meeting the design goal for scalable utilization of newly-
-      available bandwidth.
+      quite tight (even just a single packet or less).  The increasingly
+      rapid growth over time is motivated by the fact that in a high-
+      speed WAN the increase in available bandwidth (and thus the
+      estimated BDP) may require the flow to grow the volume of its
+      inflight data by up to O(1,000,000) packets; even a quite typical
+      high-speed WAN BDP like 10Gbps * 100ms is around 83,000 packets
+      (with a 1500-byte MTU).  BBR takes an approach where the additive
+      increase to BBR.inflight_hi exponentially doubles each round trip;
+      in each successive round trip, inflight_hi grows by 1, 2, 4, 8,
+      16, etc, with the increases spread uniformly across the entire
+      round trip.  This helps allow BBR to utilize a larger BDP in
+      O(log(BDP)) round trips, meeting the design goal for scalable
+      utilization of newly-available bandwidth.
 
    Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and
    transitions to ProbeBW_DOWN to try to drain the bottleneck queue when
@@ -1196,12 +1198,13 @@ Table of Contents
        the flow has saturated the available per-flow bandwidth ("filled
        the pipe"), by looking for a plateau in the measured
        rs.delivery_rate.  If, during this process, the volume of data is
-       constrained (flow becomes cwnd-limited while cwnd is limited by
-       BBR.inflight_hi), then the flow cannot fully explore the
-       available bandwidth, and so it resets the "full pipe" estimator
-       by calling BBRResetFullBW().
+       constrained by BBR.inflight_hi (the flow becomes cwnd-limited
+       while cwnd is limited by BBR.inflight_hi), then the flow cannot
+       fully explore the available bandwidth, and so it resets the "full
+       pipe" estimator by calling BBRResetFullBW().
 
-   2.  Loss: The current loss rate exceeds BBRLossThresh (2%).
+   2.  Loss: The current loss rate, over the time scale of the last
+       round trip, exceeds BBRLossThresh (2%).
 
 4.3.3.5.  Time Scale for Bandwidth Probing
 
@@ -1218,15 +1221,15 @@ Table of Contents
    can continue to work well in the primary contexts where they do
    today:
 
-   *  Intra-datacenter/LAN traffic: we want Reno/CUBIC to be able to
-      perform well in 100M through 40G enterprise and datacenter
-      Ethernet
+   *  Intra-datacenter/LAN traffic: the goal is to allow Reno/CUBIC to
+      be able to perform well in 100M through 40G enterprise and
+      datacenter Ethernet:
 
       -  BDP = 40 Gbps * 20 us / (1514 bytes) ~= 66 packets
 
-   *  Public Internet last mile traffic: we want Reno/CUBIC to be able
-      to support up to 25Mbps (for 4K Video) at an RTT of 30ms, typical
-      parameters for common CDNs for large video services:
+   *  Public Internet last mile traffic: the goal is to allow Reno/CUBIC
+      to be able to support up to 25Mbps (for 4K Video) at an RTT of
+      30ms, typical parameters for common CDNs for large video services:
 
       -  BDP = 25Mbps * 30 ms / (1514 bytes) ~= 62 packets
 
@@ -1298,25 +1301,28 @@ Table of Contents
    mind:
 
    *  Choosing a value smaller than roughly 60 would imply that when BBR
-      flows coexisted with Reno/CUBIC flows (e.g.  Netflix Reno flows)
-      on public Internet broadband links, the Reno/CUBIC flows would not
-      be able to achieve enough bandwidth to show 4K video.
+      flows coexisted with Reno/CUBIC flows on public Internet broadband
+      links, the Reno/CUBIC flows would not be able to achieve enough
+      bandwidth to show 4K video.
 
    *  Choosing a value that is too large would prevent BBR from reaching
       its goal of tolerating 1% loss per round trip.  Given that the
-      steady-state (non-bandwidth-probing) BBR response to a round trip
-      with X% packet loss is to reduce the sending rate by X% (see the
-      "Updating the Model Upon Packet Loss" section), this means that
-      the BBR sending rate after N rounds of packet loss at a rate
-      loss_rate is reduced to (1 - loss_rate)^N.  A simplified model
-      predicts that for a flow that encounters 1% loss in N=137 round
-      trips of ProbeBW_CRUISE, and then doubles its cwnd (back to
-      BBR.inflight_hi) in ProbeBW_REFILL and ProbeBW_UP, we expect that
-      it will be able to restore and reprobe its original sending rate,
-      since: (1 - loss_rate)^N * 2^2 = (1 - .01)^137 * 2^2 ~= 1.01.
-      That is, we expect the flow will be able to fully respond to
-      packet loss signals in ProbeBW_CRUISE while also fully re-
-      measuring its maximum achievable throughput in ProbeBW_UP.
+      steady-state (non-bandwidth-probing) BBR response to a non-
+      application-limited round trip with X% packet loss is to reduce
+      the sending rate by X% (see "Updating the Model Upon Packet Loss"
+      in Section 4.5.10), this means that the BBR sending rate after N
+      rounds of packet loss at a rate loss_rate is reduced to (1 -
+      loss_rate)^N.  A simplified model predicts that for a flow that
+      encounters 1% loss in N=137 round trips of ProbeBW_CRUISE, and
+      then doubles its cwnd (back to BBR.inflight_hi) in ProbeBW_REFILL
+      and ProbeBW_UP, we expect that it will be able to restore and
+      reprobe its original sending rate, since: (1 - loss_rate)^N * 2^2
+      = (1 - .01)^137 * 2^2 ~= 1.01.  That is, we expect the flow will
+      be able to fully respond to packet loss signals in ProbeBW_CRUISE
+      while also fully re-measuring its maximum achievable throughput in
+      ProbeBW_UP.  However, with a larger number of round trips of
+      ProbeBW_CRUISE, the flow would not be able to sustain its
+      achievable throughput.
 
    The resulting behavior is that for BBR flows with small BDPs, the
    bandwidth probing will be on roughly the same time scale as Reno/
@@ -1344,7 +1350,7 @@ Table of Contents
          random_int_between(0, 1); /* 0 or 1 */
        /* Decide the random wall clock bound for wait: */
        BBR.bw_probe_wait =
-         2sec + random_float_between(0.0, 1.0) /* 0..1 sec */
+         2 + random_float_between(0.0, 1.0) /* 0..1 sec */ secs
 
      BBRIsRenoCoexistenceProbeTime():
        reno_rounds = BBRTargetInflight()
@@ -1391,7 +1397,6 @@ Table of Contents
      BBRStartProbeBW_UP():
        BBR.ack_phase = ACKS_PROBE_STARTING
        BBRStartRound()
-       BBR.cycle_stamp = Now() /* start wall clock */
        BBRResetFullBW()
        BBR.full_bw = rs.delivery_rate
        BBR.state = ProbeBW_UP
@@ -1466,9 +1471,9 @@ Table of Contents
      BBRInflightWithHeadroom():
        if (BBR.inflight_hi == Infinity)
          return Infinity
-       headroom = max(1, BBRHeadroom * BBR.inflight_hi)
-         return max(BBR.inflight_hi - headroom,
-                    BBRMinPipeCwnd)
+       headroom = max(1*SMSS, BBRHeadroom * BBR.inflight_hi)
+       return max(BBR.inflight_hi - headroom,
+                  BBRMinPipeCwnd)
 
      /* Raise inflight_hi slope if appropriate. */
      BBRRaiseInflightHiSlope():
@@ -1499,7 +1504,7 @@ Table of Contents
          if (IsInAProbeBWState() and !rs.is_app_limited)
            BBRAdvanceMaxBwFilter()
 
-       if (!CheckInflightTooHigh())
+       if (!IsInflightTooHigh())
          /* Loss rate is safe. Adjust upper bounds upward. */
          if (BBR.inflight_hi == Infinity)
            return /* no upper bounds to raise */
@@ -1829,7 +1834,7 @@ Table of Contents
        if (packet.delivered >= BBR.next_round_delivered)
          BBRStartRound()
          BBR.round_count++
-         BBR.rounds_since_probe++
+         BBR.rounds_since_bw_probe++
          BBR.round_start = true
        else
          BBR.round_start = false
@@ -2644,7 +2649,7 @@ Table of Contents
 
      /* Do loss signals suggest inflight is too high?
       * If so, react. */
-     CheckInflightTooHigh():
+     IsInflightTooHigh():
        if (IsInflightTooHigh(rs))
          if (BBR.bw_probe_samples)
            BBRHandleInflightTooHigh()
