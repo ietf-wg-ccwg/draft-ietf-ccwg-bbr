@@ -1817,18 +1817,27 @@ all of the following conditions:</t>
     C.delivered_time = Now()
 
     /* Update info using the newest packet: */
-    if (P.delivered &gt; rs.prior_delivered)
+    if (!rs.has_data or IsNewestPacket(P, rs))
+      rs.has_data         = true
       rs.prior_delivered  = P.delivered
       rs.prior_time       = P.delivered_time
       rs.is_app_limited   = P.is_app_limited
       rs.send_elapsed     = P.sent_time - P.first_sent_time
       rs.ack_elapsed      = C.delivered_time - P.delivered_time
+      rs.last_end_seq     = P.end_seq
       C.first_sent_time   = P.sent_time
 
     /* Mark the packet as delivered once it's SACKed to
      * avoid being used again when it's cumulatively acked.
      */
     P.delivered_time = 0
+
+  /* Is the given Packet the most recently sent packet
+   * that has been delivered? */
+  IsNewestPacket(Packet P, RateSample rs):
+    return (P.sent_time > C.first_sent_time or
+            (P.sent_time == C.first_sent_time and
+             after(P.end_seq, rs.last_end_seq))
 </artwork></figure>
 
 </section>
