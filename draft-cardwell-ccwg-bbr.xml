@@ -408,7 +408,7 @@ network path that produce aggregation effects.</t>
 
 </list></t>
 
-<t>Note that those two aspects are in tension: the highest throughput is available to the flow when it sends as fast as possible and occupies as many bottleneck buffer slots as possible; the lowest que pressure is achieved by the flow when it sends as slow as possible and occupies as few bottleneck buffer slots as possible. To resolve the tension, the algorithm aims to achieve the maximum throughput achievable while still meeting the queue pressure objective.</t>
+<t>Note that those two aspects are in tension: the highest throughput is available to the flow when it sends as fast as possible and occupies as many bottleneck buffer slots as possible; the lowest queue pressure is achieved by the flow when it sends as slow as possible and occupies as few bottleneck buffer slots as possible. To resolve the tension, the algorithm aims to achieve the maximum throughput achievable while still meeting the queue pressure objective.</t>
 
 </section>
 <section title="Time Scales for the Network Model" anchor="time-scales-for-the-network-model">
