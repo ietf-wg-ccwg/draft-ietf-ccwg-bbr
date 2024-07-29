@@ -624,10 +624,10 @@ Table of Contents
 
    Note that those two aspects are in tension: the highest throughput is
    available to the flow when it sends as fast as possible and occupies
-   as many bottleneck buffer slots as possible; the lowest que pressure
-   is achieved by the flow when it sends as slow as possible and
-   occupies as few bottleneck buffer slots as possible.  To resolve the
-   tension, the algorithm aims to achieve the maximum throughput
+   as many bottleneck buffer slots as possible; the lowest queue
+   pressure is achieved by the flow when it sends as slow as possible
+   and occupies as few bottleneck buffer slots as possible.  To resolve
+   the tension, the algorithm aims to achieve the maximum throughput
    achievable while still meeting the queue pressure objective.
 
 3.4.2.  Time Scales for the Network Model
