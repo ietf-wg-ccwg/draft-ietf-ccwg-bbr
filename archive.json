@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-28T01:16:45.699882+00:00",
+  "timestamp": "2024-07-30T01:11:40.697082+00:00",
   "repo": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
   "labels": [
     {
@@ -10,5 +10,34 @@
     }
   ],
   "issues": [],
-  "pulls": []
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOL3MllM52vZRc",
+      "title": "fix: correct misspelling \"que\" to \"queue\"",
+      "url": "https://github.com/ietf-wg-ccwg/draft-cardwell-ccwg-bbr/pull/1",
+      "state": "MERGED",
+      "author": "spmzt",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This pull request corrects a misspelling of the word 'queue'.",
+      "createdAt": "2024-07-29T12:40:23Z",
+      "updatedAt": "2024-07-29T13:06:34Z",
+      "baseRepository": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "0f46affa058bdd125291f4a46098534f93cb4140",
+      "headRepository": "spmzt/draft-cardwell-ccwg-bbr",
+      "headRefName": "main",
+      "headRefOid": "c3754e8f9c1e83a63352d658738e990c97e98a42",
+      "closedAt": "2024-07-29T13:06:34Z",
+      "mergedAt": "2024-07-29T13:06:34Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "fbb5bc1beebd3507f12397f481833521f4c095d5"
+      },
+      "comments": [],
+      "reviews": []
+    }
+  ]
 }
