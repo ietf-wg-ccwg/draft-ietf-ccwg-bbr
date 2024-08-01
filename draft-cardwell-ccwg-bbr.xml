@@ -1945,7 +1945,7 @@ following situations:</t>
   BBRUpdateMaxBw()
     BBRUpdateRound()
     if (rs.delivery_rate &gt;= BBR.max_bw || !rs.is_app_limited)
-        BBR.max_bw = update_windowed_max_filter(
+        BBR.max_bw = UpdateWindowedMaxFilter(
                       filter=BBR.MaxBwFilter,
                       value=rs.delivery_rate,
                       time=BBR.cycle_count,
@@ -2046,7 +2046,7 @@ following situations:</t>
     else
       filter_len = 1  /* in Startup, just remember 1 round */
     BBR.extra_acked =
-      update_windowed_max_filter(
+      UpdateWindowedMaxFilter(
         filter=BBR.ExtraACKedFilter,
         value=extra,
         time=BBR.round_count,
