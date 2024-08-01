@@ -2215,7 +2215,7 @@ inflight_lo	= max( inflight_latest, BBRBeta * inflight_lo )
   BBRAdaptLowerBoundsFromCongestion():
     if (BBRIsProbingBW())
       return
-    if (BBR.loss_in_round())
+    if (BBR.loss_in_round)
       BBRInitLowerBounds()
       BBRLossLowerBounds()
 
