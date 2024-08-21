@@ -1518,7 +1518,7 @@ as follows:
       random_int_between(0, 1); /* 0 or 1 */
     /* Decide the random wall clock bound for wait: */
     BBR.bw_probe_wait =
-      2 + random_float_between(0.0, 1.0) /* 0..1 sec */ secs
+      2 + random_float_between(0.0, 1.0) /* 0..1 sec */
 
   BBRIsRenoCoexistenceProbeTime():
     reno_rounds = BBRTargetInflight()
