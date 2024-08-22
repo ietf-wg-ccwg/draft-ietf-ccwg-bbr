@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-20T01:12:22.963124+00:00",
+  "timestamp": "2024-08-22T01:14:13.272041+00:00",
   "repo": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
   "labels": [
     {
@@ -36,6 +36,32 @@
       "mergeCommit": {
         "oid": "fbb5bc1beebd3507f12397f481833521f4c095d5"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOL3MllM55Bily",
+      "title": " Remove secs inside pseudocode of BBRPickProbeWait ",
+      "url": "https://github.com/ietf-wg-ccwg/draft-cardwell-ccwg-bbr/pull/2",
+      "state": "OPEN",
+      "author": "spmzt",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This pull request removes the non-pseudocode keyword 'secs'.\r\nI think the keyword 'secs' was unnecessary and not part of the pseudocode structure.",
+      "createdAt": "2024-08-21T18:48:27Z",
+      "updatedAt": "2024-08-21T18:48:27Z",
+      "baseRepository": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "a9eb2f4f3649ce174503765d79565e1c6e65cb03",
+      "headRepository": "spmzt/draft-cardwell-ccwg-bbr",
+      "headRefName": "main",
+      "headRefOid": "975628feec76c0d9fad2c750abf45dab37207a9e",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
