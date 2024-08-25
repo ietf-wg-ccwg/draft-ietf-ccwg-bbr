@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-22T01:14:13.272041+00:00",
+  "timestamp": "2024-08-25T01:18:58.622779+00:00",
   "repo": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
   "labels": [
     {
@@ -51,19 +51,74 @@
       "labels": [],
       "body": "This pull request removes the non-pseudocode keyword 'secs'.\r\nI think the keyword 'secs' was unnecessary and not part of the pseudocode structure.",
       "createdAt": "2024-08-21T18:48:27Z",
-      "updatedAt": "2024-08-21T18:48:27Z",
+      "updatedAt": "2024-08-24T23:42:40Z",
       "baseRepository": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "a9eb2f4f3649ce174503765d79565e1c6e65cb03",
       "headRepository": "spmzt/draft-cardwell-ccwg-bbr",
       "headRefName": "main",
-      "headRefOid": "975628feec76c0d9fad2c750abf45dab37207a9e",
+      "headRefOid": "bd160b2ee252822f2cd34e948ba17a405d199b7e",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "comments": [
+        {
+          "author": "spmzt",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Done.",
+          "createdAt": "2024-08-24T23:42:39Z",
+          "updatedAt": "2024-08-24T23:42:39Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6Glt7N",
+          "commit": {
+            "abbreviatedOid": "975628f"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-23T20:16:08Z",
+          "updatedAt": "2024-08-23T20:18:01Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "This \"que\" seems like it has already been fixed? Please rebase your patch series onto the latest version of the draft. Thanks!\r\n",
+              "createdAt": "2024-08-23T20:16:08Z",
+              "updatedAt": "2024-08-23T20:18:01Z"
+            },
+            {
+              "originalPosition": 4,
+              "body": "It seems like the removal of \"secs\" is the contribution here?\r\n\r\nCan you please rebase your commit onto the latest draft commits, and squash your commits into a single commit that makes this change? Thanks!\r\n",
+              "createdAt": "2024-08-23T20:17:58Z",
+              "updatedAt": "2024-08-23T20:18:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6Gl05r",
+          "commit": {
+            "abbreviatedOid": "975628f"
+          },
+          "author": "spmzt",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-23T20:37:13Z",
+          "updatedAt": "2024-08-23T20:37:13Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "Ok",
+              "createdAt": "2024-08-23T20:37:13Z",
+              "updatedAt": "2024-08-23T20:37:13Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
