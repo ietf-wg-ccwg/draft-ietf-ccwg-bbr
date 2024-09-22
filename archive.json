@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-19T01:18:39.389789+00:00",
+  "timestamp": "2024-09-22T01:25:28.161994+00:00",
   "repo": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
   "labels": [
     {
@@ -119,6 +119,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOL3MllM58OHZQ",
+      "title": "Pseudocode cleanup and language clarifications",
+      "url": "https://github.com/ietf-wg-ccwg/draft-cardwell-ccwg-bbr/pull/3",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "- Removes BBR.ack_phase from pseudocode\r\n- Ensures value for drain pacing gain is consistent in different parts of the document\r\n- Minor clarifications to the prose\r\n- Removes explicit references to Youtube",
+      "createdAt": "2024-09-20T22:35:22Z",
+      "updatedAt": "2024-09-20T22:35:23Z",
+      "baseRepository": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "a9eb2f4f3649ce174503765d79565e1c6e65cb03",
+      "headRepository": "jbeshay/draft-cardwell-ccwg-bbr",
+      "headRefName": "20240920",
+      "headRefOid": "9571b3645e8e6dbfbfa73c21ce4d5d31591cc962",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
