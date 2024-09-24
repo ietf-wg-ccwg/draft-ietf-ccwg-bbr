@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-22T01:25:28.161994+00:00",
+  "timestamp": "2024-09-24T01:20:39.420217+00:00",
   "repo": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
   "labels": [
     {
@@ -132,7 +132,7 @@
       "labels": [],
       "body": "- Removes BBR.ack_phase from pseudocode\r\n- Ensures value for drain pacing gain is consistent in different parts of the document\r\n- Minor clarifications to the prose\r\n- Removes explicit references to Youtube",
       "createdAt": "2024-09-20T22:35:22Z",
-      "updatedAt": "2024-09-20T22:35:23Z",
+      "updatedAt": "2024-09-23T15:55:06Z",
       "baseRepository": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "a9eb2f4f3649ce174503765d79565e1c6e65cb03",
@@ -144,7 +144,34 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6KcVOy",
+          "commit": {
+            "abbreviatedOid": "9571b36"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Thanks! Mostly looks great. I had one question and one quick suggestion.\r\n\r\ncc: @ianswett\r\n",
+          "createdAt": "2024-09-23T15:42:24Z",
+          "updatedAt": "2024-09-23T15:55:06Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "I agree it would be great to simplify this ack_phase stuff... But AFAICT this has a bug: in a particular ProbeBW_DOWN episode, before a round trip in ProbeBW_DOWN elapses (before BBR.round_start becomes true),  BBRIsTimeToCruise() may return true if inflight is less than the estimated BDP. So this expression may never be true, and the BBRAdvanceMaxBwFilter() may never be called. WDYT?\r\n",
+              "createdAt": "2024-09-23T15:42:24Z",
+              "updatedAt": "2024-09-23T15:55:06Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "Looks like this 0.35 value occurs a second time, lower in the text:\r\n\r\n    It uses a pacing_gain of BBRDrainPacingGain = 0.35\r\n\r\nLet's change that one as well. Perhaps we should remove the discussion of the exactly value in that other spot, so we don't have this kind of potential disagreement in the text in the future. How about:\r\n\r\nold:\r\n\r\n      It uses a pacing_gain of BBRDrainPacingGain = 0.35, chosen...\r\n\r\nproposed:\r\n\r\n      It uses a pacing_gain of BBRDrainPacingGain, with a value chosen ...\r\n",
+              "createdAt": "2024-09-23T15:47:49Z",
+              "updatedAt": "2024-09-23T15:55:06Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
