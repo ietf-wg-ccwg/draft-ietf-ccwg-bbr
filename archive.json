@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-24T01:20:39.420217+00:00",
+  "timestamp": "2024-09-26T01:20:01.790754+00:00",
   "repo": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
   "labels": [
     {
@@ -132,7 +132,7 @@
       "labels": [],
       "body": "- Removes BBR.ack_phase from pseudocode\r\n- Ensures value for drain pacing gain is consistent in different parts of the document\r\n- Minor clarifications to the prose\r\n- Removes explicit references to Youtube",
       "createdAt": "2024-09-20T22:35:22Z",
-      "updatedAt": "2024-09-23T15:55:06Z",
+      "updatedAt": "2024-09-24T17:11:17Z",
       "baseRepository": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "a9eb2f4f3649ce174503765d79565e1c6e65cb03",
@@ -168,6 +168,26 @@
               "body": "Looks like this 0.35 value occurs a second time, lower in the text:\r\n\r\n    It uses a pacing_gain of BBRDrainPacingGain = 0.35\r\n\r\nLet's change that one as well. Perhaps we should remove the discussion of the exactly value in that other spot, so we don't have this kind of potential disagreement in the text in the future. How about:\r\n\r\nold:\r\n\r\n      It uses a pacing_gain of BBRDrainPacingGain = 0.35, chosen...\r\n\r\nproposed:\r\n\r\n      It uses a pacing_gain of BBRDrainPacingGain, with a value chosen ...\r\n",
               "createdAt": "2024-09-23T15:47:49Z",
               "updatedAt": "2024-09-23T15:55:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6KomE2",
+          "commit": {
+            "abbreviatedOid": "9d31d2e"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-24T17:11:16Z",
+          "updatedAt": "2024-09-24T17:11:17Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "Good point. One way to avoid the bug is to advance the cycle when entering ProbeBW_DOWN if the transport isn't app limited. That's the approach I've taken in mvfst. ",
+              "createdAt": "2024-09-24T17:11:17Z",
+              "updatedAt": "2024-09-24T17:11:17Z"
             }
           ]
         }
