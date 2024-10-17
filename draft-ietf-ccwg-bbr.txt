@@ -5,13 +5,13 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 20 January 2025                                  J. Beshay, Ed.
+Expires: 19 April 2025                                    J. Beshay, Ed.
                                                                     Meta
-                                                            19 July 2024
+                                                         16 October 2024
 
 
                          BBR Congestion Control
-                     draft-cardwell-ccwg-bbr-latest
+                       draft-ietf-ccwg-bbr-latest
 
 Abstract
 
@@ -31,6 +31,17 @@ Abstract
    for TCP [RFC9293] and QUIC [RFC9000].  This document specifies
    version 3 of the BBR algorithm, BBRv3.
 
+Discussion Venues
+
+   This note is to be removed before publishing as an RFC.
+
+   Discussion of this document takes place on the Congestion Control
+   Working Group Working Group mailing list (ccwg@ietf.org), which is
+   archived at https://mailarchive.ietf.org/arch/browse/ccwg/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/ietf-wg-ccwg/draft-cardwell-ccwg-bbr.
+
 Status of This Memo
 
    This Internet-Draft is submitted in full conformance with the
@@ -46,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 January 2025.
+   This Internet-Draft will expire on 19 April 2025.
 
 Copyright Notice
 
@@ -177,7 +188,7 @@ Table of Contents
    [RFC9438].  These limitations apply no matter what the bottleneck
    link is capable of or what the connection's fair share is.
    Furthermore, failure to reach the fair share can cause poor
-   throughpout and poor tail latency for latency-sensitive applications.
+   throughput and poor tail latency for latency-sensitive applications.
 
    The BBR ("Bottleneck Bandwidth and Round-trip propagation time")
    congestion control algorithm is a model-based algorithm that takes an
@@ -624,10 +635,10 @@ Table of Contents
 
    Note that those two aspects are in tension: the highest throughput is
    available to the flow when it sends as fast as possible and occupies
-   as many bottleneck buffer slots as possible; the lowest que pressure
-   is achieved by the flow when it sends as slow as possible and
-   occupies as few bottleneck buffer slots as possible.  To resolve the
-   tension, the algorithm aims to achieve the maximum throughput
+   as many bottleneck buffer slots as possible; the lowest queue
+   pressure is achieved by the flow when it sends as slow as possible
+   and occupies as few bottleneck buffer slots as possible.  To resolve
+   the tension, the algorithm aims to achieve the maximum throughput
    achievable while still meeting the queue pressure objective.
 
 3.4.2.  Time Scales for the Network Model
@@ -1546,7 +1557,6 @@ Table of Contents
 
    The algorithm for ProbeRTT is as follows:
 
-
    Entry conditions: In any state other than ProbeRTT itself, if the
    BBR.probe_rtt_min_delay estimate has not been updated (i.e., by
    getting a lower RTT measurement) for more than ProbeRTTInterval = 5
@@ -2167,7 +2177,6 @@ Table of Contents
    rs.ack_elapsed: ACK time interval calculated from the most recent
    packet delivered (see the "ACK Rate" section above).
 
-
 4.5.2.3.2.  Transmitting or retransmitting a data packet
 
    Upon transmitting or retransmitting a data packet, the sender
@@ -2446,7 +2455,7 @@ Table of Contents
      BBRUpdateMaxBw()
        BBRUpdateRound()
        if (rs.delivery_rate >= BBR.max_bw || !rs.is_app_limited)
-           BBR.max_bw = update_windowed_max_filter(
+           BBR.max_bw = UpdateWindowedMaxFilter(
                          filter=BBR.MaxBwFilter,
                          value=rs.delivery_rate,
                          time=BBR.cycle_count,
@@ -2617,7 +2626,7 @@ Table of Contents
        else
          filter_len = 1  /* in Startup, just remember 1 round */
        BBR.extra_acked =
-         update_windowed_max_filter(
+         UpdateWindowedMaxFilter(
            filter=BBR.ExtraACKedFilter,
            value=extra,
            time=BBR.round_count,
@@ -2769,8 +2778,8 @@ Table of Contents
    Upon the ACK at the end of each round that encountered a newly-marked
    loss, the flow updates its model (bw_lo and inflight_lo) as follows:
 
-         bw_lo     = max(       bw_latest, BBRBeta *       bw_lo )
-   inflight_lo     = max( inflight_latest, BBRBeta * inflight_lo )
+         bw_lo = max(       bw_latest, BBRBeta *       bw_lo )
+   inflight_lo = max( inflight_latest, BBRBeta * inflight_lo )
 
    This logic can be represented as follows:
 
@@ -2806,7 +2815,7 @@ Table of Contents
      BBRAdaptLowerBoundsFromCongestion():
        if (BBRIsProbingBW())
          return
-       if (BBR.loss_in_round())
+       if (BBR.loss_in_round)
          BBRInitLowerBounds()
          BBRLossLowerBounds()
 
@@ -3352,75 +3361,83 @@ Table of Contents
 
 9.1.  Normative References
 
-   [RFC2018]  Mathis, M. and J. Mahdavi, "TCP Selective Acknowledgment
-              Options", RFC 2018, October 1996,
-              <http://www.rfc-editor.org/rfc/rfc2018.txt>.
+   [RFC2018]  Mathis, M., Mahdavi, J., Floyd, S., and A. Romanow, "TCP
+              Selective Acknowledgment Options", RFC 2018,
+              DOI 10.17487/RFC2018, October 1996,
+              <https://www.rfc-editor.org/rfc/rfc2018>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", RFC 2119, March 1997,
-              <http://www.rfc-editor.org/rfc/rfc2119.txt>.
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
 
    [RFC4340]  Kohler, E., Handley, M., and S. Floyd, "Datagram
               Congestion Control Protocol (DCCP)", RFC 4340,
               DOI 10.17487/RFC4340, March 2006,
-              <https://www.rfc-editor.org/info/rfc4340>.
+              <https://www.rfc-editor.org/rfc/rfc4340>.
 
    [RFC5226]  Narten, T. and H. Alvestrand, "Guidelines for Writing an
-              IANA Considerations Section in RFCs", May 2008.
+              IANA Considerations Section in RFCs", RFC 5226,
+              DOI 10.17487/RFC5226, May 2008,
+              <https://www.rfc-editor.org/rfc/rfc5226>.
 
    [RFC5681]  Allman, M., Paxson, V., and E. Blanton, "TCP Congestion
-              Control", RFC 5681, September 2009,
-              <https://tools.ietf.org/html/rfc5681>.
+              Control", RFC 5681, DOI 10.17487/RFC5681, September 2009,
+              <https://www.rfc-editor.org/rfc/rfc5681>.
 
-   [RFC6298]  Paxson, V., "Computing TCP's Retransmission Timer",
-              RFC 6298, June 2011,
-              <https://wiki.tools.ietf.org/html/rfc6298>.
+   [RFC6298]  Paxson, V., Allman, M., Chu, J., and M. Sargent,
+              "Computing TCP's Retransmission Timer", RFC 6298,
+              DOI 10.17487/RFC6298, June 2011,
+              <https://www.rfc-editor.org/rfc/rfc6298>.
 
    [RFC6675]  Blanton, E., Allman, M., Wang, L., Jarvinen, I., Kojo, M.,
               and Y. Nishida, "A Conservative Loss Recovery Algorithm
               Based on Selective Acknowledgment (SACK) for TCP",
               RFC 6675, DOI 10.17487/RFC6675, August 2012,
-              <https://www.rfc-editor.org/info/rfc6675>.
+              <https://www.rfc-editor.org/rfc/rfc6675>.
 
    [RFC6928]  Chu, J., Dukkipati, N., Cheng, Y., and M. Mathis,
               "Increasing TCP's Initial Window", RFC 6928,
               DOI 10.17487/RFC6928, April 2013,
-              <https://www.rfc-editor.org/info/rfc6928>.
+              <https://www.rfc-editor.org/rfc/rfc6928>.
 
    [RFC6937]  Mathis, M., Dukkipati, N., and Y. Cheng, "Proportional
               Rate Reduction for TCP", RFC 6937, DOI 10.17487/RFC6937,
-              May 2013, <https://www.rfc-editor.org/info/rfc6937>.
+              May 2013, <https://www.rfc-editor.org/rfc/rfc6937>.
 
    [RFC7323]  Borman, D., Braden, B., Jacobson, V., and R.
-              Scheffenegger, "TCP Extensions for High Performance",
-              September 2014.
+              Scheffenegger, Ed., "TCP Extensions for High Performance",
+              RFC 7323, DOI 10.17487/RFC7323, September 2014,
+              <https://www.rfc-editor.org/rfc/rfc7323>.
 
    [RFC7942]  Sheffer, Y. and A. Farrel, "Improving Awareness of Running
-              Code: The Implementation Status Section", July 2016.
+              Code: The Implementation Status Section", BCP 205,
+              RFC 7942, DOI 10.17487/RFC7942, July 2016,
+              <https://www.rfc-editor.org/rfc/rfc7942>.
 
    [RFC8985]  Cheng, Y., Cardwell, N., Dukkipati, N., and P. Jha, "The
               RACK-TLP Loss Detection Algorithm for TCP", RFC 8985,
               DOI 10.17487/RFC8985, February 2021,
-              <https://www.rfc-editor.org/info/rfc8985>.
+              <https://www.rfc-editor.org/rfc/rfc8985>.
 
    [RFC9000]  Iyengar, J., Ed. and M. Thomson, Ed., "QUIC: A UDP-Based
               Multiplexed and Secure Transport", RFC 9000,
               DOI 10.17487/RFC9000, May 2021,
-              <https://www.rfc-editor.org/info/rfc9000>.
+              <https://www.rfc-editor.org/rfc/rfc9000>.
 
    [RFC9293]  Eddy, W., Ed., "Transmission Control Protocol (TCP)",
               STD 7, RFC 9293, DOI 10.17487/RFC9293, August 2022,
-              <https://www.rfc-editor.org/info/rfc9293>.
+              <https://www.rfc-editor.org/rfc/rfc9293>.
 
    [RFC9438]  Xu, L., Ha, S., Rhee, I., Goel, V., and L. Eggert, Ed.,
               "CUBIC for Fast and Long-Distance Networks", RFC 9438,
               DOI 10.17487/RFC9438, August 2023,
-              <https://www.rfc-editor.org/info/rfc9438>.
+              <https://www.rfc-editor.org/rfc/rfc9438>.
 
 9.2.  Informative References
 
    [A15]      Abrahamsson, M., "TCP ACK suppression", IETF AQM mailing
-              list , November 2015, <https://www.ietf.org/mail-
+              list, November 2015, <https://www.ietf.org/mail-
               archive/web/aqm/current/msg01480.html>.
 
    [B15]      Brakmo, L., "TCP-NV: An Update to TCP-Vegas",  , August
@@ -3463,11 +3480,12 @@ Table of Contents
               congestion-based-congestion-control/pdf>.
 
    [draft-romo-iccrg-ccid5]
-              Romo, N., Kim, J., and M. Amend, "Profile for Datagram
-              Congestion Control Protocol (DCCP) Congestion Control ID
-              5", Work in Progress, Internet-Draft, draft-romo-iccrg-
-              ccid5, 25 October 2021,
-              <https://tools.ietf.org/html/draft-romo-iccrg-ccid5>.
+              Moreno, N. R., Kim, J., and M. Amend, "Profile for
+              Datagram Congestion Control Protocol (DCCP) Congestion
+              Control ID 5", Work in Progress, Internet-Draft, draft-
+              romo-iccrg-ccid5-00, 25 October 2021,
+              <https://datatracker.ietf.org/doc/html/draft-romo-iccrg-
+              ccid5-00>.
 
    [GK81]     Gail, R. and L. Kleinrock, "An Invariant Property of
               Computer Network Power", Proceedings of the International
