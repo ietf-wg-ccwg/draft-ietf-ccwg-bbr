@@ -2,16 +2,16 @@
 
 This is the working area for the individual Internet-Draft, "BBR Congestion Control".
 
-* [Editor's Copy](https://ietf-wg-ccwg.github.io/draft-cardwell-ccwg-bbr/#go.draft-cardwell-ccwg-bbr.html)
-* [Datatracker Page](https://datatracker.ietf.org/doc/draft-cardwell-ccwg-bbr)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-cardwell-ccwg-bbr)
-* [Compare Editor's Copy to Individual Draft](https://ietf-wg-ccwg.github.io/draft-cardwell-ccwg-bbr/#go.draft-cardwell-ccwg-bbr.diff)
+* [Editor's Copy](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/#go.draft-ietf-ccwg-bbr.html)
+* [Datatracker Page](https://datatracker.ietf.org/doc/draft-ietf-ccwg-bbr)
+* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-ietf-ccwg-bbr)
+* [Compare Editor's Copy to Individual Draft](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/#go.draft-ietf-ccwg-bbr.diff)
 
 
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/ietf-wg-ccwg/draft-cardwell-ccwg-bbr/blob/main/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/main/CONTRIBUTING.md).
 
 Contributions can be made by creating pull requests.
 The GitHub interface supports creating pull requests using the Edit (✏) button.
