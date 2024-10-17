@@ -1,21 +1,45 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-15T01:21:31.453385+00:00",
-  "repo": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
+  "timestamp": "2024-10-17T01:20:50.459529+00:00",
+  "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
       "name": "duplicate",
       "description": "This issue or pull request already exists",
       "color": "cfd3d7"
+    },
+    {
+      "name": "Editorial",
+      "description": "Editorial issues or PRs that don't change the wire image or normative behavior.",
+      "color": "006b75"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 4,
+      "id": "I_kwDOL3MllM6agc6U",
+      "title": "Talk about TCP and SACK less",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/4",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "I believe the intent is to be as agnostic to the specific transport as possible, so implementers in QUIC or other transports can implement BBR as well.\r\n\r\nCurrently the draft has a number of references to TCP and SACK.  Some of them are needed for technical accuracy, but others could be removed or changed to more general language.",
+      "createdAt": "2024-10-16T15:13:46Z",
+      "updatedAt": "2024-10-16T21:57:25Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": [
     {
       "number": 1,
       "id": "PR_kwDOL3MllM52vZRc",
       "title": "fix: correct misspelling \"que\" to \"queue\"",
-      "url": "https://github.com/ietf-wg-ccwg/draft-cardwell-ccwg-bbr/pull/1",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/1",
       "state": "MERGED",
       "author": "spmzt",
       "authorAssociation": "CONTRIBUTOR",
@@ -24,7 +48,7 @@
       "body": "This pull request corrects a misspelling of the word 'queue'.",
       "createdAt": "2024-07-29T12:40:23Z",
       "updatedAt": "2024-07-29T13:06:34Z",
-      "baseRepository": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "0f46affa058bdd125291f4a46098534f93cb4140",
       "headRepository": "spmzt/draft-cardwell-ccwg-bbr",
@@ -43,7 +67,7 @@
       "number": 2,
       "id": "PR_kwDOL3MllM55Bily",
       "title": " Remove secs inside pseudocode of BBRPickProbeWait ",
-      "url": "https://github.com/ietf-wg-ccwg/draft-cardwell-ccwg-bbr/pull/2",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/2",
       "state": "OPEN",
       "author": "spmzt",
       "authorAssociation": "CONTRIBUTOR",
@@ -51,8 +75,8 @@
       "labels": [],
       "body": "This pull request removes the non-pseudocode keyword 'secs'.\r\nI think the keyword 'secs' was unnecessary and not part of the pseudocode structure.",
       "createdAt": "2024-08-21T18:48:27Z",
-      "updatedAt": "2024-08-24T23:42:40Z",
-      "baseRepository": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
+      "updatedAt": "2024-10-15T18:59:53Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "a9eb2f4f3649ce174503765d79565e1c6e65cb03",
       "headRepository": "spmzt/draft-cardwell-ccwg-bbr",
@@ -117,6 +141,19 @@
               "updatedAt": "2024-08-23T20:37:13Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6NSCRY",
+          "commit": {
+            "abbreviatedOid": "bd160b2"
+          },
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-15T18:59:53Z",
+          "updatedAt": "2024-10-15T18:59:53Z",
+          "comments": []
         }
       ]
     },
@@ -124,7 +161,7 @@
       "number": 3,
       "id": "PR_kwDOL3MllM58OHZQ",
       "title": "Pseudocode cleanup and language clarifications",
-      "url": "https://github.com/ietf-wg-ccwg/draft-cardwell-ccwg-bbr/pull/3",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/3",
       "state": "OPEN",
       "author": "jbeshay",
       "authorAssociation": "NONE",
@@ -132,13 +169,13 @@
       "labels": [],
       "body": "- Removes BBR.ack_phase from pseudocode\r\n- Ensures value for drain pacing gain is consistent in different parts of the document\r\n- Minor clarifications to the prose\r\n- Removes explicit references to Youtube",
       "createdAt": "2024-09-20T22:35:22Z",
-      "updatedAt": "2024-09-24T17:11:17Z",
-      "baseRepository": "ietf-wg-ccwg/draft-cardwell-ccwg-bbr",
+      "updatedAt": "2024-10-16T03:43:54Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "a9eb2f4f3649ce174503765d79565e1c6e65cb03",
       "headRepository": "jbeshay/draft-cardwell-ccwg-bbr",
       "headRefName": "20240920",
-      "headRefOid": "9571b3645e8e6dbfbfa73c21ce4d5d31591cc962",
+      "headRefOid": "093d82535f887464d29e0c0588adf1c8e929958c",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -188,6 +225,102 @@
               "body": "Good point. One way to avoid the bug is to advance the cycle when entering ProbeBW_DOWN if the transport isn't app limited. That's the approach I've taken in mvfst. ",
               "createdAt": "2024-09-24T17:11:17Z",
               "updatedAt": "2024-09-24T17:11:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6NSCzk",
+          "commit": {
+            "abbreviatedOid": "9571b36"
+          },
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "TBH, I think sent and transmitted are equivalent and sent is shorter, so unless there's a clear definition of one vs the other, I prefer sent.",
+          "createdAt": "2024-10-15T19:01:04Z",
+          "updatedAt": "2024-10-16T02:00:46Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "```suggestion\r\n<t>Variables for connection state (C), per-packet state (P), or per-ACK rate sample (rs) that are not defined below are defined in <xref target=\"delivery-rate-samples\"/> \"Delivery Rate Samples\".</t>\r\n```",
+              "createdAt": "2024-10-15T19:01:04Z",
+              "updatedAt": "2024-10-16T02:00:46Z"
+            },
+            {
+              "originalPosition": 43,
+              "body": "```suggestion\r\n<t>BBR's state machine uses two control mechanisms: the pacing_gain and the cwnd. Primarily, it uses the pacing_gain (see the \"Pacing Rate\" section), which controls how fast packets are sent relative to BBR.bw. A pacing_gain &gt; 1 decreases inter-packet time and increases inflight. A pacing_gain &lt; 1 has the opposite effect, increasing inter-packet time and while aiming to decrease inflight. The cwnd is sufficiently larger than the BDP to allow the higher pacing gain to accumulate more packets in flight. Only if the state machine needs to quickly reduce inflight to a particular absolute value, it uses the cwnd.</t>\r\n```",
+              "createdAt": "2024-10-16T01:47:21Z",
+              "updatedAt": "2024-10-16T02:00:46Z"
+            },
+            {
+              "originalPosition": 53,
+              "body": "```suggestion\r\n<t>Upon starting a full pipe detection process (either on startup or when probing for an increase in bandwidth), the following steps are taken:</t>\r\n```",
+              "createdAt": "2024-10-16T01:47:56Z",
+              "updatedAt": "2024-10-16T02:00:46Z"
+            },
+            {
+              "originalPosition": 62,
+              "body": "Maybe we should define what a 'round' is above and use that here and elsewhere?",
+              "createdAt": "2024-10-16T01:48:43Z",
+              "updatedAt": "2024-10-16T02:00:46Z"
+            },
+            {
+              "originalPosition": 62,
+              "body": "I thought the 3 round number was due to a number of issues, including receive window auto-tuning.  This text seems to be assuming a certain auto-tuning behavior, which I'm a bit uncomfortable with given it's implementation dependent.\r\n\r\n```suggestion\r\n<t>BBR waits three packet-timed round trips to have solid evidence that the sender is not detecting a delivery-rate plateau that was temporarily imposed by the receive window or temporary congestion. Allowing three rounds provides time for the receiver's receive-window auto-tuning to open up the receive window and for the BBR sender to realize that BBR.max_bw should be higher: in the first round the receive-window auto-tuning algorithm grows the receive window; in the second round the sender fills the higher receive window; in the third round the sender gets higher delivery-rate samples. This three-round threshold was validated by experimental data.</t>\r\n```",
+              "createdAt": "2024-10-16T01:51:54Z",
+              "updatedAt": "2024-10-16T02:00:46Z"
+            },
+            {
+              "originalPosition": 125,
+              "body": "```suggestion\r\n<t>Delivery rate samples are generated upon receiving ACKs; Losing an ACK results in losing the delivery rate sample, and instead generating a delivery rate sample from a subsequent ACK. Lost ACKs can underestimate the delivery rate due the artificially inflated \"rs.interval\". The impact of this effect is mitigated using the BBR.max_bw filter. </t>\r\n```",
+              "createdAt": "2024-10-16T01:59:15Z",
+              "updatedAt": "2024-10-16T02:00:46Z"
+            },
+            {
+              "originalPosition": 134,
+              "body": "This is TCP centric, FYI.  Also, I don't think we care about the performance of BBR without SACK?",
+              "createdAt": "2024-10-16T02:00:33Z",
+              "updatedAt": "2024-10-16T02:00:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6NVEJt",
+          "commit": {
+            "abbreviatedOid": "9571b36"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-16T03:36:55Z",
+          "updatedAt": "2024-10-16T03:36:55Z",
+          "comments": [
+            {
+              "originalPosition": 62,
+              "body": "We could remove the description of the specific receive window tuning behavior.\r\n```suggestion\r\n<t>BBR waits three packet-timed round trips to have reasonable evidence that the sender is not detecting a delivery-rate plateau that was temporarily imposed by congestion or receive-window auto-tuning. This three-round threshold was validated by experimental data to allow the receiver the chance to grow its receive window.</t>\r\n```",
+              "createdAt": "2024-10-16T03:36:55Z",
+              "updatedAt": "2024-10-16T03:36:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6NVEjI",
+          "commit": {
+            "abbreviatedOid": "9571b36"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-16T03:39:13Z",
+          "updatedAt": "2024-10-16T03:39:13Z",
+          "comments": [
+            {
+              "originalPosition": 125,
+              "body": "I will use your suggestion, changing the casing of `losing` after `ACKs;`\r\n```suggestion\r\n<t>Delivery rate samples are generated upon receiving ACKs; losing an ACK results in losing the delivery rate sample, and instead generating a delivery rate sample from a subsequent ACK. Lost ACKs can underestimate the delivery rate due the artificially inflated \"rs.interval\". The impact of this effect is mitigated using the BBR.max_bw filter. </t>\r\n```",
+              "createdAt": "2024-10-16T03:39:13Z",
+              "updatedAt": "2024-10-16T03:39:13Z"
             }
           ]
         }
