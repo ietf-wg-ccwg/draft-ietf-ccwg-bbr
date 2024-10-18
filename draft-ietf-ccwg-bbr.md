@@ -9,7 +9,7 @@ pi:
   sortrefs: 'true'
 title: BBR Congestion Control
 abbrev: BBR
-area: IRTF
+area: IETF
 wg: CCWG
 kw: Congestion Control
 date: 2024-10-16
