@@ -884,13 +884,7 @@ Throughout the lifetime of a BBR flow, it sequentially cycles through all
 three tactics, to measure the network path and try to optimize its operating
 point.
 
-BBR's state machine uses two control mechanisms. Primarily, it uses the pacing_gain
-(see the "Pacing Rate" section), which controls how fast packets are sent
-relative to BBR.bw. A pacing_gain > 1 decreases inter-packet time and increases
-inflight. A pacing_gain \< 1 has the opposite effect, increasing inter-packet
-time and while aiming to decrease inflight. Second, if the state machine
-needs to quickly reduce inflight to a particular absolute value, it uses
-the cwnd.
+BBR's state machine uses two control mechanisms: the pacing_gain and the cwnd. Primarily, it uses the pacing_gain (see the "Pacing Rate" section), which controls how fast packets are sent relative to BBR.bw. A pacing_gain > 1 decreases inter-packet time and increases inflight. A pacing_gain \< 1 has the opposite effect, increasing inter-packet time and while aiming to decrease inflight. The cwnd is sufficiently larger than the BDP to allow the higher pacing gain to accumulate more packets in flight. Only if the state machine needs to quickly reduce inflight to a particular absolute value, it uses the cwnd.
 
 
 
