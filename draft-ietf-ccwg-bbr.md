@@ -283,7 +283,7 @@ and section 8 closes with Acknowledgments.
 
 This document defines state variables and constants for the BBR algorithm.
 
-The variables starting with C, P, or rs not defined below are defined in {{delivery-rate-samples}}, "Delivery Rate Samples".
+Variables for connection state (C), per-packet state (P), or per-ACK rate sample (rs) that are not defined below  are defined in {{delivery-rate-samples}}, "Delivery Rate Samples".
 
 ## Transport Connection State {#transport-connection-state}
 
