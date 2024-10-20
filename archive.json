@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-17T01:20:50.459529+00:00",
+  "timestamp": "2024-10-20T01:27:11.214146+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -169,18 +169,26 @@
       "labels": [],
       "body": "- Removes BBR.ack_phase from pseudocode\r\n- Ensures value for drain pacing gain is consistent in different parts of the document\r\n- Minor clarifications to the prose\r\n- Removes explicit references to Youtube",
       "createdAt": "2024-09-20T22:35:22Z",
-      "updatedAt": "2024-10-16T03:43:54Z",
+      "updatedAt": "2024-10-18T05:59:54Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
-      "baseRefOid": "a9eb2f4f3649ce174503765d79565e1c6e65cb03",
-      "headRepository": "jbeshay/draft-cardwell-ccwg-bbr",
+      "baseRefOid": "93905d7c99e2dfe62379da1b89b268f09f54cc95",
+      "headRepository": "jbeshay/draft-ietf-ccwg-bbr",
       "headRefName": "20240920",
-      "headRefOid": "093d82535f887464d29e0c0588adf1c8e929958c",
+      "headRefOid": "65e2696f7551e6b35f1f92b6ce9b08b4303b3c22",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "NONE",
+          "body": "I am going to redo this on top of the markdown version.\r\ncc @nealcardwell @ianswett ",
+          "createdAt": "2024-10-17T04:41:48Z",
+          "updatedAt": "2024-10-17T04:41:48Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM6KcVOy",
