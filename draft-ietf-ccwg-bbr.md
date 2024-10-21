@@ -9,7 +9,7 @@ pi:
   sortrefs: 'true'
 title: BBR Congestion Control
 abbrev: BBR
-area: IRTF
+area: IETF
 wg: CCWG
 kw: Congestion Control
 date: 2024-10-16
@@ -283,7 +283,7 @@ and section 8 closes with Acknowledgments.
 
 This document defines state variables and constants for the BBR algorithm.
 
-The variables starting with C, P, or rs not defined below are defined in {{delivery-rate-samples}}, "Delivery Rate Samples".
+Variables for connection state (C), per-packet state (P), or per-ACK rate sample (rs) that are not defined below  are defined in {{delivery-rate-samples}}, "Delivery Rate Samples".
 
 ## Transport Connection State {#transport-connection-state}
 
@@ -372,7 +372,7 @@ in
 one round-trip or less. As noted in {{BBRDrainPacingGain}}, any
 value at or below 1 / BBRStartupCwndGain = 1 / 2 = 0.5 will theoretically
 achieve this. BBR uses the value 0.35, which has been shown to offer good
-performance on YouTube, when compared with other alternatives.
+performance when compared with other alternatives.
 
 
 ## cwnd State and Parameters {#cwnd-state-and-parameters}
@@ -884,13 +884,7 @@ Throughout the lifetime of a BBR flow, it sequentially cycles through all
 three tactics, to measure the network path and try to optimize its operating
 point.
 
-BBR's state machine uses two control mechanisms. Primarily, it uses the pacing_gain
-(see the "Pacing Rate" section), which controls how fast packets are sent
-relative to BBR.bw. A pacing_gain > 1 decreases inter-packet time and increases
-inflight. A pacing_gain \< 1 has the opposite effect, increasing inter-packet
-time and while aiming to decrease inflight. Second, if the state machine
-needs to quickly reduce inflight to a particular absolute value, it uses
-the cwnd.
+BBR's state machine uses two control mechanisms: the pacing_gain and the cwnd. Primarily, it uses the pacing_gain (see the "Pacing Rate" section), which controls how fast packets are sent relative to BBR.bw. A pacing_gain > 1 decreases inter-packet time and increases inflight. A pacing_gain \< 1 has the opposite effect, increasing inter-packet time and while aiming to decrease inflight. The cwnd is sufficiently larger than the BDP to allow the higher pacing gain to accumulate more packets in flight. Only if the state machine needs to quickly reduce inflight to a particular absolute value, it uses the cwnd.
 
 
 
@@ -1064,8 +1058,7 @@ it estimates that it has fully utilized the per-flow available bandwidth,
 and
 sets both BBR.full_bw_now and BBR.full_bw_reached to true.
 
-Upon starting a full pipe detection process, the following initialization
-runs:
+Upon starting a full pipe detection process (either on startup or when probing for an increase in bandwidth), the following steps are taken:
 
 
 ~~~~
@@ -1096,15 +1089,7 @@ new data, and when the delivery rate sample is not application-limited
       BBR.full_bw_reached = true
 ~~~~
 
-BBR waits three rounds to have solid evidence that the sender is not detecting
-a delivery-rate plateau that was temporarily imposed by the receive window.
-Allowing three rounds provides time for the receiver's receive-window auto-tuning
-to open up the receive window and for the BBR sender to realize that BBR.max_bw
-should be higher: in the first round the receive-window auto-tuning algorithm
-grows the receive window; in the second round the sender fills the higher
-receive window; in the third round the sender gets higher delivery-rate samples.
-This three-round threshold was validated by YouTube experimental data.
-
+BBR waits three packet-timed round trips to have reasonable evidence that the sender is not detecting a delivery-rate plateau that was temporarily imposed by congestion or receive-window auto-tuning. This three-round threshold was validated by experimental data to allow the receiver the chance to grow its receive window.
 
 #### Exiting Startup Based on Packet Loss {#exiting-startup-based-on-packet-loss}
 
@@ -1149,8 +1134,7 @@ by
 switching to a pacing_gain well below 1.0, until any estimated queue has
 been
 drained. It uses a pacing_gain of BBRDrainPacingGain = 0.35, chosen via
-analysis {{BBRDrainPacingGain}} and experimentation (on YouTube)
-to try to drain the queue in less than one round-trip:
+analysis {{BBRDrainPacingGain}} and experimentation to try to drain the queue in less than one round-trip:
 
 
 ~~~~
@@ -2587,14 +2571,7 @@ whether it is per "aggregate" or per SMSS.
 
 ##### Impact of ACK losses {#impact-of-ack-losses}
 
-Delivery rate samples are generated upon receiving each ACK; ACKs may contain
-both cumulative and selective acknowledgment information. Losing an ACK results
-in losing the delivery rate sample corresponding to that ACK, and generating
-a delivery rate sample at later a time (upon the arrival of the next ACK).
-This can underestimate the delivery rate due the artificially inflated "rs.interval".
-As with any effect that can cause underestimation, it is RECOMMENDED that
-applications or congestion control algorithms using the output of this algorithm
-apply appropriate filtering to mitigate the impact of this effect.
+Delivery rate samples are generated upon receiving each ACK; ACKs may contain both cumulative and selective acknowledgment information. Losing an ACK results in losing the delivery rate sample corresponding to that ACK, and generating a delivery rate sample at later a time (upon the arrival of the next ACK). This can underestimate the delivery rate due the artificially inflated "rs.interval". The impact of this effect is mitigated using the BBR.max_bw filter.
 
 
 ##### Impact of packet reordering {#impact-of-packet-reordering}
@@ -2636,8 +2613,6 @@ If the transport connection does not use SACK (i.e., either or both ends
 of the connections do not accept SACK), then this algorithm can be extended
 to estimate approximate delivery rates using duplicate ACKs (much like Reno
 and {{RFC5681}} estimates that each duplicate ACK indicates that a data packet has been delivered).
-The details of this extension will be described in a future version of this
-draft.
 
 
 
