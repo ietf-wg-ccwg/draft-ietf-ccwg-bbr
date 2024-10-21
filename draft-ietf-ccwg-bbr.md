@@ -3695,8 +3695,9 @@ Pawel Jurczyk, Biren Roy, David Wetherall, Amin Vahdat, Leonidas Kontothanassis,
 and the YouTube, google.com, Bandwidth Enforcer, and Google SRE teams for
 their invaluable help and support. We would like to thank Randall R. Stewart,
 Jim Warner, Loganaden Velvindron, Hiren Panchasara, Adrian Zapletal, Christian
-Huitema, Bao Zheng, Jonathan Morton, Matt Olson, and Junho Choi for feedback
-and suggestions on earlier versions of this document.
+Huitema, Bao Zheng, Jonathan Morton, Matt Olson, Junho Choi, Carsten Bormann,
+and Pouria Mousavizadeh Tehrani for feedback, suggestions, and edits on earlier
+versions of this document.
 
 
 --- back
