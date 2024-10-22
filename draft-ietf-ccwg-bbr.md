@@ -374,7 +374,7 @@ Drain mode, to attempt to drain the estimated queue at the bottleneck link
 in
 one round-trip or less. As noted in {{BBRDrainPacingGain}}, any
 value at or below 1 / BBRStartupCwndGain = 1 / 2 = 0.5 will theoretically
-achieve this. BBR uses the value 0.35, which has been shown to offer good
+achieve this. BBR uses the value 0.5, which has been shown to offer good
 performance when compared with other alternatives.
 
 
@@ -1148,12 +1148,12 @@ before attempting to drain the level of in-flight data to the estimated BDP.
 
 ### Drain {#drain}
 
-Upon exiting Startup, BBR enters its Drain state. In Drain, BBR aims to quickly
-drain any queue at the bottleneck link that was created in Startup by switching
-to a pacing_gain well below 1.0, until any estimated queue has been drained. It
-uses a pacing_gain of BBRDrainPacingGain = 0.35, chosen via analysis
-{{BBRDrainPacingGain}} and experimentation to try to drain the queue in less
-than one round-trip:
+Upon exiting Startup, BBR enters its Drain state. In Drain, BBR aims to
+quickly drain any queue at the bottleneck link that was created in Startup by
+switching to a pacing_gain well below 1.0, until any estimated queue has been
+drained. It uses a pacing_gain of BBRDrainPacingGain, with a value chosen
+via analysis {{BBRDrainPacingGain}} and experimentation to try to drain the
+queue in less than one round-trip:
 
 
 ~~~~
