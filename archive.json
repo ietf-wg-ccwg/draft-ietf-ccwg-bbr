@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-20T01:27:11.214146+00:00",
+  "timestamp": "2024-10-22T01:21:48.729824+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -23,15 +23,39 @@
       "state": "OPEN",
       "author": "ianswett",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "ianswett"
+      ],
       "labels": [
         "Editorial"
       ],
       "body": "I believe the intent is to be as agnostic to the specific transport as possible, so implementers in QUIC or other transports can implement BBR as well.\r\n\r\nCurrently the draft has a number of references to TCP and SACK.  Some of them are needed for technical accuracy, but others could be removed or changed to more general language.",
       "createdAt": "2024-10-16T15:13:46Z",
-      "updatedAt": "2024-10-16T21:57:25Z",
+      "updatedAt": "2024-10-21T15:36:57Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Great point. @ianswett  or @jbeshay -  do you have interest and cycles to take this on? :-) IMHO it would be good to have editorial changes from someone who is familiar with QUIC terminology, so the new text makes sense for both TCP and QUIC.\r\n",
+          "createdAt": "2024-10-21T14:28:41Z",
+          "updatedAt": "2024-10-21T14:28:41Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "body": "I was intending to tackle this, but I'm always happy to review someone else's PRs as well.",
+          "createdAt": "2024-10-21T14:42:48Z",
+          "updatedAt": "2024-10-21T14:42:48Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Great, thanks!\r\n",
+          "createdAt": "2024-10-21T15:36:56Z",
+          "updatedAt": "2024-10-21T15:36:56Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -68,21 +92,21 @@
       "id": "PR_kwDOL3MllM55Bily",
       "title": " Remove secs inside pseudocode of BBRPickProbeWait ",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/2",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "spmzt",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "This pull request removes the non-pseudocode keyword 'secs'.\r\nI think the keyword 'secs' was unnecessary and not part of the pseudocode structure.",
       "createdAt": "2024-08-21T18:48:27Z",
-      "updatedAt": "2024-10-15T18:59:53Z",
+      "updatedAt": "2024-10-21T16:03:33Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "a9eb2f4f3649ce174503765d79565e1c6e65cb03",
       "headRepository": "spmzt/draft-cardwell-ccwg-bbr",
       "headRefName": "main",
       "headRefOid": "bd160b2ee252822f2cd34e948ba17a405d199b7e",
-      "closedAt": null,
+      "closedAt": "2024-10-21T16:03:33Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -93,6 +117,13 @@
           "body": "Done.",
           "createdAt": "2024-08-24T23:42:39Z",
           "updatedAt": "2024-08-24T23:42:39Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks! Merged here, after rebasing to apply to the .md:\r\n\r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/commit/4159875aa93802a5603b5b75d61e28b70086bbd2\r\n\r\nAlso added you to the Acknowledgments:\r\n\r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/commit/871539f6c9e8561fc77578c37f6f33e890797c8f\r\n",
+          "createdAt": "2024-10-21T16:03:33Z",
+          "updatedAt": "2024-10-21T16:03:33Z"
         }
       ],
       "reviews": [
@@ -160,33 +191,42 @@
     {
       "number": 3,
       "id": "PR_kwDOL3MllM58OHZQ",
-      "title": "Pseudocode cleanup and language clarifications",
+      "title": "Language clarifications",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/3",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
-      "body": "- Removes BBR.ack_phase from pseudocode\r\n- Ensures value for drain pacing gain is consistent in different parts of the document\r\n- Minor clarifications to the prose\r\n- Removes explicit references to Youtube",
+      "body": "- Minor clarifications to the prose\r\n- Removes explicit references to Youtube",
       "createdAt": "2024-09-20T22:35:22Z",
-      "updatedAt": "2024-10-18T05:59:54Z",
+      "updatedAt": "2024-10-21T21:57:31Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
-      "baseRefOid": "93905d7c99e2dfe62379da1b89b268f09f54cc95",
+      "baseRefOid": "871539f6c9e8561fc77578c37f6f33e890797c8f",
       "headRepository": "jbeshay/draft-ietf-ccwg-bbr",
       "headRefName": "20240920",
-      "headRefOid": "65e2696f7551e6b35f1f92b6ce9b08b4303b3c22",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "acbd8ca5e1f58ba8c23ae8d392bccb0d378ea6a3",
+      "closedAt": "2024-10-21T21:57:23Z",
+      "mergedAt": "2024-10-21T21:57:23Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "b912be6cbc3ffec98692d4acd5da9067f3237611"
+      },
       "comments": [
         {
           "author": "jbeshay",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "I am going to redo this on top of the markdown version.\r\ncc @nealcardwell @ianswett ",
           "createdAt": "2024-10-17T04:41:48Z",
           "updatedAt": "2024-10-17T04:41:48Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks, this 4-commit version with purely editorial changes looks great to merge now. Thanks!\r\n",
+          "createdAt": "2024-10-21T20:27:21Z",
+          "updatedAt": "2024-10-21T20:27:21Z"
         }
       ],
       "reviews": [
@@ -222,7 +262,7 @@
             "abbreviatedOid": "9d31d2e"
           },
           "author": "jbeshay",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-09-24T17:11:16Z",
@@ -298,7 +338,7 @@
             "abbreviatedOid": "9571b36"
           },
           "author": "jbeshay",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-10-16T03:36:55Z",
@@ -318,7 +358,7 @@
             "abbreviatedOid": "9571b36"
           },
           "author": "jbeshay",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2024-10-16T03:39:13Z",
@@ -329,6 +369,139 @@
               "body": "I will use your suggestion, changing the casing of `losing` after `ACKs;`\r\n```suggestion\r\n<t>Delivery rate samples are generated upon receiving ACKs; losing an ACK results in losing the delivery rate sample, and instead generating a delivery rate sample from a subsequent ACK. Lost ACKs can underestimate the delivery rate due the artificially inflated \"rs.interval\". The impact of this effect is mitigated using the BBR.max_bw filter. </t>\r\n```",
               "createdAt": "2024-10-16T03:39:13Z",
               "updatedAt": "2024-10-16T03:39:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6ODeZI",
+          "commit": {
+            "abbreviatedOid": "acbd8ca"
+          },
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "Text LG, but we should decide if we want to impose the line limits I've seen in other Github IETF projects.",
+          "createdAt": "2024-10-21T20:46:22Z",
+          "updatedAt": "2024-10-21T20:47:01Z",
+          "comments": [
+            {
+              "originalPosition": 65,
+              "body": "The text LG, but usually we reflow markdown to ~80 character lines, at least in my experience.",
+              "createdAt": "2024-10-21T20:46:22Z",
+              "updatedAt": "2024-10-21T20:47:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6OD1rG",
+          "commit": {
+            "abbreviatedOid": "acbd8ca"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-21T21:49:37Z",
+          "updatedAt": "2024-10-21T21:49:37Z",
+          "comments": [
+            {
+              "originalPosition": 65,
+              "body": "I prefer 80 character lines as well. It should make it easier to have smaller, easy-to-review diffs. And make it easier to view/edit as well.\r\n\r\n@jbeshay - if you have time to reformat to 80 characters, that's great.\r\n\r\nSince we're on a deadline, I'm OK with merging this version now and I can reformat as a follow-up if you want.\r\n\r\n",
+              "createdAt": "2024-10-21T21:49:37Z",
+              "updatedAt": "2024-10-21T21:49:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6OD3zT",
+          "commit": {
+            "abbreviatedOid": "acbd8ca"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-21T21:56:54Z",
+          "updatedAt": "2024-10-21T21:56:55Z",
+          "comments": [
+            {
+              "originalPosition": 65,
+              "body": "Sounds good. I'll merge this now then. I will push the reformat to 80 characters later tonight.",
+              "createdAt": "2024-10-21T21:56:55Z",
+              "updatedAt": "2024-10-21T21:56:55Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOL3MllM5_WnhG",
+      "title": "Remove BBR.ack_phase from pseudocode",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/5",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We don't need to explicitly track the ack_phase in order to advance MaxBWFilter. Instead, we can advance it when entering ProbeBW_Down.\r\n\r\nThis logic is currently used in Mvfst. ",
+      "createdAt": "2024-10-21T17:14:29Z",
+      "updatedAt": "2024-10-21T17:14:29Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "871539f6c9e8561fc77578c37f6f33e890797c8f",
+      "headRepository": "jbeshay/draft-ietf-ccwg-bbr",
+      "headRefName": "remove_ack_phase",
+      "headRefOid": "ee98c12ad6f0e93153656218a7df1b1ef92618d7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 6,
+      "id": "PR_kwDOL3MllM5_WrsD",
+      "title": "Use consistent value for drain pacing gain which matches derivation doc",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/6",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The drain gain value is inconsistent. The derivation doc linked (https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf) suggests using 0.5 and that's the value referenced in the table under (Summary of Control Behavior in the State Machine).  0.35 (~ 1 / StartupPacingGain) is used in a couple of other places.\r\n\r\nThis PR changes it to 0.5 everywhere. \r\n\r\nAlternatively, we could change the table to use 0.35 since this is what existing implementations are using ([Linux TCP](https://github.com/google/bbr/blob/v3/net/ipv4/tcp_bbr.c#L221C46-L221C51), [Quiche](https://github.com/google/quiche/blob/73107195dfbe8f0a531d3e2f052c9f2e15ec0e3c/quiche/quic/core/congestion_control/bbr2_misc.h#L111), [Mvfst](https://github.com/facebook/mvfst/blob/main/quic/congestion_control/Bbr2.cpp#L27)). The 0.5 value can be regarded as an upper bound.",
+      "createdAt": "2024-10-21T17:24:45Z",
+      "updatedAt": "2024-10-22T01:11:26Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "871539f6c9e8561fc77578c37f6f33e890797c8f",
+      "headRepository": "jbeshay/draft-ietf-ccwg-bbr",
+      "headRefName": "drain_gain",
+      "headRefOid": "c7d7d37bdce9fef05648cf524d83c06d130e68d4",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6OEkCF",
+          "commit": {
+            "abbreviatedOid": "c7d7d37"
+          },
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "LGTM, minus the very long line.",
+          "createdAt": "2024-10-22T01:11:15Z",
+          "updatedAt": "2024-10-22T01:11:26Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "Please reflow this",
+              "createdAt": "2024-10-22T01:11:16Z",
+              "updatedAt": "2024-10-22T01:11:26Z"
             }
           ]
         }
