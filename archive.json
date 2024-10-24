@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-22T01:21:48.729824+00:00",
+  "timestamp": "2024-10-24T01:20:37.653131+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -470,15 +470,15 @@
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
-      "body": "The drain gain value is inconsistent. The derivation doc linked (https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf) suggests using 0.5 and that's the value referenced in the table under (Summary of Control Behavior in the State Machine).  0.35 (~ 1 / StartupPacingGain) is used in a couple of other places.\r\n\r\nThis PR changes it to 0.5 everywhere. \r\n\r\nAlternatively, we could change the table to use 0.35 since this is what existing implementations are using ([Linux TCP](https://github.com/google/bbr/blob/v3/net/ipv4/tcp_bbr.c#L221C46-L221C51), [Quiche](https://github.com/google/quiche/blob/73107195dfbe8f0a531d3e2f052c9f2e15ec0e3c/quiche/quic/core/congestion_control/bbr2_misc.h#L111), [Mvfst](https://github.com/facebook/mvfst/blob/main/quic/congestion_control/Bbr2.cpp#L27)). The 0.5 value can be regarded as an upper bound.",
+      "body": "The drain gain value is inconsistent. The derivation doc linked (https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf) suggests using 0.5 and that's the value referenced in the table under (Summary of Control Behavior in the State Machine).  0.35 (~ 1 / StartupPacingGain) is used in a couple of other places.\r\n\r\nThis PR changes it to 0.5 everywhere. \r\n\r\nExisting implementations are using 0.35 ([Linux TCP](https://github.com/google/bbr/blob/v3/net/ipv4/tcp_bbr.c#L221C46-L221C51), [Quiche](https://github.com/google/quiche/blob/73107195dfbe8f0a531d3e2f052c9f2e15ec0e3c/quiche/quic/core/congestion_control/bbr2_misc.h#L111), [Mvfst](https://github.com/facebook/mvfst/blob/main/quic/congestion_control/Bbr2.cpp#L27)). The 0.5 value can be regarded as an upper bound. \r\n\r\nThis PR will keep the value consistent in the draft while we test the impact of the changing it to 0.5.",
       "createdAt": "2024-10-21T17:24:45Z",
-      "updatedAt": "2024-10-22T01:11:26Z",
+      "updatedAt": "2024-10-22T06:36:19Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
-      "baseRefOid": "871539f6c9e8561fc77578c37f6f33e890797c8f",
+      "baseRefOid": "bbc5137f505b65c4063296e52f13d930ccfa3eb8",
       "headRepository": "jbeshay/draft-ietf-ccwg-bbr",
       "headRefName": "drain_gain",
-      "headRefOid": "c7d7d37bdce9fef05648cf524d83c06d130e68d4",
+      "headRefOid": "7a56fb259117a8ccac4868cf50fc44290a7aa169",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
