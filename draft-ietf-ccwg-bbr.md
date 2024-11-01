@@ -31,7 +31,7 @@ normative:
   RFC2018:
   RFC7323:
   RFC2119:
-  RFC5226:
+  RFC8126:
   RFC6298:
   RFC5681:
   RFC7942:
@@ -3679,7 +3679,7 @@ as the existing standard congestion control algorithm {{RFC5681}}.
 # IANA Considerations {#iana-considerations}
 
 This document has no IANA actions. Here we are using that phrase, suggested
-by {{RFC5226}}, because BBR does not modify or extend the wire format of
+by {{RFC8126}}, because BBR does not modify or extend the wire format of
 any network protocol,
 nor does it add new dependencies on assigned numbers. BBR involves only a
 change to the congestion control algorithm of a transport sender, and does
@@ -3705,8 +3705,8 @@ and the YouTube, google.com, Bandwidth Enforcer, and Google SRE teams for
 their invaluable help and support. We would like to thank Randall R. Stewart,
 Jim Warner, Loganaden Velvindron, Hiren Panchasara, Adrian Zapletal, Christian
 Huitema, Bao Zheng, Jonathan Morton, Matt Olson, Junho Choi, Carsten Bormann,
-and Pouria Mousavizadeh Tehrani for feedback, suggestions, and edits on earlier
-versions of this document.
+Pouria Mousavizadeh Tehrani, and Amanda Baber
+for feedback, suggestions, and edits on earlier versions of this document.
 
 
 --- back
