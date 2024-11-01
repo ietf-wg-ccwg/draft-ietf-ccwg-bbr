@@ -3324,7 +3324,7 @@ Table of Contents
 7.  IANA Considerations
 
    This document has no IANA actions.  Here we are using that phrase,
-   suggested by [RFC5226], because BBR does not modify or extend the
+   suggested by [RFC8126], because BBR does not modify or extend the
    wire format of any network protocol, nor does it add new dependencies
    on assigned numbers.  BBR involves only a change to the congestion
    control algorithm of a transport sender, and does not involve changes
@@ -3350,9 +3350,9 @@ Table of Contents
    Enforcer, and Google SRE teams for their invaluable help and support.
    We would like to thank Randall R.  Stewart, Jim Warner, Loganaden
    Velvindron, Hiren Panchasara, Adrian Zapletal, Christian Huitema, Bao
-   Zheng, Jonathan Morton, Matt Olson, Junho Choi, Carsten Bormann, and
-   Pouria Mousavizadeh Tehrani for feedback, suggestions, and edits on
-   earlier versions of this document.
+   Zheng, Jonathan Morton, Matt Olson, Junho Choi, Carsten Bormann,
+   Pouria Mousavizadeh Tehrani, and Amanda Baber for feedback,
+   suggestions, and edits on earlier versions of this document.
 
 9.  References
 
@@ -3372,11 +3372,6 @@ Table of Contents
               Congestion Control Protocol (DCCP)", RFC 4340,
               DOI 10.17487/RFC4340, March 2006,
               <https://www.rfc-editor.org/rfc/rfc4340>.
-
-   [RFC5226]  Narten, T. and H. Alvestrand, "Guidelines for Writing an
-              IANA Considerations Section in RFCs", RFC 5226,
-              DOI 10.17487/RFC5226, May 2008,
-              <https://www.rfc-editor.org/rfc/rfc5226>.
 
    [RFC5681]  Allman, M., Paxson, V., and E. Blanton, "TCP Congestion
               Control", RFC 5681, DOI 10.17487/RFC5681, September 2009,
@@ -3411,6 +3406,11 @@ Table of Contents
               Code: The Implementation Status Section", BCP 205,
               RFC 7942, DOI 10.17487/RFC7942, July 2016,
               <https://www.rfc-editor.org/rfc/rfc7942>.
+
+   [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+              Writing an IANA Considerations Section in RFCs", BCP 26,
+              RFC 8126, DOI 10.17487/RFC8126, June 2017,
+              <https://www.rfc-editor.org/rfc/rfc8126>.
 
    [RFC8985]  Cheng, Y., Cardwell, N., Dukkipati, N., and P. Jha, "The
               RACK-TLP Loss Detection Algorithm for TCP", RFC 8985,
