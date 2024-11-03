@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-31T01:22:24.522620+00:00",
+  "timestamp": "2024-11-03T01:26:23.298644+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -472,7 +472,7 @@
       "labels": [],
       "body": "The drain gain value is inconsistent. The derivation doc linked (https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf) suggests using 0.5 and that's the value referenced in the table under (Summary of Control Behavior in the State Machine).  0.35 (~ 1 / StartupPacingGain) is used in a couple of other places.\r\n\r\nThis PR changes it to 0.5 everywhere. \r\n\r\nExisting implementations are using 0.35 ([Linux TCP](https://github.com/google/bbr/blob/v3/net/ipv4/tcp_bbr.c#L221C46-L221C51), [Quiche](https://github.com/google/quiche/blob/73107195dfbe8f0a531d3e2f052c9f2e15ec0e3c/quiche/quic/core/congestion_control/bbr2_misc.h#L111), [Mvfst](https://github.com/facebook/mvfst/blob/main/quic/congestion_control/Bbr2.cpp#L27)). The 0.5 value can be regarded as an upper bound. \r\n\r\nThis PR will keep the value consistent in the draft while we test the impact of the changing it to 0.5.",
       "createdAt": "2024-10-21T17:24:45Z",
-      "updatedAt": "2024-10-22T06:36:19Z",
+      "updatedAt": "2024-11-01T17:04:45Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "bbc5137f505b65c4063296e52f13d930ccfa3eb8",
@@ -483,7 +483,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "As one data point, we have performance A/B experiment data from Linux TCP YouTube experiments. The main performance changes were:\r\n\r\n+ 0.5x has slightly slower video play start-up\r\n+ 0.5x has slightly more rebuffers\r\n",
+          "createdAt": "2024-11-01T17:04:44Z",
+          "updatedAt": "2024-11-01T17:04:44Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM6OEkCF",
