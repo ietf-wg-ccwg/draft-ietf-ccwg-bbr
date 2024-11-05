@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-03T01:26:23.298644+00:00",
+  "timestamp": "2024-11-05T01:19:32.421829+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -472,7 +472,7 @@
       "labels": [],
       "body": "The drain gain value is inconsistent. The derivation doc linked (https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf) suggests using 0.5 and that's the value referenced in the table under (Summary of Control Behavior in the State Machine).  0.35 (~ 1 / StartupPacingGain) is used in a couple of other places.\r\n\r\nThis PR changes it to 0.5 everywhere. \r\n\r\nExisting implementations are using 0.35 ([Linux TCP](https://github.com/google/bbr/blob/v3/net/ipv4/tcp_bbr.c#L221C46-L221C51), [Quiche](https://github.com/google/quiche/blob/73107195dfbe8f0a531d3e2f052c9f2e15ec0e3c/quiche/quic/core/congestion_control/bbr2_misc.h#L111), [Mvfst](https://github.com/facebook/mvfst/blob/main/quic/congestion_control/Bbr2.cpp#L27)). The 0.5 value can be regarded as an upper bound. \r\n\r\nThis PR will keep the value consistent in the draft while we test the impact of the changing it to 0.5.",
       "createdAt": "2024-10-21T17:24:45Z",
-      "updatedAt": "2024-11-01T17:04:45Z",
+      "updatedAt": "2024-11-04T15:59:55Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "bbc5137f505b65c4063296e52f13d930ccfa3eb8",
@@ -490,6 +490,34 @@
           "body": "As one data point, we have performance A/B experiment data from Linux TCP YouTube experiments. The main performance changes were:\r\n\r\n+ 0.5x has slightly slower video play start-up\r\n+ 0.5x has slightly more rebuffers\r\n",
           "createdAt": "2024-11-01T17:04:44Z",
           "updatedAt": "2024-11-01T17:04:44Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "body": "As with all things in BBR, one change can be better or worse depending upon another.  Do we think there's a chance exit from STARTUP will get faster?  If so, draining the pipe quickly might be less important?\r\n\r\nAlternatively, we could adopt the stance that the drain pacing gain should be based on the STARTUP pacing gain, not the CWND gain, because ideally BBR is largely rate/pacing limited and not CWND limited?",
+          "createdAt": "2024-11-04T00:45:07Z",
+          "updatedAt": "2024-11-04T00:45:07Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": ">  Do we think there's a chance exit from STARTUP will get faster? If so, draining the pipe quickly might be less important?\r\n\r\nChanging the drain pacing gain is used after we've already decided to exit startup, so I don't see how this change can impact startup.\r\n\r\n> Alternatively, we could adopt the stance that the drain pacing gain should be based on the STARTUP pacing gain, not the CWND gain\r\n\r\nThe cwnd gain is used in the referenced [derivation doc](https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf) in the assumption about the inflight volume at the beginning of DRAIN: \r\n```\r\nstarting_inflight = BBRStartupCwndGain * bw * min_rtt\r\n```\r\nSwitching this to the StartupPacingGain will give us a value for inflight that Startup can't actually achieve, so we'll try to drain more aggressively (0.35 vs. 0.5) and end up draining in under 1 rtt consistently. My hypothesis is that the shorter drain duration is probably behind the better startup and lower rebuffers in test that we lose with 0.5 due to longer drain.\r\n\r\n> because ideally BBR is largely rate/pacing limited and not CWND limited?\r\n\r\nOn this, I think it applies at the beginning of Startup and throughout ProbeBW. But when Startup has reached the delivery rate plateau, BBR should be cwnd limited since StartupPacingGain > StartupCwndGain. Is my reasoning correct here?",
+          "createdAt": "2024-11-04T15:38:04Z",
+          "updatedAt": "2024-11-04T15:38:04Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I (@nealcardwell) said:\r\n> As one data point, we have performance A/B experiment data from Linux TCP YouTube experiments. The main performance changes were:\r\n\r\nLooking again at these results, Ian has pointed out that it's unclear if those results were statistically significant.\r\n\r\nI've updated the slides to say:\r\n\r\n```\r\n+ Have some performance A/B experiment data from Linux TCP YouTube experiments:\r\n  + Unclear if there are statistically significant performance regressions\r\n  + Would like to re-run an experiment to ensure there are no regressions\r\n```\r\n\r\n@ianswett said:\r\n> Alternatively, we could adopt the stance that the drain pacing gain should be based on the STARTUP pacing gain, not the CWND gain, because ideally BBR is largely rate/pacing limited and not CWND limited?\r\n\r\nI'm pretty sure that the pacing gain in Drain should be 1/startup_cwnd_gain, based on:\r\n\r\n(1) the derivation:\r\nhttps://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf\r\n\r\n(2) the traces, where we see clearly that in STARTUP typically there is a large standing queue for several round trips, whose magnitude is controlled by startup_cwnd_gain:\r\nhttps://www.ietf.org/proceedings/97/slides/slides-97-iccrg-bbr-congestion-control-02.pdf#page=16\r\n\r\n---\r\n\r\nOverall, personally I'm strongly inclined to change the drain pacing gain from 0.346 to 0.5 for a number of reasons:\r\n\r\n(1) consistency with the derivation:\r\nhttps://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf\r\n\r\n(2) simplicity (1/2 is simpler than a 0.346 that would be a hang-over derived from an earlier BBR design parameter that's no longer used)\r\n\r\n(3) using 1/2 presumably has a significantly lower risk of stalls/rebuffers if the ACK stream dries up;  if the ACK stream dries up we presumably would rather have the pacing rate set to 0.5*estimated_bandwidth\r\n than 0.34*estimated_bandwidth.\r\n\r\nI would just like to run another A/B experiment to directly compare 0.346 with 0.5 to ensure there is no regression, before \"finalizing\" the 0.5 value.\r\n",
+          "createdAt": "2024-11-04T15:41:55Z",
+          "updatedAt": "2024-11-04T15:41:55Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "[BTW, my update https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/6#issuecomment-2455049496 crossed with Joseph's update https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/6#issuecomment-2455039635 ... :-) ]\r\n\r\n>  But when Startup has reached the delivery rate plateau, BBR should be cwnd limited since StartupPacingGain > StartupCwndGain. Is my reasoning correct here?\r\n\r\nI believe the reasoning would be: when Startup has reached the delivery rate plateau, BBR should be cwnd limited since: \r\n\r\nStartupPacingGain > 1, which means the sending rate is greater than the delivery rate, so that a queue will accumulate at the bottleneck link and grow until inflight reaches cwnd, and the magnitude of the flow's contribution to the queue will be roughly: cwnd - true_BDP ~= startup_cwnd_gain*estimated_BDP - true_BDP, so the magnitude of the queue will be in proportion to startup_cwnd_gain.\r\n\r\n",
+          "createdAt": "2024-11-04T15:59:54Z",
+          "updatedAt": "2024-11-04T15:59:54Z"
         }
       ],
       "reviews": [
