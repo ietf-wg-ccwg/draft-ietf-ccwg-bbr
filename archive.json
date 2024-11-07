@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-05T01:19:32.421829+00:00",
+  "timestamp": "2024-11-07T01:19:35.619251+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -54,6 +54,79 @@
           "body": "Great, thanks!\r\n",
           "createdAt": "2024-10-21T15:36:56Z",
           "updatedAt": "2024-10-21T15:36:56Z"
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "id": "I_kwDOL3MllM6dEqcL",
+      "title": "Decide and document the BBR draft's stance on ECN",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/7",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Today at the IETF 121 CCWG session, @martinduke asked about the BBR draft's stance on ECN.\r\n\r\nI agree that we should decide and document the BBR draft's stance on ECN.\r\n\r\nIn particular we should probably decide on and document the stance on both:\r\n\r\n+ RFC 3168 ECN\r\n+ L4S ECN\r\n\r\nFor the record, so the ideas are preserved and discussed, I'm pasting some of the CCWG session notes from [Borrowing from the session ](https://notes.ietf.org/notes-ietf-121-ccwg) :\r\n\r\n+ Martin Duke: What about ECT(0), which could be a smilair reaction to loss. Reply - would need to look at this.\r\n\r\n+ Michael Welzl: Following-up, there is ABE (RFC8511), which is a simple change, which uses a smaller backoff to an ECN mark using ECT(0), rather than the full L4S approach, but still with significant benefit. Reply - This is something to consider if we consider ECN.\r\n\r\ncc: @ianswett @jbeshay @renghardt @ekinnear @mattmathis @mwelzl",
+      "createdAt": "2024-11-05T11:51:57Z",
+      "updatedAt": "2024-11-05T18:38:30Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "chromi",
+          "authorAssociation": "NONE",
+          "body": "RFC-3168 requires a CE mark to be treated equivalently to a packet loss.  RFC-8511 modifies the *quantitative* extent to which this must be done, but essentially preserves the *qualitative* equivalency.\r\n\r\nBBR is a little special in that packet loss does not immediately cause a multiplicative-decrease reaction as in conventional window-based CCAs.  That is, BBR only considers packet loss to be a congestion indication above a certain threshold level.  Plain vanilla TCP with RFC-3168 support, however, only reports one CE mark per RTT.  If the BDP exceeds a few dozen segments, that would prevent RFC-3168 from signalling enough CE marks that, if treated strictly equivalent to packet loss, would meet the corresponding threshold and actually trigger a backoff.\r\n\r\nQUIC and SCTP don't have this limitation.  If multiple CE marks occur per RTT, they can report all of them \"precisely\" to the sender, and BBR would be able to meaningfully react to them as equivalents to loss.  There are also certain extensions to TCP which provide a similar capability.\r\n\r\nMy proposal to resolve this is straightforward:\r\n\r\n- If \"precise\" reporting of ECN marks is available, ie. multiple CE marks per RTT can be distinguished, then BBR should treat CE marks as equivalent to loss.\r\n- Otherwise, BBR should react to *single* CE marks in a manner more closely equivalent to standard CCA behaviour.  This could be by immediately and unconditionally entering the ProbeRTT state.\r\n",
+          "createdAt": "2024-11-05T12:44:55Z",
+          "updatedAt": "2024-11-05T12:44:55Z"
+        },
+        {
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "body": "I thought the ECT(0) thing would be straightforward, but Michael's comment\r\nmade it clear that is not a no-brainer. Therefore Neal's assessment that we\r\nshouldn't do anything without some experimentation and deployment is\r\nconvincing to me.\r\n\r\nSo I wouldn't hold this up based on someone willing to do the work,\r\nalthough (as Neal knows) I have some intent to some L4S-BBR testing. It may\r\nnot happen on a timetable useful for this draft.\r\n\r\nOn Tue, Nov 5, 2024 at 12:45\u202fPM Jonathan Morton ***@***.***>\r\nwrote:\r\n\r\n> RFC-3168 requires a CE mark to be treated equivalently to a packet loss.\r\n> RFC-8511 modifies the *quantitative* extent to which this must be done,\r\n> but essentially preserves the *qualitative* equivalency.\r\n>\r\n> BBR is a little special in that packet loss does not immediately cause a\r\n> multiplicative-decrease reaction as in conventional window-based CCAs. That\r\n> is, BBR only considers packet loss to be a congestion indication above a\r\n> certain threshold level. Plain vanilla TCP with RFC-3168 support, however,\r\n> only reports one CE mark per RTT. If the BDP exceeds a few dozen segments,\r\n> that would prevent RFC-3168 from signalling enough CE marks that, if\r\n> treated strictly equivalent to packet loss, would meet the corresponding\r\n> threshold and actually trigger a backoff.\r\n>\r\n> QUIC and SCTP don't have this limitation. If multiple CE marks occur per\r\n> RTT, they can report all of them \"precisely\" to the sender, and BBR would\r\n> be able to meaningfully react to them as equivalents to loss. There are\r\n> also certain extensions to TCP which provide a similar capability.\r\n>\r\n> My proposal to resolve this is straightforward:\r\n>\r\n>    - If \"precise\" reporting of ECN marks is available, ie. multiple CE\r\n>    marks per RTT can be distinguished, then BBR should treat CE marks as\r\n>    equivalent to loss.\r\n>    - Otherwise, BBR should react to *single* CE marks in a manner more\r\n>    closely equivalent to standard CCA behaviour. This could be by immediately\r\n>    and unconditionally entering the ProbeRTT state.\r\n>\r\n> \u2014\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/7#issuecomment-2457074299>,\r\n> or unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/AF2EYEKFHKSKQ2AGTWG7LTLZ7C4V3AVCNFSM6AAAAABRGLUIJSVHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHMZDINJXGA3TIMRZHE>\r\n> .\r\n> You are receiving this because you were mentioned.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+          "createdAt": "2024-11-05T13:22:44Z",
+          "updatedAt": "2024-11-05T13:22:44Z"
+        },
+        {
+          "author": "gorryfair",
+          "authorAssociation": "NONE",
+          "body": "I don't understand really why the simple approach in RFC 8511 can't just be used for ECT(0). I don't think we need to invent a new method - what is said there could be matched to BBR; I'd hope that any L4S device on path will also react to ECT(0) and mark as CE, therefore it would give you at least a helpful ECN reaction to a filling bottleneck",
+          "createdAt": "2024-11-05T13:36:02Z",
+          "updatedAt": "2024-11-05T13:36:02Z"
+        },
+        {
+          "author": "mwelzl",
+          "authorAssociation": "NONE",
+          "body": "@chromi points out an important issue here - indeed, with a threshold, the ability to convey only one mark per RTT can be problematic.\r\n\r\nI don't necessarily agree with the proposal though: if precise reporting is available, then why would you want to react to it as strongly as to loss? The RFC 8511 logic: \"ECN marks tells us that this comes from an AQM algorithm, and hence the queue is shorter\" is still true.",
+          "createdAt": "2024-11-05T13:36:15Z",
+          "updatedAt": "2024-11-05T13:36:15Z"
+        },
+        {
+          "author": "chromi",
+          "authorAssociation": "NONE",
+          "body": "> @chromi points out an important issue here - indeed, with a threshold, the ability to convey only one mark per RTT can be problematic.\r\n> \r\n> I don't necessarily agree with the proposal though: if precise reporting is available, then why would you want to react to it as strongly as to loss? The RFC 8511 logic: \"ECN marks tells us that this comes from an AQM algorithm, and hence the queue is shorter\" is still true.\r\n\r\nBBR's response to loss is already very gentle, compared to NewReno or CUBIC:\r\n\r\n>    BBR searches for the maximum volume of data that can be sensibly\r\n>    placed in-flight in the network.  A key precondition is that the flow\r\n>    is actually trying robustly to find that operating point.  To\r\n>    implement this, when a flow is in ProbeBW, and an ACK covers data\r\n>    sent in one of the accelerating phases (REFILL or UP), and the ACK\r\n>    indicates that the loss rate over the past round trip exceeds the\r\n>    queue pressure objective, and the flow is not application limited,\r\n>    and has not yet responded to congestion signals from the most recent\r\n>    REFILL or UP phase, then the flow estimates that the volume of data\r\n>    it allowed in flight exceeded what matches the current delivery\r\n>    process on the path, and reduces BBR.inflight_hi:\r\n\r\n>    When encountering packet loss when the flow is not probing for\r\n>    bandwidth, the strategy is to gradually adapt to the current measured\r\n>    delivery process (the rate and volume of data that is delivered\r\n>    through the network path over the last round trip).  This applies\r\n>    generally: whether in fast recovery, RTO recovery, TLP recovery;\r\n>    whether application-limited or not.\r\n\r\n(The above is from \u00a7\u00a7 4.5.10.2-3.)\r\n\r\nIn fact, there's an argument that the response to a CE mark should be **more positive** than to loss.  Loss could have several causes, which motivates BBR's designed insensitivity to modest amounts of packet loss.  A CE mark is unambiguously a congestion signal.",
+          "createdAt": "2024-11-05T13:51:20Z",
+          "updatedAt": "2024-11-05T13:51:20Z"
+        },
+        {
+          "author": "chromi",
+          "authorAssociation": "NONE",
+          "body": "Having read and understood a bit more of the specification than before, I think I can revise my proposal as follows:\r\n\r\n- When indication of a CE mark is reflected to the sender, BBR should immediately behave as though the packet loss rate exceeded the sensitivity threshold - that is, `BBRNoteLoss()` should be called and `IsInflightTooHigh()` should return `TRUE`.\r\n\r\nThis does not require any \"precise\" reflection of ECN marks, so it can be used with vanilla TCP.  The effect of a CE mark will be:\r\n\r\n- to terminate any bandwidth probe that BBR is carrying out, and\r\n- to pay more immediate attention to the \"delivery model\", which BBR uses to estimate the path characteristics, in adjusting the send rate and in-flight data volume for the immediate future.\r\n\r\nThis should be very easy to implement, and could also be one of the more straightforward possible modifications of BBR to test.",
+          "createdAt": "2024-11-05T15:37:13Z",
+          "updatedAt": "2024-11-05T15:37:13Z"
+        },
+        {
+          "author": "mwelzl",
+          "authorAssociation": "NONE",
+          "body": "Ah, oh yes, you're right: since an ECN mark is, as you say, unambiguously a congestion signal, not immediately reacting to it (even just one signal/RTT) will cause delay and not help anyone. So this proposal of immediate reaction sounds right to me.",
+          "createdAt": "2024-11-05T16:10:21Z",
+          "updatedAt": "2024-11-05T16:10:21Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "body": "I think it's important to document a recommended response to ECN in the draft, but I don't have a strong opinion on what that is as long as it performs well in real-world testing.",
+          "createdAt": "2024-11-05T18:38:29Z",
+          "updatedAt": "2024-11-05T18:38:29Z"
         }
       ]
     }
