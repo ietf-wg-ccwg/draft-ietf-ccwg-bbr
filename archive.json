@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-07T01:19:35.619251+00:00",
+  "timestamp": "2024-11-10T01:24:21.025759+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -129,6 +129,40 @@
           "updatedAt": "2024-11-05T18:38:29Z"
         }
       ]
+    },
+    {
+      "number": 8,
+      "id": "I_kwDOL3MllM6dYrnQ",
+      "title": "Do we need inflight_lo?",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/8",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "When looking at traces, I've found reasoning about when inflight_lo ends up being a limiting factor and when it's not is quite difficult.\r\n\r\nIn general, BBR attempts to create as accurate a model of the network path as possible.  Originally this was bandwidth and min_rtt, then extra acked for aggregation, then inflight_hi for the max BDP of the pipe.\r\n\r\nBecause BBR no longer does packet conservation, I realize there needs to be some sort of short term model, but the current one is quite complex and I'm hoping it could be simpler.\r\n\r\nIn the Google HTTP/3 implementation, we've done some YouTube experiments with ignoring inflight_lo entirely, and it didn't dramatically increase retransmit rate or RTT, and the QoE was slightly improved.  I don't have the data on hand, but it certainly didn't seem to break BBR and it made it much easier to reason about BBR's behavior.\r\n\r\nIt's possible that inflight_lo is critical to certain properties of BBR, in which case it'd be nice to document those.",
+      "createdAt": "2024-11-07T09:59:55Z",
+      "updatedAt": "2024-11-07T09:59:56Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 9,
+      "id": "I_kwDOL3MllM6dYtXH",
+      "title": "inflight_hi and inflight_lo are confusing names",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/9",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "They're really inflight_longterm and inflight_shortterm or something along those lines.  Also, _hi can be lower than _lo, which is not at all obvious.\r\n\r\nTo be clear, I don't really like inflight_longterm and inflight_shortterm, but maybe inflight_long and inflight_short or something else?",
+      "createdAt": "2024-11-07T10:02:42Z",
+      "updatedAt": "2024-11-07T10:02:42Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
