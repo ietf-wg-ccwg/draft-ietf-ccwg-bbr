@@ -1644,6 +1644,11 @@ The ancillary logic to implement the ProbeBW state machine:
       return true  /* we estimate we've fully used path bw */
     return false
 
+  BBRIsProbingBW():
+    return (BBR.state == Startup or
+            BBR.state == ProbeBW_REFILL or
+            BBR.state == ProbeBW_UP)
+
   BBRHasElapsedInPhase(interval):
     return Now() > BBR.cycle_stamp + interval
 
@@ -3705,7 +3710,7 @@ and the YouTube, google.com, Bandwidth Enforcer, and Google SRE teams for
 their invaluable help and support. We would like to thank Randall R. Stewart,
 Jim Warner, Loganaden Velvindron, Hiren Panchasara, Adrian Zapletal, Christian
 Huitema, Bao Zheng, Jonathan Morton, Matt Olson, Junho Choi, Carsten Bormann,
-Pouria Mousavizadeh Tehrani, and Amanda Baber
+Pouria Mousavizadeh Tehrani, Amanda Baber and Frédéric Lécaille
 for feedback, suggestions, and edits on earlier versions of this document.
 
 
