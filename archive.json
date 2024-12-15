@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-12-12T01:27:49.190871+00:00",
+  "timestamp": "2024-12-15T01:41:36.520310+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -649,6 +649,54 @@
           ]
         }
       ]
+    },
+    {
+      "number": 10,
+      "id": "PR_kwDOL3MllM6FKx4e",
+      "title": "BBRIsProbingBW() is not implemented",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/10",
+      "state": "OPEN",
+      "author": "haproxyFred",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "According to this RFC part in relation with BBRAdaptLowerBoundsFromCongestion():\r\n\r\n  4.5.10.3. When not Probing for Bandwidth\r\n  When not explicitly accelerating to probe for bandwidth (Drain, ProbeRTT,\r\n  ProbeBW_DOWN, ProbeBW_CRUISE), BBR responds to loss by slowing down to some\r\n  extent.\r\n\r\nthis function should exclude the BBR states which are not aforementioned, that is to say Startup, ProbeBW_UP and ProbeBW_REFILL calling BBRIsProbingBW(). So, this latter should be implemented as follows:\r\n\r\nBBRIsProbingBW():\r\n\treturn BBR.state == Startup or\r\n\t       BBR.state == ProbeBW_UP or\r\n\t       BBR.state == ProbeBW_REFILL\r\n\r\nThis patch directly inlines the code of BBRIsProbingBW().",
+      "createdAt": "2024-12-13T16:55:09Z",
+      "updatedAt": "2024-12-13T18:07:20Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "b286d1084fa85d12b1a4a141be339fad8e2759fa",
+      "headRepository": "haproxyFred/draft-ietf-ccwg-bbr",
+      "headRefName": "main",
+      "headRefOid": "0e9eed7fe90b6737060e81dae9db1a2f7ad6e4a4",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks for finding and fixing this!\r\n\r\nA couple minor requests before we merge this:\r\n\r\n+ The commit description calls this document an \"RFC\", but it is just an Internet Draft so far. To avoid confusion, can you please replace \"RFC\" with \"Internet Draft\"?\r\n\r\n+ To make it easier for folks comparing the Linux TCP BBRv3 code and the draft, can you please pull this pseudocode out into a separate BBRIsProbingBW() function and place it immediately above the BBRHasElapsedInPhase() function, to match the  Linux TCP BBRv3 code here:\r\n\r\nhttps://github.com/google/bbr/blob/7542cc7c41c0492a0cdbeb77e295cbfdcd9f5e11/net/ipv4/tcp_bbr.c#L1016\r\n\r\n+ Similarly, can you please reorder the checks to more closely match the Linux TCP BBRv3 code:\r\n\r\n```\r\nBBRIsProbingBW():\r\n  return (BBR.state == Startup or\r\n          BBR.state == ProbeBW_REFILL or\r\n          BBR.state == ProbeBW_UP)\r\n```\r\n\r\n+ Can you please share your first and last name?\r\n\r\n+ Is it OK if we add your first and last name to the acknowledgments section? If so, I encourage you to add yourself there in this commit, to avoid extra round trips of edits/reviews (s/and Amanda Baber/Amanda Baber, and Your Name/).\r\n\r\nThanks!\r\n\r\ncc: @ianswett @jbeshay ",
+          "createdAt": "2024-12-13T17:16:33Z",
+          "updatedAt": "2024-12-13T17:16:33Z"
+        },
+        {
+          "author": "haproxyFred",
+          "authorAssociation": "NONE",
+          "body": "Ok. Well, I am not sure a \"git push -f\" was a good idea. Let me know.",
+          "createdAt": "2024-12-13T17:57:06Z",
+          "updatedAt": "2024-12-13T17:57:06Z"
+        },
+        {
+          "author": "haproxyFred",
+          "authorAssociation": "NONE",
+          "body": "oops, sorry, forgot to mention the \"Internet Draft\"...",
+          "createdAt": "2024-12-13T18:07:19Z",
+          "updatedAt": "2024-12-13T18:07:19Z"
+        }
+      ],
+      "reviews": []
     }
   ]
 }
