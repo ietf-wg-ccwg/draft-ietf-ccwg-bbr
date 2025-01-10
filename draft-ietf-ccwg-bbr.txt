@@ -1470,6 +1470,11 @@ Table of Contents
          return true  /* we estimate we've fully used path bw */
        return false
 
+     BBRIsProbingBW():
+       return (BBR.state == Startup or
+               BBR.state == ProbeBW_REFILL or
+               BBR.state == ProbeBW_UP)
+
      BBRHasElapsedInPhase(interval):
        return Now() > BBR.cycle_stamp + interval
 
@@ -3351,8 +3356,9 @@ Table of Contents
    We would like to thank Randall R.  Stewart, Jim Warner, Loganaden
    Velvindron, Hiren Panchasara, Adrian Zapletal, Christian Huitema, Bao
    Zheng, Jonathan Morton, Matt Olson, Junho Choi, Carsten Bormann,
-   Pouria Mousavizadeh Tehrani, and Amanda Baber for feedback,
-   suggestions, and edits on earlier versions of this document.
+   Pouria Mousavizadeh Tehrani, Amanda Baber and Frédéric Lécaille for
+   feedback, suggestions, and edits on earlier versions of this
+   document.
 
 9.  References
 
