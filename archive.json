@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-09T01:20:51.534450+00:00",
+  "timestamp": "2025-01-12T01:35:45.741182+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -142,9 +142,17 @@
       "labels": [],
       "body": "When looking at traces, I've found reasoning about when inflight_lo ends up being a limiting factor and when it's not is quite difficult.\r\n\r\nIn general, BBR attempts to create as accurate a model of the network path as possible.  Originally this was bandwidth and min_rtt, then extra acked for aggregation, then inflight_hi for the max BDP of the pipe.\r\n\r\nBecause BBR no longer does packet conservation, I realize there needs to be some sort of short term model, but the current one is quite complex and I'm hoping it could be simpler.\r\n\r\nIn the Google HTTP/3 implementation, we've done some YouTube experiments with ignoring inflight_lo entirely, and it didn't dramatically increase retransmit rate or RTT, and the QoE was slightly improved.  I don't have the data on hand, but it certainly didn't seem to break BBR and it made it much easier to reason about BBR's behavior.\r\n\r\nIt's possible that inflight_lo is critical to certain properties of BBR, in which case it'd be nice to document those.",
       "createdAt": "2024-11-07T09:59:55Z",
-      "updatedAt": "2024-11-07T09:59:56Z",
+      "updatedAt": "2025-01-10T18:08:18Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "body": "We discussed this on the editor's call and because inflight_hi is only set at the end of STARTUP and PROBE_UP, if the buffer gets smaller suddenly due to cross traffic or otherwise, BBR will be take a while to reduce inflight.\r\n\r\nOn the other hand, BBR doesn't immediately reduce inflight_hi whenever 2% loss is observed because it could be transitory and go away fairly quickly.",
+          "createdAt": "2025-01-10T18:08:16Z",
+          "updatedAt": "2025-01-10T18:08:16Z"
+        }
+      ]
     },
     {
       "number": 9,
@@ -160,9 +168,17 @@
       ],
       "body": "They're really inflight_longterm and inflight_shortterm or something along those lines.  Also, _hi can be lower than _lo, which is not at all obvious.\r\n\r\nTo be clear, I don't really like inflight_longterm and inflight_shortterm, but maybe inflight_long and inflight_short or something else?",
       "createdAt": "2024-11-07T10:02:42Z",
-      "updatedAt": "2024-11-07T10:02:42Z",
+      "updatedAt": "2025-01-10T18:08:58Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "body": "We discussed this on the editors call and agreed that inflight_longterm and inflight_shortterm are less confusing and not overly verbose.",
+          "createdAt": "2025-01-10T18:08:56Z",
+          "updatedAt": "2025-01-10T18:08:56Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -655,24 +671,26 @@
       "id": "PR_kwDOL3MllM6FKx4e",
       "title": "BBRIsProbingBW() is not implemented",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/10",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "haproxyFred",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
-      "body": "According to this RFC part in relation with BBRAdaptLowerBoundsFromCongestion():\r\n\r\n  4.5.10.3. When not Probing for Bandwidth\r\n  When not explicitly accelerating to probe for bandwidth (Drain, ProbeRTT,\r\n  ProbeBW_DOWN, ProbeBW_CRUISE), BBR responds to loss by slowing down to some\r\n  extent.\r\n\r\nthis function should exclude the BBR states which are not aforementioned, that is to say Startup, ProbeBW_UP and ProbeBW_REFILL calling BBRIsProbingBW(). So, this latter should be implemented as follows:\r\n\r\nBBRIsProbingBW():\r\n\treturn BBR.state == Startup or\r\n\t       BBR.state == ProbeBW_UP or\r\n\t       BBR.state == ProbeBW_REFILL\r\n\r\nThis patch directly inlines the code of BBRIsProbingBW().",
+      "body": "According to this draft in relation with BBRAdaptLowerBoundsFromCongestion():\r\n\r\n  4.5.10.3. When not Probing for Bandwidth\r\n  When not explicitly accelerating to probe for bandwidth (Drain, ProbeRTT,\r\n  ProbeBW_DOWN, ProbeBW_CRUISE), BBR responds to loss by slowing down to some\r\n  extent.\r\n\r\nthis function should exclude the BBR states which are not aforementioned, that is to say Startup, ProbeBW_UP and ProbeBW_REFILL calling BBRIsProbingBW(). So, this latter should be implemented as follows:\r\n\r\nBBRIsProbingBW():\r\n\treturn BBR.state == Startup or\r\n\t       BBR.state == ProbeBW_UP or\r\n\t       BBR.state == ProbeBW_REFILL\r\n\r\nThis patch directly inlines the code of BBRIsProbingBW().",
       "createdAt": "2024-12-13T16:55:09Z",
-      "updatedAt": "2024-12-13T18:07:20Z",
+      "updatedAt": "2025-01-10T17:12:08Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b286d1084fa85d12b1a4a141be339fad8e2759fa",
       "headRepository": "haproxyFred/draft-ietf-ccwg-bbr",
       "headRefName": "main",
       "headRefOid": "0e9eed7fe90b6737060e81dae9db1a2f7ad6e4a4",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-01-10T17:12:08Z",
+      "mergedAt": "2025-01-10T17:12:08Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "ec8e965913f5b603296d3f74386eb6000e6de9d4"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -683,20 +701,34 @@
         },
         {
           "author": "haproxyFred",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "Ok. Well, I am not sure a \"git push -f\" was a good idea. Let me know.",
           "createdAt": "2024-12-13T17:57:06Z",
           "updatedAt": "2024-12-13T17:57:06Z"
         },
         {
           "author": "haproxyFred",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "oops, sorry, forgot to mention the \"Internet Draft\"...",
           "createdAt": "2024-12-13T18:07:19Z",
           "updatedAt": "2024-12-13T18:07:19Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6Xkybb",
+          "commit": {
+            "abbreviatedOid": "0e9eed7"
+          },
+          "author": "ianswett",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-01-10T17:11:57Z",
+          "updatedAt": "2025-01-10T17:11:57Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
