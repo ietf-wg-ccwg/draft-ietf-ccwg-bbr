@@ -1,11 +1,11 @@
 # BBR Congestion Control
 
-This is the working area for the individual Internet-Draft, "BBR Congestion Control".
+This is the working area for the IETF [CCWG Working Group](https://datatracker.ietf.org/group/ccwg/documents/) Internet-Draft, "BBR Congestion Control".
 
 * [Editor's Copy](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/#go.draft-ietf-ccwg-bbr.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-ietf-ccwg-bbr)
 * [Working Group Draft](https://datatracker.ietf.org/doc/html/draft-ietf-ccwg-bbr)
-* [Compare Editor's Copy to Individual Draft](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/#go.draft-ietf-ccwg-bbr.diff)
+* [Compare Editor's Copy to Working Group Draft](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/#go.draft-ietf-ccwg-bbr.diff)
 
 
 ## Contributing
