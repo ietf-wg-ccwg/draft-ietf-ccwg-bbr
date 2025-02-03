@@ -217,8 +217,6 @@ products and degrees of buffering in Internet paths. As the Internet has
 evolved, loss-based congestion control is increasingly problematic in several
 important scenarios:
 
-
-
 1. Shallow buffers: In shallow buffers, packet loss can happen even when a link
   has low utilization. With high-speed, long-haul links employing commodity
   switches with shallow buffers, loss-based congestion control can cause abysmal
@@ -242,15 +240,12 @@ important scenarios:
 In both the shallow-buffer (1.) or dynamic-traffic (3.) scenarios mentioned
 above it is difficult to achieve full throughput with loss-based congestion
 control in practice: for CUBIC, sustaining 10Gbps over 100ms RTT needs a
-packet
-loss rate below 0.000003% (i.e., more than 40 seconds between packet losses),
+packet loss rate below 0.000003% (i.e., more than 40 seconds between packet losses),
 and over a 100ms RTT path a more feasible loss rate like 1% can only sustain
-at
-most 3 Mbps {{RFC9438}}. These limitations apply no matter what
+at most 3 Mbps {{RFC9438}}. These limitations apply no matter what
 the bottleneck link is capable of or what the connection's fair share
 is. Furthermore, failure to reach the fair share can cause poor throughput
-and
-poor tail latency for latency-sensitive applications.
+and poor tail latency for latency-sensitive applications.
 
 The BBR ("Bottleneck Bandwidth and Round-trip propagation time") congestion
 control algorithm is a model-based algorithm that takes an approach different
@@ -263,12 +258,10 @@ pressure. It then uses this model in order to guide its control behavior
 in seeking high throughput and low queue pressure.
 
 This document describes the current version of the BBR algorithm, BBRv3.
-The
-original version of the algorithm, BBRv1, was described previously at a high
-level {{CCGHJ16}}{{CCGHJ17}}. The implications of BBR
+The original version of the algorithm, BBRv1, was described previously at a
+high level {{CCGHJ16}}{{CCGHJ17}}. The implications of BBR
 in allowing high utilization of high-speed networks with shallow buffers
-have
-been discussed in other work {{MM19}}. Active work on the BBR
+have been discussed in other work {{MM19}}. Active work on the BBR
 algorithm is continuing.
 
 This document is organized as follows. Section 2 provides various definitions
@@ -432,16 +425,14 @@ pacing rate control parameter that is consistent with the queue pressure
 objective (BBR.bw).
 
 BBR.max_bw: The windowed maximum recent bandwidth sample, obtained using
-the
-BBR delivery rate sampling algorithm in {{delivery-rate-samples}},
+the BBR delivery rate sampling algorithm in {{delivery-rate-samples}},
 measured during the current or previous bandwidth probing cycle (or during
 Startup, if the flow is still in that state). (Part of the long-term
 model.)
 
 BBR.bw_shortterm: The short-term maximum sending bandwidth that the algorithm
 estimates is safe for matching the current network path delivery rate, based
-on
-any loss signals in the current bandwidth probing cycle. This is generally
+on any loss signals in the current bandwidth probing cycle. This is generally
 lower than max_bw (thus the name). (Part of the short-term model.)
 
 BBR.bw: The maximum sending bandwidth that the algorithm estimates is
@@ -481,17 +472,15 @@ budget (BBR.offload_budget), and BBRMinPipeCwnd.
 
 BBR.inflight_longterm: The long-term maximum volume of in-flight data that the
 algorithm estimates will produce acceptable queue pressure, based on signals
-in
-the current or previous bandwidth probing cycle, as measured by loss. That
-is,
-if a flow is probing for bandwidth, and observes that sending a particular
+in the current or previous bandwidth probing cycle, as measured by loss. That
+is, if a flow is probing for bandwidth, and observes that sending a particular
 volume of in-flight data causes a loss rate higher than the loss rate
 objective, it sets inflight_longterm to that volume of data. (Part of the long-term
 model.)
 
-BBR.inflight_shortterm: Analogous to BBR.bw_shortterm, the short-term maximum volume of
-in-flight data that the algorithm estimates is safe for matching the current
-network path delivery process, based on any loss signals in the current
+BBR.inflight_shortterm: Analogous to BBR.bw_shortterm, the short-term maximum
+volume of in-flight data that the algorithm estimates is safe for matching the
+current network path delivery process, based on any loss signals in the current
 bandwidth probing cycle. This is generally lower than max_inflight or
 inflight_longterm (thus the name). (Part of the short-term model.)
 
@@ -588,8 +577,6 @@ The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 be interpreted as described in {{RFC2119}}.
 
 
-
-
 # Design Overview {#design-overview}
 
 ## High-Level Design Goals {#high-level-design-goals}
@@ -603,8 +590,7 @@ The high-level goal of BBR is to achieve both:
 
    * Achieved with average packet loss rates of up to 1%.
 
-
-1. Low queue pressure (low queuing delay and low packet loss).
+2. Low queue pressure (low queuing delay and low packet loss).
 
 
 These goals are in tension: sending faster improves the odds of achieving
@@ -621,7 +607,7 @@ match the network delivery process, in two dimensions:
   rate at which the network delivers the flow's data (the available bottleneck
   bandwidth)
 
-1. data volume: the amount of unacknowledged data in flight in the network
+2. data volume: the amount of unacknowledged data in flight in the network
   should ideally match the bandwidth-delay product (BDP) of the path
 
 
@@ -635,7 +621,7 @@ fail to meet its high-level design goals:
   the sender can maintain a large standing queue, increasing network latency
   and risking packet loss.
 
-1. rate mismatch: If a sender's volume of in-flight data matches the BDP
+2. rate mismatch: If a sender's volume of in-flight data matches the BDP
   perfectly but its sending rate exceeds the available bottleneck bandwidth
   (e.g. the sender transmits a BDP of data in an unpaced fashion, at the
   sender's link rate), then up to a full BDP of data can burst into the
@@ -655,8 +641,6 @@ that are consistent with its objective for queue pressure.
 Depending on what signals a given network path manifests at a given time,
 the objective for queue pressure is measured in terms of the most strict
 among:
-
-
 
 * the amount of data that is estimated to be queued in the bottleneck buffer
   (data_in_flight - estimated_BDP): the objective is to maintain this amount
@@ -690,8 +674,6 @@ state is described below.
 
 At a high level, the BBR model is trying to reflect two aspects of the network
 path:
-
-
 
 * Model what's required for achieving full throughput: Estimate the data rate
   (BBR.max_bw) and data volume (BBR.max_inflight) required to fully utilize the
@@ -748,8 +730,6 @@ probe the limits of the available path capacity in case the congestion has
 abated and more capacity is available.
 
 
-
-
 ## Control Parameter Overview {#control-parameter-overview}
 
 BBR uses its model to control the connection's sending behavior. Rather than
@@ -757,15 +737,13 @@ using a single control parameter, like the cwnd parameter that limits the
 volume of in-flight data in the Reno and CUBIC congestion control algorithms,
 BBR uses three distinct control parameters:
 
-
-
 1. pacing rate: the maximum rate at which BBR sends data.
 
-1. send quantum: the maximum size of any aggregate that the transport sender
+2. send quantum: the maximum size of any aggregate that the transport sender
   implementation may need to transmit as a unit to amortize per-packet
   transmission overheads.
 
-1. cwnd: the maximum volume of data BBR allows in-flight in the network at any
+3. cwnd: the maximum volume of data BBR allows in-flight in the network at any
   time.
 
 
@@ -779,7 +757,6 @@ available for the TCP {{RFC9293}} and QUIC {{RFC9000}} transport
 protocols, and these implementations have been used in production
 for a large volume of Internet traffic. An open source implementation of
 BBR is also available for DCCP {{RFC4340}}  {{draft-romo-iccrg-ccid5}}.
-
 
 
 # Detailed Algorithm {#detailed-algorithm}
@@ -838,8 +815,6 @@ or continuous).
 
 This state machine has several goals:
 
-
-
 * Achieve high throughput by efficiently utilizing available bandwidth.
 
 * Achieve low latency and packet loss rates by keeping queues bounded and small.
@@ -854,8 +829,6 @@ This state machine has several goals:
 
 In the BBR framework, at any given time the sender can choose one of the
 following tactics:
-
-
 
 * Acceleration: Send faster then the network is delivering data: to probe the
   maximum bandwidth available to the flow
@@ -915,7 +888,6 @@ sub-steps invoked referenced below are described below.
 Upon transport connection initialization, BBR executes its initialization
 steps:
 
-
 ~~~~
   BBROnInit():
     InitWindowedMaxFilter(filter=BBR.MaxBwFilter, value=0, time=0)
@@ -942,7 +914,6 @@ steps:
 When transmitting, BBR merely needs to check for the case where the flow
 is restarting from idle:
 
-
 ~~~~
   BBROnTransmit():
     BBRHandleRestartFromIdle()
@@ -954,7 +925,6 @@ is restarting from idle:
 On every ACK, the BBR algorithm executes the following BBRUpdateOnACK() steps
 in order to update its network path model, update its state machine, and
 adjust its control parameters to adapt to the updated model:
-
 
 ~~~~
   BBRUpdateOnACK():
@@ -987,7 +957,6 @@ On every packet loss event, where some sequence range "packet" is marked
 lost, the BBR algorithm executes the following BBRUpdateOnLoss() steps in
 order to update its network path model
 
-
 ~~~~
   BBRUpdateOnLoss(packet):
     BBRHandleLostPacket(packet)
@@ -1018,7 +987,6 @@ and BBR.cwnd_gain to BBRDefaultCwndGain (2) {{BBRStartupCwndGain}}.
 When initializing a connection, or upon any later entry into Startup mode,
 BBR executes the following BBREnterStartup() steps:
 
-
 ~~~~
   BBREnterStartup():
     BBR.state = Startup
@@ -1029,16 +997,13 @@ BBR executes the following BBREnterStartup() steps:
 As BBR grows its sending rate rapidly, it obtains higher delivery rate
 samples, BBR.max_bw increases, and the pacing rate and cwnd both adapt by
 smoothly growing in proportion. Once the pipe is full, a queue typically
-forms,
-but the cwnd_gain bounds any queue to (cwnd_gain - 1) \* estimated_BDP, which
-is
-approximately (2 - 1) \* estimated_BDP = estimated_BDP. The immediately
+forms, but the cwnd_gain bounds any queue to (cwnd_gain - 1) \* estimated_BDP,
+which is approximately (2 - 1) \* estimated_BDP = estimated_BDP. The immediately
 following Drain state is designed to quickly drain that queue.
 
 During Startup, BBR estimates whether the pipe is full using two estimators.
 The first looks for a plateau in the BBR.max_bw estimate. The second looks
 for packet loss. The following subsections discuss these estimators.
-
 
 ~~~~
   BBRCheckStartupDone():
@@ -1059,23 +1024,18 @@ rs.delivery_rate.
 BBR tracks the status of the current full-pipe estimation process in the
 boolean BBR.full_bw_now, and uses BBR.full_bw_now to exit ProbeBW_UP. BBR
 records in the boolean BBR.full_bw_reached whether BBR estimates that it
-has
-ever fully utilized its available bandwidth (over the lifetime of the
+has ever fully utilized its available bandwidth (over the lifetime of the
 connection), and uses BBR.full_bw_reached to decide when to exit Startup
-and
-enter Drain.
+and enter Drain.
 
 The full pipe estimator works as follows: if BBR counts several (three)
 non-application-limited rounds where attempts to significantly increase the
 delivery rate actually result in little increase (less than 25 percent),
-then
-it estimates that it has fully utilized the per-flow available bandwidth,
-and
-sets both BBR.full_bw_now and BBR.full_bw_reached to true.
+then it estimates that it has fully utilized the per-flow available bandwidth,
+and sets both BBR.full_bw_now and BBR.full_bw_reached to true.
 
 Upon starting a full pipe detection process (either on startup or when probing
 for an increase in bandwidth), the following steps are taken:
-
 
 ~~~~
   BBRResetFullBW():
@@ -1087,7 +1047,6 @@ for an increase in bandwidth), the following steps are taken:
 While running the full pipe detection process, upon an ACK that acknowledges
 new data, and when the delivery rate sample is not application-limited
 (see {{delivery-rate-samples}}), BBR runs the "full pipe" estimator:
-
 
 ~~~~
   BBRCheckFullBWReached():
@@ -1114,11 +1073,8 @@ receive window.
 #### Exiting Startup Based on Packet Loss {#exiting-startup-based-on-packet-loss}
 
 A second method BBR uses for estimating the bottleneck is full in Startup
-is
-by looking at packet losses. Specifically, BBRCheckStartupHighLoss() checks
+is by looking at packet losses. Specifically, BBRCheckStartupHighLoss() checks
 whether all of the following criteria are all met:
-
-
 
 * The connection has been in fast recovery for at least one full packet-timed
   round trip.
