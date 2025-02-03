@@ -1276,7 +1276,7 @@ work well in the primary contexts where they do today:
 
 * Intra-datacenter/LAN traffic: the goal is to allow Reno/CUBIC to be able
   to perform well in 100M through 40G enterprise and datacenter Ethernet:
-  
+
   * BDP = 40 Gbps \* 20 us / (1514 bytes) ~= 66 packets
 
 * Public Internet last mile traffic: the goal is to allow Reno/CUBIC to be
