@@ -1163,24 +1163,17 @@ Exit conditions: The flow exits the ProbeBW_DOWN phase and enters CRUISE
 when the flow estimates that both of the following conditions have been
 met:
 
-
-
 * There is free headroom: If inflight_longterm is set, then BBR remains in
   ProbeBW_DOWN at least until the volume of in-flight data is less than or
-  equal
-  to a target calculated based on (1 - BBRHeadroom)\*BBR.inflight_longterm. The goal
-  of
-  this constraint is to ensure that in cases where loss signals suggest an
-  upper
-  limit on the volume of in-flight data, then the flow attempts to leave some
-  free headroom in the path (e.g. free space in the bottleneck buffer or free
-  time slots in the bottleneck link) that can be used by cross traffic (both
-  for
-  convergence of bandwidth shares and for burst tolerance).
+  equal to a target calculated based on (1 - BBRHeadroom)\*BBR.inflight_longterm.
+  The goal of this constraint is to ensure that in cases where loss signals
+  suggest an upper limit on the volume of in-flight data, then the flow attempts
+  to leave some free headroom in the path (e.g. free space in the bottleneck
+  buffer or free time slots in the bottleneck link) that can be used by cross
+  traffic (both for convergence of bandwidth shares and for burst tolerance).
 
 * The volume of in-flight data is less than or equal to BBR.bdp, i.e. the flow
   estimates that it has drained any queue at the bottleneck.
-
 
 
 #### ProbeBW_CRUISE {#probebwcruise}
@@ -1192,12 +1185,10 @@ network is delivering data. It tries to match the sending rate to the flow's
 current available bandwidth, to try to achieve high utilization of the
 available bandwidth without increasing queue pressure. It does this by
 switching to a pacing_gain of 1.0, sending at 100% of BBR.bw. Notably, while
-in
-this state it responds to concrete congestion signals (loss) by reducing
-BBR.bw_shortterm and BBR.inflight_shortterm, because these signals suggest that the available
-bandwidth and deliverable volume of in-flight data have likely reduced, and
-the
-flow needs to change to adapt, slowing down to match the latest delivery
+in this state it responds to concrete congestion signals (loss) by reducing
+BBR.bw_shortterm and BBR.inflight_shortterm, because these signals suggest that
+the available bandwidth and deliverable volume of in-flight data have likely reduced,
+and the flow needs to change to adapt, slowing down to match the latest delivery
 process.
 
 Exit conditions: The connection adaptively holds this state until it decides
@@ -1213,13 +1204,11 @@ utilize the network bottleneck without creating any significant queue pressure.
 
 To do this, BBR first resets the short-term model parameters bw_shortterm and
 inflight_shortterm, setting both to "Infinity". This is the key moment in the BBR
-time
-scale strategy (see "Time Scale Strategy", {{time-scale-strategy}})
-where the flow pivots, discarding its
-conservative short-term bw_shortterm and inflight_shortterm parameters and beginning to
-robustly probe the bottleneck's long-term available bandwidth. During this
-time
-the estimated bandwidth and inflight_longterm, if set, constrain the connection.
+time scale strategy (see "Time Scale Strategy", {{time-scale-strategy}})
+where the flow pivots, discarding its conservative short-term bw_shortterm and
+inflight_shortterm parameters and beginning to robustly probe the bottleneck's
+long-term available bandwidth. During this time the estimated bandwidth and
+inflight_longterm, if set, constrain the connection.
 
 During ProbeBW_REFILL BBR uses a BBR.pacing_gain of 1.0, to send at a rate
 that matches the current estimated available bandwidth, for one packet-timed
