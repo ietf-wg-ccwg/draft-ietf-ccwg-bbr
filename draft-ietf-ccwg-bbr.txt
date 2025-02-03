@@ -782,11 +782,11 @@ Table of Contents
       motivations:
 
       -  Reducing queuing delay: to reduce queuing delay, to reduce
-         latency for request/response cross-traffic (e.g.  RPC, web
+         latency for request/response cross-traffic (e.g. RPC, web
          traffic).
 
       -  Reducing packet loss: to reduce packet loss, to reduce tail
-         latency for request/response cross-traffic (e.g.  RPC, web
+         latency for request/response cross-traffic (e.g. RPC, web
          traffic) and improve coexistence with Reno/CUBIC.
 
       -  Probing BBR.min_rtt: to probe the path's BBR.min_rtt
