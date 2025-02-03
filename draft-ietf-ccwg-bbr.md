@@ -191,11 +191,9 @@ informative:
 This document specifies the BBR congestion control algorithm. BBR ("Bottleneck
 Bandwidth and Round-trip propagation time") uses recent measurements of a
 transport connection's delivery rate, round-trip time, and packet loss rate
-to
-build an explicit model of the network path. BBR then uses this model to
+to build an explicit model of the network path. BBR then uses this model to
 control both how fast it sends data and the maximum volume of data it allows
-in
-flight in the network at any time. Relative to loss-based congestion control
+in flight in the network at any time. Relative to loss-based congestion control
 algorithms such as Reno {{RFC5681}} or CUBIC {{RFC9438}}, BBR offers
 substantially higher throughput for bottlenecks
 with shallow buffers or random losses, and substantially lower queueing delays
