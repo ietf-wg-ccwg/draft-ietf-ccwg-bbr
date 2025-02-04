@@ -12,11 +12,9 @@
        This document specifies the BBR congestion control algorithm. BBR (&quot;Bottleneck
 Bandwidth and Round-trip propagation time&quot;) uses recent measurements of a
 transport connection's delivery rate, round-trip time, and packet loss rate
-to
-build an explicit model of the network path. BBR then uses this model to
+to build an explicit model of the network path. BBR then uses this model to
 control both how fast it sends data and the maximum volume of data it allows
-in
-flight in the network at any time. Relative to loss-based congestion control
+in flight in the network at any time. Relative to loss-based congestion control
 algorithms such as Reno   or CUBIC  , BBR offers
 substantially higher throughput for bottlenecks
 with shallow buffers or random losses, and substantially lower queueing delays
@@ -1110,11 +1108,9 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <p id="section-abstract-1">This document specifies the BBR congestion control algorithm. BBR ("Bottleneck
 Bandwidth and Round-trip propagation time") uses recent measurements of a
 transport connection's delivery rate, round-trip time, and packet loss rate
-to
-build an explicit model of the network path. BBR then uses this model to
+to build an explicit model of the network path. BBR then uses this model to
 control both how fast it sends data and the maximum volume of data it allows
-in
-flight in the network at any time. Relative to loss-based congestion control
+in flight in the network at any time. Relative to loss-based congestion control
 algorithms such as Reno <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> or CUBIC <span>[<a href="#RFC9438" class="cite xref">RFC9438</a>]</span>, BBR offers
 substantially higher throughput for bottlenecks
 with shallow buffers or random losses, and substantially lower queueing delays
@@ -1585,8 +1581,7 @@ round (4 * ln(2) ~= 2.77) <span>[<a href="#BBRStartupPacingGain" class="cite xre
 Startup mode for BBR.pacing_gain.<a href="#section-2.5-4" class="pilcrow">¶</a></p>
 <p id="section-2.5-5">BBRDrainPacingGain: A constant specifying the pacing gain value used in
 Drain mode, to attempt to drain the estimated queue at the bottleneck link
-in
-one round-trip or less. As noted in <span>[<a href="#BBRDrainPacingGain" class="cite xref">BBRDrainPacingGain</a>]</span>, any
+in one round-trip or less. As noted in <span>[<a href="#BBRDrainPacingGain" class="cite xref">BBRDrainPacingGain</a>]</span>, any
 value at or below 1 / BBRStartupCwndGain = 1 / 2 = 0.5 will theoretically
 achieve this. BBR uses the value 0.35, which has been shown to offer good
 performance when compared with other alternatives.<a href="#section-2.5-5" class="pilcrow">¶</a></p>
@@ -2317,8 +2312,7 @@ order to update its network path model<a href="#section-4.2.4-1" class="pilcrow"
 <p id="section-4.3.1.1-1">When a BBR flow starts up, it performs its first (and most rapid) sequential
 probe/drain process in the Startup and Drain states. Network link bandwidths
 currently span a range of at least 11 orders of magnitude, from a few bps
-to
-hundreds of Gbps. To quickly learn BBR.max_bw, given this huge range to
+to hundreds of Gbps. To quickly learn BBR.max_bw, given this huge range to
 explore, BBR's Startup state does an exponential search of the rate space,
 doubling the sending rate each round. This finds BBR.max_bw in O(log_2(BDP))
 round trips.<a href="#section-4.3.1.1-1" class="pilcrow">¶</a></p>
@@ -2340,8 +2334,8 @@ BBR executes the following BBREnterStartup() steps:<a href="#section-4.3.1.1-3" 
 samples, BBR.max_bw increases, and the pacing rate and cwnd both adapt by
 smoothly growing in proportion. Once the pipe is full, a queue typically
 forms, but the cwnd_gain bounds any queue to (cwnd_gain - 1) * estimated_BDP,
-which is approximately (2 - 1) * estimated_BDP = estimated_BDP. The immediately
-following Drain state is designed to quickly drain that queue.<a href="#section-4.3.1.1-5" class="pilcrow">¶</a></p>
+which is approximately (2 - 1) * estimated_BDP = estimated_BDP.
+The immediately following Drain state is designed to quickly drain that queue.<a href="#section-4.3.1.1-5" class="pilcrow">¶</a></p>
 <p id="section-4.3.1.1-6">During Startup, BBR estimates whether the pipe is full using two estimators.
 The first looks for a plateau in the BBR.max_bw estimate. The second looks
 for packet loss. The following subsections discuss these estimators.<a href="#section-4.3.1.1-6" class="pilcrow">¶</a></p>
@@ -2438,11 +2432,9 @@ lost in that round trip.<a href="#section-4.3.1.3-2.3.1" class="pilcrow">¶</a><
 <p id="section-4.3.1.3-3">If these criteria are all met, then BBRCheckStartupHighLoss() takes the
 following steps. First, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
-by
-these losses, which is max(BBR.bdp, BBR.inflight_latest), where
+by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
 BBR.inflight_latest is the max delivered volume of data (rs.delivered) over
-the
-last round trip. Finally, it exits Startup and enters Drain.<a href="#section-4.3.1.3-3" class="pilcrow">¶</a></p>
+the last round trip. Finally, it exits Startup and enters Drain.<a href="#section-4.3.1.3-3" class="pilcrow">¶</a></p>
 <p id="section-4.3.1.3-4">The algorithm waits until all three criteria are met to filter out noise
 from burst losses, and to try to ensure the bottleneck is fully utilized
 on a sustained basis, and the full bottleneck bandwidth has been measured,
@@ -2472,10 +2464,8 @@ than one round-trip:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
 </div>
 <p id="section-4.3.2-3">In Drain, when the amount of data in flight is less than or equal to the
 estimated BDP, meaning BBR estimates that the queue at the bottleneck link
-has
-been fully drained, then BBR exits Drain and enters ProbeBW. To implement
-this,
-upon every ACK BBR executes:<a href="#section-4.3.2-3" class="pilcrow">¶</a></p>
+has been fully drained, then BBR exits Drain and enters ProbeBW. To implement
+this, upon every ACK BBR executes:<a href="#section-4.3.2-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.2-4">
 <pre>
   BBRCheckDrainDone():
@@ -2510,8 +2500,7 @@ the amount of data in flight, with all of the standard motivations for the
 deceleration tactic (discussed in "State Machine Tactics" in
 <a href="#state-machine-tactics" class="auto internal xref">Section 4.1.3</a>). It does this by switching to a
 BBR.pacing_gain of 0.90, sending at 90% of BBR.bw. The pacing_gain value
-of
-0.90 is derived based on the ProbeBW_UP pacing gain of 1.25, as the minimum
+of 0.90 is derived based on the ProbeBW_UP pacing gain of 1.25, as the minimum
 pacing_gain value that allows bandwidth-based convergence to approximate
 fairness, and validated through experiments.<a href="#section-4.3.3.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.3.3.1-2">Exit conditions: The flow exits the ProbeBW_DOWN phase and enters CRUISE
@@ -2525,8 +2514,8 @@ equal to a target calculated based on (1 - BBRHeadroom)*BBR.inflight_longterm.
 The goal of this constraint is to ensure that in cases where loss signals
 suggest an upper limit on the volume of in-flight data, then the flow attempts
 to leave some free headroom in the path (e.g. free space in the bottleneck
-buffer or free time slots in the bottleneck link) that can be used by cross
-traffic (both for convergence of bandwidth shares and for burst tolerance).<a href="#section-4.3.3.1-3.1.1" class="pilcrow">¶</a></p>
+buffer or free time slots in the bottleneck link) that can be used by
+cross traffic (both for convergence of bandwidth shares and for burst tolerance).<a href="#section-4.3.3.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.3.3.1-3.2">
                 <p id="section-4.3.3.1-3.2.1">The volume of in-flight data is less than or equal to BBR.bdp, i.e. the flow
@@ -2549,9 +2538,9 @@ available bandwidth without increasing queue pressure. It does this by
 switching to a pacing_gain of 1.0, sending at 100% of BBR.bw. Notably, while
 in this state it responds to concrete congestion signals (loss) by reducing
 BBR.bw_shortterm and BBR.inflight_shortterm, because these signals suggest that
-the available bandwidth and deliverable volume of in-flight data have likely reduced,
-and the flow needs to change to adapt, slowing down to match the latest delivery
-process.<a href="#section-4.3.3.2-1" class="pilcrow">¶</a></p>
+the available bandwidth and deliverable volume of in-flight data have likely
+reduced, and the flow needs to change to adapt, slowing down to match the
+latest delivery process.<a href="#section-4.3.3.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.3.3.2-2">Exit conditions: The connection adaptively holds this state until it decides
 that it is time to probe for bandwidth (see "Time Scale for Bandwidth Probing",
 in <a href="#time-scale-for-bandwidth-probing-" class="auto internal xref">Section 4.3.3.5</a>), at which time it enters
@@ -2579,27 +2568,22 @@ transitioning into ProbeBW_UP and significantly increasing the chances of
 causing loss. The motivating insight is that, as soon as a flow starts
 acceleration, sending faster than the available bandwidth, it will start
 building a queue at the bottleneck. And if the buffer is shallow enough,
-then
-the flow can cause loss signals very shortly after the first accelerating
+then the flow can cause loss signals very shortly after the first accelerating
 packets arrive at the bottleneck. If the flow were to neglect to fill the
-pipe
-before it causes this loss signal, then these very quick signals of excess
+pipe before it causes this loss signal, then these very quick signals of excess
 queue could cause the flow's estimate of the path's capacity (i.e. inflight_longterm)
 to significantly underestimate. In particular, if the flow were to transition
 directly from ProbeBW_CRUISE to ProbeBW_UP, the volume of in-flight data
-(at
-the time the first accelerating packets were sent) may often be still very
+(at the time the first accelerating packets were sent) may often be still very
 close to the volume of in-flight data maintained in CRUISE, which may be
-only
-(1 - BBRHeadroom)*inflight_longterm.<a href="#section-4.3.3.3-3" class="pilcrow">¶</a></p>
+only (1 - BBRHeadroom)*inflight_longterm.<a href="#section-4.3.3.3-3" class="pilcrow">¶</a></p>
 <p id="section-4.3.3.3-4">Exit conditions: The flow exits ProbeBW_REFILL after one packet-timed round
 trip, and enters ProbeBW_UP. This is because after one full round trip of
 sending in ProbeBW_REFILL the flow (if not application-limited) has had an
 opportunity to place as many packets in flight as its BBR.bw and inflight_longterm
 permit. Correspondingly, at this point the flow starts to see bandwidth samples
 reflecting its ProbeBW_REFILL behavior, which may be putting too much data
-in
-flight.<a href="#section-4.3.3.3-4" class="pilcrow">¶</a></p>
+in flight.<a href="#section-4.3.3.3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probebwup">
@@ -2611,9 +2595,8 @@ flight.<a href="#section-4.3.3.3-4" class="pilcrow">¶</a></p>
 increases in available bandwidth by raising the sending rate, using a
 BBR.pacing_gain of 1.25, to send faster than the current estimated available
 bandwidth. It also raises the cwnd_gain to 2.25, to ensure that the flow
-can
-send faster than it had been, even if cwnd was previously limiting the sending
-process.<a href="#section-4.3.3.4-1" class="pilcrow">¶</a></p>
+can send faster than it had been, even if cwnd was previously limiting the
+sending process.<a href="#section-4.3.3.4-1" class="pilcrow">¶</a></p>
 <p id="section-4.3.3.4-2">If the flow has not set BBR.inflight_longterm, it implicitly tries to raise the
 volume of in-flight data to at least BBR.pacing_gain * BBR.bdp = 1.25 *
 BBR.bdp.<a href="#section-4.3.3.4-2" class="pilcrow">¶</a></p>
@@ -3047,20 +3030,17 @@ delay.<a href="#section-4.3.4.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.1-2">A critical point is that before BBR raises its BBR.min_rtt
 estimate (which would in turn raise its maximum permissible cwnd), it first
 enters ProbeRTT to try to make a concerted and coordinated effort to drain
-the
-bottleneck queue and make a robust BBR.min_rtt measurement. This allows the
+the bottleneck queue and make a robust BBR.min_rtt measurement. This allows the
 BBR.min_rtt estimates of ensembles of BBR flows to converge, avoiding feedback
 loops of ever-increasing queues and RTT samples.<a href="#section-4.3.4.1-2" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.1-3">The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
 every ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
-by
-setting its cwnd_gain to BBRProbeRTTCwndGain = 0.5 to reduce its volume of
+by setting its cwnd_gain to BBRProbeRTTCwndGain = 0.5 to reduce its volume of
 inflight data to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.<a href="#section-4.3.4.1-3" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.1-4">There are two main motivations for making the MinRTTFilterLen roughly twice
 the ProbeRTTInterval. First, this ensures that during a ProbeRTT episode
-the
-flow will "remember" the BBR.min_rtt value it measured during the previous
+the flow will "remember" the BBR.min_rtt value it measured during the previous
 ProbeRTT episode, providing a robust BDP estimate for the cwnd = 0.5*BDP
 calculation, increasing the likelihood of fully draining the bottleneck
 queue. Second, this allows the flow's BBR.min_rtt filter window to generally
@@ -3069,15 +3049,12 @@ estimate.<a href="#section-4.3.4.1-4" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.1-5">The algorithm for ProbeRTT is as follows:<a href="#section-4.3.4.1-5" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.1-6">Entry conditions: In any state other than ProbeRTT itself, if the
 BBR.probe_rtt_min_delay estimate has not been updated (i.e., by getting a
-lower
-RTT measurement) for more than ProbeRTTInterval = 5 seconds, then BBR enters
-ProbeRTT and reduces the BBR.cwnd_gain to BBRProbeRTTCwndGain = 0.5.<a href="#section-4.3.4.1-6" class="pilcrow">¶</a></p>
+lower RTT measurement) for more than ProbeRTTInterval = 5 seconds, then BBR
+enters ProbeRTT and reduces the BBR.cwnd_gain to BBRProbeRTTCwndGain = 0.5.<a href="#section-4.3.4.1-6" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.1-7">Exit conditions: After maintaining the volume of in-flight data at
 BBRProbeRTTCwndGain*BBR.bdp for at least ProbeRTTDuration (200 ms) and at
-least
-one packet-timed round trip, BBR leaves ProbeRTT and transitions to ProbeBW
-if
-it estimates the pipe was filled already, or Startup otherwise.<a href="#section-4.3.4.1-7" class="pilcrow">¶</a></p>
+least one packet-timed round trip, BBR leaves ProbeRTT and transitions to
+ProbeBW if it estimates the pipe was filled already, or Startup otherwise.<a href="#section-4.3.4.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probertt-design-rationale">
@@ -3109,8 +3086,7 @@ standard ProbeRTTInterval of 5 secs.<a href="#section-4.3.4.2-4" class="pilcrow"
 traffic levels or routes change, but long enough so that interactive
 applications (e.g., Web, remote procedure calls, video chunks) often have
 natural silences or low-rate periods within the window where the flow's rate
-is
-low enough for long enough to drain its queue in the bottleneck. Then the
+is low enough for long enough to drain its queue in the bottleneck. Then the
 BBR.probe_rtt_min_delay filter opportunistically picks up these measurements,
 and the BBR.probe_rtt_min_delay estimate refreshes without requiring
 ProbeRTT. This way, flows typically need only pay the 2 percent throughput
@@ -3277,20 +3253,15 @@ ProbeBW_CRUISE.<a href="#section-4.3.4.5-3" class="pilcrow">¶</a></p>
           </h4>
 <p id="section-4.4.1-1">When restarting from idle in ProbeBW states, BBR leaves its cwnd as-is and
 paces packets at exactly BBR.bw, aiming to return as quickly as possible
-to its
-target operating point of rate balance and a full pipe. Specifically, if
-the
-flow's BBR.state is ProbeBW, and the flow is application-limited, and there
-are
-no packets in flight currently, then before the flow sends one or more packets
-BBR sets BBR.pacing_rate to exactly BBR.bw.<a href="#section-4.4.1-1" class="pilcrow">¶</a></p>
+to its target operating point of rate balance and a full pipe. Specifically, if
+the flow's BBR.state is ProbeBW, and the flow is application-limited, and there
+are no packets in flight currently, then before the flow sends one or more
+packets BBR sets BBR.pacing_rate to exactly BBR.bw.<a href="#section-4.4.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.4.1-2">Also, when restarting from idle BBR checks to see if the connection is in
 ProbeRTT and has met the exit conditions for ProbeRTT. If a connection goes
 idle during ProbeRTT then often it will have met those exit conditions by
-the
-time it restarts, so that the connection can restore the cwnd to its full
-value
-before it starts transmitting a new flight of data.<a href="#section-4.4.1-2" class="pilcrow">¶</a></p>
+the time it restarts, so that the connection can restore the cwnd to its full
+value before it starts transmitting a new flight of data.<a href="#section-4.4.1-2" class="pilcrow">¶</a></p>
 <p id="section-4.4.1-3">More precisely, the BBR algorithm takes the following steps in
 BBRHandleRestartFromIdle() before sending a packet for a flow:<a href="#section-4.4.1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.4.1-4">
@@ -3353,15 +3324,13 @@ calculates and uses its value. We can group the parameter into three groups:<a h
           </h4>
 <p id="section-4.5.1-1">Several aspects of BBR depend on counting the progress of "packet-timed"
 round trips, which start at the transmission of some segment, and then end
-at
-the acknowledgement of that segment. BBR.round_count is a count of the number
+at the acknowledgement of that segment. BBR.round_count is a count of the number
 of these "packet-timed" round trips elapsed so far. BBR uses this virtual
 BBR.round_count because it is more robust than using wall clock time. In
 particular, arbitrary intervals of wall clock time can elapse due to
 application idleness, variations in RTTs, or timer delays for retransmission
 timeouts, causing wall-clock-timed model parameter estimates to "time out"
-or
-to be "forgotten" too quickly to provide robustness.<a href="#section-4.5.1-1" class="pilcrow">¶</a></p>
+or to be "forgotten" too quickly to provide robustness.<a href="#section-4.5.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.5.1-2">BBR counts packet-timed round trips by recording state about a sentinel packet,
 and waiting for an ACK of any data packet that was sent after that sentinel
 packet, using the following pseudocode:<a href="#section-4.5.1-2" class="pilcrow">¶</a></p>
@@ -3627,8 +3596,7 @@ follows:<a href="#section-4.5.2.2.2.4-4" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.2.3-1">In application-limited phases the transmission rate is limited by the
 sending application rather than the congestion control algorithm. Modern
 transport protocol connections are often application-limited, either due
-to
-request/response workloads (e.g., Web traffic, RPC traffic) or because the
+to request/response workloads (e.g., Web traffic, RPC traffic) or because the
 sender transmits data in chunks (e.g., adaptive streaming video).<a href="#section-4.5.2.2.3-1" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.2.3-2">Knowing whether a delivery rate sample was application-limited is crucial
 for congestion control algorithms and applications to use the estimated delivery
@@ -3641,8 +3609,7 @@ at which the application happens to be transmitting data at any moment.<a href="
 if there was some moment during the sampled flight of data packets when there
 was no data ready to send.<a href="#section-4.5.2.2.3-3" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.2.3-4">The algorithm detects that an application-limited phase has started when
-the
-sending application requests to send new data, or the connection's
+the sending application requests to send new data, or the connection's
 retransmission mechanisms decide to retransmit data, and the connection meets
 all of the following conditions:<a href="#section-4.5.2.2.3-4" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.5.2.2.3-5">
@@ -3677,8 +3644,7 @@ said to have exited the data pipeline).<a href="#section-4.5.2.2.3-6" class="pil
                 </h6>
 <p id="section-4.5.2.2.3.1-1">In some cases receiver flow control limits (such as the TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>
 advertised receive window, RCV.WND) are the factor limiting the
-delivery
-rate. This algorithm treats cases where the delivery rate was constrained
+delivery rate. This algorithm treats cases where the delivery rate was constrained
 by such conditions the same as it treats cases where the delivery rate is
 constrained by in-network bottlenecks. That is, it treats receiver bottlenecks
 the same as network bottlenecks. This has a conceptual symmetry and has worked
@@ -3895,15 +3861,11 @@ packet, i.e., the packet with the highest "P.delivered" value.<a href="#section-
 <p id="section-4.5.2.3.4-1">An application-limited phase starts when the connection decides to send more
 data, at a point in time when the connection had previously run out of data.
 Some decisions to send more data are triggered by the application writing
-more
-data to the connection, and some are triggered by loss detection (during
-ACK
-processing or upon the triggering of a timer) estimating that some sequence
+more data to the connection, and some are triggered by loss detection (during
+ACK processing or upon the triggering of a timer) estimating that some sequence
 ranges need to be retransmitted. To detect all such cases, the algorithm
-calls
-CheckIfApplicationLimited() to check for application-limited behavior in
-the
-following situations:<a href="#section-4.5.2.3.4-1" class="pilcrow">¶</a></p>
+calls CheckIfApplicationLimited() to check for application-limited behavior in
+the following situations:<a href="#section-4.5.2.3.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.5.2.3.4-2.1">
                   <p id="section-4.5.2.3.4-2.1.1">The sending application asks the transport layer to send more data; i.e.,
@@ -4375,20 +4337,17 @@ is to try to ensure that BBR does not react more dramatically than CUBIC's
 <span>[<a href="#RFC8985" class="cite xref">RFC8985</a>]</span> that delay loss marking while waiting for potential
 reordering to resolve, may mark packets as lost long after the loss itself
 happened. In such cases, the tx_in_flight for the delivered sequence range
-that
-allowed the loss to be detected may be considerably smaller than the
+that allowed the loss to be detected may be considerably smaller than the
 tx_in_flight of the lost packet itself. In such cases using the former
 tx_in_flight rather than the latter can cause BBR.inflight_longterm to be
 significantly underestimated. To avoid such issues, BBR processes each loss
 detection event to more precisely estimate the volume of in-flight data at
 which loss rates cross BBRLossThresh, noting that this may have happened
 mid-way through some TSO/GSO offload burst (represented as a "packet" in
-the
-pseudocode in this document). To estimate this threshold volume of data,
-we can
-solve for "lost_prefix" in the following way, where inflight_prev represents
-the volume of in-flight data preceding this packet, and lost_prev represents
-the data lost among that previous in-flight data.<a href="#section-4.5.10.2-4" class="pilcrow">¶</a></p>
+the pseudocode in this document). To estimate this threshold volume of data,
+we can solve for "lost_prefix" in the following way, where inflight_prev
+represents the volume of in-flight data preceding this packet, and lost_prev
+represents the data lost among that previous in-flight data.<a href="#section-4.5.10.2-4" class="pilcrow">¶</a></p>
 <p id="section-4.5.10.2-5">First we start with:<a href="#section-4.5.10.2-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.5.10.2-6">
 <pre>
@@ -4653,16 +4612,12 @@ sample, and the initial pacing_gain:<a href="#section-4.6.2-5" class="pilcrow">�
 <p id="section-4.6.2-7">After initialization, on each data ACK BBR updates its pacing rate to be
 proportional to bw, as long as it estimates that it has filled the pipe
 (BBR.full_bw_reached is true; see the "Startup" section for details), or
-doing
-so increases the pacing rate. Limiting the pacing rate updates in this way
+doing so increases the pacing rate. Limiting the pacing rate updates in this way
 helps the connection probe robustly for bandwidth until it estimates it has
 reached its full available bandwidth ("filled the pipe"). In particular,
-this
-prevents the pacing rate from being reduced when the connection has only
-seen
-application-limited bandwidth samples. BBR updates the pacing rate on each
-ACK
-by executing the BBRSetPacingRate() step as follows:<a href="#section-4.6.2-7" class="pilcrow">¶</a></p>
+this prevents the pacing rate from being reduced when the connection has only
+seen application-limited bandwidth samples. BBR updates the pacing rate on each
+ACK by executing the BBRSetPacingRate() step as follows:<a href="#section-4.6.2-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.6.2-8">
 <pre>
   BBRSetPacingRateWithGain(pacing_gain):
@@ -4935,22 +4890,15 @@ ACKed or SACKed, BBR runs the following BBRSetCwnd() steps to update cwnd:<a hre
 </div>
 <p id="section-4.6.4.6-4">There are several considerations embodied in the logic above. If BBR has
 measured enough samples to achieve confidence that it has filled the pipe
-(see
-the description of BBR.full_bw_reached in the "Startup" section below), then
-it
-increases its cwnd based on the number of packets delivered, while bounding
-its
-cwnd to be no larger than the BBR.max_inflight adapted to the estimated
+(see the description of BBR.full_bw_reached in the "Startup" section below), then
+it increases its cwnd based on the number of packets delivered, while bounding
+its cwnd to be no larger than the BBR.max_inflight adapted to the estimated
 BDP. Otherwise, if the cwnd is below the BBR.max_inflight, or the sender
-has
-marked so little data delivered (less than InitialCwnd) that it does not
-yet
-judge its BBR.max_bw estimate and BBR.max_inflight as useful, then it increases
+has marked so little data delivered (less than InitialCwnd) that it does not
+yet judge its BBR.max_bw estimate and BBR.max_inflight as useful, then it increases
 cwnd without bounding it to be below BBR.max_inflight. Finally, BBR imposes
-a
-floor of BBRMinPipeCwnd in order to allow pipelining even with small BDPs
-(see
-the "Minimum cwnd for Pipelining" section, above).<a href="#section-4.6.4.6-4" class="pilcrow">¶</a></p>
+a floor of BBRMinPipeCwnd in order to allow pipelining even with small BDPs
+(see the "Minimum cwnd for Pipelining" section, above).<a href="#section-4.6.4.6-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="bounding-cwnd-based-on-recent-congestion">
@@ -5158,10 +5106,10 @@ as the existing standard congestion control algorithm <span>[<a href="#RFC5681" 
       </h2>
 <p id="section-7-1">This document has no IANA actions. Here we are using that phrase, suggested
 by <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>, because BBR does not modify or extend the wire format of
-any network protocol,
-nor does it add new dependencies on assigned numbers. BBR involves only a
-change to the congestion control algorithm of a transport sender, and does
-not involve changes in the network, the receiver, or any network protocol.<a href="#section-7-1" class="pilcrow">¶</a></p>
+any network protocol, nor does it add new dependencies on assigned numbers.
+BBR involves only a change to the congestion control algorithm of a transport
+sender, and does not involve changes in the network, the receiver, or any network
+protocol.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <p id="section-7-2">Note to RFC Editor: this section may be removed on publication as an RFC.<a href="#section-7-2" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -5173,14 +5121,13 @@ not involve changes in the network, the receiver, or any network protocol.<a hre
 <p id="section-8-1">The authors are grateful to Len Kleinrock for his work on the theory underlying
 congestion control. We are indebted to Larry Brakmo for pioneering work on
 the Vegas <span>[<a href="#BP95" class="cite xref">BP95</a>]</span> and New Vegas <span>[<a href="#B15" class="cite xref">B15</a>]</span> congestion control algorithms,
-which presaged many elements of BBR, and for
-Larry's advice and guidance during BBR's early development. The authors would
-also like to thank Kevin Yang, Priyaranjan Jha, Yousuk Seung, Luke Hsiao
-for their work on TCP BBR; Jana Iyengar, Victor Vasiliev, Bin Wu for their
-work on QUIC BBR; and Matt Mathis for his research work on the BBR algorithm
-and its implications <span>[<a href="#MM19" class="cite xref">MM19</a>]</span>. We would also like to thank C. Stephen
-Gunn, Eric Dumazet, Nandita Dukkipati,
-Pawel Jurczyk, Biren Roy, David Wetherall, Amin Vahdat, Leonidas Kontothanassis,
+which presaged many elements of BBR, and for Larry's advice and guidance during
+BBR's early development. The authors would also like to thank Kevin Yang,
+Priyaranjan Jha, Yousuk Seung, Luke Hsiao for their work on TCP BBR; Jana Iyengar,
+Victor Vasiliev, Bin Wu for their work on QUIC BBR; and Matt Mathis for his
+research work on the BBR algorithm and its implications <span>[<a href="#MM19" class="cite xref">MM19</a>]</span>. We would also
+like to thank C. Stephen Gunn, Eric Dumazet, Nandita Dukkipati, Pawel Jurczyk,
+Biren Roy, David Wetherall, Amin Vahdat, Leonidas Kontothanassis,
 and the YouTube, google.com, Bandwidth Enforcer, and Google SRE teams for
 their invaluable help and support. We would like to thank Randall R. Stewart,
 Jim Warner, Loganaden Velvindron, Hiren Panchasara, Adrian Zapletal, Christian
