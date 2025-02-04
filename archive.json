@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-30T01:18:11.824746+00:00",
+  "timestamp": "2025-02-04T01:19:27.133221+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -22,7 +22,7 @@
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/4",
       "state": "OPEN",
       "author": "ianswett",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [
         "ianswett"
       ],
@@ -43,7 +43,7 @@
         },
         {
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "I was intending to tackle this, but I'm always happy to review someone else's PRs as well.",
           "createdAt": "2024-10-21T14:42:48Z",
           "updatedAt": "2024-10-21T14:42:48Z"
@@ -65,11 +65,13 @@
       "state": "OPEN",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "ianswett"
+      ],
       "labels": [],
       "body": "Today at the IETF 121 CCWG session, @martinduke asked about the BBR draft's stance on ECN.\r\n\r\nI agree that we should decide and document the BBR draft's stance on ECN.\r\n\r\nIn particular we should probably decide on and document the stance on both:\r\n\r\n+ RFC 3168 ECN\r\n+ L4S ECN\r\n\r\nFor the record, so the ideas are preserved and discussed, I'm pasting some of the CCWG session notes from [Borrowing from the session ](https://notes.ietf.org/notes-ietf-121-ccwg) :\r\n\r\n+ Martin Duke: What about ECT(0), which could be a smilair reaction to loss. Reply - would need to look at this.\r\n\r\n+ Michael Welzl: Following-up, there is ABE (RFC8511), which is a simple change, which uses a smaller backoff to an ECN mark using ECT(0), rather than the full L4S approach, but still with significant benefit. Reply - This is something to consider if we consider ECN.\r\n\r\ncc: @ianswett @jbeshay @renghardt @ekinnear @mattmathis @mwelzl",
       "createdAt": "2024-11-05T11:51:57Z",
-      "updatedAt": "2024-11-05T18:38:30Z",
+      "updatedAt": "2025-02-03T17:51:58Z",
       "closedAt": null,
       "comments": [
         {
@@ -123,10 +125,17 @@
         },
         {
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "I think it's important to document a recommended response to ECN in the draft, but I don't have a strong opinion on what that is as long as it performs well in real-world testing.",
           "createdAt": "2024-11-05T18:38:29Z",
           "updatedAt": "2024-11-05T18:38:29Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The authors discussed this further today, and I intend to write a PR to capture that.",
+          "createdAt": "2025-02-03T17:51:51Z",
+          "updatedAt": "2025-02-03T17:51:51Z"
         }
       ]
     },
@@ -137,7 +146,7 @@
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/8",
       "state": "OPEN",
       "author": "ianswett",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "When looking at traces, I've found reasoning about when inflight_lo ends up being a limiting factor and when it's not is quite difficult.\r\n\r\nIn general, BBR attempts to create as accurate a model of the network path as possible.  Originally this was bandwidth and min_rtt, then extra acked for aggregation, then inflight_hi for the max BDP of the pipe.\r\n\r\nBecause BBR no longer does packet conservation, I realize there needs to be some sort of short term model, but the current one is quite complex and I'm hoping it could be simpler.\r\n\r\nIn the Google HTTP/3 implementation, we've done some YouTube experiments with ignoring inflight_lo entirely, and it didn't dramatically increase retransmit rate or RTT, and the QoE was slightly improved.  I don't have the data on hand, but it certainly didn't seem to break BBR and it made it much easier to reason about BBR's behavior.\r\n\r\nIt's possible that inflight_lo is critical to certain properties of BBR, in which case it'd be nice to document those.",
@@ -147,7 +156,7 @@
       "comments": [
         {
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "We discussed this on the editor's call and because inflight_hi is only set at the end of STARTUP and PROBE_UP, if the buffer gets smaller suddenly due to cross traffic or otherwise, BBR will be take a while to reduce inflight.\r\n\r\nOn the other hand, BBR doesn't immediately reduce inflight_hi whenever 2% loss is observed because it could be transitory and go away fairly quickly.",
           "createdAt": "2025-01-10T18:08:16Z",
           "updatedAt": "2025-01-10T18:08:16Z"
@@ -161,7 +170,7 @@
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/9",
       "state": "OPEN",
       "author": "ianswett",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [
         "Editorial"
@@ -173,7 +182,7 @@
       "comments": [
         {
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "We discussed this on the editors call and agreed that inflight_longterm and inflight_shortterm are less confusing and not overly verbose.",
           "createdAt": "2025-01-10T18:08:56Z",
           "updatedAt": "2025-01-10T18:08:56Z"
@@ -302,7 +311,7 @@
             "abbreviatedOid": "bd160b2"
           },
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "APPROVED",
           "body": "",
           "createdAt": "2024-10-15T18:59:53Z",
@@ -405,7 +414,7 @@
             "abbreviatedOid": "9571b36"
           },
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "TBH, I think sent and transmitted are equivalent and sent is shorter, so unless there's a clear definition of one vs the other, I prefer sent.",
           "createdAt": "2024-10-15T19:01:04Z",
@@ -501,7 +510,7 @@
             "abbreviatedOid": "acbd8ca"
           },
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "Text LG, but we should decide if we want to impose the line limits I've seen in other Github IETF projects.",
           "createdAt": "2024-10-21T20:46:22Z",
@@ -616,7 +625,7 @@
         },
         {
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "As with all things in BBR, one change can be better or worse depending upon another.  Do we think there's a chance exit from STARTUP will get faster?  If so, draining the pipe quickly might be less important?\r\n\r\nAlternatively, we could adopt the stance that the drain pacing gain should be based on the STARTUP pacing gain, not the CWND gain, because ideally BBR is largely rate/pacing limited and not CWND limited?",
           "createdAt": "2024-11-04T00:45:07Z",
           "updatedAt": "2024-11-04T00:45:07Z"
@@ -650,7 +659,7 @@
             "abbreviatedOid": "c7d7d37"
           },
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "APPROVED",
           "body": "LGTM, minus the very long line.",
           "createdAt": "2024-10-22T01:11:15Z",
@@ -721,11 +730,109 @@
             "abbreviatedOid": "0e9eed7"
           },
           "author": "ianswett",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "APPROVED",
           "body": "",
           "createdAt": "2025-01-10T17:11:57Z",
           "updatedAt": "2025-01-10T17:11:57Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "id": "PR_kwDOL3MllM6J4MFN",
+      "title": "Rename inflight_lo and inflight_hi to inflight_shortterm and inflight\u2026",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/11",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "\u2026_longterm\r\n\r\nAlso rename bw_lo to bw_shortterm.\r\n\r\nThis also reflows a lot of lines, only some of which were directly affected by the rename.\r\n\r\nFixes #9 ",
+      "createdAt": "2025-02-03T16:54:35Z",
+      "updatedAt": "2025-02-03T23:57:16Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "f9c83c483c864df95e1389a10648664ac0cdc845",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-shortterm-longterm",
+      "headRefOid": "eab0af26c997010bfa95409379bee5290c80a2ff",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 12,
+      "id": "PR_kwDOL3MllM6J5RuB",
+      "title": "Reflow and remove extra whitespace",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/12",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "No text changes",
+      "createdAt": "2025-02-03T19:35:07Z",
+      "updatedAt": "2025-02-03T23:48:25Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "f9c83c483c864df95e1389a10648664ac0cdc845",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-remove-whitespace",
+      "headRefOid": "fbe00a93bf6335f4e982b404bff8ea41264f7541",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 13,
+      "id": "PR_kwDOL3MllM6J6guB",
+      "title": "Update GitHub actions from the template",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/13",
+      "state": "MERGED",
+      "author": "ekinnear",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Update github actions from the template",
+      "createdAt": "2025-02-03T22:39:33Z",
+      "updatedAt": "2025-02-03T23:09:16Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "ec8e965913f5b603296d3f74386eb6000e6de9d4",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ek/update-actions-2",
+      "headRefOid": "b3b2eb7dece2d0ebf8dea55e2605d52587bf557f",
+      "closedAt": "2025-02-03T23:08:47Z",
+      "mergedAt": "2025-02-03T23:08:47Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "f9c83c483c864df95e1389a10648664ac0cdc845"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6adJ4J",
+          "commit": {
+            "abbreviatedOid": "b3b2eb7"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-03T23:06:05Z",
+          "updatedAt": "2025-02-03T23:06:05Z",
           "comments": []
         }
       ]
