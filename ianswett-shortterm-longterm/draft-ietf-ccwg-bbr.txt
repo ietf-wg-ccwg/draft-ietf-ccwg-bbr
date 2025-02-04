@@ -2877,31 +2877,31 @@ inflight_shortterm = max( inflight_latest, BBRBeta * inflight_shortterm )
    each ACK, BBR uses the values in the table below to compute BBR.bw in
    BBRBoundBWForModel(), and the cwnd in BBRBoundCwndForModel():
 
----------------+--------+--------+------+--------+-----------------
-State          | Tactic | Pacing | Cwnd | Rate   | Volume
-               |        | Gain   | Gain | Cap    | Cap
----------------+--------+--------+------+--------+-----------------
-Startup        | accel  | 2.77   | 2    | N/A    | N/A
-               |        |        |      |        |
----------------+--------+--------+------+--------+-----------------
-Drain          | decel  | 0.5    | 2    | bw_shortterm  | inflight_longterm,
-               |        |        |      |        | inflight_shortterm
----------------+--------+--------+------+--------+-----------------
-ProbeBW_DOWN   | decel  | 0.90   | 2    | bw_shortterm  | inflight_longterm,
-               |        |        |      |        | inflight_shortterm
----------------+--------+--------+------+--------+-----------------
-ProbeBW_CRUISE | cruise | 1.0    | 2    | bw_shortterm  | 0.85*inflight_longterm
-               |        |        |      |        | inflight_shortterm
----------------+--------+--------+------+--------+-----------------
-ProbeBW_REFILL | accel  | 1.0    | 2    |        | inflight_longterm
-               |        |        |      |        |
----------------+--------+--------+------+--------+-----------------
-ProbeBW_UP     | accel  | 1.25   | 2.25 |        | inflight_longterm
-               |        |        |      |        |
----------------+--------+--------+------+--------+-----------------
-ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm  | 0.85*inflight_longterm
-               |        |        |      |        | inflight_shortterm
----------------+--------+--------+------+--------+-----------------
+---------------+--------+--------+------+--------------+-----------------
+State          | Tactic | Pacing | Cwnd | Rate         | Volume
+               |        | Gain   | Gain | Cap          | Cap
+---------------+--------+--------+------+--------------+-----------------
+Startup        | accel  | 2.77   | 2    | N/A          | N/A
+               |        |        |      |              |
+---------------+--------+--------+------+--------------+-----------------
+Drain          | decel  | 0.5    | 2    | bw_shortterm | inflight_longterm,
+               |        |        |      |              | inflight_shortterm
+---------------+--------+--------+------+--------------+-----------------
+ProbeBW_DOWN   | decel  | 0.90   | 2    | bw_shortterm | inflight_longterm,
+               |        |        |      |              | inflight_shortterm
+---------------+--------+--------+------+--------------+-----------------
+ProbeBW_CRUISE | cruise | 1.0    | 2    | bw_shortterm | 0.85*inflight_longterm
+               |        |        |      |              | inflight_shortterm
+---------------+--------+--------+------+--------------+-----------------
+ProbeBW_REFILL | accel  | 1.0    | 2    |              | inflight_longterm
+               |        |        |      |              |
+---------------+--------+--------+------+--------------+-----------------
+ProbeBW_UP     | accel  | 1.25   | 2.25 |              | inflight_longterm
+               |        |        |      |              |
+---------------+--------+--------+------+--------------+-----------------
+ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
+               |        |        |      |              | inflight_shortterm
+---------------+--------+--------+------+--------------+-----------------
 
 4.6.2.  Pacing Rate: BBR.pacing_rate
 
