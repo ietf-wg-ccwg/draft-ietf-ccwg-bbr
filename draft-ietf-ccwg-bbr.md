@@ -1669,7 +1669,7 @@ is deemed a sufficient attempt to coordinate to drain the queue.
 
 #### Calculating the rs.rtt RTT Sample {#calculating-the-rsrtt-rtt-sample}
 
-Upon transmitting each packet, BBR or the underlying transport protocol
+Upon transmitting each packet, BBR or the associated transport protocol
 stores in per-packet data the wall-clock scheduled transmission time of the
 packet in packet.departure_time (see "Pacing Rate: BBR.pacing_rate" in
 {{pacing-rate-bbrpacingrate}} for how this is calculated).
