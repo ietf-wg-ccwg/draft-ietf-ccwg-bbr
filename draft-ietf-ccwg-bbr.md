@@ -2753,9 +2753,9 @@ when the most recently ACKed packet was sent. And the BBRBeta (0.7x) bound
 is to try to ensure that BBR does not react more dramatically than CUBIC's
 0.7x multiplicative decrease factor.
 
-Some loss detection algorithms, including algorithms like RACK
-{{RFC8985}} or QUIC loss detection {{RFC9002}}, delay loss marking to wait
-for potential reordering, so may mark packets as lost long after the loss itself
+Some loss detection algorithms, including RACK {{RFC8985}} or QUIC loss
+detection {{RFC9002}}, delay loss marking to wait for potential
+reordering, so packets can be declared lost long after the loss itself.
 happened. In such cases, the tx_in_flight for the delivered sequence range
 that allowed the loss to be detected may be considerably smaller than the
 tx_in_flight of the lost packet itself. In such cases using the former
