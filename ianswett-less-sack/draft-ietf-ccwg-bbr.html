@@ -4324,9 +4324,9 @@ reduces BBR.inflight_hi:<a href="#section-4.5.10.2-1" class="pilcrow">¶</a></p>
 when the most recently ACKed packet was sent. And the BBRBeta (0.7x) bound
 is to try to ensure that BBR does not react more dramatically than CUBIC's
 0.7x multiplicative decrease factor.<a href="#section-4.5.10.2-3" class="pilcrow">¶</a></p>
-<p id="section-4.5.10.2-4">Some loss detection algorithms, including algorithms like RACK
-<span>[<a href="#RFC8985" class="cite xref">RFC8985</a>]</span> or QUIC loss detection <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>, delay loss marking to wait
-for potential reordering, so may mark packets as lost long after the loss itself
+<p id="section-4.5.10.2-4">Some loss detection algorithms, including RACK <span>[<a href="#RFC8985" class="cite xref">RFC8985</a>]</span> or QUIC loss
+detection <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>, delay loss marking to wait for potential
+reordering, so packets can be declared lost long after the loss itself.
 happened. In such cases, the tx_in_flight for the delivered sequence range
 that allowed the loss to be detected may be considerably smaller than the
 tx_in_flight of the lost packet itself. In such cases using the former
