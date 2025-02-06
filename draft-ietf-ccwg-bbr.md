@@ -42,6 +42,7 @@ normative:
   RFC6928:
   RFC6675:
   RFC6937:
+  RFC9002:
 informative:
   CCGHJ16:
     target: http://queue.acm.org/detail.cfm?id=3022184
@@ -407,7 +408,7 @@ calculating a volume of free headroom to try to leave unused in the path
 link) that can be used by cross traffic (the value is 0.15).
 
 BBRMinPipeCwnd: The minimal cwnd value BBR targets, to allow pipelining with
-TCP endpoints that follow an "ACK every other packet" delayed-ACK policy:
+endpoints that follow an "ACK every other packet" delayed-ACK policy:
 4 \* SMSS.
 
 
@@ -1463,7 +1464,7 @@ The core logic for entering each state:
 ~~~~
 
 BBR executes the following BBRUpdateProbeBWCyclePhase() logic on each ACK
-that ACKs or SACKs new data, to advance the ProbeBW state machine:
+that acknowledges new data, to advance the ProbeBW state machine:
 
 ~~~~
   /* The core state machine logic for ProbeBW: */
@@ -1668,25 +1669,23 @@ is deemed a sufficient attempt to coordinate to drain the queue.
 
 #### Calculating the rs.rtt RTT Sample {#calculating-the-rsrtt-rtt-sample}
 
-Upon transmitting each packet, BBR (or the associated transport protocol)
+Upon transmitting each packet, BBR or the underlying transport protocol
 stores in per-packet data the wall-clock scheduled transmission time of the
 packet in packet.departure_time (see "Pacing Rate: BBR.pacing_rate" in
 {{pacing-rate-bbrpacingrate}} for how this is calculated).
 
-For every ACK that newly acknowledges some data (whether cumulatively or
-selectively), the sender's BBR implementation (or the associated transport
-protocol implementation) attempts to calculate an RTT sample. The sender MUST
-consider any potential retransmission ambiguities that can arise in some
-transport protocols. If some of the acknowledged data was not retransmitted, or
-some of the data was retransmitted but the sender can still unambiguously
-determine the RTT of the data (e.g. if the transport supports {{RFC7323}} TCP
-timestamps or an equivalent mechanism), then the sender calculates an RTT
-sample, rs.rtt, as follows:
+For every ACK that newly acknowledges data, the sender's BBR implementation
+or the associated transport protocol implementation attempts to calculate an
+RTT sample. The sender MUST consider any potential retransmission ambiguities
+that can arise in some transport protocols. If some of the acknowledged data
+was not retransmitted, or some of the data was retransmitted but the sender
+can still unambiguously determine the RTT of the data (e.g. QUIC or TCP with
+timestamps {{RFC7323}}), then the sender calculates an RTT sample, rs.rtt,
+as follows:
 
 ~~~~
   rs.rtt = Now() - packet.departure_time
 ~~~~
-
 
 #### ProbeRTT Logic {#probertt-logic}
 
@@ -1713,8 +1712,8 @@ estimate:
 ~~~~
 
 Here BBR.probe_rtt_expired is a boolean recording whether the
-BBR.probe_rtt_min_delay has expired and is due for a refresh, via either an
-application idle period or a transition into ProbeRTT state.
+BBR.probe_rtt_min_delay has expired and is due for a refresh, via either
+an application idle period or a transition into ProbeRTT state.
 
 On every ACK BBR executes BBRCheckProbeRTT() to handle the steps related
 to the ProbeRTT state as follows:
@@ -2205,28 +2204,29 @@ are being retransmitted.
 
 C.pipe: The sender's estimate of the amount of data outstanding in the network
 (measured in octets or packets). This includes data packets in the current
-outstanding window that are being transmitted or retransmitted and have not
-been SACKed or marked lost (e.g. "pipe" from {{RFC6675}}).
+outstanding window that are inflight and have not been acknowledged or marked lost
+(e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
 This does not include pure ACK packets.
 
 
 ###### Per-packet (P) state {#per-packet-p-state}
 
 This algorithm requires the following new state variables for each packet
-that has been transmitted but not yet ACKed or SACKed:
+that has been transmitted but has not been acknowledged:
 
 P.delivered: C.delivered when the packet was sent from transport connection
-C.
+C. TODO: I'm not sure what this is for?
 
-P.delivered_time: C.delivered_time when the packet was sent.
-
-P.first_sent_time: C.first_sent_time when the packet was sent.
+P.delivered_time: C.delivered_time when the packet was delivered TODO: Does my reword work?
 
 P.is_app_limited: true if C.app_limited was non-zero when the packet was
 sent, else false.
 
 P.sent_time: The time when the packet was sent.
 
+Additionally, TCP and other transport protocols that retransmit packets require:
+
+P.first_sent_time: C.first_sent_time when the packet was sent.
 
 ###### Rate Sample (rs) Output {#rate-sample-rs-output}
 
@@ -2254,10 +2254,10 @@ rs.ack_elapsed: ACK time interval calculated from the most recent packet
 delivered (see the "ACK Rate" section above).
 
 
-##### Transmitting or retransmitting a data packet {#transmitting-or-retransmitting-a-data-packet}
+##### Transmitting a data packet {#transmitting-a-data-packet}
 
-Upon transmitting or retransmitting a data packet, the sender snapshots the
-current delivery information in per-packet state. This will allow the sender
+Upon transmitting a data packet, the sender snapshots the current delivery
+information in per-packet state. This will allow the sender
 to generate a rate sample later, in the UpdateRateSample() step, when the
 packet is (S)ACKed.
 
@@ -2286,7 +2286,7 @@ After each packet transmission, the sender executes the following steps:
 ##### Upon receiving an ACK {#upon-receiving-an-ack}
 
 When an ACK arrives, the sender invokes GenerateRateSample() to fill in a
-rate sample. For each  packet that was newly SACKed or ACKed, UpdateRateSample()
+rate sample. For each  packet that was newly acknowledged, UpdateRateSample()
 updates the rate sample based on a snapshot of connection delivery information
 from the time at which the packet was last transmitted. UpdateRateSample()
 is invoked multiple times when a stretched ACK acknowledges multiple data
@@ -2296,7 +2296,7 @@ packet, i.e., the packet with the highest "P.delivered" value.
 ~~~~
   /* Upon receiving ACK, fill in delivery rate sample rs. */
   GenerateRateSample(RateSample rs):
-    for each newly SACKed or ACKed packet P
+    for each newly acknowledged packet P
       UpdateRateSample(P, rs)
 
     /* Clear app-limited field if bubble is ACKed and gone. */
@@ -2327,10 +2327,10 @@ packet, i.e., the packet with the highest "P.delivered" value.
 
     return true;  /* we filled in rs with a rate sample */
 
-  /* Update rs when a packet is SACKed or ACKed. */
+  /* Update rs when a packet is acknowledged. */
   UpdateRateSample(Packet P, RateSample rs):
     if (P.delivered_time == 0)
-      return /* P already SACKed */
+      return /* P already acknowledged */
 
     C.delivered += P.data_length
     C.delivered_time = Now()
@@ -2346,9 +2346,7 @@ packet, i.e., the packet with the highest "P.delivered" value.
       rs.last_end_seq     = P.end_seq
       C.first_sent_time   = P.sent_time
 
-    /* Mark the packet as delivered once it's SACKed to
-     * avoid being used again when it's cumulatively acked.
-     */
+    /* Mark the packet as delivered once it's acknowleged. */
     P.delivered_time = 0
 
   /* Is the given Packet the most recently sent packet
@@ -2433,12 +2431,11 @@ incremented appropriately in any case.
 ##### Impact of packet loss and retransmissions {#impact-of-packet-loss-and-retransmissions}
 
 There are several possible approaches for handling cases where a delivery
-rate sample is based on an ACK or SACK for a retransmitted packet.
+rate sample is based on a retransmitted packet.
 
 If the transport protocol supports unambiguous ACKs for retransmitted data
-sequence ranges (as in QUIC {{RFC9000}}) then the algorithm is perfectly robust
-to retransmissions, because the starting packet, P, for the sample can be
-unambiguously retrieved.
+(as in QUIC {{RFC9000}}) then the algorithm is perfectly robust to retransmissions,
+because the starting packet, P, for the sample can be unambiguously retrieved.
 
 If the transport protocol, like TCP {{RFC9293}}, has ambiguous ACKs for
 retransmitted sequence ranges, then the following approaches MAY be used:
@@ -2452,14 +2449,16 @@ retransmitted sequence ranges, then the following approaches MAY be used:
   a retransmitted sequence range.
 
 
-##### Connections without SACK support {#connections-without-sack-support}
+###### TCP Connections without SACK {#connections-without-sack}
 
-If the transport connection does not use SACK (i.e., either or both ends of the
-connections do not accept SACK), then this algorithm can be extended to
-estimate approximate delivery rates using duplicate ACKs (much like Reno and
-{{RFC5681}} estimates that each duplicate ACK indicates that a data packet has
-been delivered).
+Whenever possibile, TCP connections using BBR as a congestion controller SHOULD
+use both SACK and timestamps. Failure to do so will cause BBR's RTT and
+bandwidth measurements to be much less accurate.
 
+When using TCP without SACK (i.e., either or both ends of the connections do
+not accept SACK), this algorithm can be extended to estimate approximate
+delivery rates using duplicate ACKs (much like Reno and {{RFC5681}} estimates
+that each duplicate ACK indicates that a data packet has been delivered).
 
 ### BBR.max_bw Max Filter {#bbrmaxbw-max-filter}
 
@@ -2571,15 +2570,6 @@ For every data packet a connection sends, BBR calculates an RTT sample that
 measures the time interval from sending a data packet until that packet is
 acknowledged.
 
-For the most part, the same considerations and mechanisms that apply to RTT
-estimation for the purposes of retransmission timeout calculations {{RFC6298}}
-apply to BBR RTT samples. Namely, BBR does not use RTT samples based on the
-transmission time of retransmitted packets, since these are ambiguous, and thus
-unreliable. Also, BBR calculates RTT samples using both cumulative and
-selective acknowledgments (if the transport supports {{RFC2018}} SACK options
-or an equivalent mechanism), or transport-layer timestamps (if the transport
-supports {{RFC7323}} TCP timestamps or an equivalent mechanism).
-
 The only divergence from RTT estimation for retransmission timeouts is in the
 case where a given acknowledgment ACKs more than one data packet. In order to
 be conservative and schedule long timeouts to avoid spurious retransmissions,
@@ -2639,8 +2629,11 @@ machine, so this document discusses that approach in the ProbeRTT section.
 ### BBR.offload_budget {#bbroffloadbudget}
 
 BBR.offload_budget is the estimate of the minimum volume of data necessary
-to achieve full throughput using sender (TSO/GSO)  and receiver (LRO, GRO)
-host offload mechanisms, computed as follows:
+to achieve full throughput using sender (TSO/GSO) and receiver (LRO, GRO)
+host offload mechanisms.  This varies based on the transport protocol and
+operating environment.
+
+For TCP, offload_budget can be computed as follows:
 
 ~~~~
     BBRUpdateOffloadBudget():
@@ -2761,8 +2754,8 @@ is to try to ensure that BBR does not react more dramatically than CUBIC's
 0.7x multiplicative decrease factor.
 
 Some loss detection algorithms, including algorithms like RACK
-{{RFC8985}} that delay loss marking while waiting for potential
-reordering to resolve, may mark packets as lost long after the loss itself
+{{RFC8985}} or QUIC loss detection {{RFC9002}}, delay loss marking to wait
+for potential reordering, so may mark packets as lost long after the loss itself
 happened. In such cases, the tx_in_flight for the delivered sequence range
 that allowed the loss to be detected may be considerably smaller than the
 tx_in_flight of the lost packet itself. In such cases using the former
@@ -3262,7 +3255,7 @@ cwnd gradually and cautiously, increasing cwnd by no more than the amount of
 data acknowledged (cumulatively or selectively) upon each ACK.
 
 Specifically, on each ACK that acknowledges "rs.newly_acked" packets as newly
-ACKed or SACKed, BBR runs the following BBRSetCwnd() steps to update cwnd:
+acknowledged, BBR runs the following BBRSetCwnd() steps to update cwnd:
 
 ~~~~
   BBRSetCwnd():
