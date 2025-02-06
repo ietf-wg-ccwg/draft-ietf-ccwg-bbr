@@ -1615,7 +1615,7 @@ Table of Contents
 
 4.3.4.3.  Calculating the rs.rtt RTT Sample
 
-   Upon transmitting each packet, BBR or the underlying transport
+   Upon transmitting each packet, BBR or the associated transport
    protocol stores in per-packet data the wall-clock scheduled
    transmission time of the packet in packet.departure_time (see "Pacing
    Rate: BBR.pacing_rate" in Section 4.6.2 for how this is calculated).
