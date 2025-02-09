@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-06T01:20:42.048710+00:00",
+  "timestamp": "2025-02-09T01:24:22.409413+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -188,6 +188,24 @@
           "updatedAt": "2025-01-10T18:08:56Z"
         }
       ]
+    },
+    {
+      "number": 14,
+      "id": "I_kwDOL3MllM6o8l4X",
+      "title": "inflight or in-flight or in flight data",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/14",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "I believe all 3 are used in the draft today, so we should probably standardize on one.",
+      "createdAt": "2025-02-06T03:41:23Z",
+      "updatedAt": "2025-02-06T03:41:23Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -753,7 +771,7 @@
       ],
       "body": "\u2026_longterm\r\n\r\nAlso rename bw_lo to bw_shortterm.\r\n\r\nThis also reflows a lot of lines, only some of which were directly affected by the rename.\r\n\r\nFixes #9 ",
       "createdAt": "2025-02-03T16:54:35Z",
-      "updatedAt": "2025-02-04T17:26:47Z",
+      "updatedAt": "2025-02-08T00:48:35Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "d0db28b7de659e66ad502af6194c4bdc4303b797",
@@ -765,7 +783,28 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6bKQe3",
+          "commit": {
+            "abbreviatedOid": "5786d12"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "one minor comment, otherwise lgtm",
+          "createdAt": "2025-02-08T00:45:15Z",
+          "updatedAt": "2025-02-08T00:48:35Z",
+          "comments": [
+            {
+              "originalPosition": 49,
+              "body": "```suggestion\r\ninflight_longterm. (Part of the short-term model.)\r\n```",
+              "createdAt": "2025-02-08T00:45:15Z",
+              "updatedAt": "2025-02-08T00:48:35Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 12,
@@ -836,6 +875,85 @@
           "createdAt": "2025-02-03T23:06:05Z",
           "updatedAt": "2025-02-03T23:06:05Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "id": "PR_kwDOL3MllM6KOJYc",
+      "title": "Remove some TCP and SACK references",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/15",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This attempts to keep them when they're relevant and may have missed some.\r\n\r\nAlso there are some TODOs where I was confused what the text intended.  Hopefully @nealcardwell can let me know how to fix those.\r\n\r\nFixes #4",
+      "createdAt": "2025-02-06T03:45:07Z",
+      "updatedAt": "2025-02-08T01:00:53Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "d0db28b7de659e66ad502af6194c4bdc4303b797",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-less-sack",
+      "headRefOid": "0aca347cca9b7c5469267c746647b355d3ad2cd4",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6a1C9U",
+          "commit": {
+            "abbreviatedOid": "ff94bdc"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-02-06T03:55:34Z",
+          "updatedAt": "2025-02-06T03:55:34Z",
+          "comments": [
+            {
+              "originalPosition": 31,
+              "body": "```suggestion\r\nUpon transmitting each packet, BBR or the associated transport protocol\r\n```",
+              "createdAt": "2025-02-06T03:55:34Z",
+              "updatedAt": "2025-02-06T03:55:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6bKROy",
+          "commit": {
+            "abbreviatedOid": "0aca347"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-02-08T00:52:52Z",
+          "updatedAt": "2025-02-08T01:00:53Z",
+          "comments": [
+            {
+              "originalPosition": 92,
+              "body": "This is for the delivery rate estimation logic, right?",
+              "createdAt": "2025-02-08T00:52:52Z",
+              "updatedAt": "2025-02-08T01:00:53Z"
+            },
+            {
+              "originalPosition": 97,
+              "body": "I am understanding \"delivered\" to mean ACKed. P.delivered is the amount of data acked when P was sent/transmitted, and P.delivered_time was the timestamp when P.delivered had been udpated. \r\n\r\nIf my understanding is correct, then the reword changes the meaning.",
+              "createdAt": "2025-02-08T00:58:32Z",
+              "updatedAt": "2025-02-08T01:00:53Z"
+            },
+            {
+              "originalPosition": 162,
+              "body": "This is consistent with my understanding, delivery means acknowledged.",
+              "createdAt": "2025-02-08T00:59:42Z",
+              "updatedAt": "2025-02-08T01:00:53Z"
+            }
+          ]
         }
       ]
     }
