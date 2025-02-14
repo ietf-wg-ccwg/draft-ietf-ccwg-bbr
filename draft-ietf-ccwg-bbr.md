@@ -1034,10 +1034,8 @@ new data, and when the delivery rate sample is not application-limited
 
 ~~~~
   BBRCheckFullBWReached():
-    if (BBR.full_bw_now or rs.is_app_limited)
+    if (BBR.full_bw_now or !BBR.round_start or rs.is_app_limited)
       return  /* no need to check for a full pipe now */
-    if (!BBR.round_start)
-      return
     if (rs.delivery_rate >= BBR.full_bw * 1.25)
       BBRResetFullBW()       /* bw is still growing, so reset */
       BBR.full_bw = rs.delivery_rate  /* record new baseline bw */
