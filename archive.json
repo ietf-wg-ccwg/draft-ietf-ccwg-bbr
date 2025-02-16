@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-13T01:20:59.818162+00:00",
+  "timestamp": "2025-02-16T01:26:58.200862+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -952,6 +952,55 @@
               "body": "This is consistent with my understanding, delivery means acknowledged.",
               "createdAt": "2025-02-08T00:59:42Z",
               "updatedAt": "2025-02-08T01:00:53Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "id": "PR_kwDOL3MllM6LSgJR",
+      "title": "Ensure BBRCheckFullBWReached pseudo code counts three full rounds",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/16",
+      "state": "MERGED",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "In the text description of the full pipe estimator, it counts three rounds. \r\n\r\n> if BBR counts several (three) non-application-limited rounds where attempts to significantly increase the\r\ndelivery rate actually result in little increase (less than 25 percent)\r\n\r\nHowever, the pseudocode allows the full bw to be reset anytime during the round. Depending on the point in time in the round when this happens, this could reduce the time spent in the bandwdith plateau by up to one round. \r\n\r\nBy moving the check for round_start earlier, the estimator is guaranteed to spend 3 full round trips in the plateau.",
+      "createdAt": "2025-02-14T19:00:59Z",
+      "updatedAt": "2025-02-15T16:18:15Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "d0db28b7de659e66ad502af6194c4bdc4303b797",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb-full-bw-reached",
+      "headRefOid": "b5f78bf424de41024d21d3befc62bdaa69d1fa96",
+      "closedAt": "2025-02-15T16:18:15Z",
+      "mergedAt": "2025-02-15T16:18:15Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "7495597fe8f19c8a198f65ecf05c9711f7d024d3"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6cFf48",
+          "commit": {
+            "abbreviatedOid": "2f41ca0"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "cc: @ianswett ",
+          "createdAt": "2025-02-14T19:55:55Z",
+          "updatedAt": "2025-02-14T19:56:05Z",
+          "comments": [
+            {
+              "originalPosition": 2,
+              "body": "Good catch! Your fix makes the pseudocode match the Linux TCP BBR implementation of this. I can't remember now why the pseudocode diverged from the actual code.\r\n\r\nTo make it more succinct, and more closely match the Linux TCP code, can we instead please refactor your fix by changing:\r\n\r\nif (BBR.full_bw_now or rs.is_app_limited)\r\n\r\nto:\r\n\r\nif (BBR.full_bw_now or !BBR.round_start or rs.is_app_limited)\r\n\r\nThen the pseudocode will very closely match the code here:\r\nhttps://elixir.bootlin.com/linux/v6.9/source/net/ipv4/tcp_bbr.c#L879\r\n",
+              "createdAt": "2025-02-14T19:55:55Z",
+              "updatedAt": "2025-02-14T19:56:05Z"
             }
           ]
         }
