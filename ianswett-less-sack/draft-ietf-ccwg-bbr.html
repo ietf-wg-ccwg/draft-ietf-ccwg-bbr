@@ -24,12 +24,12 @@ acknowledgment. Thus far, open source implementations are available
 for TCP   and QUIC  . This document
 specifies version 3 of the BBR algorithm, BBRv3. 
     " name="description">
-<meta content="xml2rfc 3.26.0" name="generator">
+<meta content="xml2rfc 3.27.0" name="generator">
 <meta content="Congestion Control" name="keyword">
 <meta content="draft-ietf-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.26.0
-    Python 3.12.8
+  xml2rfc 3.27.0
+    Python 3.12.9
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
@@ -450,7 +450,7 @@ dl {
     margin-bottom: 0;
   }
 }
-dl > dt {
+dl:not(.dlNewline) > dt {
   float: left;
   margin-right: 2ch;
   min-width: 8ch;
@@ -3707,8 +3707,8 @@ This does not include pure ACK packets.<a href="#section-4.5.2.3.1.1-11" class="
 <p id="section-4.5.2.3.1.2-1">This algorithm requires the following new state variables for each packet
 that has been transmitted but has not been acknowledged:<a href="#section-4.5.2.3.1.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.3.1.2-2">P.delivered: C.delivered when the packet was sent from transport connection
-C. TODO: I'm not sure what this is for?<a href="#section-4.5.2.3.1.2-2" class="pilcrow">¶</a></p>
-<p id="section-4.5.2.3.1.2-3">P.delivered_time: C.delivered_time when the packet was delivered TODO: Does my reword work?<a href="#section-4.5.2.3.1.2-3" class="pilcrow">¶</a></p>
+C.<a href="#section-4.5.2.3.1.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.3.1.2-3">P.delivered_time: C.delivered_time when the packet was sent.<a href="#section-4.5.2.3.1.2-3" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.3.1.2-4">P.is_app_limited: true if C.app_limited was non-zero when the packet was
 sent, else false.<a href="#section-4.5.2.3.1.2-4" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.3.1.2-5">P.sent_time: The time when the packet was sent.<a href="#section-4.5.2.3.1.2-5" class="pilcrow">¶</a></p>
