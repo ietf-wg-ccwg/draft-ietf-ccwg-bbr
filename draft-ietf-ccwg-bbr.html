@@ -24,12 +24,12 @@ acknowledgment. Thus far, open source implementations are available
 for TCP   and QUIC  . This document
 specifies version 3 of the BBR algorithm, BBRv3. 
     " name="description">
-<meta content="xml2rfc 3.26.0" name="generator">
+<meta content="xml2rfc 3.27.0" name="generator">
 <meta content="Congestion Control" name="keyword">
 <meta content="draft-ietf-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.26.0
-    Python 3.12.8
+  xml2rfc 3.27.0
+    Python 3.12.9
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
@@ -450,7 +450,7 @@ dl {
     margin-bottom: 0;
   }
 }
-dl > dt {
+dl:not(.dlNewline) > dt {
   float: left;
   margin-right: 2ch;
   min-width: 8ch;
@@ -1628,7 +1628,7 @@ calculating a volume of free headroom to try to leave unused in the path
 (e.g. free space in the bottleneck buffer or free time slots in the bottleneck
 link) that can be used by cross traffic (the value is 0.15).<a href="#section-2.8-3" class="pilcrow">¶</a></p>
 <p id="section-2.8-4">BBRMinPipeCwnd: The minimal cwnd value BBR targets, to allow pipelining with
-TCP endpoints that follow an "ACK every other packet" delayed-ACK policy:
+endpoints that follow an "ACK every other packet" delayed-ACK policy:
 4 * SMSS.<a href="#section-2.8-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2887,7 +2887,7 @@ as follows:<a href="#section-4.3.3.5.3-6" class="pilcrow">¶</a></p>
 </pre><a href="#section-4.3.3.6-5" class="pilcrow">¶</a>
 </div>
 <p id="section-4.3.3.6-6">BBR executes the following BBRUpdateProbeBWCyclePhase() logic on each ACK
-that ACKs or SACKs new data, to advance the ProbeBW state machine:<a href="#section-4.3.3.6-6" class="pilcrow">¶</a></p>
+that acknowledges new data, to advance the ProbeBW state machine:<a href="#section-4.3.3.6-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.3.6-7">
 <pre>
   /* The core state machine logic for ProbeBW: */
@@ -3098,19 +3098,18 @@ is deemed a sufficient attempt to coordinate to drain the queue.<a href="#sectio
             <h5 id="name-calculating-the-rsrtt-rtt-s">
 <a href="#section-4.3.4.3" class="section-number selfRef">4.3.4.3. </a><a href="#name-calculating-the-rsrtt-rtt-s" class="section-name selfRef">Calculating the rs.rtt RTT Sample</a>
             </h5>
-<p id="section-4.3.4.3-1">Upon transmitting each packet, BBR (or the associated transport protocol)
+<p id="section-4.3.4.3-1">Upon transmitting each packet, BBR or the associated transport protocol
 stores in per-packet data the wall-clock scheduled transmission time of the
 packet in packet.departure_time (see "Pacing Rate: BBR.pacing_rate" in
 <a href="#pacing-rate-bbrpacingrate" class="auto internal xref">Section 4.6.2</a> for how this is calculated).<a href="#section-4.3.4.3-1" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.3-2">For every ACK that newly acknowledges some data (whether cumulatively or
-selectively), the sender's BBR implementation (or the associated transport
-protocol implementation) attempts to calculate an RTT sample. The sender MUST
-consider any potential retransmission ambiguities that can arise in some
-transport protocols. If some of the acknowledged data was not retransmitted, or
-some of the data was retransmitted but the sender can still unambiguously
-determine the RTT of the data (e.g. if the transport supports <span>[<a href="#RFC7323" class="cite xref">RFC7323</a>]</span> TCP
-timestamps or an equivalent mechanism), then the sender calculates an RTT
-sample, rs.rtt, as follows:<a href="#section-4.3.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.3-2">For every ACK that newly acknowledges data, the sender's BBR implementation
+or the associated transport protocol implementation attempts to calculate an
+RTT sample. The sender MUST consider any potential retransmission ambiguities
+that can arise in some transport protocols. If some of the acknowledged data
+was not retransmitted, or some of the data was retransmitted but the sender
+can still unambiguously determine the RTT of the data (e.g. QUIC or TCP with
+timestamps <span>[<a href="#RFC7323" class="cite xref">RFC7323</a>]</span>), then the sender calculates an RTT sample, rs.rtt,
+as follows:<a href="#section-4.3.4.3-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.4.3-3">
 <pre>
   rs.rtt = Now() - packet.departure_time
@@ -3146,8 +3145,8 @@ estimate:<a href="#section-4.3.4.4-1" class="pilcrow">¶</a></p>
 </pre><a href="#section-4.3.4.4-2" class="pilcrow">¶</a>
 </div>
 <p id="section-4.3.4.4-3">Here BBR.probe_rtt_expired is a boolean recording whether the
-BBR.probe_rtt_min_delay has expired and is due for a refresh, via either an
-application idle period or a transition into ProbeRTT state.<a href="#section-4.3.4.4-3" class="pilcrow">¶</a></p>
+BBR.probe_rtt_min_delay has expired and is due for a refresh, via either
+an application idle period or a transition into ProbeRTT state.<a href="#section-4.3.4.4-3" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.4-4">On every ACK BBR executes BBRCheckProbeRTT() to handle the steps related
 to the ProbeRTT state as follows:<a href="#section-4.3.4.4-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.4.4-5">
@@ -3693,8 +3692,8 @@ are marked as lost.<a href="#section-4.5.2.3.1.1-9" class="pilcrow">¶</a></p>
 are being retransmitted.<a href="#section-4.5.2.3.1.1-10" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.3.1.1-11">C.pipe: The sender's estimate of the amount of data outstanding in the network
 (measured in octets or packets). This includes data packets in the current
-outstanding window that are being transmitted or retransmitted and have not
-been SACKed or marked lost (e.g. "pipe" from <span>[<a href="#RFC6675" class="cite xref">RFC6675</a>]</span>).
+outstanding window that are inflight and have not been acknowledged or marked lost
+(e.g. "pipe" from <span>[<a href="#RFC6675" class="cite xref">RFC6675</a>]</span> or "bytes_in_flight" from <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>).
 This does not include pure ACK packets.<a href="#section-4.5.2.3.1.1-11" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -3704,14 +3703,15 @@ This does not include pure ACK packets.<a href="#section-4.5.2.3.1.1-11" class="
 <a href="#section-4.5.2.3.1.2" class="section-number selfRef">4.5.2.3.1.2. </a><a href="#name-per-packet-p-state" class="section-name selfRef">Per-packet (P) state</a>
                 </h6>
 <p id="section-4.5.2.3.1.2-1">This algorithm requires the following new state variables for each packet
-that has been transmitted but not yet ACKed or SACKed:<a href="#section-4.5.2.3.1.2-1" class="pilcrow">¶</a></p>
+that has been transmitted but has not been acknowledged:<a href="#section-4.5.2.3.1.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.3.1.2-2">P.delivered: C.delivered when the packet was sent from transport connection
 C.<a href="#section-4.5.2.3.1.2-2" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.3.1.2-3">P.delivered_time: C.delivered_time when the packet was sent.<a href="#section-4.5.2.3.1.2-3" class="pilcrow">¶</a></p>
-<p id="section-4.5.2.3.1.2-4">P.first_sent_time: C.first_sent_time when the packet was sent.<a href="#section-4.5.2.3.1.2-4" class="pilcrow">¶</a></p>
-<p id="section-4.5.2.3.1.2-5">P.is_app_limited: true if C.app_limited was non-zero when the packet was
-sent, else false.<a href="#section-4.5.2.3.1.2-5" class="pilcrow">¶</a></p>
-<p id="section-4.5.2.3.1.2-6">P.sent_time: The time when the packet was sent.<a href="#section-4.5.2.3.1.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.3.1.2-4">P.is_app_limited: true if C.app_limited was non-zero when the packet was
+sent, else false.<a href="#section-4.5.2.3.1.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.3.1.2-5">P.sent_time: The time when the packet was sent.<a href="#section-4.5.2.3.1.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.3.1.2-6">Additionally, TCP and other transport protocols that retransmit packets require:<a href="#section-4.5.2.3.1.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.3.1.2-7">P.first_sent_time: C.first_sent_time when the packet was sent.<a href="#section-4.5.2.3.1.2-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="rate-sample-rs-output">
@@ -3737,13 +3737,13 @@ delivered (see the "ACK Rate" section above).<a href="#section-4.5.2.3.1.3-9" cl
 </div>
 </section>
 </div>
-<div id="transmitting-or-retransmitting-a-data-packet">
+<div id="transmitting-a-data-packet">
 <section id="section-4.5.2.3.2">
-              <h6 id="name-transmitting-or-retransmitt">
-<a href="#section-4.5.2.3.2" class="section-number selfRef">4.5.2.3.2. </a><a href="#name-transmitting-or-retransmitt" class="section-name selfRef">Transmitting or retransmitting a data packet</a>
+              <h6 id="name-transmitting-a-data-packet">
+<a href="#section-4.5.2.3.2" class="section-number selfRef">4.5.2.3.2. </a><a href="#name-transmitting-a-data-packet" class="section-name selfRef">Transmitting a data packet</a>
               </h6>
-<p id="section-4.5.2.3.2-1">Upon transmitting or retransmitting a data packet, the sender snapshots the
-current delivery information in per-packet state. This will allow the sender
+<p id="section-4.5.2.3.2-1">Upon transmitting a data packet, the sender snapshots the current delivery
+information in per-packet state. This will allow the sender
 to generate a rate sample later, in the UpdateRateSample() step, when the
 packet is (S)ACKed.<a href="#section-4.5.2.3.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.3.2-2">If there are packets already in flight, then we need to start delivery rate
@@ -3774,7 +3774,7 @@ interval between now and the next ACK.<a href="#section-4.5.2.3.2-2" class="pilc
 <a href="#section-4.5.2.3.3" class="section-number selfRef">4.5.2.3.3. </a><a href="#name-upon-receiving-an-ack" class="section-name selfRef">Upon receiving an ACK</a>
               </h6>
 <p id="section-4.5.2.3.3-1">When an ACK arrives, the sender invokes GenerateRateSample() to fill in a
-rate sample. For each  packet that was newly SACKed or ACKed, UpdateRateSample()
+rate sample. For each  packet that was newly acknowledged, UpdateRateSample()
 updates the rate sample based on a snapshot of connection delivery information
 from the time at which the packet was last transmitted. UpdateRateSample()
 is invoked multiple times when a stretched ACK acknowledges multiple data
@@ -3784,7 +3784,7 @@ packet, i.e., the packet with the highest "P.delivered" value.<a href="#section-
 <pre>
   /* Upon receiving ACK, fill in delivery rate sample rs. */
   GenerateRateSample(RateSample rs):
-    for each newly SACKed or ACKed packet P
+    for each newly acknowledged packet P
       UpdateRateSample(P, rs)
 
     /* Clear app-limited field if bubble is ACKed and gone. */
@@ -3815,10 +3815,10 @@ packet, i.e., the packet with the highest "P.delivered" value.<a href="#section-
 
     return true;  /* we filled in rs with a rate sample */
 
-  /* Update rs when a packet is SACKed or ACKed. */
+  /* Update rs when a packet is acknowledged. */
   UpdateRateSample(Packet P, RateSample rs):
     if (P.delivered_time == 0)
-      return /* P already SACKed */
+      return /* P already acknowledged */
 
     C.delivered += P.data_length
     C.delivered_time = Now()
@@ -3834,9 +3834,7 @@ packet, i.e., the packet with the highest "P.delivered" value.<a href="#section-
       rs.last_end_seq     = P.end_seq
       C.first_sent_time   = P.sent_time
 
-    /* Mark the packet as delivered once it's SACKed to
-     * avoid being used again when it's cumulatively acked.
-     */
+    /* Mark the packet as delivered once it's acknowleged. */
     P.delivered_time = 0
 
   /* Is the given Packet the most recently sent packet
@@ -3947,11 +3945,10 @@ incremented appropriately in any case.<a href="#section-4.5.2.4.3-1" class="pilc
 <a href="#section-4.5.2.4.4" class="section-number selfRef">4.5.2.4.4. </a><a href="#name-impact-of-packet-loss-and-r" class="section-name selfRef">Impact of packet loss and retransmissions</a>
               </h6>
 <p id="section-4.5.2.4.4-1">There are several possible approaches for handling cases where a delivery
-rate sample is based on an ACK or SACK for a retransmitted packet.<a href="#section-4.5.2.4.4-1" class="pilcrow">¶</a></p>
+rate sample is based on a retransmitted packet.<a href="#section-4.5.2.4.4-1" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.4.4-2">If the transport protocol supports unambiguous ACKs for retransmitted data
-sequence ranges (as in QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>) then the algorithm is perfectly robust
-to retransmissions, because the starting packet, P, for the sample can be
-unambiguously retrieved.<a href="#section-4.5.2.4.4-2" class="pilcrow">¶</a></p>
+(as in QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>) then the algorithm is perfectly robust to retransmissions,
+because the starting packet, P, for the sample can be unambiguously retrieved.<a href="#section-4.5.2.4.4-2" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.4.4-3">If the transport protocol, like TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>, has ambiguous ACKs for
 retransmitted sequence ranges, then the following approaches MAY be used:<a href="#section-4.5.2.4.4-3" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.5.2.4.4-4">
@@ -3966,18 +3963,20 @@ retransmitted sequence ranges, then the following approaches MAY be used:<a href
   a retransmitted sequence range.<a href="#section-4.5.2.4.4-4.2.1" class="pilcrow">¶</a></p>
 </li>
               </ol>
+<div id="connections-without-sack">
+<section id="section-4.5.2.4.4.1">
+                <h6 id="name-tcp-connections-without-sac">
+<a href="#section-4.5.2.4.4.1" class="section-number selfRef">4.5.2.4.4.1. </a><a href="#name-tcp-connections-without-sac" class="section-name selfRef">TCP Connections without SACK</a>
+                </h6>
+<p id="section-4.5.2.4.4.1-1">Whenever possibile, TCP connections using BBR as a congestion controller SHOULD
+use both SACK and timestamps. Failure to do so will cause BBR's RTT and
+bandwidth measurements to be much less accurate.<a href="#section-4.5.2.4.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.5.2.4.4.1-2">When using TCP without SACK (i.e., either or both ends of the connections do
+not accept SACK), this algorithm can be extended to estimate approximate
+delivery rates using duplicate ACKs (much like Reno and <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> estimates
+that each duplicate ACK indicates that a data packet has been delivered).<a href="#section-4.5.2.4.4.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="connections-without-sack-support">
-<section id="section-4.5.2.4.5">
-              <h6 id="name-connections-without-sack-su">
-<a href="#section-4.5.2.4.5" class="section-number selfRef">4.5.2.4.5. </a><a href="#name-connections-without-sack-su" class="section-name selfRef">Connections without SACK support</a>
-              </h6>
-<p id="section-4.5.2.4.5-1">If the transport connection does not use SACK (i.e., either or both ends of the
-connections do not accept SACK), then this algorithm can be extended to
-estimate approximate delivery rates using duplicate ACKs (much like Reno and
-<span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> estimates that each duplicate ACK indicates that a data packet has
-been delivered).<a href="#section-4.5.2.4.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -4116,15 +4115,7 @@ delay samples.<a href="#section-4.5.7-1" class="pilcrow">¶</a></p>
 <p id="section-4.5.7.1-1">For every data packet a connection sends, BBR calculates an RTT sample that
 measures the time interval from sending a data packet until that packet is
 acknowledged.<a href="#section-4.5.7.1-1" class="pilcrow">¶</a></p>
-<p id="section-4.5.7.1-2">For the most part, the same considerations and mechanisms that apply to RTT
-estimation for the purposes of retransmission timeout calculations <span>[<a href="#RFC6298" class="cite xref">RFC6298</a>]</span>
-apply to BBR RTT samples. Namely, BBR does not use RTT samples based on the
-transmission time of retransmitted packets, since these are ambiguous, and thus
-unreliable. Also, BBR calculates RTT samples using both cumulative and
-selective acknowledgments (if the transport supports <span>[<a href="#RFC2018" class="cite xref">RFC2018</a>]</span> SACK options
-or an equivalent mechanism), or transport-layer timestamps (if the transport
-supports <span>[<a href="#RFC7323" class="cite xref">RFC7323</a>]</span> TCP timestamps or an equivalent mechanism).<a href="#section-4.5.7.1-2" class="pilcrow">¶</a></p>
-<p id="section-4.5.7.1-3">The only divergence from RTT estimation for retransmission timeouts is in the
+<p id="section-4.5.7.1-2">The only divergence from RTT estimation for retransmission timeouts is in the
 case where a given acknowledgment ACKs more than one data packet. In order to
 be conservative and schedule long timeouts to avoid spurious retransmissions,
 the maximum among such potential RTT samples is typically used for computing
@@ -4132,7 +4123,7 @@ retransmission timeouts; i.e., SRTT is typically calculated using the data
 packet with the earliest transmission time. By contrast, in order for BBR to
 try to reach the minimum amount of data in flight to fill the pipe, BBR uses
 the minimum among such potential RTT samples; i.e., BBR calculates the RTT
-using the data packet with the latest transmission time.<a href="#section-4.5.7.1-3" class="pilcrow">¶</a></p>
+using the data packet with the latest transmission time.<a href="#section-4.5.7.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="bbrminrtt-min-filter">
@@ -4195,25 +4186,27 @@ machine, so this document discusses that approach in the ProbeRTT section.<a hre
 <a href="#section-4.5.8" class="section-number selfRef">4.5.8. </a><a href="#name-bbroffload_budget" class="section-name selfRef">BBR.offload_budget</a>
           </h4>
 <p id="section-4.5.8-1">BBR.offload_budget is the estimate of the minimum volume of data necessary
-to achieve full throughput using sender (TSO/GSO)  and receiver (LRO, GRO)
-host offload mechanisms, computed as follows:<a href="#section-4.5.8-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.5.8-2">
+to achieve full throughput using sender (TSO/GSO) and receiver (LRO, GRO)
+host offload mechanisms.  This varies based on the transport protocol and
+operating environment.<a href="#section-4.5.8-1" class="pilcrow">¶</a></p>
+<p id="section-4.5.8-2">For TCP, offload_budget can be computed as follows:<a href="#section-4.5.8-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.5.8-3">
 <pre>
     BBRUpdateOffloadBudget():
       BBR.offload_budget = 3 * BBR.send_quantum
-</pre><a href="#section-4.5.8-2" class="pilcrow">¶</a>
+</pre><a href="#section-4.5.8-3" class="pilcrow">¶</a>
 </div>
-<p id="section-4.5.8-3">The factor of 3 is chosen to allow maintaining at least:<a href="#section-4.5.8-3" class="pilcrow">¶</a></p>
+<p id="section-4.5.8-4">The factor of 3 is chosen to allow maintaining at least:<a href="#section-4.5.8-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-4.5.8-4.1">
-              <p id="section-4.5.8-4.1.1">1 quantum in the sending host's queuing discipline layer<a href="#section-4.5.8-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-4.5.8-5.1">
+              <p id="section-4.5.8-5.1.1">1 quantum in the sending host's queuing discipline layer<a href="#section-4.5.8-5.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.5.8-4.2">
-              <p id="section-4.5.8-4.2.1">1 quantum being segmented in the sending host TSO/GSO engine<a href="#section-4.5.8-4.2.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-4.5.8-5.2">
+              <p id="section-4.5.8-5.2.1">1 quantum being segmented in the sending host TSO/GSO engine<a href="#section-4.5.8-5.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.5.8-4.3">
-              <p id="section-4.5.8-4.3.1">1 quantum being reassembled or otherwise remaining unacknowledged due to
-the receiver host's LRO/GRO/delayed-ACK engine<a href="#section-4.5.8-4.3.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-4.5.8-5.3">
+              <p id="section-4.5.8-5.3.1">1 quantum being reassembled or otherwise remaining unacknowledged due to
+the receiver host's LRO/GRO/delayed-ACK engine<a href="#section-4.5.8-5.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
@@ -4329,9 +4322,9 @@ reduces BBR.inflight_hi:<a href="#section-4.5.10.2-1" class="pilcrow">¶</a></p>
 when the most recently ACKed packet was sent. And the BBRBeta (0.7x) bound
 is to try to ensure that BBR does not react more dramatically than CUBIC's
 0.7x multiplicative decrease factor.<a href="#section-4.5.10.2-3" class="pilcrow">¶</a></p>
-<p id="section-4.5.10.2-4">Some loss detection algorithms, including algorithms like RACK
-<span>[<a href="#RFC8985" class="cite xref">RFC8985</a>]</span> that delay loss marking while waiting for potential
-reordering to resolve, may mark packets as lost long after the loss itself
+<p id="section-4.5.10.2-4">Some loss detection algorithms, including RACK <span>[<a href="#RFC8985" class="cite xref">RFC8985</a>]</span> or QUIC loss
+detection <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>, delay loss marking to wait for potential
+reordering, so packets can be declared lost long after the loss itself.
 happened. In such cases, the tx_in_flight for the delivered sequence range
 that allowed the loss to be detected may be considerably smaller than the
 tx_in_flight of the lost packet itself. In such cases using the former
@@ -4870,7 +4863,7 @@ to the BBR.max_inflight.  When cwnd is below BBR.max_inflight, BBR raises the
 cwnd gradually and cautiously, increasing cwnd by no more than the amount of
 data acknowledged (cumulatively or selectively) upon each ACK.<a href="#section-4.6.4.6-1" class="pilcrow">¶</a></p>
 <p id="section-4.6.4.6-2">Specifically, on each ACK that acknowledges "rs.newly_acked" packets as newly
-ACKed or SACKed, BBR runs the following BBRSetCwnd() steps to update cwnd:<a href="#section-4.6.4.6-2" class="pilcrow">¶</a></p>
+acknowledged, BBR runs the following BBRSetCwnd() steps to update cwnd:<a href="#section-4.6.4.6-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.6.4.6-3">
 <pre>
   BBRSetCwnd():
@@ -5194,6 +5187,10 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dt id="RFC9000">[RFC9000]</dt>
         <dd>
 <span class="refAuthor">Iyengar, J., Ed.</span> and <span class="refAuthor">M. Thomson, Ed.</span>, <span class="refTitle">"QUIC: A UDP-Based Multiplexed and Secure Transport"</span>, <span class="seriesInfo">RFC 9000</span>, <span class="seriesInfo">DOI 10.17487/RFC9000</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9000">https://www.rfc-editor.org/rfc/rfc9000</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9002">[RFC9002]</dt>
+        <dd>
+<span class="refAuthor">Iyengar, J., Ed.</span> and <span class="refAuthor">I. Swett, Ed.</span>, <span class="refTitle">"QUIC Loss Detection and Congestion Control"</span>, <span class="seriesInfo">RFC 9002</span>, <span class="seriesInfo">DOI 10.17487/RFC9002</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9002">https://www.rfc-editor.org/rfc/rfc9002</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9293">[RFC9293]</dt>
         <dd>
