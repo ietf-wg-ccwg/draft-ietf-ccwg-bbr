@@ -402,7 +402,7 @@ probing for bandwidth (the default is 2%).
 BBRBeta: The default multiplicative decrease to make upon each round trip
 during which the connection detects packet loss (the value is 0.7).
 
-BBRHeadroom: The multiplicative factor to apply to BBR.inflight_hi when
+BBRHeadroom: The multiplicative factor to apply to BBR.inflight_longterm when
 calculating a volume of free headroom to try to leave unused in the path
 (e.g. free space in the bottleneck buffer or free time slots in the bottleneck
 link) that can be used by cross traffic (the value is 0.15).
@@ -427,7 +427,7 @@ measured during the current or previous bandwidth probing cycle (or during
 Startup, if the flow is still in that state). (Part of the long-term
 model.)
 
-BBR.bw_lo: The short-term maximum sending bandwidth that the algorithm
+BBR.bw_shortterm: The short-term maximum sending bandwidth that the algorithm
 estimates is safe for matching the current network path delivery rate, based
 on any loss signals in the current bandwidth probing cycle. This is generally
 lower than max_bw (thus the name). (Part of the short-term model.)
@@ -435,7 +435,7 @@ lower than max_bw (thus the name). (Part of the short-term model.)
 BBR.bw: The maximum sending bandwidth that the algorithm estimates is
 appropriate for matching the current network path delivery rate, given all
 available signals in the model, at any time scale. It is the min() of max_bw
-and bw_lo.
+and bw_shortterm.
 
 
 ### Data Volume Network Path Model Parameters {#data-volume-network-path-model-parameters}
@@ -467,19 +467,19 @@ fully utilize the bottleneck bandwidth available to the flow, based on the
 BDP estimate (BBR.bdp), the aggregation estimate (BBR.extra_acked), the offload
 budget (BBR.offload_budget), and BBRMinPipeCwnd.
 
-BBR.inflight_hi: The long-term maximum volume of in-flight data that the
+BBR.inflight_longterm: The long-term maximum volume of in-flight data that the
 algorithm estimates will produce acceptable queue pressure, based on signals
 in the current or previous bandwidth probing cycle, as measured by loss. That
 is, if a flow is probing for bandwidth, and observes that sending a particular
 volume of in-flight data causes a loss rate higher than the loss rate
-objective, it sets inflight_hi to that volume of data. (Part of the long-term
+objective, it sets inflight_longterm to that volume of data. (Part of the long-term
 model.)
 
-BBR.inflight_lo: Analogous to BBR.bw_lo, the short-term maximum volume of
-in-flight data that the algorithm estimates is safe for matching the current
-network path delivery process, based on any loss signals in the current
+BBR.inflight_shortterm: Analogous to BBR.bw_shortterm, the short-term maximum
+volume of in-flight data that the algorithm estimates is safe for matching the
+current network path delivery process, based on any loss signals in the current
 bandwidth probing cycle. This is generally lower than max_inflight or
-inflight_hi (thus the name). (Part of the short-term model.)
+inflight_longterm (thus the name). (Part of the short-term model.)
 
 
 ## State for Responding to Congestion {#state-for-responding-to-congestion}
@@ -571,7 +571,6 @@ transition into ProbeRTT state.
 The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to
 be interpreted as described in {{RFC2119}}.
-
 
 
 # Design Overview {#design-overview}
@@ -1070,7 +1069,7 @@ whether all of the following criteria are all met:
 
 If these criteria are all met, then BBRCheckStartupHighLoss() takes the
 following steps. First, it sets BBR.full_bw_reached = true. Then it sets
-BBR.inflight_hi to its estimate of a safe level of in-flight data suggested
+BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
 BBR.inflight_latest is the max delivered volume of data (rs.delivered) over
 the last round trip. Finally, it exits Startup and enters Drain.
@@ -1136,9 +1135,9 @@ Exit conditions: The flow exits the ProbeBW_DOWN phase and enters CRUISE
 when the flow estimates that both of the following conditions have been
 met:
 
-* There is free headroom: If inflight_hi is set, then BBR remains in
+* There is free headroom: If inflight_longterm is set, then BBR remains in
   ProbeBW_DOWN at least until the volume of in-flight data is less than or
-  equal to a target calculated based on (1 - BBRHeadroom)\*BBR.inflight_hi.
+  equal to a target calculated based on (1 - BBRHeadroom)\*BBR.inflight_longterm.
   The goal of this constraint is to ensure that in cases where loss signals
   suggest an upper limit on the volume of in-flight data, then the flow attempts
   to leave some free headroom in the path (e.g. free space in the bottleneck
@@ -1159,10 +1158,10 @@ current available bandwidth, to try to achieve high utilization of the
 available bandwidth without increasing queue pressure. It does this by
 switching to a pacing_gain of 1.0, sending at 100% of BBR.bw. Notably, while
 in this state it responds to concrete congestion signals (loss) by reducing
-BBR.bw_lo and BBR.inflight_lo, because these signals suggest that the available
-bandwidth and deliverable volume of in-flight data have likely reduced, and
-the flow needs to change to adapt, slowing down to match the latest delivery
-process.
+BBR.bw_shortterm and BBR.inflight_shortterm, because these signals suggest that
+the available bandwidth and deliverable volume of in-flight data have likely
+reduced, and the flow needs to change to adapt, slowing down to match the
+latest delivery process.
 
 Exit conditions: The connection adaptively holds this state until it decides
 that it is time to probe for bandwidth (see "Time Scale for Bandwidth Probing",
@@ -1175,13 +1174,13 @@ ProbeBW_REFILL.
 The goal of the ProbeBW_REFILL state is to "refill the pipe", to try to fully
 utilize the network bottleneck without creating any significant queue pressure.
 
-To do this, BBR first resets the short-term model parameters bw_lo and
-inflight_lo, setting both to "Infinity". This is the key moment in the BBR
+To do this, BBR first resets the short-term model parameters bw_shortterm and
+inflight_shortterm, setting both to "Infinity". This is the key moment in the BBR
 time scale strategy (see "Time Scale Strategy", {{time-scale-strategy}})
-where the flow pivots, discarding its conservative short-term bw_lo and inflight_lo
-parameters and beginning to robustly probe the bottleneck's long-term available
-bandwidth. During this time the estimated bandwidth and inflight_hi, if set,
-constrain the connection.
+where the flow pivots, discarding its conservative short-term bw_shortterm and
+inflight_shortterm parameters and beginning to robustly probe the bottleneck's
+long-term available bandwidth. During this time the estimated bandwidth and
+inflight_longterm, if set, constrain the connection.
 
 During ProbeBW_REFILL BBR uses a BBR.pacing_gain of 1.0, to send at a rate
 that matches the current estimated available bandwidth, for one packet-timed
@@ -1193,17 +1192,17 @@ building a queue at the bottleneck. And if the buffer is shallow enough,
 then the flow can cause loss signals very shortly after the first accelerating
 packets arrive at the bottleneck. If the flow were to neglect to fill the
 pipe before it causes this loss signal, then these very quick signals of excess
-queue could cause the flow's estimate of the path's capacity (i.e. inflight_hi)
+queue could cause the flow's estimate of the path's capacity (i.e. inflight_longterm)
 to significantly underestimate. In particular, if the flow were to transition
 directly from ProbeBW_CRUISE to ProbeBW_UP, the volume of in-flight data
 (at the time the first accelerating packets were sent) may often be still very
 close to the volume of in-flight data maintained in CRUISE, which may be
-only (1 - BBRHeadroom)\*inflight_hi.
+only (1 - BBRHeadroom)\*inflight_longterm.
 
 Exit conditions: The flow exits ProbeBW_REFILL after one packet-timed round
 trip, and enters ProbeBW_UP. This is because after one full round trip of
 sending in ProbeBW_REFILL the flow (if not application-limited) has had an
-opportunity to place as many packets in flight as its BBR.bw and inflight_hi
+opportunity to place as many packets in flight as its BBR.bw and inflight_longterm
 permit. Correspondingly, at this point the flow starts to see bandwidth samples
 reflecting its ProbeBW_REFILL behavior, which may be putting too much data
 in flight.
@@ -1218,29 +1217,31 @@ bandwidth. It also raises the cwnd_gain to 2.25, to ensure that the flow
 can send faster than it had been, even if cwnd was previously limiting the
 sending process.
 
-If the flow has not set BBR.inflight_hi, it implicitly tries to raise the
+If the flow has not set BBR.inflight_longterm, it implicitly tries to raise the
 volume of in-flight data to at least BBR.pacing_gain \* BBR.bdp = 1.25 \*
 BBR.bdp.
 
-If the flow has set BBR.inflight_hi and encounters that limit, it then
-gradually increases the upper volume bound (BBR.inflight_hi) using the
+If the flow has set BBR.inflight_longterm and encounters that limit, it then
+gradually increases the upper volume bound (BBR.inflight_longterm) using the
 following approach:
 
-* inflight_hi: The flow raises inflight_hi in ProbeBW_UP in a manner that is
-  slow and cautious at first, but increasingly rapid and bold over time. The
-  initial caution is motivated by the fact that a given BBR flow may be sharing
+* inflight_longterm: The flow raises inflight_longterm in ProbeBW_UP in a manner
+  that is slow and cautious at first, but increasingly rapid and bold over time.
+  The initial caution is motivated by the fact that a given BBR flow may be sharing
   a shallow buffer with thousands of other flows, so that the buffer space
   available to the flow may be quite tight (even just a single packet or
   less). The increasingly rapid growth over time is motivated by the fact that
   in a high-speed WAN the increase in available bandwidth (and thus the estimated
   BDP) may require the flow to grow the volume of its inflight data by up to
   O(1,000,000) packets; even a quite typical high-speed WAN BDP like 10Gbps
-  \* 100ms is around 83,000 packets (with a 1500-byte MTU). BBR takes an approach
-  where the additive increase to BBR.inflight_hi exponentially doubles each
-  round trip; in each successive round trip, inflight_hi grows by 1, 2, 4, 8, 16,
-  etc, with the increases spread uniformly across the entire round trip.
-  This helps allow BBR to utilize a larger BDP in O(log(BDP)) round trips,
-  meeting the design goal for scalable utilization of newly-available bandwidth.
+  \*
+  100ms is around 83,000 packets (with a 1500-byte MTU). BBR takes an approach
+  where the additive increase to BBR.inflight_longterm exponentially doubles each
+  round trip; in each successive round trip, inflight_longterm grows by
+  1, 2, 4, 8, 16, etc, with the increases spread uniformly across the entire
+  round trip. This helps allow BBR to utilize a larger BDP in O(log(BDP)) round
+  trips, meeting the design goal for scalable utilization of newly-available
+  bandwidth.
 
 
 Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and
@@ -1252,8 +1253,8 @@ of the following conditions are met:
   estimate whether the flow has saturated the available per-flow bandwidth
   ("filled the pipe"), by looking for a plateau in the measured
   rs.delivery_rate. If, during this process, the volume of data is constrained
-  by BBR.inflight_hi (the flow becomes cwnd-limited while cwnd is limited by
-  BBR.inflight_hi), then the flow cannot fully explore the available bandwidth,
+  by BBR.inflight_longterm (the flow becomes cwnd-limited while cwnd is limited by
+  BBR.inflight_longterm), then the flow cannot fully explore the available bandwidth,
   and so it resets the "full pipe" estimator by calling BBRResetFullBW().
 
 2. Loss: The current loss rate, over the time scale of the last round trip,
@@ -1366,7 +1367,7 @@ are chosen to be 62-63 with the following considerations in mind:
   is reduced to (1 - loss_rate)^N.
   A simplified model predicts that for a flow that encounters 1% loss
   in N=137 round trips of ProbeBW_CRUISE, and then doubles its cwnd
-  (back to BBR.inflight_hi) in ProbeBW_REFILL and ProbeBW_UP, we
+  (back to BBR.inflight_longterm) in ProbeBW_REFILL and ProbeBW_UP, we
   expect that it will be able to restore and reprobe its original
   sending rate, since: (1 - loss_rate)^N \* 2^2 = (1 - .01)^137 \* 2^2
   ~= 1.01.
@@ -1379,8 +1380,8 @@ are chosen to be 62-63 with the following considerations in mind:
 The resulting behavior is that for BBR flows with small BDPs, the bandwidth
 probing will be on roughly the same time scale as Reno/CUBIC; flows with
 large BDPs will intentionally probe more rapidly/frequently than Reno/CUBIC
-would (roughly every 62 round trips for low-RTT flows, or 2-3 secs for high-RTT
-flows).
+would (roughly every 62 round trips for low-RTT flows, or 2-3 secs for
+high-RTT flows).
 
 The considerations above for timing bandwidth probing can be implemented
 as follows:
@@ -1434,7 +1435,7 @@ The core logic for entering each state:
 ~~~~
   BBRStartProbeBW_DOWN():
     BBRResetCongestionSignals()
-    BBR.probe_up_cnt = Infinity /* not growing inflight_hi */
+    BBR.probe_up_cnt = Infinity /* not growing inflight_longterm */
     BBRPickProbeWait()
     BBR.cycle_stamp = Now()  /* start wall clock */
     BBR.ack_phase  = ACKS_PROBE_STOPPING
@@ -1458,7 +1459,7 @@ The core logic for entering each state:
     BBRResetFullBW()
     BBR.full_bw = rs.delivery_rate
     BBR.state = ProbeBW_UP
-    BBRRaiseInflightHiSlope()
+    BBRRaiseInflightLongtermSlope()
 ~~~~
 
 BBR executes the following BBRUpdateProbeBWCyclePhase() logic on each ACK
@@ -1515,8 +1516,8 @@ The ancillary logic to implement the ProbeBW state machine:
 
   /* Time to transition from UP to DOWN? */
   BBRIsTimeToGoDown():
-    if (is_cwnd_limited and cwnd >= BBR.inflight_hi)
-      BBRResetFullBW()   /* bw is limited by inflight_hi */
+    if (is_cwnd_limited and cwnd >= BBR.inflight_longterm)
+      BBRResetFullBW()   /* bw is limited by inflight_longterm */
       BBR.full_bw = rs.delivery_rate
     else if (BBR.full_bw_now)
       return true  /* we estimate we've fully used path bw */
@@ -1535,32 +1536,32 @@ The ancillary logic to implement the ProbeBW state machine:
    * other flows, for fairness convergence and lower
    * RTTs and loss */
   BBRInflightWithHeadroom():
-    if (BBR.inflight_hi == Infinity)
+    if (BBR.inflight_longterm == Infinity)
       return Infinity
-    headroom = max(1*SMSS, BBRHeadroom * BBR.inflight_hi)
-    return max(BBR.inflight_hi - headroom,
+    headroom = max(1*SMSS, BBRHeadroom * BBR.inflight_longterm)
+    return max(BBR.inflight_longterm - headroom,
                BBRMinPipeCwnd)
 
-  /* Raise inflight_hi slope if appropriate. */
-  BBRRaiseInflightHiSlope():
+  /* Raise inflight_longterm slope if appropriate. */
+  BBRRaiseInflightLongtermSlope():
     growth_this_round = 1*SMSS << BBR.bw_probe_up_rounds
     BBR.bw_probe_up_rounds = min(BBR.bw_probe_up_rounds + 1, 30)
     BBR.probe_up_cnt = max(cwnd / growth_this_round, 1)
 
-  /* Increase inflight_hi if appropriate. */
-  BBRProbeInflightHiUpward():
-    if (!is_cwnd_limited or cwnd < BBR.inflight_hi)
-      return  /* not fully using inflight_hi, so don't grow it */
+  /* Increase inflight_longterm if appropriate. */
+  BBRProbeInflightLongtermUpward():
+    if (!is_cwnd_limited or cwnd < BBR.inflight_longterm)
+      return  /* not fully using inflight_longterm, so don't grow it */
    BBR.bw_probe_up_acks += rs.newly_acked
    if (BBR.bw_probe_up_acks >= BBR.probe_up_cnt)
      delta = BBR.bw_probe_up_acks / BBR.probe_up_cnt
      BBR.bw_probe_up_acks -= delta * BBR.bw_probe_up_cnt
-     BBR.inflight_hi += delta
+     BBR.inflight_longterm += delta
    if (BBR.round_start)
-     BBRRaiseInflightHiSlope()
+     BBRRaiseInflightLongtermSlope()
 
   /* Track ACK state and update BBR.max_bw window and
-   * BBR.inflight_hi. */
+   * BBR.inflight_longterm. */
   BBRAdaptUpperBounds():
     if (BBR.ack_phase == ACKS_PROBE_STARTING and BBR.round_start)
       /* starting to get bw probing samples */
@@ -1572,12 +1573,12 @@ The ancillary logic to implement the ProbeBW state machine:
 
     if (!IsInflightTooHigh())
       /* Loss rate is safe. Adjust upper bounds upward. */
-      if (BBR.inflight_hi == Infinity)
+      if (BBR.inflight_longterm == Infinity)
         return /* no upper bounds to raise */
-      if (rs.tx_in_flight > BBR.inflight_hi)
-        BBR.inflight_hi = rs.tx_in_flight
+      if (rs.tx_in_flight > BBR.inflight_longterm)
+        BBR.inflight_longterm = rs.tx_in_flight
       if (BBR.state == ProbeBW_UP)
-        BBRProbeInflightHiUpward()
+        BBRProbeInflightLongtermUpward()
 ~~~~
 
 
@@ -2721,7 +2722,7 @@ trip exceeds the queue pressure objective, and the flow is not application
 limited, and has not yet responded to congestion signals from the most recent
 REFILL or UP phase, then the flow estimates that the volume of data it allowed
 in flight exceeded what matches the current delivery process on the path, and
-reduces BBR.inflight_hi:
+reduces BBR.inflight_longterm:
 
 ~~~~
   /* Do loss signals suggest inflight is too high?
@@ -2740,7 +2741,7 @@ reduces BBR.inflight_hi:
   BBRHandleInflightTooHigh():
     BBR.bw_probe_samples = 0;  /* only react once per bw probe */
     if (!rs.is_app_limited)
-      BBR.inflight_hi = max(rs.tx_in_flight,
+      BBR.inflight_longterm = max(rs.tx_in_flight,
                             BBRTargetInflight() * BBRBeta))
     If (BBR.state == ProbeBW_UP)
       BBRStartProbeBW_DOWN()
@@ -2757,7 +2758,7 @@ reordering, so packets can be declared lost long after the loss itself.
 happened. In such cases, the tx_in_flight for the delivered sequence range
 that allowed the loss to be detected may be considerably smaller than the
 tx_in_flight of the lost packet itself. In such cases using the former
-tx_in_flight rather than the latter can cause BBR.inflight_hi to be
+tx_in_flight rather than the latter can cause BBR.inflight_longterm to be
 significantly underestimated. To avoid such issues, BBR processes each loss
 detection event to more precisely estimate the volume of in-flight data at
 which loss rates cross BBRLossThresh, noting that this may have happened
@@ -2803,11 +2804,11 @@ In pseudocode:
     rs.lost = C.lost - packet.lost /* data lost since transmit */
     rs.is_app_limited = packet.is_app_limited;
     if (IsInflightTooHigh(rs))
-      rs.tx_in_flight = BBRInflightHiFromLostPacket(rs, packet)
+      rs.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
       BBRHandleInflightTooHigh(rs)
 
   /* At what prefix of packet did losses exceed BBRLossThresh? */
-  BBRInflightHiFromLostPacket(rs, packet):
+  BBRInflightLongtermFromLostPacket(rs, packet):
     size = packet.size
     /* What was in flight before this packet? */
     inflight_prev = rs.tx_in_flight - size
@@ -2828,8 +2829,8 @@ ProbeBW_DOWN, ProbeBW_CRUISE), BBR  responds to loss by slowing down to some
 extent. This is because loss suggests that the available bandwidth and safe
 volume of in-flight data may have decreased recently, and the flow needs
 to adapt, slowing down toward the latest delivery process. BBR flows implement
-this response by reducing the short-term model parameters, BBR.bw_lo and
-BBR.inflight_lo.
+this response by reducing the short-term model parameters, BBR.bw_shortterm and
+BBR.inflight_shortterm.
 
 When encountering packet loss when the flow is not probing for bandwidth,
 the strategy is to gradually adapt to the current measured delivery process
@@ -2846,11 +2847,11 @@ BBR.inflight_latest: a 1-round-trip max of delivered volume of data
 (rs.delivered).
 
 Upon the ACK at the end of each round that encountered a newly-marked loss,
-the flow updates its model (bw_lo and inflight_lo) as follows:
+the flow updates its model (bw_shortterm and inflight_shortterm) as follows:
 
 ~~~~
-      bw_lo = max(       bw_latest, BBRBeta *       bw_lo )
-inflight_lo = max( inflight_latest, BBRBeta * inflight_lo )
+      bw_shortterm = max(       bw_latest, BBRBeta *       bw_shortterm )
+inflight_shortterm = max( inflight_latest, BBRBeta * inflight_shortterm )
 ~~~~
 
 This logic can be represented as follows:
@@ -2894,24 +2895,24 @@ This logic can be represented as follows:
 
   /* Handle the first congestion episode in this cycle */
   BBRInitLowerBounds():
-    if (BBR.bw_lo == Infinity)
-      BBR.bw_lo = BBR.max_bw
-    if (BBR.inflight_lo == Infinity)
-      BBR.inflight_lo = cwnd
+    if (BBR.bw_shortterm == Infinity)
+      BBR.bw_shortterm = BBR.max_bw
+    if (BBR.inflight_shortterm == Infinity)
+      BBR.inflight_shortterm = cwnd
 
   /* Adjust model once per round based on loss */
   BBRLossLowerBounds()
-    BBR.bw_lo       = max(BBR.bw_latest,
-                          BBRBeta * BBR.bw_lo)
-    BBR.inflight_lo = max(BBR.inflight_latest,
-                          BBRBeta * BBR.inflight_lo)
+    BBR.bw_shortterm       = max(BBR.bw_latest,
+                          BBRBeta * BBR.bw_shortterm)
+    BBR.inflight_shortterm = max(BBR.inflight_latest,
+                          BBRBeta * BBR.inflight_shortterm)
 
   BBRResetLowerBounds():
-    BBR.bw_lo       = Infinity
-    BBR.inflight_lo = Infinity
+    BBR.bw_shortterm       = Infinity
+    BBR.inflight_shortterm = Infinity
 
   BBRBoundBWForModel():
-    BBR.bw = min(BBR.max_bw, BBR.bw_lo)
+    BBR.bw = min(BBR.max_bw, BBR.bw_shortterm)
 
 ~~~~
 
@@ -2948,31 +2949,31 @@ BBR uses the values in the table below to compute BBR.bw in
 BBRBoundBWForModel(), and the cwnd in BBRBoundCwndForModel():
 
 ~~~~
----------------+--------+--------+------+--------+-----------------
-State          | Tactic | Pacing | Cwnd | Rate   | Volume
-               |        | Gain   | Gain | Cap    | Cap
----------------+--------+--------+------+--------+-----------------
-Startup        | accel  | 2.77   | 2    | N/A    | N/A
-               |        |        |      |        |
----------------+--------+--------+------+--------+-----------------
-Drain          | decel  | 0.5    | 2    | bw_lo  | inflight_hi,
-               |        |        |      |        | inflight_lo
----------------+--------+--------+------+--------+-----------------
-ProbeBW_DOWN   | decel  | 0.90   | 2    | bw_lo  | inflight_hi,
-               |        |        |      |        | inflight_lo
----------------+--------+--------+------+--------+-----------------
-ProbeBW_CRUISE | cruise | 1.0    | 2    | bw_lo  | 0.85*inflight_hi
-               |        |        |      |        | inflight_lo
----------------+--------+--------+------+--------+-----------------
-ProbeBW_REFILL | accel  | 1.0    | 2    |        | inflight_hi
-               |        |        |      |        |
----------------+--------+--------+------+--------+-----------------
-ProbeBW_UP     | accel  | 1.25   | 2.25 |        | inflight_hi
-               |        |        |      |        |
----------------+--------+--------+------+--------+-----------------
-ProbeRTT       | decel  | 1.0    | 0.5  | bw_lo  | 0.85*inflight_hi
-               |        |        |      |        | inflight_lo
----------------+--------+--------+------+--------+-----------------
+---------------+--------+--------+------+--------------+-----------------
+State          | Tactic | Pacing | Cwnd | Rate         | Volume
+               |        | Gain   | Gain | Cap          | Cap
+---------------+--------+--------+------+--------------+-----------------
+Startup        | accel  | 2.77   | 2    | N/A          | N/A
+               |        |        |      |              |
+---------------+--------+--------+------+--------------+-----------------
+Drain          | decel  | 0.5    | 2    | bw_shortterm | inflight_longterm,
+               |        |        |      |              | inflight_shortterm
+---------------+--------+--------+------+--------------+-----------------
+ProbeBW_DOWN   | decel  | 0.90   | 2    | bw_shortterm | inflight_longterm,
+               |        |        |      |              | inflight_shortterm
+---------------+--------+--------+------+--------------+-----------------
+ProbeBW_CRUISE | cruise | 1.0    | 2    | bw_shortterm | 0.85*inflight_longterm
+               |        |        |      |              | inflight_shortterm
+---------------+--------+--------+------+--------------+-----------------
+ProbeBW_REFILL | accel  | 1.0    | 2    |              | inflight_longterm
+               |        |        |      |              |
+---------------+--------+--------+------+--------------+-----------------
+ProbeBW_UP     | accel  | 1.25   | 2.25 |              | inflight_longterm
+               |        |        |      |              |
+---------------+--------+--------+------+--------------+-----------------
+ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
+               |        |        |      |              | inflight_shortterm
+---------------+--------+--------+------+--------------+-----------------
 ~~~~
 
 
@@ -3291,13 +3292,13 @@ State Machine" section:
     cap = Infinity
     if (IsInAProbeBWState() and
         BBR.state != ProbeBW_CRUISE)
-      cap = BBR.inflight_hi
+      cap = BBR.inflight_longterm
     else if (BBR.state == ProbeRTT or
              BBR.state == ProbeBW_CRUISE)
       cap = BBRInflightWithHeadroom()
 
-    /* apply inflight_lo (possibly infinite): */
-    cap = min(cap, BBR.inflight_lo)
+    /* apply inflight_shortterm (possibly infinite): */
+    cap = min(cap, BBR.inflight_shortterm)
     cap = max(cap, BBRMinPipeCwnd)
     cwnd = min(cwnd, cap)
 ~~~~
