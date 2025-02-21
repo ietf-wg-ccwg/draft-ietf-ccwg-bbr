@@ -2215,9 +2215,9 @@ This algorithm requires the following new state variables for each packet
 that has been transmitted but has not been acknowledged:
 
 P.delivered: C.delivered when the packet was sent from transport connection
-C. TODO: I'm not sure what this is for?
+C.
 
-P.delivered_time: C.delivered_time when the packet was delivered TODO: Does my reword work?
+P.delivered_time: C.delivered_time when the packet was sent.
 
 P.is_app_limited: true if C.app_limited was non-zero when the packet was
 sent, else false.
