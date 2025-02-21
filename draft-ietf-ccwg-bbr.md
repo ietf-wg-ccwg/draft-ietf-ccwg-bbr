@@ -279,6 +279,11 @@ Variables for connection state (C), per-packet state (P), or per-ACK rate
 sample (rs) that are not defined below are defined in
 {{delivery-rate-samples}}, "Delivery Rate Samples".
 
+In this document, "acknowledged" or "delivered" data means any transmitted data that the
+remote transport endpoint has confirmed that it has received, e.g.,
+via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment {{RFC793}}, or
+TCP SACK ("Selective Acknowledgment") block {{RFC2018}}.
+
 ## Transport Connection State {#transport-connection-state}
 
 C.delivered: The total amount of data (tracked in octets or in packets)
