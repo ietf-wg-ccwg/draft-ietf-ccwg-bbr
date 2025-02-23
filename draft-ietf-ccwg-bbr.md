@@ -2218,14 +2218,12 @@ C.
 
 P.delivered_time: C.delivered_time when the packet was sent.
 
+P.first_sent_time: C.first_sent_time when the packet was sent.
+
 P.is_app_limited: true if C.app_limited was non-zero when the packet was
 sent, else false.
 
 P.sent_time: The time when the packet was sent.
-
-Additionally, TCP and other transport protocols that retransmit packets require:
-
-P.first_sent_time: C.first_sent_time when the packet was sent.
 
 ###### Rate Sample (rs) Output {#rate-sample-rs-output}
 
