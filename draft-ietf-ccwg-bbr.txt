@@ -2145,15 +2145,12 @@ Table of Contents
 
    P.delivered_time: C.delivered_time when the packet was sent.
 
+   P.first_sent_time: C.first_sent_time when the packet was sent.
+
    P.is_app_limited: true if C.app_limited was non-zero when the packet
    was sent, else false.
 
    P.sent_time: The time when the packet was sent.
-
-   Additionally, TCP and other transport protocols that retransmit
-   packets require:
-
-   P.first_sent_time: C.first_sent_time when the packet was sent.
 
 4.5.2.3.1.3.  Rate Sample (rs) Output
 
