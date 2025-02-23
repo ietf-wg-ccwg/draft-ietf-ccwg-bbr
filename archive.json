@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-20T01:21:26.069866+00:00",
+  "timestamp": "2025-02-23T01:26:46.436968+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -20,7 +20,7 @@
       "id": "I_kwDOL3MllM6agc6U",
       "title": "Talk about TCP and SACK less",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/4",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -31,8 +31,8 @@
       ],
       "body": "I believe the intent is to be as agnostic to the specific transport as possible, so implementers in QUIC or other transports can implement BBR as well.\r\n\r\nCurrently the draft has a number of references to TCP and SACK.  Some of them are needed for technical accuracy, but others could be removed or changed to more general language.",
       "createdAt": "2024-10-16T15:13:46Z",
-      "updatedAt": "2024-10-21T15:36:57Z",
-      "closedAt": null,
+      "updatedAt": "2025-02-21T18:57:11Z",
+      "closedAt": "2025-02-21T18:57:11Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -168,7 +168,7 @@
       "id": "I_kwDOL3MllM6dYtXH",
       "title": "inflight_hi and inflight_lo are confusing names",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/9",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -177,8 +177,8 @@
       ],
       "body": "They're really inflight_longterm and inflight_shortterm or something along those lines.  Also, _hi can be lower than _lo, which is not at all obvious.\r\n\r\nTo be clear, I don't really like inflight_longterm and inflight_shortterm, but maybe inflight_long and inflight_short or something else?",
       "createdAt": "2024-11-07T10:02:42Z",
-      "updatedAt": "2025-01-10T18:08:58Z",
-      "closedAt": null,
+      "updatedAt": "2025-02-21T19:11:56Z",
+      "closedAt": "2025-02-21T19:11:56Z",
       "comments": [
         {
           "author": "ianswett",
@@ -206,6 +206,37 @@
       "updatedAt": "2025-02-06T03:41:23Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 17,
+      "id": "I_kwDOL3MllM6rDFYL",
+      "title": "Impact of increasing ProbeRTT interval to 10s?",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/17",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "\nIncreasing ProbeRTT interval to 10s in internet facing connections improves application performance in initial experiments, most probably due to reducing the cwnd dips for connections with long transfers. \n\nI haven't measured its impact on the speed of convergence to a fair of the bandwidth but the 10s value is already used in some of the implementations as well.",
+      "createdAt": "2025-02-21T18:15:30Z",
+      "updatedAt": "2025-02-22T14:44:17Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks! We'll try to re-run experiments comparing ProbeRTT interval of 5s vs 10s for our workloads.\n",
+          "createdAt": "2025-02-21T20:36:48Z",
+          "updatedAt": "2025-02-21T20:36:48Z"
+        },
+        {
+          "author": "gorryfair",
+          "authorAssociation": "NONE",
+          "body": "I suspect the experiment results with different cross-traffic will be crucial to understanding the sharing properties of these two configurations, I look forward to seeing the results.\n\nGorry",
+          "createdAt": "2025-02-22T14:44:16Z",
+          "updatedAt": "2025-02-22T14:44:16Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -762,7 +793,7 @@
       "id": "PR_kwDOL3MllM6J4MFN",
       "title": "Rename inflight_lo and inflight_hi to inflight_shortterm and inflight\u2026",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/11",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -771,17 +802,19 @@
       ],
       "body": "\u2026_longterm\r\n\r\nAlso rename bw_lo to bw_shortterm.\r\n\r\nThis also reflows a lot of lines, only some of which were directly affected by the rename.\r\n\r\nFixes #9 ",
       "createdAt": "2025-02-03T16:54:35Z",
-      "updatedAt": "2025-02-08T00:48:35Z",
+      "updatedAt": "2025-02-21T19:11:55Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "d0db28b7de659e66ad502af6194c4bdc4303b797",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-shortterm-longterm",
       "headRefOid": "5786d123285d1a623df1ed5a0553c8844fa3e7e8",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-02-21T19:11:54Z",
+      "mergedAt": "2025-02-21T19:11:54Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "0a9ae4fe8a29fbe97359f0db8a790cabf4ed83da"
+      },
       "comments": [],
       "reviews": [
         {
@@ -803,6 +836,39 @@
               "updatedAt": "2025-02-08T00:48:35Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6c_1GB",
+          "commit": {
+            "abbreviatedOid": "5786d12"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-02-21T19:01:09Z",
+          "updatedAt": "2025-02-21T19:01:10Z",
+          "comments": [
+            {
+              "originalPosition": 49,
+              "body": "Thanks. Good point. To move this PR along, I'll cook another commit for that.\r\n\r\n",
+              "createdAt": "2025-02-21T19:01:10Z",
+              "updatedAt": "2025-02-21T19:01:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6c_6AS",
+          "commit": {
+            "abbreviatedOid": "5786d12"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-21T19:11:17Z",
+          "updatedAt": "2025-02-21T19:11:17Z",
+          "comments": []
         }
       ]
     },
@@ -883,24 +949,26 @@
       "id": "PR_kwDOL3MllM6KOJYc",
       "title": "Remove some TCP and SACK references",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/15",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "This attempts to keep them when they're relevant and may have missed some.\r\n\r\nAlso there are some TODOs where I was confused what the text intended.  Hopefully @nealcardwell can let me know how to fix those.\r\n\r\nFixes #4",
       "createdAt": "2025-02-06T03:45:07Z",
-      "updatedAt": "2025-02-08T01:00:53Z",
+      "updatedAt": "2025-02-21T18:57:10Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "d0db28b7de659e66ad502af6194c4bdc4303b797",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-less-sack",
-      "headRefOid": "0aca347cca9b7c5469267c746647b355d3ad2cd4",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "d92feced57dce5778d5ec2a2b83639798f4a481a",
+      "closedAt": "2025-02-21T18:57:10Z",
+      "mergedAt": "2025-02-21T18:57:10Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "ea7c7c3f116ccec685c476db8269b29684a8dda0"
+      },
       "comments": [],
       "reviews": [
         {
@@ -954,6 +1022,19 @@
               "updatedAt": "2025-02-08T01:00:53Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6c_y4r",
+          "commit": {
+            "abbreviatedOid": "d92fece"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-21T18:56:13Z",
+          "updatedAt": "2025-02-21T18:56:13Z",
+          "comments": []
         }
       ]
     },
@@ -1005,6 +1086,148 @@
           ]
         }
       ]
+    },
+    {
+      "number": 18,
+      "id": "PR_kwDOL3MllM6MF_zR",
+      "title": "Revert recent prose about P.first_sent_time",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/18",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Commit ea7c7c3f116ccec685c476 added some commentary about first_sent_time: \"Additionally, TCP and other transport protocols that retransmit packets require\".\r\n\r\nBut first_sent_time is not really about retransmits. Rather, it's about the first send time for a flight of outstanding data in the network, and is used for\r\ncomputing the time elapsed to send the currently\r\noutstanding flight of data.\r\n\r\nThis commit removes the commentary and moves\r\nthe definition of P.first_sent_time back to its original spot.",
+      "createdAt": "2025-02-21T19:36:42Z",
+      "updatedAt": "2025-02-21T19:38:35Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "0a9ae4fe8a29fbe97359f0db8a790cabf4ed83da",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-p-first-sent-time",
+      "headRefOid": "62c684da72fb61d93591b153f509e202be552314",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc: @ianswett @jbeshay ",
+          "createdAt": "2025-02-21T19:36:54Z",
+          "updatedAt": "2025-02-21T19:36:54Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6dAGdJ",
+          "commit": {
+            "abbreviatedOid": "62c684d"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-21T19:38:35Z",
+          "updatedAt": "2025-02-21T19:38:35Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "id": "PR_kwDOL3MllM6MGBWQ",
+      "title": "Remove \"(thus the name)\" comments after longterm/shortterm rename",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/19",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Remove \"(thus the name)\" comments.\r\nThey no longer make sense after the longterm/shortterm rename.\r\n\r\nThanks for jbeshay@ pointing this out during a recent review!\r\n",
+      "createdAt": "2025-02-21T19:39:59Z",
+      "updatedAt": "2025-02-21T19:40:12Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "0a9ae4fe8a29fbe97359f0db8a790cabf4ed83da",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-thus-the-name",
+      "headRefOid": "27285ffc52a4f17047a3ff0d34a9b38315b4f23e",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc: @ianswett @jbeshay ",
+          "createdAt": "2025-02-21T19:40:10Z",
+          "updatedAt": "2025-02-21T19:40:10Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 20,
+      "id": "PR_kwDOL3MllM6MGFmG",
+      "title": "fix awkward \\* on a line by itself",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/20",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "A recent edit left this lonely \\* on a line by itself.",
+      "createdAt": "2025-02-21T19:48:09Z",
+      "updatedAt": "2025-02-21T19:49:30Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "0a9ae4fe8a29fbe97359f0db8a790cabf4ed83da",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-fix-awkward-star",
+      "headRefOid": "782ee5875ded7df0bd73268ea2eade16374401ab",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Forgot to mention; This also simplifies:\r\n\r\n  BBR takes an approach  where the additive increase\r\n\r\nto:\r\n\r\n  The additive increase\r\n",
+          "createdAt": "2025-02-21T19:49:28Z",
+          "updatedAt": "2025-02-21T19:49:28Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 21,
+      "id": "PR_kwDOL3MllM6MGM4f",
+      "title": "define \"acknowledged\" and \"delivered\" in a transport-agnostic way",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/21",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Recent commit ea7c7c3f116ccec685c476 made some nice improvements\r\nby replacing verbose, TCP-specific text like \"ACKed or SACKed\"\r\nwith succinct and transport-agnostic terms like \"acknowledged\".\r\n\r\nLet's add text to be very clear about what we  mean by those terms,\r\ns ince they are key, and TCP implementors may be\r\nconfused about whether \"acknowledged\" includes SACKs.\r\n",
+      "createdAt": "2025-02-21T20:08:25Z",
+      "updatedAt": "2025-02-21T20:15:25Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "0a9ae4fe8a29fbe97359f0db8a790cabf4ed83da",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-define-acknowledged-delivered",
+      "headRefOid": "f2045a390c63c19c49ca1619d3a005b68a84c00a",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
