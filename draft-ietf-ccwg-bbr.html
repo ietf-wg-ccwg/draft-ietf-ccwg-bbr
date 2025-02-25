@@ -2615,15 +2615,13 @@ available to the flow may be quite tight (even just a single packet or
 less). The increasingly rapid growth over time is motivated by the fact that
 in a high-speed WAN the increase in available bandwidth (and thus the estimated
 BDP) may require the flow to grow the volume of its inflight data by up to
-O(1,000,000) packets; even a quite typical high-speed WAN BDP like 10Gbps
-*
-100ms is around 83,000 packets (with a 1500-byte MTU). BBR takes an approach
-where the additive increase to BBR.inflight_longterm exponentially doubles each
-round trip; in each successive round trip, inflight_longterm grows by
-1, 2, 4, 8, 16, etc, with the increases spread uniformly across the entire
-round trip. This helps allow BBR to utilize a larger BDP in O(log(BDP)) round
-trips, meeting the design goal for scalable utilization of newly-available
-bandwidth.<a href="#section-4.3.3.4-4.1.1" class="pilcrow">¶</a></p>
+O(1,000,000) packets; even a high-speed WAN BDP like
+10Gbps * 100ms is around 83,000 packets (with a 1500-byte MTU). The additive
+increase to BBR.inflight_longterm exponentially doubles each round trip;
+in each successive round trip, inflight_longterm grows by 1, 2, 4, 8, 16,
+etc, with the increases spread uniformly across the entire round trip.
+This helps allow BBR to utilize a larger BDP in O(log(BDP)) round trips,
+meeting the design goal for scalable utilization of newly-available bandwidth.<a href="#section-4.3.3.4-4.1.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 <p id="section-4.3.3.4-5">Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and
