@@ -2611,7 +2611,7 @@ available to the flow may be quite tight (even just a single packet or
 less). The increasingly rapid growth over time is motivated by the fact that
 in a high-speed WAN the increase in available bandwidth (and thus the estimated
 BDP) may require the flow to grow the volume of its inflight data by up to
-O(1,000,000) packets; even a quite typical high-speed WAN BDP like
+O(1,000,000) packets; even a high-speed WAN BDP like
 10Gbps * 100ms is around 83,000 packets (with a 1500-byte MTU). The additive
 increase to BBR.inflight_longterm exponentially doubles each round trip;
 in each successive round trip, inflight_longterm grows by 1, 2, 4, 8, 16,
