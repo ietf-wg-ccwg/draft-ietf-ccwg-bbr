@@ -376,8 +376,8 @@ Table of Contents
    BBR.bw_shortterm: The short-term maximum sending bandwidth that the
    algorithm estimates is safe for matching the current network path
    delivery rate, based on any loss signals in the current bandwidth
-   probing cycle.  This is generally lower than max_bw (thus the name).
-   (Part of the short-term model.)
+   probing cycle.  This is generally lower than max_bw.  (Part of the
+   short-term model.)
 
    BBR.bw: The maximum sending bandwidth that the algorithm estimates is
    appropriate for matching the current network path delivery rate,
@@ -428,8 +428,8 @@ Table of Contents
    maximum volume of in-flight data that the algorithm estimates is safe
    for matching the current network path delivery process, based on any
    loss signals in the current bandwidth probing cycle.  This is
-   generally lower than max_inflight or inflight_longterm (thus the
-   name).  (Part of the short-term model.)
+   generally lower than max_inflight or inflight_longterm.  (Part of the
+   short-term model.)
 
 2.10.  State for Responding to Congestion
 
