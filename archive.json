@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-23T01:26:46.436968+00:00",
+  "timestamp": "2025-02-25T01:23:07.774552+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1092,24 +1092,26 @@
       "id": "PR_kwDOL3MllM6MF_zR",
       "title": "Revert recent prose about P.first_sent_time",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/18",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Commit ea7c7c3f116ccec685c476 added some commentary about first_sent_time: \"Additionally, TCP and other transport protocols that retransmit packets require\".\r\n\r\nBut first_sent_time is not really about retransmits. Rather, it's about the first send time for a flight of outstanding data in the network, and is used for\r\ncomputing the time elapsed to send the currently\r\noutstanding flight of data.\r\n\r\nThis commit removes the commentary and moves\r\nthe definition of P.first_sent_time back to its original spot.",
       "createdAt": "2025-02-21T19:36:42Z",
-      "updatedAt": "2025-02-21T19:38:35Z",
+      "updatedAt": "2025-02-23T15:12:19Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "0a9ae4fe8a29fbe97359f0db8a790cabf4ed83da",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-p-first-sent-time",
       "headRefOid": "62c684da72fb61d93591b153f509e202be552314",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-02-23T15:12:19Z",
+      "mergedAt": "2025-02-23T15:12:19Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "3d59ec9e1ce9fe14d94a9c950d1664746f7d6c27"
+      },
       "comments": [
         {
           "author": "nealcardwell",
