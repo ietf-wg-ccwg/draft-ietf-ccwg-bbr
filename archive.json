@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-25T01:23:07.774552+00:00",
+  "timestamp": "2025-02-27T01:22:56.815004+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1142,24 +1142,26 @@
       "id": "PR_kwDOL3MllM6MGBWQ",
       "title": "Remove \"(thus the name)\" comments after longterm/shortterm rename",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/19",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Remove \"(thus the name)\" comments.\r\nThey no longer make sense after the longterm/shortterm rename.\r\n\r\nThanks for jbeshay@ pointing this out during a recent review!\r\n",
       "createdAt": "2025-02-21T19:39:59Z",
-      "updatedAt": "2025-02-21T19:40:12Z",
+      "updatedAt": "2025-02-25T17:47:16Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "0a9ae4fe8a29fbe97359f0db8a790cabf4ed83da",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-thus-the-name",
       "headRefOid": "27285ffc52a4f17047a3ff0d34a9b38315b4f23e",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-02-25T17:47:08Z",
+      "mergedAt": "2025-02-25T17:47:08Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "a0c260787d9f4abab3080efd0e39e1a7263af1a4"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -1169,31 +1171,47 @@
           "updatedAt": "2025-02-21T19:40:10Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6dT0Qo",
+          "commit": {
+            "abbreviatedOid": "27285ff"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-25T04:30:09Z",
+          "updatedAt": "2025-02-25T04:30:09Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 20,
       "id": "PR_kwDOL3MllM6MGFmG",
       "title": "fix awkward \\* on a line by itself",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/20",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "A recent edit left this lonely \\* on a line by itself.",
       "createdAt": "2025-02-21T19:48:09Z",
-      "updatedAt": "2025-02-21T19:49:30Z",
+      "updatedAt": "2025-02-25T17:53:11Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "0a9ae4fe8a29fbe97359f0db8a790cabf4ed83da",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-fix-awkward-star",
-      "headRefOid": "782ee5875ded7df0bd73268ea2eade16374401ab",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "0fae7923f5388687a81d416d3b41311cc9426abc",
+      "closedAt": "2025-02-25T17:53:07Z",
+      "mergedAt": "2025-02-25T17:53:07Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "f1ec1d9c7973560c2bc554e6d8fb506a9337463e"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -1203,33 +1221,90 @@
           "updatedAt": "2025-02-21T19:49:28Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6dT0w4",
+          "commit": {
+            "abbreviatedOid": "782ee58"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-02-25T04:31:19Z",
+          "updatedAt": "2025-02-25T04:31:20Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "```suggestion\r\n  O(1,000,000) packets; even a high-speed WAN BDP like\r\n```",
+              "createdAt": "2025-02-25T04:31:19Z",
+              "updatedAt": "2025-02-25T04:31:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6dT00M",
+          "commit": {
+            "abbreviatedOid": "782ee58"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "A small suggestion, but LGTM",
+          "createdAt": "2025-02-25T04:31:27Z",
+          "updatedAt": "2025-02-25T04:32:29Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "```suggestion\r\n  O(1,000,000) packets; even a high-speed WAN BDP like\r\n```",
+              "createdAt": "2025-02-25T04:31:27Z",
+              "updatedAt": "2025-02-25T04:32:29Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 21,
       "id": "PR_kwDOL3MllM6MGM4f",
       "title": "define \"acknowledged\" and \"delivered\" in a transport-agnostic way",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/21",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Recent commit ea7c7c3f116ccec685c476 made some nice improvements\r\nby replacing verbose, TCP-specific text like \"ACKed or SACKed\"\r\nwith succinct and transport-agnostic terms like \"acknowledged\".\r\n\r\nLet's add text to be very clear about what we  mean by those terms,\r\ns ince they are key, and TCP implementors may be\r\nconfused about whether \"acknowledged\" includes SACKs.\r\n",
       "createdAt": "2025-02-21T20:08:25Z",
-      "updatedAt": "2025-02-21T20:15:25Z",
+      "updatedAt": "2025-02-25T17:47:55Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "0a9ae4fe8a29fbe97359f0db8a790cabf4ed83da",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-define-acknowledged-delivered",
       "headRefOid": "f2045a390c63c19c49ca1619d3a005b68a84c00a",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-02-25T17:47:44Z",
+      "mergedAt": "2025-02-25T17:47:44Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "aa11c8770647b2a76cac1dc94f19e125782087cd"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6dT19b",
+          "commit": {
+            "abbreviatedOid": "f2045a3"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-25T04:33:45Z",
+          "updatedAt": "2025-02-25T04:33:45Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
