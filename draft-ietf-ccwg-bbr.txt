@@ -229,7 +229,7 @@ Table of Contents
    In this document, "acknowledged" or "delivered" data means any
    transmitted data that the remote transport endpoint has confirmed
    that it has received, e.g., via a QUIC ACK Range [RFC9000], TCP
-   cumulative acknowledgment [RFC793], or TCP SACK ("Selective
+   cumulative acknowledgment [RFC9293], or TCP SACK ("Selective
    Acknowledgment") block [RFC2018].
 
 2.1.  Transport Connection State
@@ -3407,10 +3407,6 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
               Scheffenegger, Ed., "TCP Extensions for High Performance",
               RFC 7323, DOI 10.17487/RFC7323, September 2014,
               <https://www.rfc-editor.org/rfc/rfc7323>.
-
-   [RFC793]   Postel, J., "Transmission Control Protocol", RFC 793,
-              DOI 10.17487/RFC0793, September 1981,
-              <https://www.rfc-editor.org/rfc/rfc793>.
 
    [RFC7942]  Sheffer, Y. and A. Farrel, "Improving Awareness of Running
               Code: The Implementation Status Section", BCP 205,
