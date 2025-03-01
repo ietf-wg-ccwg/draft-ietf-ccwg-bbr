@@ -27,7 +27,7 @@ author:
   org: Meta
   email: jbeshay@meta.com
 normative:
-  RFC793:
+  RFC9293:
   RFC9293:
   RFC2018:
   RFC7323:
@@ -283,7 +283,7 @@ sample (rs) that are not defined below are defined in
 In this document, "acknowledged" or "delivered" data means any transmitted
 data that the remote transport endpoint has confirmed that it has received,
 e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
-{{RFC793}}, or TCP SACK ("Selective Acknowledgment") block {{RFC2018}}.
+{{RFC9293}}, or TCP SACK ("Selective Acknowledgment") block {{RFC2018}}.
 
 ## Transport Connection State {#transport-connection-state}
 
