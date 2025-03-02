@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-27T01:22:56.815004+00:00",
+  "timestamp": "2025-03-02T01:28:08.088368+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -235,6 +235,62 @@
           "body": "I suspect the experiment results with different cross-traffic will be crucial to understanding the sharing properties of these two configurations, I look forward to seeing the results.\n\nGorry",
           "createdAt": "2025-02-22T14:44:16Z",
           "updatedAt": "2025-02-22T14:44:16Z"
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "id": "I_kwDOL3MllM6r5v45",
+      "title": "HTTP",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/22",
+      "state": "CLOSED",
+      "author": "crcjs2025",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "[\u0e14\u0e32\u0e27\u0e19\u0e4c\u0e42\u0e2b\u0e25\u0e14.txt](https://github.com/user-attachments/files/19006903/default.txt)\n![Image](https://github.com/user-attachments/assets/83bfe59b-1ec7-497c-8b65-20f42b6f7031)\n[rfc7234.txt.pdf](https://github.com/user-attachments/files/19006904/rfc7234.txt.pdf)\n<!-- Failed to upload \"Bittycoon\\-\\-.zip\" -->\n[/https://www.rfc-editor.org/rfc/rfc9110.html](url)**",
+      "createdAt": "2025-02-27T10:10:02Z",
+      "updatedAt": "2025-02-27T13:03:51Z",
+      "closedAt": "2025-02-27T13:03:51Z",
+      "comments": []
+    },
+    {
+      "number": 23,
+      "id": "I_kwDOL3MllM6r5wab",
+      "title": "HTTP",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/23",
+      "state": "CLOSED",
+      "author": "crcjs2025",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "[\n\n[\u0e14\u0e32\u0e27\u0e19\u0e4c\u0e42\u0e2b\u0e25\u0e14.txt](https://github.com/user-attachments/files/19006931/default.txt)\n![Image](https://github.com/user-attachments/assets/87e78de3-f52d-4908-87e8-53b06b52ef65)\n![Image](https://github.com/user-attachments/assets/e39c79b5-228f-45ae-850d-6593136fe12c)\n[rfc7234.txt.pdf](https://github.com/user-attachments/files/19006932/rfc7234.txt.pdf)\n\nhttps://www.rfc-editor.org/rfc/rfc9110.html](url)",
+      "createdAt": "2025-02-27T10:10:55Z",
+      "updatedAt": "2025-02-27T13:03:51Z",
+      "closedAt": "2025-02-27T13:03:51Z",
+      "comments": []
+    },
+    {
+      "number": 24,
+      "id": "I_kwDOL3MllM6r5xBL",
+      "title": "Interne",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/24",
+      "state": "CLOSED",
+      "author": "crcjs2025",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "[\n\n[\u0e14\u0e32\u0e27\u0e19\u0e4c\u0e42\u0e2b\u0e25\u0e14.txt](https://github.com/user-attachments/files/19006947/default.txt)\n![Image](https://github.com/user-attachments/assets/c7683826-12ae-4e14-80c1-37502d648fc2)\n[rfc7234.txt.pdf](https://github.com/user-attachments/files/19006948/rfc7234.txt.pdf)\n\nhttps://www.rfc-editor.org/rfc/rfc9110.html](url)",
+      "createdAt": "2025-02-27T10:11:56Z",
+      "updatedAt": "2025-02-27T17:41:25Z",
+      "closedAt": "2025-02-27T13:03:52Z",
+      "comments": [
+        {
+          "author": "renghardt",
+          "authorAssociation": "NONE",
+          "body": "Blocked this user from creating more issues in the ietf-wg-ccwg organization",
+          "createdAt": "2025-02-27T17:41:24Z",
+          "updatedAt": "2025-02-27T17:41:24Z"
         }
       ]
     }
@@ -1302,6 +1358,61 @@
           "body": "",
           "createdAt": "2025-02-25T04:33:45Z",
           "updatedAt": "2025-02-25T04:33:45Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "id": "PR_kwDOL3MllM6M-yPF",
+      "title": "RFC 793 -> RFC 9293",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/25",
+      "state": "MERGED",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-02-28T19:39:06Z",
+      "updatedAt": "2025-03-01T15:45:30Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "f1ec1d9c7973560c2bc554e6d8fb506a9337463e",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-rfc-793-rfc-9293",
+      "headRefOid": "bbafd294bf8a04320e9c8c447bbe0ee338347ccb",
+      "closedAt": "2025-03-01T15:45:30Z",
+      "mergedAt": "2025-03-01T15:45:30Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "c0b1c8764f10ee53a5b81894fb5fc726d41b1c3b"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6eDvWR",
+          "commit": {
+            "abbreviatedOid": "bbafd29"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-28T21:11:37Z",
+          "updatedAt": "2025-02-28T21:11:37Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6eGfOQ",
+          "commit": {
+            "abbreviatedOid": "bbafd29"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-03-01T15:44:51Z",
+          "updatedAt": "2025-03-01T15:44:51Z",
           "comments": []
         }
       ]
