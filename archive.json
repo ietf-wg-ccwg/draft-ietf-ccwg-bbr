@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-13T01:25:36.601410+00:00",
+  "timestamp": "2025-03-16T01:37:59.943486+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -219,7 +219,7 @@
       "labels": [],
       "body": "\nIncreasing ProbeRTT interval to 10s in internet facing connections improves application performance in initial experiments, most probably due to reducing the cwnd dips for connections with long transfers. \n\nI haven't measured its impact on the speed of convergence to a fair of the bandwidth but the 10s value is already used in some of the implementations as well.",
       "createdAt": "2025-02-21T18:15:30Z",
-      "updatedAt": "2025-02-22T14:44:17Z",
+      "updatedAt": "2025-03-16T00:58:03Z",
       "closedAt": null,
       "comments": [
         {
@@ -235,6 +235,13 @@
           "body": "I suspect the experiment results with different cross-traffic will be crucial to understanding the sharing properties of these two configurations, I look forward to seeing the results.\n\nGorry",
           "createdAt": "2025-02-22T14:44:16Z",
           "updatedAt": "2025-02-22T14:44:16Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I expect DASH and HLS video playback may have app-limited behavior more often than 10 seconds, but not always less than every 5 seconds.  Since the app-limited behavior will fully drain the pipe, it will delay the next ProbeRTT.  This is a bit like the app doing ProbeRTT on a timescale of it's choosing rather than BBR choosing when to drain the pipe.\n\nI'm curious what simulations say in this case.",
+          "createdAt": "2025-03-16T00:58:01Z",
+          "updatedAt": "2025-03-16T00:58:01Z"
         }
       ]
     },
@@ -293,6 +300,24 @@
           "updatedAt": "2025-02-27T17:41:24Z"
         }
       ]
+    },
+    {
+      "number": 26,
+      "id": "I_kwDOL3MllM6uNGx4",
+      "title": "Bandwidth estimation still uses _seq names, which are TCP-centric",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/26",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "I believe the draft is fairly transport agnostic, but the bandwidth estimation section still has some references to end_seq and similar names that don't cleanly translate to QUIC.\n\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/draft-ietf-ccwg-bbr-02/draft-ietf-ccwg-bbr.md#bbrmax_bw-estimated-maximum-bandwidth-bbrmaxbw-estimated-maximum-bandwidth",
+      "createdAt": "2025-03-16T00:39:46Z",
+      "updatedAt": "2025-03-16T00:39:46Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
