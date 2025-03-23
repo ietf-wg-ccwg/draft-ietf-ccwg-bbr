@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-20T01:24:55.740962+00:00",
+  "timestamp": "2025-03-23T01:38:41.760326+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -362,7 +362,51 @@
       ],
       "body": "When trying to add consistency by fixing #14 I realized that the text refers to packets in flight.  The Google quiche QUIC implementation of BBR uses bytes, not packets.  I believe the Linux TCP implementation uses packets, and the BSD implementation uses bytes?  I'm unsure what mvfst uses?\n\nPossibly we can define a term at the beginning of the document, ie: \"Inflight\" and define it to be in bytes or packets depending upon the implementation?\n\nI'm a bit worried we'll have unit issues, since bytes and packets are not the same, but I haven't attempted this PR yet.",
       "createdAt": "2025-03-18T10:25:58Z",
-      "updatedAt": "2025-03-18T10:26:44Z",
+      "updatedAt": "2025-03-20T05:02:07Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "A few attendees at IETF said they'd prefer bytes, since that's what most implementations use, but obviously Linux does not.",
+          "createdAt": "2025-03-20T05:02:06Z",
+          "updatedAt": "2025-03-20T05:02:06Z"
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "id": "I_kwDOL3MllM6u9AbL",
+      "title": "Do we need to use \"C.\" in front of connection variables?",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/28",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "The document only describes a single connection, so there's no ambiguity about the connection.\n\nSome variables like is_cwnd_limited don't have a \"C.\" in front of them, but they also seem connection local?",
+      "createdAt": "2025-03-20T12:02:37Z",
+      "updatedAt": "2025-03-20T12:02:37Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 29,
+      "id": "I_kwDOL3MllM6u9CZe",
+      "title": "Be consistent about CamelCase vs '_' state variable names",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/29",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "Today, sometimes the draft uses camelcase (ie: InitialCwnd), and sometimes uses lowercase with underscores (ie: is_cwnd_limited).  I don't have a strong preference, but the inconsistency is potentially confusing for readers, because I think the choice of which to use is somewhat arbitrary today?",
+      "createdAt": "2025-03-20T12:04:57Z",
+      "updatedAt": "2025-03-20T12:04:57Z",
       "closedAt": null,
       "comments": []
     }
@@ -1488,6 +1532,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 30,
+      "id": "PR_kwDOL3MllM6PdGq7",
+      "title": "Remove the \"C.\" prefix from connection local variables",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/30",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Alternatively, we could be consistent about always using \"C.\" in front of connection local variables, which I don't believe we are today.\r\n\r\nFixes #28 ",
+      "createdAt": "2025-03-20T12:10:53Z",
+      "updatedAt": "2025-03-20T12:10:53Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "c0b1c8764f10ee53a5b81894fb5fc726d41b1c3b",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-less-C",
+      "headRefOid": "92f4d72bfba7bface48e38faef158227c7cbd76b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
