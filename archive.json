@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-23T01:38:41.760326+00:00",
+  "timestamp": "2025-03-25T01:27:05.783045+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -407,6 +407,38 @@
       "body": "Today, sometimes the draft uses camelcase (ie: InitialCwnd), and sometimes uses lowercase with underscores (ie: is_cwnd_limited).  I don't have a strong preference, but the inconsistency is potentially confusing for readers, because I think the choice of which to use is somewhat arbitrary today?",
       "createdAt": "2025-03-20T12:04:57Z",
       "updatedAt": "2025-03-20T12:04:57Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 31,
+      "id": "I_kwDOL3MllM6vg5rv",
+      "title": "Experimental RFCs should have an Experiment",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/31",
+      "state": "OPEN",
+      "author": "martinduke",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Sec 3.2 of RFC 9743 suggests this.\n\nJust a little text about the areas of interest that require more data.",
+      "createdAt": "2025-03-24T22:39:58Z",
+      "updatedAt": "2025-03-24T22:39:58Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 32,
+      "id": "I_kwDOL3MllM6vg6X_",
+      "title": "Clarify C.delivered",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/32",
+      "state": "OPEN",
+      "author": "martinduke",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Sec 2.1 says:\n\n\"C.delivered: The total amount of data (tracked in octets or in packets) delivered so far over the lifetime of the transport connection C.\"\n\nIs this 'unique data' excluding spurious retransmits? Please clarify.",
+      "createdAt": "2025-03-24T22:42:22Z",
+      "updatedAt": "2025-03-24T22:42:22Z",
       "closedAt": null,
       "comments": []
     }
