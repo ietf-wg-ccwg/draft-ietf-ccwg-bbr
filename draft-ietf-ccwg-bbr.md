@@ -754,6 +754,18 @@ protocols, and these implementations have been used in production
 for a large volume of Internet traffic. An open source implementation of
 BBR is also available for DCCP {{RFC4340}}  {{draft-romo-iccrg-ccid5}}.
 
+## ECN
+
+This experimental version of BBR does not specify a specific response to
+either Classic {{RFC3168}} or L4S {{RFC9330}} style ECN. However, if
+BBR negotiates either type of ECN, the congestion controller response
+MUST treat any CE marks as congestion. 
+
+{{?RFC8311, Section 4.1}} relaxes the requirement from RFC3168 that the
+congestion response to CE marks be identical to packet loss.
+The congestion response resquirements of L4S are detailed in
+{{?RFC9330, Section 4.3}}.
+
 
 # Detailed Algorithm {#detailed-algorithm}
 
