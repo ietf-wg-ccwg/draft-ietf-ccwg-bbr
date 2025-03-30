@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-27T01:26:32.812627+00:00",
+  "timestamp": "2025-03-30T01:40:57.786925+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -357,12 +357,10 @@
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
-      "labels": [
-        "Editorial"
-      ],
+      "labels": [],
       "body": "When trying to add consistency by fixing #14 I realized that the text refers to packets in flight.  The Google quiche QUIC implementation of BBR uses bytes, not packets.  I believe the Linux TCP implementation uses packets, and the BSD implementation uses bytes?  I'm unsure what mvfst uses?\n\nPossibly we can define a term at the beginning of the document, ie: \"Inflight\" and define it to be in bytes or packets depending upon the implementation?\n\nI'm a bit worried we'll have unit issues, since bytes and packets are not the same, but I haven't attempted this PR yet.",
       "createdAt": "2025-03-18T10:25:58Z",
-      "updatedAt": "2025-03-20T05:02:07Z",
+      "updatedAt": "2025-03-29T16:05:41Z",
       "closedAt": null,
       "comments": [
         {
@@ -1584,6 +1582,32 @@
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-less-C",
       "headRefOid": "92f4d72bfba7bface48e38faef158227c7cbd76b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 33,
+      "id": "PR_kwDOL3MllM6QqS10",
+      "title": "Document ECN stance",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/33",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #7\r\n\r\nRelevant to #31",
+      "createdAt": "2025-03-29T16:25:22Z",
+      "updatedAt": "2025-03-29T23:07:13Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "c0b1c8764f10ee53a5b81894fb5fc726d41b1c3b",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-ecn-stance",
+      "headRefOid": "c87e9dcc829d77ff10dccc1d9fd36af449c2ee72",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
