@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-30T01:40:57.786925+00:00",
+  "timestamp": "2025-04-01T01:45:26.247248+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1601,7 +1601,7 @@
       "labels": [],
       "body": "Fixes #7\r\n\r\nRelevant to #31",
       "createdAt": "2025-03-29T16:25:22Z",
-      "updatedAt": "2025-03-29T23:07:13Z",
+      "updatedAt": "2025-03-31T16:40:58Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "c0b1c8764f10ee53a5b81894fb5fc726d41b1c3b",
@@ -1613,7 +1613,61 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6imPIg",
+          "commit": {
+            "abbreviatedOid": "c87e9dc"
+          },
+          "author": "mwelzl",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-03-30T15:28:06Z",
+          "updatedAt": "2025-03-30T15:28:06Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "```suggestion\r\nClassic {{RFC3168}}, Alternative Backoff with ECN (ABE) {{RFC8511}} or L4S {{RFC9330}} style ECN. However, if\r\n```\r\n\r\nIt seems strange to describe this as if Classic or L4S were the only two possible options. Really, we have:\r\n- Classic, PS, although updated by RFC 8311, PS\r\n- Experimental: ABE or L4S.\r\n",
+              "createdAt": "2025-03-30T15:28:06Z",
+              "updatedAt": "2025-03-30T15:28:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6itfBf",
+          "commit": {
+            "abbreviatedOid": "c87e9dc"
+          },
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-03-31T16:18:29Z",
+          "updatedAt": "2025-03-31T16:18:29Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6itp2P",
+          "commit": {
+            "abbreviatedOid": "c87e9dc"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-03-31T16:38:22Z",
+          "updatedAt": "2025-03-31T16:40:58Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "Strictly speaking, BBR itself would not do the ECN negotiation itself in some trnsports, and there may be future transports that do not require negotiating ECN support; they may specify it as mandatory. AFAICT the constraint is with the ECN code point. So for precision I'd suggest replacing \"BBR negotiates either type of ECN\" with \"the transport connection claims ECN support by marking  packets using either the ECT(0) or ECT(1) code point\".",
+              "createdAt": "2025-03-31T16:38:22Z",
+              "updatedAt": "2025-03-31T16:40:58Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
