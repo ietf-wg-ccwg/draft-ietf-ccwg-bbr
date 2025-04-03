@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-01T01:45:26.247248+00:00",
+  "timestamp": "2025-04-03T01:27:00.393210+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -386,9 +386,17 @@
       ],
       "body": "The document only describes a single connection, so there's no ambiguity about the connection.\n\nSome variables like is_cwnd_limited don't have a \"C.\" in front of them, but they also seem connection local?",
       "createdAt": "2025-03-20T12:02:37Z",
-      "updatedAt": "2025-03-20T12:02:37Z",
+      "updatedAt": "2025-04-02T22:24:28Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "As an implementer, I found the distinction between C.delivered / packet.delivered / rs.delivered helpful in identifying which one we're referring to, especially when they don't appear together in the same line.\n\nThe three other connection state variable names (SMSS, is_cwnd_limited, InitialCwnd) are not reused in the packets or rate samples so there are easier to identify. But for the sake of consistency, I would prefer adding the \"C.\" prefix to all the connection variables. This would also keep it consistent with the rate sampling algorithm where we're using \"C.\" for all connection variables.",
+          "createdAt": "2025-04-02T22:24:27Z",
+          "updatedAt": "2025-04-02T22:24:27Z"
+        }
+      ]
     },
     {
       "number": 29,
@@ -436,9 +444,17 @@
       "labels": [],
       "body": "Sec 2.1 says:\n\n\"C.delivered: The total amount of data (tracked in octets or in packets) delivered so far over the lifetime of the transport connection C.\"\n\nIs this 'unique data' excluding spurious retransmits? Please clarify.",
       "createdAt": "2025-03-24T22:42:22Z",
-      "updatedAt": "2025-03-24T22:42:22Z",
+      "updatedAt": "2025-04-02T22:45:59Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think the concept of \"unique data\" is also ambiguous. It depends on how the transport handles retransmissions and how it detects spurious ones. One way around this is to define it in terms of ACKing. I.e., delivered data is acked data at the transport.\n\nIn case of QUIC this would include spurious retransmits because a retransmit is a new packet. For TCP, it wouldn't. ",
+          "createdAt": "2025-04-02T22:45:58Z",
+          "updatedAt": "2025-04-02T22:45:58Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -1575,7 +1591,7 @@
       "labels": [],
       "body": "Alternatively, we could be consistent about always using \"C.\" in front of connection local variables, which I don't believe we are today.\r\n\r\nFixes #28 ",
       "createdAt": "2025-03-20T12:10:53Z",
-      "updatedAt": "2025-03-20T12:10:53Z",
+      "updatedAt": "2025-04-02T22:25:36Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "c0b1c8764f10ee53a5b81894fb5fc726d41b1c3b",
@@ -1586,7 +1602,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "More details in my comment on the issue but tl;dr, I prefer using \"C.\" for all the connection variables instead.",
+          "createdAt": "2025-04-02T22:25:35Z",
+          "updatedAt": "2025-04-02T22:25:35Z"
+        }
+      ],
       "reviews": []
     },
     {
