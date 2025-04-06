@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-03T01:27:00.393210+00:00",
+  "timestamp": "2025-04-06T01:39:48.390530+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -455,6 +455,22 @@
           "updatedAt": "2025-04-02T22:45:58Z"
         }
       ]
+    },
+    {
+      "number": 34,
+      "id": "I_kwDOL3MllM6xMQkN",
+      "title": "Document when/why the bandwidth estimator overestimates",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/34",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "And explain that's one reason we limit bandwidth measurements to the send rate.",
+      "createdAt": "2025-04-04T15:46:47Z",
+      "updatedAt": "2025-04-04T15:46:47Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
