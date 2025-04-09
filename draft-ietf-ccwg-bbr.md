@@ -764,8 +764,8 @@ the congestion controller response MUST treat any CE marks as congestion.
 
 {{?RFC8311, Section 4.1}} relaxes the requirement from RFC3168 that the
 congestion response to CE marks be identical to packet loss.
-The congestion response resquirements of L4S are detailed in
-{{?RFC9330, Section 4.3}}.
+The congestion response requirements of L4S are detailed in
+{{RFC9330, Section 4.3}}.
 
 
 # Detailed Algorithm {#detailed-algorithm}
