@@ -757,7 +757,7 @@ BBR is also available for DCCP {{RFC4340}}  {{draft-romo-iccrg-ccid5}}.
 ## ECN
 
 This experimental version of BBR does not specify a specific response to
-either Classic {{RFC3168}} or L4S {{RFC9330}} style ECN. However, if
+Classic {{RFC3168}}, Alternative Backoff with ECN (ABE) {{RFC8511}} or L4S {{RFC9330}} style ECN. However, if
 BBR negotiates either type of ECN, the congestion controller response
 MUST treat any CE marks as congestion. 
 
