@@ -758,7 +758,7 @@ BBR is also available for DCCP {{RFC4340}}  {{draft-romo-iccrg-ccid5}}.
 
 This experimental version of BBR does not specify a specific response to
 Classic {{RFC3168}}, Alternative Backoff with ECN (ABE) {{RFC8511}} or L4S {{RFC9330}} style ECN. However, if
-BBR negotiates either type of ECN, the congestion controller response
+the transport connection claims ECN support by marking packets using either the ECT(0) or ECT(1) code point, the congestion controller response
 MUST treat any CE marks as congestion. 
 
 {{?RFC8311, Section 4.1}} relaxes the requirement from RFC3168 that the
