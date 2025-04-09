@@ -760,7 +760,7 @@ This experimental version of BBR does not specify a specific response to
 Classic {{RFC3168}}, Alternative Backoff with ECN (ABE) {{RFC8511}} or
 L4S {{RFC9330}} style ECN. However, if the connection claims ECN support
 by marking packets using either the ECT(0) or ECT(1) code point,
-the congestion controller response MUST treat any CE marks as congestion. 
+the congestion controller response MUST treat any CE marks as congestion.
 
 {{?RFC8311, Section 4.1}} relaxes the requirement from RFC3168 that the
 congestion response to CE marks be identical to packet loss.
