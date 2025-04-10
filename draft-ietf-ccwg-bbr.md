@@ -28,7 +28,6 @@ author:
   email: jbeshay@meta.com
 normative:
   RFC9293:
-  RFC9293:
   RFC2018:
   RFC7323:
   RFC2119:
@@ -44,6 +43,9 @@ normative:
   RFC6675:
   RFC6937:
   RFC9002:
+  RFC3168:
+  RFC9330:
+  RFC8511:
 informative:
   CCGHJ16:
     target: http://queue.acm.org/detail.cfm?id=3022184
