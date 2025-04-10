@@ -28,7 +28,6 @@ author:
   email: jbeshay@meta.com
 normative:
   RFC9293:
-  RFC9293:
   RFC2018:
   RFC7323:
   RFC2119:
@@ -44,6 +43,9 @@ normative:
   RFC6675:
   RFC6937:
   RFC9002:
+  RFC3168:
+  RFC9330:
+  RFC8511:
 informative:
   CCGHJ16:
     target: http://queue.acm.org/detail.cfm?id=3022184
@@ -753,6 +755,19 @@ available for the TCP {{RFC9293}} and QUIC {{RFC9000}} transport
 protocols, and these implementations have been used in production
 for a large volume of Internet traffic. An open source implementation of
 BBR is also available for DCCP {{RFC4340}}  {{draft-romo-iccrg-ccid5}}.
+
+## ECN
+
+This experimental version of BBR does not specify a specific response to
+Classic {{RFC3168}}, Alternative Backoff with ECN (ABE) {{RFC8511}} or
+L4S {{RFC9330}} style ECN. However, if the connection claims ECN support
+by marking packets using either the ECT(0) or ECT(1) code point,
+the congestion controller response MUST treat any CE marks as congestion.
+
+{{?RFC8311, Section 4.1}} relaxes the requirement from RFC3168 that the
+congestion response to CE marks be identical to packet loss.
+The congestion response requirements of L4S are detailed in
+{{RFC9330, Section 4.3}}.
 
 
 # Detailed Algorithm {#detailed-algorithm}
