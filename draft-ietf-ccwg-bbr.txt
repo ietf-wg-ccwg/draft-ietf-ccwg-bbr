@@ -104,6 +104,7 @@ Table of Contents
        3.4.2.  Time Scales for the Network Model
      3.5.  Control Parameter Overview
      3.6.  Environment and Usage
+     3.7.  ECN
    4.  Detailed Algorithm
      4.1.  State Machine
        4.1.1.  State Transition Diagram
@@ -710,6 +711,20 @@ Table of Contents
    used in production for a large volume of Internet traffic.  An open
    source implementation of BBR is also available for DCCP [RFC4340]
    [draft-romo-iccrg-ccid5].
+
+3.7.  ECN
+
+   This experimental version of BBR does not specify a specific response
+   to Classic [RFC3168], Alternative Backoff with ECN (ABE) [RFC8511] or
+   L4S [RFC9330] style ECN.  However, if the connection claims ECN
+   support by marking packets using either the ECT(0) or ECT(1) code
+   point, the congestion controller response MUST treat any CE marks as
+   congestion.
+
+   [RFC8311], Section 4.1 relaxes the requirement from RFC3168 that the
+   congestion response to CE marks be identical to packet loss.  The
+   congestion response requirements of L4S are detailed in [RFC9330],
+   Section 4.3.
 
 4.  Detailed Algorithm
 
@@ -3374,6 +3389,11 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/rfc/rfc2119>.
 
+   [RFC3168]  Ramakrishnan, K., Floyd, S., and D. Black, "The Addition
+              of Explicit Congestion Notification (ECN) to IP",
+              RFC 3168, DOI 10.17487/RFC3168, September 2001,
+              <https://www.rfc-editor.org/rfc/rfc3168>.
+
    [RFC4340]  Kohler, E., Handley, M., and S. Floyd, "Datagram
               Congestion Control Protocol (DCCP)", RFC 4340,
               DOI 10.17487/RFC4340, March 2006,
@@ -3418,6 +3438,11 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
               RFC 8126, DOI 10.17487/RFC8126, June 2017,
               <https://www.rfc-editor.org/rfc/rfc8126>.
 
+   [RFC8511]  Khademi, N., Welzl, M., Armitage, G., and G. Fairhurst,
+              "TCP Alternative Backoff with ECN (ABE)", RFC 8511,
+              DOI 10.17487/RFC8511, December 2018,
+              <https://www.rfc-editor.org/rfc/rfc8511>.
+
    [RFC8985]  Cheng, Y., Cardwell, N., Dukkipati, N., and P. Jha, "The
               RACK-TLP Loss Detection Algorithm for TCP", RFC 8985,
               DOI 10.17487/RFC8985, February 2021,
@@ -3435,6 +3460,12 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    [RFC9293]  Eddy, W., Ed., "Transmission Control Protocol (TCP)",
               STD 7, RFC 9293, DOI 10.17487/RFC9293, August 2022,
               <https://www.rfc-editor.org/rfc/rfc9293>.
+
+   [RFC9330]  Briscoe, B., Ed., De Schepper, K., Bagnulo, M., and G.
+              White, "Low Latency, Low Loss, and Scalable Throughput
+              (L4S) Internet Service: Architecture", RFC 9330,
+              DOI 10.17487/RFC9330, January 2023,
+              <https://www.rfc-editor.org/rfc/rfc9330>.
 
    [RFC9438]  Xu, L., Ha, S., Rhee, I., Goel, V., and L. Eggert, Ed.,
               "CUBIC for Fast and Long-Distance Networks", RFC 9438,
@@ -3520,6 +3551,11 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    [MM19]     Mathis, M. and J. Mahdavi, "Deprecating The TCP
               Macroscopic Model", Computer Communication Review, vol.
               49, no. 5, pp. 63-68 , October 2019.
+
+   [RFC8311]  Black, D., "Relaxing Restrictions on Explicit Congestion
+              Notification (ECN) Experimentation", RFC 8311,
+              DOI 10.17487/RFC8311, January 2018,
+              <https://www.rfc-editor.org/rfc/rfc8311>.
 
    [WS95]     Wright, G. and W. Stevens, "TCP/IP Illustrated, Volume 2:
               The Implementation", Addison-Wesley , 1995.

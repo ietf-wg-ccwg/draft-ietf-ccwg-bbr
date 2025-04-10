@@ -24,18 +24,18 @@ acknowledgment. Thus far, open source implementations are available
 for TCP   and QUIC  . This document
 specifies version 3 of the BBR algorithm, BBRv3. 
     " name="description">
-<meta content="xml2rfc 3.27.0" name="generator">
+<meta content="xml2rfc 3.28.1" name="generator">
 <meta content="Congestion Control" name="keyword">
 <meta content="draft-ietf-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.27.0
+  xml2rfc 3.28.1
     Python 3.12.9
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
-    Jinja2 3.1.5
+    Jinja2 3.1.6
     lxml 5.3.0
-    platformdirs 4.3.6
+    platformdirs 4.3.7
     pycountry 24.6.1
     PyYAML 6.0.2
     requests 2.32.3
@@ -1274,6 +1274,9 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.6">
                 <p id="section-toc.1-1.3.2.6.1"><a href="#section-3.6" class="auto internal xref">3.6</a>.  <a href="#name-environment-and-usage" class="internal xref">Environment and Usage</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.7">
+                <p id="section-toc.1-1.3.2.7.1"><a href="#section-3.7" class="auto internal xref">3.7</a>.  <a href="#name-ecn" class="internal xref">ECN</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
@@ -2043,6 +2046,22 @@ available for the TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</
 protocols, and these implementations have been used in production
 for a large volume of Internet traffic. An open source implementation of
 BBR is also available for DCCP <span>[<a href="#RFC4340" class="cite xref">RFC4340</a>]</span>  <span>[<a href="#draft-romo-iccrg-ccid5" class="cite xref">draft-romo-iccrg-ccid5</a>]</span>.<a href="#section-3.6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ecn">
+<section id="section-3.7">
+        <h3 id="name-ecn">
+<a href="#section-3.7" class="section-number selfRef">3.7. </a><a href="#name-ecn" class="section-name selfRef">ECN</a>
+        </h3>
+<p id="section-3.7-1">This experimental version of BBR does not specify a specific response to
+Classic <span>[<a href="#RFC3168" class="cite xref">RFC3168</a>]</span>, Alternative Backoff with ECN (ABE) <span>[<a href="#RFC8511" class="cite xref">RFC8511</a>]</span> or
+L4S <span>[<a href="#RFC9330" class="cite xref">RFC9330</a>]</span> style ECN. However, if the connection claims ECN support
+by marking packets using either the ECT(0) or ECT(1) code point,
+the congestion controller response MUST treat any CE marks as congestion.<a href="#section-3.7-1" class="pilcrow">¶</a></p>
+<p id="section-3.7-2"><span>[<a href="#RFC8311" class="cite xref">RFC8311</a>], <a href="https://rfc-editor.org/rfc/rfc8311#section-4.1" class="relref">Section 4.1</a></span> relaxes the requirement from RFC3168 that the
+congestion response to CE marks be identical to packet loss.
+The congestion response requirements of L4S are detailed in
+<span>[<a href="#RFC9330" class="cite xref">RFC9330</a>], <a href="https://rfc-editor.org/rfc/rfc9330#section-4.3" class="relref">Section 4.3</a></span>.<a href="#section-3.7-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -5147,6 +5166,10 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
         <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC3168">[RFC3168]</dt>
+        <dd>
+<span class="refAuthor">Ramakrishnan, K.</span>, <span class="refAuthor">Floyd, S.</span>, and <span class="refAuthor">D. Black</span>, <span class="refTitle">"The Addition of Explicit Congestion Notification (ECN) to IP"</span>, <span class="seriesInfo">RFC 3168</span>, <span class="seriesInfo">DOI 10.17487/RFC3168</span>, <time datetime="2001-09" class="refDate">September 2001</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3168">https://www.rfc-editor.org/rfc/rfc3168</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC4340">[RFC4340]</dt>
         <dd>
 <span class="refAuthor">Kohler, E.</span>, <span class="refAuthor">Handley, M.</span>, and <span class="refAuthor">S. Floyd</span>, <span class="refTitle">"Datagram Congestion Control Protocol (DCCP)"</span>, <span class="seriesInfo">RFC 4340</span>, <span class="seriesInfo">DOI 10.17487/RFC4340</span>, <time datetime="2006-03" class="refDate">March 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4340">https://www.rfc-editor.org/rfc/rfc4340</a>&gt;</span>. </dd>
@@ -5183,6 +5206,10 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
         <dd>
 <span class="refAuthor">Cotton, M.</span>, <span class="refAuthor">Leiba, B.</span>, and <span class="refAuthor">T. Narten</span>, <span class="refTitle">"Guidelines for Writing an IANA Considerations Section in RFCs"</span>, <span class="seriesInfo">BCP 26</span>, <span class="seriesInfo">RFC 8126</span>, <span class="seriesInfo">DOI 10.17487/RFC8126</span>, <time datetime="2017-06" class="refDate">June 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8126">https://www.rfc-editor.org/rfc/rfc8126</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC8511">[RFC8511]</dt>
+        <dd>
+<span class="refAuthor">Khademi, N.</span>, <span class="refAuthor">Welzl, M.</span>, <span class="refAuthor">Armitage, G.</span>, and <span class="refAuthor">G. Fairhurst</span>, <span class="refTitle">"TCP Alternative Backoff with ECN (ABE)"</span>, <span class="seriesInfo">RFC 8511</span>, <span class="seriesInfo">DOI 10.17487/RFC8511</span>, <time datetime="2018-12" class="refDate">December 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8511">https://www.rfc-editor.org/rfc/rfc8511</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8985">[RFC8985]</dt>
         <dd>
 <span class="refAuthor">Cheng, Y.</span>, <span class="refAuthor">Cardwell, N.</span>, <span class="refAuthor">Dukkipati, N.</span>, and <span class="refAuthor">P. Jha</span>, <span class="refTitle">"The RACK-TLP Loss Detection Algorithm for TCP"</span>, <span class="seriesInfo">RFC 8985</span>, <span class="seriesInfo">DOI 10.17487/RFC8985</span>, <time datetime="2021-02" class="refDate">February 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8985">https://www.rfc-editor.org/rfc/rfc8985</a>&gt;</span>. </dd>
@@ -5198,6 +5225,10 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dt id="RFC9293">[RFC9293]</dt>
         <dd>
 <span class="refAuthor">Eddy, W., Ed.</span>, <span class="refTitle">"Transmission Control Protocol (TCP)"</span>, <span class="seriesInfo">STD 7</span>, <span class="seriesInfo">RFC 9293</span>, <span class="seriesInfo">DOI 10.17487/RFC9293</span>, <time datetime="2022-08" class="refDate">August 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9293">https://www.rfc-editor.org/rfc/rfc9293</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9330">[RFC9330]</dt>
+        <dd>
+<span class="refAuthor">Briscoe, B., Ed.</span>, <span class="refAuthor">De Schepper, K.</span>, <span class="refAuthor">Bagnulo, M.</span>, and <span class="refAuthor">G. White</span>, <span class="refTitle">"Low Latency, Low Loss, and Scalable Throughput (L4S) Internet Service: Architecture"</span>, <span class="seriesInfo">RFC 9330</span>, <span class="seriesInfo">DOI 10.17487/RFC9330</span>, <time datetime="2023-01" class="refDate">January 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9330">https://www.rfc-editor.org/rfc/rfc9330</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9438">[RFC9438]</dt>
       <dd>
@@ -5271,6 +5302,10 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dt id="MM19">[MM19]</dt>
         <dd>
 <span class="refAuthor">Mathis, M.</span> and <span class="refAuthor">J. Mahdavi</span>, <span class="refTitle">"Deprecating The TCP Macroscopic Model"</span>, <span class="seriesInfo">Computer Communication Review, vol. 49, no. 5, pp. 63-68 </span>, <time datetime="2019-10" class="refDate">October 2019</time>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8311">[RFC8311]</dt>
+        <dd>
+<span class="refAuthor">Black, D.</span>, <span class="refTitle">"Relaxing Restrictions on Explicit Congestion Notification (ECN) Experimentation"</span>, <span class="seriesInfo">RFC 8311</span>, <span class="seriesInfo">DOI 10.17487/RFC8311</span>, <time datetime="2018-01" class="refDate">January 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8311">https://www.rfc-editor.org/rfc/rfc8311</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="WS95">[WS95]</dt>
       <dd>
