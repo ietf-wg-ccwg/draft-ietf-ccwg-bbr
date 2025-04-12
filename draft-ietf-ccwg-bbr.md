@@ -2742,15 +2742,6 @@ reduces BBR.inflight_longterm:
 
 ~~~~
   /* Do loss signals suggest inflight is too high?
-   * If so, react. */
-  IsInflightTooHigh():
-    if (IsInflightTooHigh(rs))
-      if (BBR.bw_probe_samples)
-        BBRHandleInflightTooHigh()
-      return true  /* inflight too high */
-    else
-      return false /* inflight not too high */
-
   IsInflightTooHigh():
     return (rs.lost > rs.tx_in_flight * BBRLossThresh)
 
@@ -2819,9 +2810,9 @@ In pseudocode:
     rs.tx_in_flight = packet.tx_in_flight /* inflight at transmit */
     rs.lost = C.lost - packet.lost /* data lost since transmit */
     rs.is_app_limited = packet.is_app_limited;
-    if (IsInflightTooHigh(rs))
+    if (IsInflightTooHigh())
       rs.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
-      BBRHandleInflightTooHigh(rs)
+      BBRHandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBRLossThresh? */
   BBRInflightLongtermFromLostPacket(rs, packet):
