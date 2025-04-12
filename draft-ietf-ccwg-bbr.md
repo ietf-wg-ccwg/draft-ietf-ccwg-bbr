@@ -3148,7 +3148,6 @@ as follows:
     return BBRQuantizationBudget(inflight)
 
   BBRUpdateMaxInflight():
-    BBRUpdateAggregationBudget()
     inflight = BBRBDPMultiple(BBR.cwnd_gain)
     inflight += BBR.extra_acked
     BBR.max_inflight = BBRQuantizationBudget(inflight)
