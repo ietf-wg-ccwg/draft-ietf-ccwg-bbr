@@ -1456,9 +1456,10 @@ The core logic for entering each state:
     BBR.probe_up_cnt = Infinity /* not growing inflight_longterm */
     BBRPickProbeWait()
     BBR.cycle_stamp = Now()  /* start wall clock */
-    BBR.ack_phase  = ACKS_PROBE_STOPPING
     BBRStartRound()
     BBR.state = ProbeBW_DOWN
+    if (!rs.is_app_limited)
+      BBRAdvanceMaxBwFilter()
 
   BBRStartProbeBW_CRUISE():
     BBR.state = ProbeBW_CRUISE
@@ -1467,12 +1468,10 @@ The core logic for entering each state:
     BBRResetLowerBounds()
     BBR.bw_probe_up_rounds = 0
     BBR.bw_probe_up_acks = 0
-    BBR.ack_phase = ACKS_REFILLING
     BBRStartRound()
     BBR.state = ProbeBW_REFILL
 
   BBRStartProbeBW_UP():
-    BBR.ack_phase = ACKS_PROBE_STARTING
     BBRStartRound()
     BBRResetFullBW()
     BBR.full_bw = rs.delivery_rate
@@ -1581,14 +1580,6 @@ The ancillary logic to implement the ProbeBW state machine:
   /* Track ACK state and update BBR.max_bw window and
    * BBR.inflight_longterm. */
   BBRAdaptUpperBounds():
-    if (BBR.ack_phase == ACKS_PROBE_STARTING and BBR.round_start)
-      /* starting to get bw probing samples */
-      BBR.ack_phase = ACKS_PROBE_FEEDBACK
-    if (BBR.ack_phase == ACKS_PROBE_STOPPING and BBR.round_start)
-      /* end of samples from bw probing phase */
-      if (IsInAProbeBWState() and !rs.is_app_limited)
-        BBRAdvanceMaxBwFilter()
-
     if (!IsInflightTooHigh())
       /* Loss rate is safe. Adjust upper bounds upward. */
       if (BBR.inflight_longterm == Infinity)
@@ -1743,7 +1734,6 @@ to the ProbeRTT state as follows:
       BBREnterProbeRTT()
       BBRSaveCwnd()
       BBR.probe_rtt_done_stamp = 0
-      BBR.ack_phase = ACKS_PROBE_STOPPING
       BBRStartRound()
     if (BBR.state == ProbeRTT)
       BBRHandleProbeRTT()
