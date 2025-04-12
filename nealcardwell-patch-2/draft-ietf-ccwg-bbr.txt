@@ -3362,9 +3362,9 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    We would like to thank Randall R.  Stewart, Jim Warner, Loganaden
    Velvindron, Hiren Panchasara, Adrian Zapletal, Christian Huitema, Bao
    Zheng, Jonathan Morton, Matt Olson, Junho Choi, Carsten Bormann,
-   Pouria Mousavizadeh Tehrani, Amanda Baber and Frédéric Lécaille for
-   feedback, suggestions, and edits on earlier versions of this
-   document.
+   Pouria Mousavizadeh Tehrani, Amanda Baber, Frédéric Lécaille, and
+   Tatsuhiro Tsujikawa for feedback, suggestions, and edits on earlier
+   versions of this document.
 
 9.  References
 
