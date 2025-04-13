@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-10T01:27:25.610491+00:00",
+  "timestamp": "2025-04-13T02:55:20.081959+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -62,7 +62,7 @@
       "id": "I_kwDOL3MllM6dEqcL",
       "title": "Decide and document the BBR draft's stance on ECN",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/7",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -71,8 +71,8 @@
       "labels": [],
       "body": "Today at the IETF 121 CCWG session, @martinduke asked about the BBR draft's stance on ECN.\r\n\r\nI agree that we should decide and document the BBR draft's stance on ECN.\r\n\r\nIn particular we should probably decide on and document the stance on both:\r\n\r\n+ RFC 3168 ECN\r\n+ L4S ECN\r\n\r\nFor the record, so the ideas are preserved and discussed, I'm pasting some of the CCWG session notes from [Borrowing from the session ](https://notes.ietf.org/notes-ietf-121-ccwg) :\r\n\r\n+ Martin Duke: What about ECT(0), which could be a smilair reaction to loss. Reply - would need to look at this.\r\n\r\n+ Michael Welzl: Following-up, there is ABE (RFC8511), which is a simple change, which uses a smaller backoff to an ECN mark using ECT(0), rather than the full L4S approach, but still with significant benefit. Reply - This is something to consider if we consider ECN.\r\n\r\ncc: @ianswett @jbeshay @renghardt @ekinnear @mattmathis @mwelzl",
       "createdAt": "2024-11-05T11:51:57Z",
-      "updatedAt": "2025-02-03T17:51:58Z",
-      "closedAt": null,
+      "updatedAt": "2025-04-10T15:24:55Z",
+      "closedAt": "2025-04-10T15:24:55Z",
       "comments": [
         {
           "author": "chromi",
@@ -97,7 +97,7 @@
         },
         {
           "author": "mwelzl",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "@chromi points out an important issue here - indeed, with a threshold, the ability to convey only one mark per RTT can be problematic.\r\n\r\nI don't necessarily agree with the proposal though: if precise reporting is available, then why would you want to react to it as strongly as to loss? The RFC 8511 logic: \"ECN marks tells us that this comes from an AQM algorithm, and hence the queue is shorter\" is still true.",
           "createdAt": "2024-11-05T13:36:15Z",
           "updatedAt": "2024-11-05T13:36:15Z"
@@ -118,7 +118,7 @@
         },
         {
           "author": "mwelzl",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "body": "Ah, oh yes, you're right: since an ECN mark is, as you say, unambiguously a congestion signal, not immediately reacting to it (even just one signal/RTT) will cause delay and not help anyone. So this proposal of immediate reaction sounds right to me.",
           "createdAt": "2024-11-05T16:10:21Z",
           "updatedAt": "2024-11-05T16:10:21Z"
@@ -478,6 +478,61 @@
       "updatedAt": "2025-04-04T15:46:47Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 35,
+      "id": "I_kwDOL3MllM6yOJXl",
+      "title": "BBRUpdateAggregationBudget is undefined",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/35",
+      "state": "OPEN",
+      "author": "tatsuhiro-t",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "```\nBBRUpdateMaxInflight():\n    BBRUpdateAggregationBudget()\n    inflight = BBRBDPMultiple(BBR.cwnd_gain)\n    inflight += BBR.extra_acked\n    BBR.max_inflight = BBRQuantizationBudget(inflight)\n```\n\nbut `BBRUpdateAggregationBudget` is not defined elsewhere.\n",
+      "createdAt": "2025-04-12T01:25:05Z",
+      "updatedAt": "2025-04-12T12:37:23Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks for catching this!\n\nI think we can remove the BBRUpdateAggregationBudget() line.\n\nThe correct function is BBRUpdateACKAggregation(), and BBRUpdateACKAggregation() is called and defined elsewhere. :-)\n\nSo I think we can just remove the BBRUpdateAggregationBudget() line.\n\ncc: @ianswett @jbeshay \n\n",
+          "createdAt": "2025-04-12T12:32:37Z",
+          "updatedAt": "2025-04-12T12:32:37Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Proposed a PR to remove the erroneous line: https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/37\n",
+          "createdAt": "2025-04-12T12:37:22Z",
+          "updatedAt": "2025-04-12T12:37:22Z"
+        }
+      ]
+    },
+    {
+      "number": 36,
+      "id": "I_kwDOL3MllM6yOOhd",
+      "title": "IsInflightTooHigh are defined 2 times and ambiguous to call which",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/36",
+      "state": "OPEN",
+      "author": "tatsuhiro-t",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "```\n IsInflightTooHigh():\n    if (IsInflightTooHigh(rs))\n      if (BBR.bw_probe_samples)\n        BBRHandleInflightTooHigh()\n      return true  /* inflight too high */\n    else\n      return false /* inflight not too high */\n\n  IsInflightTooHigh():\n    return (rs.lost > rs.tx_in_flight * BBRLossThresh)\n```\n\nThere are 2 `IsInflightTooHigh` definitions.  I suggest to rename either one to resolve ambiguity.\n",
+      "createdAt": "2025-04-12T01:35:50Z",
+      "updatedAt": "2025-04-12T15:04:54Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks for catching this!\n\nPosted a PR to fix this:\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/38\n\nThis PR removes the first version of IsInflightTooHigh(), which is the incorrect version.\n\ncc: @ianswett @jbeshay \n",
+          "createdAt": "2025-04-12T15:04:53Z",
+          "updatedAt": "2025-04-12T15:04:53Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -1641,24 +1696,26 @@
       "id": "PR_kwDOL3MllM6QqS10",
       "title": "Document ECN stance",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/33",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #7\r\n\r\nRelevant to #31",
       "createdAt": "2025-03-29T16:25:22Z",
-      "updatedAt": "2025-04-09T22:53:26Z",
+      "updatedAt": "2025-04-10T15:24:54Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "c0b1c8764f10ee53a5b81894fb5fc726d41b1c3b",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-ecn-stance",
-      "headRefOid": "35783c136a0f5943e112622505dc17d09d35cb6a",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "3f5e1920d8406730429dc59769d346cd84046461",
+      "closedAt": "2025-04-10T15:24:54Z",
+      "mergedAt": "2025-04-10T15:24:54Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "13b1c03a1c04ac7821c4efa236a9bfc210e53145"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -1675,7 +1732,7 @@
             "abbreviatedOid": "c87e9dc"
           },
           "author": "mwelzl",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2025-03-30T15:28:06Z",
@@ -1754,6 +1811,93 @@
           "createdAt": "2025-04-09T22:53:26Z",
           "updatedAt": "2025-04-09T22:53:26Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 37,
+      "id": "PR_kwDOL3MllM6SWn-A",
+      "title": "remove accidental call to BBRUpdateAggregationBudget()",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/37",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #35\r\n\r\nWe can remove the BBRUpdateAggregationBudget() line.\r\n\r\nThe correct function is BBRUpdateACKAggregation(). And BBRUpdateACKAggregation() is called and defined elsewhere.\r\n",
+      "createdAt": "2025-04-12T12:36:51Z",
+      "updatedAt": "2025-04-12T16:45:06Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "13b1c03a1c04ac7821c4efa236a9bfc210e53145",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-1",
+      "headRefOid": "b44eb5002e4f2de70a78cb21d254a25b65a49083",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6ko9Wy",
+          "commit": {
+            "abbreviatedOid": "b44eb50"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-04-12T16:45:06Z",
+          "updatedAt": "2025-04-12T16:45:06Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 38,
+      "id": "PR_kwDOL3MllM6SW0c5",
+      "title": "Remove duplicate IsInflightTooHigh() function definition",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/38",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #36.\r\n\r\nRemove accidental duplicate IsInflightTooHigh() function definition.",
+      "createdAt": "2025-04-12T14:58:16Z",
+      "updatedAt": "2025-04-12T16:45:31Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "13b1c03a1c04ac7821c4efa236a9bfc210e53145",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-2",
+      "headRefOid": "6bea16f22afe66c31113b39c3c27c57ffb15bbe1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6ko8Gf",
+          "commit": {
+            "abbreviatedOid": "6bea16f"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "LG, minus one editorial nit.",
+          "createdAt": "2025-04-12T16:40:03Z",
+          "updatedAt": "2025-04-12T16:43:52Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "nit: you removed the end of the comment.  Did you want to remove that or remove the comment entirely or ?",
+              "createdAt": "2025-04-12T16:40:03Z",
+              "updatedAt": "2025-04-12T16:43:52Z"
+            }
+          ]
         }
       ]
     }
