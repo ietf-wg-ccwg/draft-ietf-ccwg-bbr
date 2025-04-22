@@ -2741,7 +2741,7 @@ in flight exceeded what matches the current delivery process on the path, and
 reduces BBR.inflight_longterm:
 
 ~~~~
-  /* Do loss signals suggest inflight is too high?
+  /* Do loss signals suggest inflight is too high? */
   IsInflightTooHigh():
     return (rs.lost > rs.tx_in_flight * BBRLossThresh)
 
