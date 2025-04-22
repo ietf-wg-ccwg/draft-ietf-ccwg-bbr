@@ -2674,16 +2674,7 @@ Table of Contents
    it allowed in flight exceeded what matches the current delivery
    process on the path, and reduces BBR.inflight_longterm:
 
-     /* Do loss signals suggest inflight is too high?
-      * If so, react. */
-     IsInflightTooHigh():
-       if (IsInflightTooHigh(rs))
-         if (BBR.bw_probe_samples)
-           BBRHandleInflightTooHigh()
-         return true  /* inflight too high */
-       else
-         return false /* inflight not too high */
-
+     /* Do loss signals suggest inflight is too high? */
      IsInflightTooHigh():
        return (rs.lost > rs.tx_in_flight * BBRLossThresh)
 
@@ -2746,9 +2737,9 @@ Table of Contents
        rs.tx_in_flight = packet.tx_in_flight /* inflight at transmit */
        rs.lost = C.lost - packet.lost /* data lost since transmit */
        rs.is_app_limited = packet.is_app_limited;
-       if (IsInflightTooHigh(rs))
+       if (IsInflightTooHigh())
          rs.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
-         BBRHandleInflightTooHigh(rs)
+         BBRHandleInflightTooHigh()
 
      /* At what prefix of packet did losses exceed BBRLossThresh? */
      BBRInflightLongtermFromLostPacket(rs, packet):
@@ -3370,9 +3361,9 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    We would like to thank Randall R.  Stewart, Jim Warner, Loganaden
    Velvindron, Hiren Panchasara, Adrian Zapletal, Christian Huitema, Bao
    Zheng, Jonathan Morton, Matt Olson, Junho Choi, Carsten Bormann,
-   Pouria Mousavizadeh Tehrani, Amanda Baber and Frédéric Lécaille for
-   feedback, suggestions, and edits on earlier versions of this
-   document.
+   Pouria Mousavizadeh Tehrani, Amanda Baber, Frédéric Lécaille, and
+   Tatsuhiro Tsujikawa for feedback, suggestions, and edits on earlier
+   versions of this document.
 
 9.  References
 
