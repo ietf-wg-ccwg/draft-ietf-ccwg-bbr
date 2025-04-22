@@ -29,7 +29,7 @@ specifies version 3 of the BBR algorithm, BBRv3.
 <meta content="draft-ietf-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.28.1
-    Python 3.12.9
+    Python 3.12.10
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
@@ -4318,7 +4318,7 @@ in flight exceeded what matches the current delivery process on the path, and
 reduces BBR.inflight_longterm:<a href="#section-4.5.10.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.5.10.2-2">
 <pre>
-  /* Do loss signals suggest inflight is too high?
+  /* Do loss signals suggest inflight is too high? */
   IsInflightTooHigh():
     return (rs.lost &gt; rs.tx_in_flight * BBRLossThresh)
 
