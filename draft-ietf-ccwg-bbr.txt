@@ -3068,7 +3068,6 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
        return BBRQuantizationBudget(inflight)
 
      BBRUpdateMaxInflight():
-       BBRUpdateAggregationBudget()
        inflight = BBRBDPMultiple(BBR.cwnd_gain)
        inflight += BBR.extra_acked
        BBR.max_inflight = BBRQuantizationBudget(inflight)

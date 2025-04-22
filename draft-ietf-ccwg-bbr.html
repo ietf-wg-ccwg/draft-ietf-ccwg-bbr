@@ -29,7 +29,7 @@ specifies version 3 of the BBR algorithm, BBRv3.
 <meta content="draft-ietf-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.28.1
-    Python 3.12.9
+    Python 3.12.10
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
@@ -4754,7 +4754,6 @@ as follows:<a href="#section-4.6.4.2-2" class="pilcrow">¶</a></p>
     return BBRQuantizationBudget(inflight)
 
   BBRUpdateMaxInflight():
-    BBRUpdateAggregationBudget()
     inflight = BBRBDPMultiple(BBR.cwnd_gain)
     inflight += BBR.extra_acked
     BBR.max_inflight = BBRQuantizationBudget(inflight)
