@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-13T02:55:20.081959+00:00",
+  "timestamp": "2025-04-24T01:38:12.281797+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -356,11 +356,13 @@
       "state": "OPEN",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "ianswett"
+      ],
       "labels": [],
       "body": "When trying to add consistency by fixing #14 I realized that the text refers to packets in flight.  The Google quiche QUIC implementation of BBR uses bytes, not packets.  I believe the Linux TCP implementation uses packets, and the BSD implementation uses bytes?  I'm unsure what mvfst uses?\n\nPossibly we can define a term at the beginning of the document, ie: \"Inflight\" and define it to be in bytes or packets depending upon the implementation?\n\nI'm a bit worried we'll have unit issues, since bytes and packets are not the same, but I haven't attempted this PR yet.",
       "createdAt": "2025-03-18T10:25:58Z",
-      "updatedAt": "2025-03-29T16:05:41Z",
+      "updatedAt": "2025-04-23T21:25:39Z",
       "closedAt": null,
       "comments": [
         {
@@ -369,6 +371,20 @@
           "body": "A few attendees at IETF said they'd prefer bytes, since that's what most implementations use, but obviously Linux does not.",
           "createdAt": "2025-03-20T05:02:06Z",
           "updatedAt": "2025-03-20T05:02:06Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Possibly we could determine a term \"Inflight\" that might be packets or bytes, and use that throughout?\n\nApparently we have 6 instances of 'octets' as well in bandwidth estimation.",
+          "createdAt": "2025-04-23T20:42:53Z",
+          "updatedAt": "2025-04-23T20:42:53Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Interestingly, it looks like the CUBIC RFC ( https://datatracker.ietf.org/doc/html/rfc9438 ) specifies that cwnd and related quantities are in segments, and has an explicit section about these issues:\n\nhttps://datatracker.ietf.org/doc/html/rfc9438#name-definitions\n\n> The unit of all window sizes in this document is segments of the SMSS, and the unit of all times is seconds. Implementations can use bytes to express window sizes, which would require factoring in the SMSS wherever necessary and replacing segments_acked ([Figure 4](https://datatracker.ietf.org/doc/html/rfc9438#eq4)) with the number of acknowledged bytes.\n\nI would propose for the BBR draft:\n\n+ (a) Like the CUBIC RFC, we should be explicit about units, and either explicitly pick bytes or packets. I would vote to specify the algorithm in terms of bytes (or octets if we want to be very IETF-y about it?), since tracking in bytes is much more correct than packets for cases where packet sizes vary, either due to application write sizes or path MTU changes.\n\n+ (b) Like the CUBIC RFC, we should add a section like that to explain the units, and explain that implementors \"MAY\" use alternate units as long as they do factor in MSS appropriately.\n",
+          "createdAt": "2025-04-23T21:25:38Z",
+          "updatedAt": "2025-04-23T21:25:38Z"
         }
       ]
     },
@@ -419,9 +435,24 @@
       ],
       "body": "Today, sometimes the draft uses camelcase (ie: InitialCwnd), and sometimes uses lowercase with underscores (ie: is_cwnd_limited).  I don't have a strong preference, but the inconsistency is potentially confusing for readers, because I think the choice of which to use is somewhat arbitrary today?",
       "createdAt": "2025-03-20T12:04:57Z",
-      "updatedAt": "2025-03-20T12:04:57Z",
+      "updatedAt": "2025-04-23T21:00:59Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "As discussed, InitialCwnd is more of an initial constant, and is_cwnd_limited is a congestion controller state variable, so making that consistent in the doc would be helpful for readers.",
+          "createdAt": "2025-04-23T20:56:03Z",
+          "updatedAt": "2025-04-23T20:56:03Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yeah, I think so far the doc was trying to use CamelCase for constants and lower_case_with_underscores for variables. IMHO it seems good to use some kind of scheme that makes it immediately obvious what's a constant and what's a variable, like all-caps for constants (A_CONSTANT_VAL vs a_variable_val), or CamelCase for constants. Thanks!\n",
+          "createdAt": "2025-04-23T21:00:58Z",
+          "updatedAt": "2025-04-23T21:00:58Z"
+        }
+      ]
     },
     {
       "number": 31,
@@ -451,7 +482,7 @@
       "labels": [],
       "body": "Sec 2.1 says:\n\n\"C.delivered: The total amount of data (tracked in octets or in packets) delivered so far over the lifetime of the transport connection C.\"\n\nIs this 'unique data' excluding spurious retransmits? Please clarify.",
       "createdAt": "2025-03-24T22:42:22Z",
-      "updatedAt": "2025-04-02T22:45:59Z",
+      "updatedAt": "2025-04-23T23:57:54Z",
       "closedAt": null,
       "comments": [
         {
@@ -460,6 +491,20 @@
           "body": "I think the concept of \"unique data\" is also ambiguous. It depends on how the transport handles retransmissions and how it detects spurious ones. One way around this is to define it in terms of ACKing. I.e., delivered data is acked data at the transport.\n\nIn case of QUIC this would include spurious retransmits because a retransmit is a new packet. For TCP, it wouldn't. ",
           "createdAt": "2025-04-02T22:45:58Z",
           "updatedAt": "2025-04-02T22:45:58Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> In case of QUIC this would include spurious retransmits because a retransmit is a new packet. For TCP, it wouldn't.\n\nAs we discussed in the co-editor meeting just now, my sense is that we can keep it simple and consistent and say that the \"C.delivered SHOULD include spurious retransmits that have been acknowledged as delivered\", or something like that, for any transport.\n\nIMHO it's good for C.delivered to include spurious retransmits, since the network congestion/bandwidth/resource considerations just care about the number of bytes, not the packet/sequence numbers.\n\nYuchung and I discussed this back somtime in 2014-2016, and since that time frame the Linux TCP BBR code has always included spurious retransmissions in the count of delivered data. That code is now in tcp_dsack_seen():\n\n     tcp_dsack_seen()\n     ...\n\t/* A spurious retransmission is delivered */\n\tstate->sack_delivered += dup_segs;\n\ncc: @ianswett @jbeshay",
+          "createdAt": "2025-04-23T21:11:52Z",
+          "updatedAt": "2025-04-23T21:11:52Z"
+        },
+        {
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "body": "SGTM. I have no opinion other than the draft clarifies it.",
+          "createdAt": "2025-04-23T23:57:53Z",
+          "updatedAt": "2025-04-23T23:57:53Z"
         }
       ]
     },
@@ -471,11 +516,15 @@
       "state": "OPEN",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
-      "labels": [],
+      "assignees": [
+        "ianswett"
+      ],
+      "labels": [
+        "Editorial"
+      ],
       "body": "And explain that's one reason we limit bandwidth measurements to the send rate.",
       "createdAt": "2025-04-04T15:46:47Z",
-      "updatedAt": "2025-04-04T15:46:47Z",
+      "updatedAt": "2025-04-23T20:47:36Z",
       "closedAt": null,
       "comments": []
     },
@@ -484,15 +533,15 @@
       "id": "I_kwDOL3MllM6yOJXl",
       "title": "BBRUpdateAggregationBudget is undefined",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/35",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "tatsuhiro-t",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "```\nBBRUpdateMaxInflight():\n    BBRUpdateAggregationBudget()\n    inflight = BBRBDPMultiple(BBR.cwnd_gain)\n    inflight += BBR.extra_acked\n    BBR.max_inflight = BBRQuantizationBudget(inflight)\n```\n\nbut `BBRUpdateAggregationBudget` is not defined elsewhere.\n",
       "createdAt": "2025-04-12T01:25:05Z",
-      "updatedAt": "2025-04-12T12:37:23Z",
-      "closedAt": null,
+      "updatedAt": "2025-04-22T16:02:12Z",
+      "closedAt": "2025-04-22T16:01:40Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -507,6 +556,13 @@
           "body": "Proposed a PR to remove the erroneous line: https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/37\n",
           "createdAt": "2025-04-12T12:37:22Z",
           "updatedAt": "2025-04-12T12:37:22Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Fixed with a PR to remove the erroneous line: https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/37\n",
+          "createdAt": "2025-04-22T16:02:11Z",
+          "updatedAt": "2025-04-22T16:02:11Z"
         }
       ]
     },
@@ -515,15 +571,15 @@
       "id": "I_kwDOL3MllM6yOOhd",
       "title": "IsInflightTooHigh are defined 2 times and ambiguous to call which",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/36",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "tatsuhiro-t",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "```\n IsInflightTooHigh():\n    if (IsInflightTooHigh(rs))\n      if (BBR.bw_probe_samples)\n        BBRHandleInflightTooHigh()\n      return true  /* inflight too high */\n    else\n      return false /* inflight not too high */\n\n  IsInflightTooHigh():\n    return (rs.lost > rs.tx_in_flight * BBRLossThresh)\n```\n\nThere are 2 `IsInflightTooHigh` definitions.  I suggest to rename either one to resolve ambiguity.\n",
       "createdAt": "2025-04-12T01:35:50Z",
-      "updatedAt": "2025-04-12T15:04:54Z",
-      "closedAt": null,
+      "updatedAt": "2025-04-22T19:21:34Z",
+      "closedAt": "2025-04-22T19:21:34Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -1819,24 +1875,26 @@
       "id": "PR_kwDOL3MllM6SWn-A",
       "title": "remove accidental call to BBRUpdateAggregationBudget()",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/37",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #35\r\n\r\nWe can remove the BBRUpdateAggregationBudget() line.\r\n\r\nThe correct function is BBRUpdateACKAggregation(). And BBRUpdateACKAggregation() is called and defined elsewhere.\r\n",
       "createdAt": "2025-04-12T12:36:51Z",
-      "updatedAt": "2025-04-12T16:45:06Z",
+      "updatedAt": "2025-04-22T16:01:45Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "13b1c03a1c04ac7821c4efa236a9bfc210e53145",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-patch-1",
       "headRefOid": "b44eb5002e4f2de70a78cb21d254a25b65a49083",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-04-22T16:01:39Z",
+      "mergedAt": "2025-04-22T16:01:39Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "2ec3f9695e0dc9fc80dc29e0e3a42993959f4233"
+      },
       "comments": [],
       "reviews": [
         {
@@ -1851,6 +1909,19 @@
           "createdAt": "2025-04-12T16:45:06Z",
           "updatedAt": "2025-04-12T16:45:06Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6l-YfS",
+          "commit": {
+            "abbreviatedOid": "b44eb50"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-04-22T15:55:03Z",
+          "updatedAt": "2025-04-22T15:55:03Z",
+          "comments": []
         }
       ]
     },
@@ -1859,25 +1930,42 @@
       "id": "PR_kwDOL3MllM6SW0c5",
       "title": "Remove duplicate IsInflightTooHigh() function definition",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/38",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #36.\r\n\r\nRemove accidental duplicate IsInflightTooHigh() function definition.",
       "createdAt": "2025-04-12T14:58:16Z",
-      "updatedAt": "2025-04-12T16:45:31Z",
+      "updatedAt": "2025-04-22T19:21:38Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "13b1c03a1c04ac7821c4efa236a9bfc210e53145",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-patch-2",
-      "headRefOid": "6bea16f22afe66c31113b39c3c27c57ffb15bbe1",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "52482cb8350ed1c4fa0ca3ad42c75fad1074b4b5",
+      "closedAt": "2025-04-22T19:21:33Z",
+      "mergedAt": "2025-04-22T19:21:33Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "c719f982ab562ada9b3cbe27300f0bc4d2a28ed5"
+      },
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@ianswett @jbeshay ready for another look... thanks!\r\n",
+          "createdAt": "2025-04-22T18:08:57Z",
+          "updatedAt": "2025-04-22T18:08:57Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> lgtm but just to clarify, as a side effect of this change the pseudocode can no longer reduce inflight_longterm in the ProbeBW state machine code (https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/main/draft-ietf-ccwg-bbr.md?plain=1#L1592) since it can't call BBRHandleInflightTooHigh, which I previously assumed was the primary path for updating it. Now it is only going to happen in the loss handling path. I think this is a good simplification.\r\n\r\nYes, that is my take as well. Thanks!\r\n",
+          "createdAt": "2025-04-22T19:19:48Z",
+          "updatedAt": "2025-04-22T19:19:48Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM6ko8Gf",
@@ -1898,6 +1986,39 @@
               "updatedAt": "2025-04-12T16:43:52Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6l_pAt",
+          "commit": {
+            "abbreviatedOid": "52482cb"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-04-22T18:08:00Z",
+          "updatedAt": "2025-04-22T18:08:00Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "Thanks. Posted a commit in this PR to try to fix this missing */ .... PTAL. Thanks!\r\n",
+              "createdAt": "2025-04-22T18:08:00Z",
+              "updatedAt": "2025-04-22T18:08:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6mAFpT",
+          "commit": {
+            "abbreviatedOid": "52482cb"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "lgtm but just to clarify, as a side effect of this change the pseudocode can no longer reduce inflight_longterm in the ProbeBW state machine code (https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/main/draft-ietf-ccwg-bbr.md?plain=1#L1592) since  it can't call BBRHandleInflightTooHigh, which I previously assumed was the primary path for updating it. Now it is only going to happen in the loss handling path. I think this is a good simplification.",
+          "createdAt": "2025-04-22T18:47:02Z",
+          "updatedAt": "2025-04-22T18:47:02Z",
+          "comments": []
         }
       ]
     }
