@@ -908,7 +908,7 @@ steps:
     BBR.extra_acked_delivered = 0
     BBR.full_bw_reached = false
     BBRResetCongestionSignals()
-    BBRResetLowerBounds()
+    BBRResetShortTermModel()
     BBRInitRoundCounting()
     BBRResetFullBW()
     BBRInitPacingRate()
@@ -1464,7 +1464,7 @@ The core logic for entering each state:
     BBR.state = ProbeBW_CRUISE
 
   BBRStartProbeBW_REFILL():
-    BBRResetLowerBounds()
+    BBRResetShortTermModel()
     BBR.bw_probe_up_rounds = 0
     BBR.bw_probe_up_acks = 0
     BBR.ack_phase = ACKS_REFILLING
@@ -1488,7 +1488,7 @@ that acknowledges new data, to advance the ProbeBW state machine:
   BBRUpdateProbeBWCyclePhase():
     if (!BBR.full_bw_reached)
       return  /* only handling steady-state behavior here */
-    BBRAdaptUpperBounds()
+    BBRAdaptLongTermModel()
     if (!IsInAProbeBWState())
       return /* only handling ProbeBW states here: */
 
@@ -1580,7 +1580,7 @@ The ancillary logic to implement the ProbeBW state machine:
 
   /* Track ACK state and update BBR.max_bw window and
    * BBR.inflight_longterm. */
-  BBRAdaptUpperBounds():
+  BBRAdaptLongTermModel():
     if (BBR.ack_phase == ACKS_PROBE_STARTING and BBR.round_start)
       /* starting to get bw probing samples */
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
@@ -1791,9 +1791,9 @@ to the ProbeRTT state as follows:
 When exiting ProbeRTT, BBR transitions to ProbeBW if it estimates the pipe
 was filled already, or Startup otherwise.
 
-When transitioning out of ProbeRTT, BBR calls BBRResetLowerBounds() to reset
-the lower bounds, since any congestion encountered in ProbeRTT may have pulled
-the short-term model far below the capacity of the path.
+When transitioning out of ProbeRTT, BBR calls BBRResetShortTermModel() to reset
+the short-term model, since any congestion encountered in ProbeRTT may have pulled
+it far below the capacity of the path.
 
 But the algorithm is cautious in timing the next bandwidth probe: raising
 inflight after ProbeRTT may cause loss, so the algorithm resets the
@@ -1806,7 +1806,7 @@ To summarize, the logic for exiting ProbeRTT is as follows:
 
 ~~~~
   BBRExitProbeRTT():
-    BBRResetLowerBounds()
+    BBRResetShortTermModel()
     if (BBR.full_bw_reached)
       BBRStartProbeBW_DOWN()
       BBRStartProbeBW_CRUISE()
@@ -2914,7 +2914,7 @@ This logic can be represented as follows:
     BBR.inflight_shortterm = max(BBR.inflight_latest,
                           BBRBeta * BBR.inflight_shortterm)
 
-  BBRResetLowerBounds():
+  BBRResetShortTermModel():
     BBR.bw_shortterm       = Infinity
     BBR.inflight_shortterm = Infinity
 
