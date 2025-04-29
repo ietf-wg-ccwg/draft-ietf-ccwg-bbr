@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-24T01:38:12.281797+00:00",
+  "timestamp": "2025-04-29T01:39:37.669567+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -2018,6 +2018,72 @@
           "body": "lgtm but just to clarify, as a side effect of this change the pseudocode can no longer reduce inflight_longterm in the ProbeBW state machine code (https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/main/draft-ietf-ccwg-bbr.md?plain=1#L1592) since  it can't call BBRHandleInflightTooHigh, which I previously assumed was the primary path for updating it. Now it is only going to happen in the loss handling path. I think this is a good simplification.",
           "createdAt": "2025-04-22T18:47:02Z",
           "updatedAt": "2025-04-22T18:47:02Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 39,
+      "id": "PR_kwDOL3MllM6UN0kH",
+      "title": "Update functions names to refer to short/long term instead of hi/lo",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/39",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "BBRResetLowerBounds() --> BBRResetShortTermModel()\r\nBBRAdaptUpperBounds() --> BBRAdaptLongTermModel()\r\n\r\nThis makes the purpose of the functions easier to understand and keeps them consistent with the names of the variables they update.",
+      "createdAt": "2025-04-28T18:48:47Z",
+      "updatedAt": "2025-04-28T18:48:48Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "c719f982ab562ada9b3cbe27300f0bc4d2a28ed5",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_update_function_names",
+      "headRefOid": "2f9c9b4fbb674f10e4cda7b7d86d3db4f9d1ece2",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 40,
+      "id": "PR_kwDOL3MllM6UN1hY",
+      "title": "Clarify C.delivered",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/40",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Addresses https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/32\r\n\r\nAdds normative language to the affected definitions.",
+      "createdAt": "2025-04-28T18:50:36Z",
+      "updatedAt": "2025-04-28T21:24:27Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "c719f982ab562ada9b3cbe27300f0bc4d2a28ed5",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_c_delivered",
+      "headRefOid": "d838d75ade8ff0c506b20cc3d38501992bed7420",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6m897J",
+          "commit": {
+            "abbreviatedOid": "d838d75"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-04-28T21:24:27Z",
+          "updatedAt": "2025-04-28T21:24:27Z",
           "comments": []
         }
       ]
