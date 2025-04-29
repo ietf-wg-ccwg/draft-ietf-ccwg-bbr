@@ -2240,7 +2240,7 @@ steps:<a href="#section-4.2.1-1" class="pilcrow">¶</a></p>
     BBR.extra_acked_delivered = 0
     BBR.full_bw_reached = false
     BBRResetCongestionSignals()
-    BBRResetLowerBounds()
+    BBRResetShortTermModel()
     BBRInitRoundCounting()
     BBRResetFullBW()
     BBRInitPacingRate()
@@ -2893,7 +2893,7 @@ as follows:<a href="#section-4.3.3.5.3-6" class="pilcrow">¶</a></p>
     BBR.state = ProbeBW_CRUISE
 
   BBRStartProbeBW_REFILL():
-    BBRResetLowerBounds()
+    BBRResetShortTermModel()
     BBR.bw_probe_up_rounds = 0
     BBR.bw_probe_up_acks = 0
     BBR.ack_phase = ACKS_REFILLING
@@ -2917,7 +2917,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
   BBRUpdateProbeBWCyclePhase():
     if (!BBR.full_bw_reached)
       return  /* only handling steady-state behavior here */
-    BBRAdaptUpperBounds()
+    BBRAdaptLongTermModel()
     if (!IsInAProbeBWState())
       return /* only handling ProbeBW states here: */
 
@@ -3009,7 +3009,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
 
   /* Track ACK state and update BBR.max_bw window and
    * BBR.inflight_longterm. */
-  BBRAdaptUpperBounds():
+  BBRAdaptLongTermModel():
     if (BBR.ack_phase == ACKS_PROBE_STARTING and BBR.round_start)
       /* starting to get bw probing samples */
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
@@ -3232,9 +3232,9 @@ to the ProbeRTT state as follows:<a href="#section-4.3.4.4-4" class="pilcrow">¶
             </h5>
 <p id="section-4.3.4.5-1">When exiting ProbeRTT, BBR transitions to ProbeBW if it estimates the pipe
 was filled already, or Startup otherwise.<a href="#section-4.3.4.5-1" class="pilcrow">¶</a></p>
-<p id="section-4.3.4.5-2">When transitioning out of ProbeRTT, BBR calls BBRResetLowerBounds() to reset
-the lower bounds, since any congestion encountered in ProbeRTT may have pulled
-the short-term model far below the capacity of the path.<a href="#section-4.3.4.5-2" class="pilcrow">¶</a></p>
+<p id="section-4.3.4.5-2">When transitioning out of ProbeRTT, BBR calls BBRResetShortTermModel() to reset
+the short-term model, since any congestion encountered in ProbeRTT may have pulled
+it far below the capacity of the path.<a href="#section-4.3.4.5-2" class="pilcrow">¶</a></p>
 <p id="section-4.3.4.5-3">But the algorithm is cautious in timing the next bandwidth probe: raising
 inflight after ProbeRTT may cause loss, so the algorithm resets the
 bandwidth-probing clock by starting the cycle at ProbeBW_DOWN(). But then as an
@@ -3245,7 +3245,7 @@ ProbeBW_CRUISE.<a href="#section-4.3.4.5-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.4.5-5">
 <pre>
   BBRExitProbeRTT():
-    BBRResetLowerBounds()
+    BBRResetShortTermModel()
     if (BBR.full_bw_reached)
       BBRStartProbeBW_DOWN()
       BBRStartProbeBW_CRUISE()
@@ -4488,7 +4488,7 @@ inflight_shortterm = max( inflight_latest, BBRBeta * inflight_shortterm )
     BBR.inflight_shortterm = max(BBR.inflight_latest,
                           BBRBeta * BBR.inflight_shortterm)
 
-  BBRResetLowerBounds():
+  BBRResetShortTermModel():
     BBR.bw_shortterm       = Infinity
     BBR.inflight_shortterm = Infinity
 
