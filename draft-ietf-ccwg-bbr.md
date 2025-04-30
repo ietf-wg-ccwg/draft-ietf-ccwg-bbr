@@ -2188,8 +2188,9 @@ This algorithm requires the following new state variables for each transport
 connection:
 
 C.delivered: The total amount of data (measured in octets or in packets)
-delivered so far over the lifetime of the transport connection. This does
-not include pure ACK packets.
+delivered so far over the lifetime of the transport connection. This MUST
+NOT include pure ACK packets. It SHOULD include spurious retransmissions
+that have been acknowledged as delivered.
 
 C.delivered_time: The wall clock time when C.delivered was last updated.
 
@@ -2223,7 +2224,7 @@ C.pipe: The sender's estimate of the amount of data outstanding in the network
 (measured in octets or packets). This includes data packets in the current
 outstanding window that are inflight and have not been acknowledged or marked lost
 (e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
-This does not include pure ACK packets.
+This MUST NOT include pure ACK packets.
 
 
 ###### Per-packet (P) state {#per-packet-p-state}
