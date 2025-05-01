@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-29T01:39:37.669567+00:00",
+  "timestamp": "2025-05-01T01:47:10.406804+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -2027,50 +2027,76 @@
       "id": "PR_kwDOL3MllM6UN0kH",
       "title": "Update functions names to refer to short/long term instead of hi/lo",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/39",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "BBRResetLowerBounds() --> BBRResetShortTermModel()\r\nBBRAdaptUpperBounds() --> BBRAdaptLongTermModel()\r\n\r\nThis makes the purpose of the functions easier to understand and keeps them consistent with the names of the variables they update.",
       "createdAt": "2025-04-28T18:48:47Z",
-      "updatedAt": "2025-04-28T18:48:48Z",
+      "updatedAt": "2025-04-30T19:43:07Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "c719f982ab562ada9b3cbe27300f0bc4d2a28ed5",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_update_function_names",
       "headRefOid": "2f9c9b4fbb674f10e4cda7b7d86d3db4f9d1ece2",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "closedAt": "2025-04-29T16:06:36Z",
+      "mergedAt": "2025-04-29T16:06:36Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "09850028da05dd5ac59e9fc3db5d1838bfa45447"
+      },
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Looks great. Joseph, thanks for this! (Sorry for the late review!)\r\n",
+          "createdAt": "2025-04-30T19:43:06Z",
+          "updatedAt": "2025-04-30T19:43:06Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6nGt9O",
+          "commit": {
+            "abbreviatedOid": "2f9c9b4"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Thanks!",
+          "createdAt": "2025-04-29T13:34:49Z",
+          "updatedAt": "2025-04-29T13:34:49Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 40,
       "id": "PR_kwDOL3MllM6UN1hY",
       "title": "Clarify C.delivered",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/40",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Addresses https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/32\r\n\r\nAdds normative language to the affected definitions.",
       "createdAt": "2025-04-28T18:50:36Z",
-      "updatedAt": "2025-04-28T21:24:27Z",
+      "updatedAt": "2025-04-30T19:44:29Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "c719f982ab562ada9b3cbe27300f0bc4d2a28ed5",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_c_delivered",
       "headRefOid": "d838d75ade8ff0c506b20cc3d38501992bed7420",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-04-30T19:44:29Z",
+      "mergedAt": "2025-04-30T19:44:29Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "e2a59e82caac806e66b9daa867462b2cbbdb3b15"
+      },
       "comments": [],
       "reviews": [
         {
@@ -2084,6 +2110,19 @@
           "body": "",
           "createdAt": "2025-04-28T21:24:27Z",
           "updatedAt": "2025-04-28T21:24:27Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6nYip_",
+          "commit": {
+            "abbreviatedOid": "d838d75"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-04-30T19:44:16Z",
+          "updatedAt": "2025-04-30T19:44:16Z",
           "comments": []
         }
       ]
