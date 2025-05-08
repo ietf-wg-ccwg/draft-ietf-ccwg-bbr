@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-01T01:47:10.406804+00:00",
+  "timestamp": "2025-05-08T01:40:59.868564+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -475,15 +475,15 @@
       "id": "I_kwDOL3MllM6vg6X_",
       "title": "Clarify C.delivered",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/32",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "martinduke",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Sec 2.1 says:\n\n\"C.delivered: The total amount of data (tracked in octets or in packets) delivered so far over the lifetime of the transport connection C.\"\n\nIs this 'unique data' excluding spurious retransmits? Please clarify.",
       "createdAt": "2025-03-24T22:42:22Z",
-      "updatedAt": "2025-04-23T23:57:54Z",
-      "closedAt": null,
+      "updatedAt": "2025-05-07T20:44:10Z",
+      "closedAt": "2025-05-07T20:44:09Z",
       "comments": [
         {
           "author": "jbeshay",
@@ -505,6 +505,13 @@
           "body": "SGTM. I have no opinion other than the draft clarifies it.",
           "createdAt": "2025-04-23T23:57:53Z",
           "updatedAt": "2025-04-23T23:57:53Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Chatting with @jbeshay we think that https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/40/ addresses the issue noted by @martinduke. Closing for now.  @martinduke please take a look and let us know if this is not sufficient. Thanks!\n",
+          "createdAt": "2025-05-07T20:44:09Z",
+          "updatedAt": "2025-05-07T20:44:09Z"
         }
       ]
     },
