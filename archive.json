@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-08T01:40:59.868564+00:00",
+  "timestamp": "2025-05-11T01:45:38.017364+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -482,7 +482,7 @@
       "labels": [],
       "body": "Sec 2.1 says:\n\n\"C.delivered: The total amount of data (tracked in octets or in packets) delivered so far over the lifetime of the transport connection C.\"\n\nIs this 'unique data' excluding spurious retransmits? Please clarify.",
       "createdAt": "2025-03-24T22:42:22Z",
-      "updatedAt": "2025-05-07T20:44:10Z",
+      "updatedAt": "2025-05-08T15:34:49Z",
       "closedAt": "2025-05-07T20:44:09Z",
       "comments": [
         {
@@ -512,6 +512,13 @@
           "body": "Chatting with @jbeshay we think that https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/40/ addresses the issue noted by @martinduke. Closing for now.  @martinduke please take a look and let us know if this is not sufficient. Thanks!\n",
           "createdAt": "2025-05-07T20:44:09Z",
           "updatedAt": "2025-05-07T20:44:09Z"
+        },
+        {
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "body": "LGTM",
+          "createdAt": "2025-05-08T15:34:49Z",
+          "updatedAt": "2025-05-08T15:34:49Z"
         }
       ]
     },
@@ -2091,7 +2098,7 @@
       "labels": [],
       "body": "Addresses https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/32\r\n\r\nAdds normative language to the affected definitions.",
       "createdAt": "2025-04-28T18:50:36Z",
-      "updatedAt": "2025-04-30T19:44:29Z",
+      "updatedAt": "2025-05-08T18:04:54Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "c719f982ab562ada9b3cbe27300f0bc4d2a28ed5",
@@ -2104,7 +2111,15 @@
       "mergeCommit": {
         "oid": "e2a59e82caac806e66b9daa867462b2cbbdb3b15"
       },
-      "comments": [],
+      "comments": [
+        {
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "body": "This addresses my issue, thanks.",
+          "createdAt": "2025-05-08T15:34:25Z",
+          "updatedAt": "2025-05-08T15:34:25Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM6m897J",
@@ -2130,6 +2145,19 @@
           "body": "",
           "createdAt": "2025-04-30T19:44:16Z",
           "updatedAt": "2025-04-30T19:44:16Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6oao6x",
+          "commit": {
+            "abbreviatedOid": "d838d75"
+          },
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "LGTM",
+          "createdAt": "2025-05-08T15:34:37Z",
+          "updatedAt": "2025-05-08T15:34:37Z",
           "comments": []
         }
       ]
