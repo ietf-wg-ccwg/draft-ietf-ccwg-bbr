@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-11T01:45:38.017364+00:00",
+  "timestamp": "2025-05-22T01:41:29.874390+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -224,7 +224,7 @@
       ],
       "body": "I believe all 3 are used in the draft today, so we should probably standardize on one.",
       "createdAt": "2025-02-06T03:41:23Z",
-      "updatedAt": "2025-03-16T16:24:56Z",
+      "updatedAt": "2025-05-21T20:45:23Z",
       "closedAt": null,
       "comments": [
         {
@@ -233,6 +233,20 @@
           "body": "RFC9002 typically uses 'in flight' and 'bytes in flight' and 'packets in flight', but occasionally uses in-flight :(\n\nhttps://www.rfc-editor.org/rfc/rfc9002.html\n\nI think 'in flight' is probably best, partially because 'bytes in-flight' and 'packets in-flight' reads oddly to me.",
           "createdAt": "2025-03-16T02:42:27Z",
           "updatedAt": "2025-03-16T02:42:27Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I am currently a fan of \"inflight\", which is short and sweet, and where we ended up with the current PRR draft: \"inflight: The data sender's best estimate of the number of bytes outstanding in the network.\":\nhttps://datatracker.ietf.org/doc/html/draft-ietf-tcpm-prr-rfc6937bis-13\n\nOr we could use InFlight or something like that, to make it more clear that its a specifically-defined variable?\n",
+          "createdAt": "2025-05-21T19:56:30Z",
+          "updatedAt": "2025-05-21T19:56:30Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I'm fine with \"inflight\".\n\nIn this case, I don't see a need to do camel case (ie: InFlight), but I don't have any objection to it.",
+          "createdAt": "2025-05-21T20:45:23Z",
+          "updatedAt": "2025-05-21T20:45:23Z"
         }
       ]
     },
@@ -344,7 +358,7 @@
       ],
       "body": "I believe the draft is fairly transport agnostic, but the bandwidth estimation section still has some references to end_seq and similar names that don't cleanly translate to QUIC.\n\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/draft-ietf-ccwg-bbr-02/draft-ietf-ccwg-bbr.md#bbrmax_bw-estimated-maximum-bandwidth-bbrmaxbw-estimated-maximum-bandwidth",
       "createdAt": "2025-03-16T00:39:46Z",
-      "updatedAt": "2025-03-16T00:39:46Z",
+      "updatedAt": "2025-05-21T20:36:54Z",
       "closedAt": null,
       "comments": []
     },
