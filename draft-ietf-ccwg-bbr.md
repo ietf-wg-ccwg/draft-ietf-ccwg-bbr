@@ -292,6 +292,10 @@ e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
 C.delivered: The total amount of data (tracked in octets or in packets)
 delivered so far over the lifetime of the transport connection C.
 
+inflight: The connection's best estimate of the number of bytes
+outstanding in the network. This includes the number of bytes that
+have been sent but have not been acknowledged or marked as lost.
+
 SMSS: The Sender Maximum Segment Size.
 
 is_cwnd_limited: True if the connection has fully utilized its cwnd at any
@@ -342,8 +346,8 @@ sent segment among segments ACKed by the ACK that was just received).
 
 ## Output Control Parameters {#output-control-parameters}
 
-cwnd: The transport sender's congestion window, which limits the amount of
-data in flight.
+cwnd: The transport sender's congestion window. When transmitting data,
+the sending connection ensures that inflight does not exceed cwnd.
 
 BBR.pacing_rate: The current pacing rate for a BBR flow, which controls
 inter-packet spacing.
@@ -611,7 +615,7 @@ match the network delivery process, in two dimensions:
   rate at which the network delivers the flow's data (the available bottleneck
   bandwidth)
 
-2. data volume: the amount of unacknowledged data in flight in the network
+2. data volume: the amount of data in flight in the network
   should ideally match the bandwidth-delay product (BDP) of the path
 
 Both the control of the data rate (via the pacing rate) and data volume
@@ -1253,7 +1257,7 @@ following approach:
   available to the flow may be quite tight (even just a single packet or
   less). The increasingly rapid growth over time is motivated by the fact that
   in a high-speed WAN the increase in available bandwidth (and thus the estimated
-  BDP) may require the flow to grow the volume of its inflight data by up to
+  BDP) may require the flow to grow the volume of its in-flight data by up to
   O(1,000,000) packets; even a high-speed WAN BDP like
   10Gbps \* 100ms is around 83,000 packets (with a 1500-byte MTU). The additive
   increase to BBR.inflight_longterm exponentially doubles each round trip;
@@ -1619,7 +1623,7 @@ loops of ever-increasing queues and RTT samples.
 The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
 every ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
 by setting its cwnd_gain to BBRProbeRTTCwndGain = 0.5 to reduce its volume of
-inflight data to half of its estimated BDP, to try to measure the unloaded
+in-flight data to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.
 
 There are two main motivations for making the MinRTTFilterLen roughly twice
@@ -2222,7 +2226,7 @@ are being retransmitted.
 
 C.pipe: The sender's estimate of the amount of data outstanding in the network
 (measured in octets or packets). This includes data packets in the current
-outstanding window that are inflight and have not been acknowledged or marked lost
+outstanding window that are in flight and have not been acknowledged or marked lost
 (e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
 This MUST NOT include pure ACK packets.
 
@@ -2825,8 +2829,8 @@ In pseudocode:
     lost_prefix = (BBRLossThresh * inflight_prev - lost_prev) /
                   (1 - BBRLossThresh)
     /* At what inflight value did losses cross BBRLossThresh? */
-    inflight = inflight_prev + lost_prefix
-    return inflight
+    inflight_at_loss = inflight_prev + lost_prefix
+    return inflight_at_loss
 ~~~~
 
 
@@ -3127,22 +3131,22 @@ as follows:
     BBR.bdp = BBR.bw * BBR.min_rtt
     return gain * BBR.bdp
 
-  BBRQuantizationBudget(inflight)
+  BBRQuantizationBudget(inflight_cap)
     BBRUpdateOffloadBudget()
-    inflight = max(inflight, BBR.offload_budget)
-    inflight = max(inflight, BBRMinPipeCwnd)
+    inflight_cap = max(inflight_cap, BBR.offload_budget)
+    inflight_cap = max(inflight_cap, BBRMinPipeCwnd)
       if (BBR.state == ProbeBW_UP)
-      inflight += 2*SMSS
-    return inflight
+      inflight_cap += 2*SMSS
+    return inflight_cap
 
   BBRInflight(gain):
-    inflight = BBRBDPMultiple(gain)
-    return BBRQuantizationBudget(inflight)
+    inflight_cap = BBRBDPMultiple(gain)
+    return BBRQuantizationBudget(inflight_cap)
 
   BBRUpdateMaxInflight():
-    inflight = BBRBDPMultiple(BBR.cwnd_gain)
-    inflight += BBR.extra_acked
-    BBR.max_inflight = BBRQuantizationBudget(inflight)
+    inflight_cap = BBRBDPMultiple(BBR.cwnd_gain)
+    inflight_cap += BBR.extra_acked
+    BBR.max_inflight = BBRQuantizationBudget(inflight_cap)
 ~~~~
 
 The "estimated_bdp" term tries to allow enough packets in flight to fully
