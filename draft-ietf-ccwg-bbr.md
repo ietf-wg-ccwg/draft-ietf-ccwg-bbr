@@ -3133,7 +3133,7 @@ as follows:
     BBRUpdateOffloadBudget()
     inflight_cap = max(inflight_cap, BBR.offload_budget)
     inflight_cap = max(inflight_cap, BBRMinPipeCwnd)
-      if (BBR.state == ProbeBW_UP)
+    if (BBR.state == ProbeBW_UP)
       inflight_cap += 2*SMSS
     return inflight_cap
 
