@@ -3046,7 +3046,7 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
        BBRUpdateOffloadBudget()
        inflight_cap = max(inflight_cap, BBR.offload_budget)
        inflight_cap = max(inflight_cap, BBRMinPipeCwnd)
-         if (BBR.state == ProbeBW_UP)
+       if (BBR.state == ProbeBW_UP)
          inflight_cap += 2*SMSS
        return inflight_cap
 
