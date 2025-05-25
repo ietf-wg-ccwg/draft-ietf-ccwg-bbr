@@ -198,7 +198,7 @@ Table of Contents
    trip time, and packet loss rate to build an explicit model of the
    network path, including its estimated available bandwidth, bandwidth-
    delay product, and the maximum volume of data that the connection can
-   place in-flight in the network without causing excessive queue
+   place in flight in the network without causing excessive queue
    pressure.  It then uses this model in order to guide its control
    behavior in seeking high throughput and low queue pressure.
 
@@ -698,7 +698,7 @@ Table of Contents
        transport sender implementation may need to transmit as a unit to
        amortize per-packet transmission overheads.
 
-   3.  cwnd: the maximum volume of data BBR allows in-flight in the
+   3.  cwnd: the maximum volume of data BBR allows in flight in the
        network at any time.
 
 3.6.  Environment and Usage
@@ -2213,11 +2213,11 @@ Table of Contents
    If there are packets already in flight, then we need to start
    delivery rate samples from the time we received the most recent ACK,
    to try to ensure that we include the full time the network needs to
-   deliver all in-flight packets.  If there are no packets in flight
-   yet, then we can start the delivery rate interval at the current
-   time, since we know that any ACKs after now indicate that the network
-   was able to deliver those packets completely in the sampling interval
-   between now and the next ACK.
+   deliver all in-flight data.  If there is no data in flight yet, then
+   we can start the delivery rate interval at the current time, since we
+   know that any ACKs after now indicate that the network was able to
+   deliver that data completely in the sampling interval between now and
+   the next ACK.
 
    After each packet transmission, the sender executes the following
    steps:
@@ -2508,7 +2508,7 @@ Table of Contents
    the path over which a transport connection is sending.  The path's
    round-trip propagation delay determines the minimum amount of time
    over which the connection must be willing to sustain transmissions at
-   the BBR.bw rate, and thus the minimum amount of data needed in-
+   the BBR.bw rate, and thus the minimum amount of data needed in
    flight, for the connection to reach full utilization (a "Full Pipe").
    The round-trip propagation delay can vary over the life of a
    connection, so BBR continually estimates BBR.min_rtt using recent
@@ -2556,18 +2556,19 @@ Table of Contents
       helping to reveal the path's underlying two-way propagation delay
       even when the aforementioned "noise" effects can often obscure it.
 
-   *  The MinRTTFilterLen aims to be long enough to avoid needing to cut
-      in-flight and throughput often.  Measuring two-way propagation
-      delay requires in-flight to be at or below BDP, which risks some
-      amount of underutilization, so BBR uses a filter window long
-      enough that such underutilization events can be rare.
+   *  The MinRTTFilterLen aims to be long enough to avoid needing to
+      reduce in-flight data and throughput often.  Measuring two-way
+      propagation delay requires in-flight data to be at or below the
+      BDP, which risks some amount of underutilization, so BBR uses a
+      filter window long enough that such underutilization events can be
+      rare.
 
    *  The MinRTTFilterLen aims to be long enough that many applications
-      have a "natural" moment of silence or low utilization that can cut
-      in-flight below BDP and naturally serve to refresh the
-      BBR.min_rtt, without requiring BBR to force an artificial cut in
-      in-flight.  This applies to many popular applications, including
-      Web, RPC, chunked audio or video traffic.
+      have a "natural" moment of silence or low utilization that can
+      reduce in-flight data below the BDP and naturally serve to refresh
+      the BBR.min_rtt, without requiring BBR to force an artificial
+      reduction in in-flight data.  This applies to many popular
+      applications, including Web, RPC, or chunked audio/video traffic.
 
    *  The MinRTTFilterLen aims to be short enough to respond in a timely
       manner to real increases in the two-way propagation delay of the
@@ -2665,7 +2666,7 @@ Table of Contents
 4.5.10.2.  Probing for Bandwidth In ProbeBW
 
    BBR searches for the maximum volume of data that can be sensibly
-   placed in-flight in the network.  A key precondition is that the flow
+   placed in flight in the network.  A key precondition is that the flow
    is actually trying robustly to find that operating point.  To
    implement this, when a flow is in ProbeBW, and an ACK covers data
    sent in one of the accelerating phases (REFILL or UP), and the ACK
