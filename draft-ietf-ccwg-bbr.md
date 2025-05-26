@@ -1946,7 +1946,8 @@ rate to help seek "rate balance", where the flow's packet arrival rate at the
 bottleneck equals the departure rate. The bottleneck rate varies over the life
 of a connection, so BBR continually estimates BBR.max_bw using recent signals.
 
-#### Delivery Rate Samples {#delivery-rate-samples}
+
+## Delivery Rate Samples {#delivery-rate-samples}
 
 This section describes a generic algorithm for a transport protocol sender to
 estimate the current delivery rate of its data on the fly. This technique is
@@ -1966,9 +1967,9 @@ goodput through some bottleneck, which may reside either in the network or
 on the end hosts (sender or receiver).
 
 
-#### Delivery Rate Sampling Algorithm Overview {#delivery-rate-sampling-algorithm-overview}
+### Delivery Rate Sampling Algorithm Overview {#delivery-rate-sampling-algorithm-overview}
 
-##### Requirements {#requirements}
+#### Requirements {#requirements}
 
 This algorithm can be implemented in any transport protocol that supports
 packet-delivery acknowledgment (so far, implementations are available for TCP
@@ -1983,7 +1984,7 @@ changes. While selective acknowledgments for out-of-order data (e.g.,
 accurate estimation during reordering and loss recovery phases.
 
 
-##### Estimating Delivery Rate {#estimating-delivery-rate}
+#### Estimating Delivery Rate {#estimating-delivery-rate}
 
 A delivery rate sample records the estimated rate at which the network delivered
 packets for a single flow, calculated over the time interval between the
@@ -1998,7 +1999,7 @@ packets. Tracking data in units of octets is more accurate, since packet
 sizes can vary. But for some purposes, including congestion control, tracking
 data in units of packets may suffice.
 
-###### ACK Rate {#ack-rate}
+##### ACK Rate {#ack-rate}
 
 First, consider the rate at which data is acknowledged by the receiver. In
 this algorithm, the computation of the ACK rate models the average slope
@@ -2058,7 +2059,7 @@ the "knee" preceding the transmit to the "knee" at ACK:
 ~~~~
 
 
-###### Compression and Aggregation {#compression-and-aggregation}
+##### Compression and Aggregation {#compression-and-aggregation}
 
 For computing the delivery_rate, the sender prefers ack_rate, the rate at which
 packets were acknowledged, since this usually the most reliable metric.
@@ -2070,7 +2071,7 @@ filter out such implausible ack_rate samples, we consider the send rate for
 each flight of data, as follows.
 
 
-###### Send Rate {#send-rate}
+##### Send Rate {#send-rate}
 
 The sender calculates the send rate, "send_rate", for a flight of data as
 follows. Define "P.first_sent_time" as the time of the first send in a flight
@@ -2094,7 +2095,7 @@ axis, and the time elapsed on the X axis: the average slope of the transmission
 of this flight of data.
 
 
-###### Delivery Rate {#delivery-rate}
+##### Delivery Rate {#delivery-rate}
 
 Since it is physically impossible to have data delivered faster than it is
 sent in a sustained fashion, when the estimator notices that the ack_rate
@@ -2121,7 +2122,7 @@ follows:
 ~~~~
 
 
-##### Tracking application-limited phases {#tracking-application-limited-phases}
+#### Tracking application-limited phases {#tracking-application-limited-phases}
 
 In application-limited phases the transmission rate is limited by the
 sending application rather than the congestion control algorithm. Modern
@@ -2167,7 +2168,7 @@ transport flow as application-limited, it marks all bandwidth samples for the
 next round trip as application-limited (at which point, the "bubble" can be
 said to have exited the data pipeline).
 
-###### Considerations Related to Receiver Flow Control Limits {#considerations-related-to-receiver-flow-control-limits}
+##### Considerations Related to Receiver Flow Control Limits {#considerations-related-to-receiver-flow-control-limits}
 
 In some cases receiver flow control limits (such as the TCP {{RFC9293}}
 advertised receive window, RCV.WND) are the factor limiting the
@@ -2178,11 +2179,11 @@ the same as network bottlenecks. This has a conceptual symmetry and has worked
 well in practice for congestion control and telemetry purposes.
 
 
-#### Detailed Delivery Rate Sampling Algorithm {#detailed-delivery-rate-sampling-algorithm}
+### Detailed Delivery Rate Sampling Algorithm {#detailed-delivery-rate-sampling-algorithm}
 
-##### Variables {#variables}
+#### Variables {#variables}
 
-###### Per-connection (C) state {#per-connection-c-state}
+##### Per-connection (C) state {#per-connection-c-state}
 
 This algorithm requires the following new state variables for each transport
 connection:
@@ -2227,7 +2228,7 @@ outstanding window that are inflight and have not been acknowledged or marked lo
 This MUST NOT include pure ACK packets.
 
 
-###### Per-packet (P) state {#per-packet-p-state}
+##### Per-packet (P) state {#per-packet-p-state}
 
 This algorithm requires the following new state variables for each packet
 that has been transmitted but has not been acknowledged:
@@ -2244,7 +2245,7 @@ sent, else false.
 
 P.sent_time: The time when the packet was sent.
 
-###### Rate Sample (rs) Output {#rate-sample-rs-output}
+##### Rate Sample (rs) Output {#rate-sample-rs-output}
 
 This algorithm provides its output in a RateSample structure rs, containing
 the following fields:
@@ -2270,7 +2271,7 @@ rs.ack_elapsed: ACK time interval calculated from the most recent packet
 delivered (see the "ACK Rate" section above).
 
 
-##### Transmitting a data packet {#transmitting-a-data-packet}
+#### Transmitting a data packet {#transmitting-a-data-packet}
 
 Upon transmitting a data packet, the sender snapshots the current delivery
 information in per-packet state. This will allow the sender
@@ -2299,7 +2300,7 @@ After each packet transmission, the sender executes the following steps:
 ~~~~
 
 
-##### Upon receiving an ACK {#upon-receiving-an-ack}
+#### Upon receiving an ACK {#upon-receiving-an-ack}
 
 When an ACK arrives, the sender invokes GenerateRateSample() to fill in a
 rate sample. For each  packet that was newly acknowledged, UpdateRateSample()
@@ -2374,7 +2375,7 @@ packet, i.e., the packet with the highest "P.delivered" value.
 ~~~~
 
 
-##### Detecting application-limited phases {#detecting-application-limited-phases}
+#### Detecting application-limited phases {#detecting-application-limited-phases}
 
 An application-limited phase starts when the connection decides to send more
 data, at a point in time when the connection had previously run out of data.
@@ -2412,9 +2413,9 @@ application-limited:
 ~~~~
 
 
-#### Delivery Rate Sampling Discussion {#delivery-rate-sampling-discussion}
+### Delivery Rate Sampling Discussion {#delivery-rate-sampling-discussion}
 
-##### Offload Mechanisms {#offload-mechanisms}
+#### Offload Mechanisms {#offload-mechanisms}
 
 If a transport sender implementation uses an offload mechanism (such as TSO,
 GSO, etc.) to combine multiple SMSS of data into a single packet "aggregate"
@@ -2424,7 +2425,7 @@ SMSS. For simplicity this document refers to such state as "per-packet",
 whether it is per "aggregate" or per SMSS.
 
 
-##### Impact of ACK losses {#impact-of-ack-losses}
+#### Impact of ACK losses {#impact-of-ack-losses}
 
 Delivery rate samples are generated upon receiving each ACK; ACKs may contain
 both cumulative and selective acknowledgment information. Losing an ACK results
@@ -2435,7 +2436,7 @@ can underestimate the delivery rate due the artificially inflated
 filter.
 
 
-##### Impact of packet reordering {#impact-of-packet-reordering}
+#### Impact of packet reordering {#impact-of-packet-reordering}
 
 This algorithm is robust to packet reordering; it makes no assumptions about
 the order in which packets are delivered or ACKed. In particular, for a
@@ -2444,7 +2445,7 @@ transmission of P and the ACK of packet P, since C.delivered will be
 incremented appropriately in any case.
 
 
-##### Impact of packet loss and retransmissions {#impact-of-packet-loss-and-retransmissions}
+#### Impact of packet loss and retransmissions {#impact-of-packet-loss-and-retransmissions}
 
 There are several possible approaches for handling cases where a delivery
 rate sample is based on a retransmitted packet.
@@ -2465,7 +2466,7 @@ retransmitted sequence ranges, then the following approaches MAY be used:
   a retransmitted sequence range.
 
 
-###### TCP Connections without SACK {#connections-without-sack}
+##### TCP Connections without SACK {#connections-without-sack}
 
 Whenever possibile, TCP connections using BBR as a congestion controller SHOULD
 use both SACK and timestamps. Failure to do so will cause BBR's RTT and
