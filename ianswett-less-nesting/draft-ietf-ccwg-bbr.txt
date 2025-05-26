@@ -126,19 +126,19 @@ Table of Contents
      4.5.  Updating Network Path Model Parameters
        4.5.1.  BBR.round_count: Tracking Packet-Timed Round Trips
        4.5.2.  BBR.max_bw: Estimated Maximum Bandwidth
+       4.5.3.  BBR.max_bw Max Filter
+       4.5.4.  BBR.max_bw and Application-limited Delivery Rate
+               Samples
+       4.5.5.  Updating the BBR.max_bw Max Filter
+       4.5.6.  Tracking Time for the BBR.max_bw Max Filter
+       4.5.7.  BBR.min_rtt: Estimated Minimum Round-Trip Time
+       4.5.8.  BBR.offload_budget
+       4.5.9.  BBR.extra_acked
+       4.5.10. Updating the Model Upon Packet Loss
      4.6.  Delivery Rate Samples
        4.6.1.  Delivery Rate Sampling Algorithm Overview
        4.6.2.  Detailed Delivery Rate Sampling Algorithm
        4.6.3.  Delivery Rate Sampling Discussion
-       4.6.4.  BBR.max_bw Max Filter
-       4.6.5.  BBR.max_bw and Application-limited Delivery Rate
-               Samples
-       4.6.6.  Updating the BBR.max_bw Max Filter
-       4.6.7.  Tracking Time for the BBR.max_bw Max Filter
-       4.6.8.  BBR.min_rtt: Estimated Minimum Round-Trip Time
-       4.6.9.  BBR.offload_budget
-       4.6.10. BBR.extra_acked
-       4.6.11. Updating the Model Upon Packet Loss
      4.7.  Updating Control Parameters
        4.7.1.  Summary of Control Behavior in the State Machine
        4.7.2.  Pacing Rate: BBR.pacing_rate
@@ -1344,7 +1344,7 @@ Table of Contents
       steady-state (non-bandwidth-probing) BBR response to a non-
       application-limited round trip with X% packet loss is to reduce
       the sending rate by X% (see "Updating the Model Upon Packet Loss"
-      in Section 4.6.11), this means that the BBR sending rate after N
+      in Section 4.5.10), this means that the BBR sending rate after N
       rounds of packet loss at a rate loss_rate is reduced to (1 -
       loss_rate)^N.  A simplified model predicts that for a flow that
       encounters 1% loss in N=137 round trips of ProbeBW_CRUISE, and
@@ -1886,6 +1886,445 @@ Table of Contents
    of a connection, so BBR continually estimates BBR.max_bw using recent
    signals.
 
+4.5.3.  BBR.max_bw Max Filter
+
+   Delivery rate samples are often below the typical bottleneck
+   bandwidth available to the flow, due to "noise" introduced by random
+   variation in physical transmission processes (e.g. radio link layer
+   noise) or queues or along the network path.  To filter these effects
+   BBR uses a max filter: BBR estimates BBR.max_bw using the windowed
+   maximum recent delivery rate sample seen by the connection over
+   recent history.
+
+   The BBR.max_bw max filter window covers a time period extending over
+   the past two ProbeBW cycles.  The BBR.max_bw max filter window length
+   is driven by trade-offs among several considerations:
+
+   *  It is long enough to cover at least one entire ProbeBW cycle (see
+      the "ProbeBW" section).  This ensures that the window contains at
+      least some delivery rate samples that are the result of data
+      transmitted with a super-unity pacing_gain (a pacing_gain larger
+      than 1.0).  Such super-unity delivery rate samples are
+      instrumental in revealing the path's underlying available
+      bandwidth even when there is noise from delivery rate shortfalls
+      due to aggregation delays, queuing delays from variable cross-
+      traffic, lossy link layers with uncorrected losses, or short-term
+      buffer exhaustion (e.g., brief coincident bursts in a shallow
+      buffer).
+
+   *  It aims to be long enough to cover short-term fluctuations in the
+      network's delivery rate due to the aforementioned sources of
+      noise.  In particular, the delivery rate for radio link layers
+      (e.g., wifi and cellular technologies) can be highly variable, and
+      the filter window needs to be long enough to remember "good"
+      delivery rate samples in order to be robust to such variations.
+
+   *  It aims to be short enough to respond in a timely manner to
+      sustained reductions in the bandwidth available to a flow, whether
+      this is because other flows are using a larger share of the
+      bottleneck, or the bottleneck link service rate has reduced due to
+      layer 1 or layer 2 changes, policy changes, or routing changes.
+      In any of these cases, existing BBR flows traversing the
+      bottleneck should, in a timely manner, reduce their BBR.max_bw
+      estimates and thus pacing rate and in-flight data, in order to
+      match the sending behavior to the new available bandwidth.
+
+4.5.4.  BBR.max_bw and Application-limited Delivery Rate Samples
+
+   Transmissions can be application-limited, meaning the transmission
+   rate is limited by the application rather than the congestion control
+   algorithm.  This is quite common because of request/response traffic.
+   When there is a transmission opportunity but no data to send, the
+   delivery rate sampler marks the corresponding bandwidth sample(s) as
+   application-limited Section 4.6.  The BBR.max_bw estimator carefully
+   decides which samples to include in the bandwidth model to ensure
+   that BBR.max_bw reflects network limits, not application limits.  By
+   default, the estimator discards application-limited samples, since by
+   definition they reflect application limits.  However, the estimator
+   does use application-limited samples if the measured delivery rate
+   happens to be larger than the current BBR.max_bw estimate, since this
+   indicates the current BBR.Max_bw estimate is too low.
+
+4.5.5.  Updating the BBR.max_bw Max Filter
+
+   For every ACK that acknowledges some data packets as delivered, BBR
+   invokes BBRUpdateMaxBw() to update the BBR.max_bw estimator as
+   follows (here rs.delivery_rate is the delivery rate sample obtained
+   from the ACK that is being processed, as specified in Section 4.6):
+
+     BBRUpdateMaxBw()
+       BBRUpdateRound()
+       if (rs.delivery_rate >= BBR.max_bw || !rs.is_app_limited)
+           BBR.max_bw = UpdateWindowedMaxFilter(
+                         filter=BBR.MaxBwFilter,
+                         value=rs.delivery_rate,
+                         time=BBR.cycle_count,
+                         window_length=MaxBwFilterLen)
+
+4.5.6.  Tracking Time for the BBR.max_bw Max Filter
+
+   BBR tracks time for the BBR.max_bw filter window using a virtual
+   (non-wall-clock) time tracked by counting the cyclical progression
+   through ProbeBW cycles.  Each time through the Probe bw cycle, one
+   round trip after exiting ProbeBW_UP (the point at which the flow has
+   its best chance to measure the highest throughput of the cycle), BBR
+   increments BBR.cycle_count, the virtual time used by the BBR.max_bw
+   filter window.  Note that BBR.cycle_count only needs to be tracked
+   with a single bit, since the BBR.max_bw filter only needs to track
+   samples from two time slots: the previous ProbeBW cycle and the
+   current ProbeBW cycle:
+
+     BBRAdvanceMaxBwFilter():
+       BBR.cycle_count++
+
+4.5.7.  BBR.min_rtt: Estimated Minimum Round-Trip Time
+
+   BBR.min_rtt is BBR's estimate of the round-trip propagation delay of
+   the path over which a transport connection is sending.  The path's
+   round-trip propagation delay determines the minimum amount of time
+   over which the connection must be willing to sustain transmissions at
+   the BBR.bw rate, and thus the minimum amount of data needed in
+   flight, for the connection to reach full utilization (a "Full Pipe").
+   The round-trip propagation delay can vary over the life of a
+   connection, so BBR continually estimates BBR.min_rtt using recent
+   round-trip delay samples.
+
+4.5.7.1.  Round-Trip Time Samples for Estimating BBR.min_rtt
+
+   For every data packet a connection sends, BBR calculates an RTT
+   sample that measures the time interval from sending a data packet
+   until that packet is acknowledged.
+
+   The only divergence from RTT estimation for retransmission timeouts
+   is in the case where a given acknowledgment ACKs more than one data
+   packet.  In order to be conservative and schedule long timeouts to
+   avoid spurious retransmissions, the maximum among such potential RTT
+   samples is typically used for computing retransmission timeouts;
+   i.e., SRTT is typically calculated using the data packet with the
+   earliest transmission time.  By contrast, in order for BBR to try to
+   reach the minimum amount of data in flight to fill the pipe, BBR uses
+   the minimum among such potential RTT samples; i.e., BBR calculates
+   the RTT using the data packet with the latest transmission time.
+
+4.5.7.2.  BBR.min_rtt Min Filter
+
+   RTT samples tend to be above the round-trip propagation delay of the
+   path, due to "noise" introduced by random variation in physical
+   transmission processes (e.g. radio link layer noise), queues along
+   the network path, the receiver's delayed ack strategy, ack
+   aggregation, etc.  Thus to filter out these effects BBR uses a min
+   filter: BBR estimates BBR.min_rtt using the minimum recent RTT sample
+   seen by the connection over that past MinRTTFilterLen seconds.  (Many
+   of the same network effects that can decrease delivery rate
+   measurements can increase RTT samples, which is why BBR's min-
+   filtering approach for RTTs is the complement of its max-filtering
+   approach for delivery rates.)
+
+   The length of the BBR.min_rtt min filter window is MinRTTFilterLen =
+   10 secs.  This is driven by trade-offs among several considerations:
+
+   *  The MinRTTFilterLen is longer than ProbeRTTInterval, so that it
+      covers an entire ProbeRTT cycle (see the "ProbeRTT" section
+      below).  This helps ensure that the window can contain RTT samples
+      that are the result of data transmitted with inflight below the
+      estimated BDP of the flow.  Such RTT samples are important for
+      helping to reveal the path's underlying two-way propagation delay
+      even when the aforementioned "noise" effects can often obscure it.
+
+   *  The MinRTTFilterLen aims to be long enough to avoid needing to
+      reduce in-flight data and throughput often.  Measuring two-way
+      propagation delay requires in-flight data to be at or below the
+      BDP, which risks some amount of underutilization, so BBR uses a
+      filter window long enough that such underutilization events can be
+      rare.
+
+   *  The MinRTTFilterLen aims to be long enough that many applications
+      have a "natural" moment of silence or low utilization that can
+      reduce in-flight data below the BDP and naturally serve to refresh
+      the BBR.min_rtt, without requiring BBR to force an artificial
+      reduction in in-flight data.  This applies to many popular
+      applications, including Web, RPC, or chunked audio/video traffic.
+
+   *  The MinRTTFilterLen aims to be short enough to respond in a timely
+      manner to real increases in the two-way propagation delay of the
+      path, e.g. due to route changes, which are expected to typically
+      happen on longer time scales.
+
+   A BBR implementation MAY use a generic windowed min filter to track
+   BBR.min_rtt.  However, a significant savings in space and improvement
+   in freshness can be achieved by integrating the BBR.min_rtt
+   estimation into the ProbeRTT state machine, so this document
+   discusses that approach in the ProbeRTT section.
+
+4.5.8.  BBR.offload_budget
+
+   BBR.offload_budget is the estimate of the minimum volume of data
+   necessary to achieve full throughput using sender (TSO/GSO) and
+   receiver (LRO, GRO) host offload mechanisms.  This varies based on
+   the transport protocol and operating environment.
+
+   For TCP, offload_budget can be computed as follows:
+
+       BBRUpdateOffloadBudget():
+         BBR.offload_budget = 3 * BBR.send_quantum
+
+   The factor of 3 is chosen to allow maintaining at least:
+
+   *  1 quantum in the sending host's queuing discipline layer
+
+   *  1 quantum being segmented in the sending host TSO/GSO engine
+
+   *  1 quantum being reassembled or otherwise remaining unacknowledged
+      due to the receiver host's LRO/GRO/delayed-ACK engine
+
+4.5.9.  BBR.extra_acked
+
+   BBR.extra_acked is a volume of data that is the estimate of the
+   recent degree of aggregation in the network path.  For each ACK, the
+   algorithm computes a sample of the estimated extra ACKed data beyond
+   the amount of data that the sender expected to be ACKed over the
+   timescale of a round-trip, given the BBR.bw.  Then it computes
+   BBR.extra_acked as the windowed maximum sample over the last
+   BBRExtraAckedFilterLen=10 packet-timed round-trips.  If the ACK rate
+   falls below the expected bandwidth, then the algorithm estimates an
+   aggregation episode has terminated, and resets the sampling interval
+   to start from the current time.
+
+   The BBR.extra_acked thus reflects the recently-measured magnitude of
+   data and ACK aggregation effects such as batching and slotting at
+   shared-medium L2 hops (wifi, cellular, DOCSIS), as well as end-host
+   offload mechanisms (TSO, GSO, LRO, GRO), and end host or middlebox
+   ACK decimation/thinning.
+
+   BBR augments its cwnd by BBR.extra_acked to allow the connection to
+   keep sending during inter-ACK silences, to an extent that matches the
+   recently measured degree of aggregation.
+
+   More precisely, this is computed as:
+
+     BBRUpdateACKAggregation():
+       /* Find excess ACKed beyond expected amount over this interval */
+       interval = (Now() - BBR.extra_acked_interval_start)
+       expected_delivered = BBR.bw * interval
+       /* Reset interval if ACK rate is below expected rate: */
+       if (BBR.extra_acked_delivered <= expected_delivered)
+           BBR.extra_acked_delivered = 0
+           BBR.extra_acked_interval_start = Now()
+           expected_delivered = 0
+       BBR.extra_acked_delivered += rs.newly_acked
+       extra = BBR.extra_acked_delivered - expected_delivered
+       extra = min(extra, cwnd)
+       if (BBR.full_bw_reached)
+         filter_len = BBRExtraAckedFilterLen
+       else
+         filter_len = 1  /* in Startup, just remember 1 round */
+       BBR.extra_acked =
+         UpdateWindowedMaxFilter(
+           filter=BBR.ExtraACKedFilter,
+           value=extra,
+           time=BBR.round_count,
+           window_length=filter_len)
+
+4.5.10.  Updating the Model Upon Packet Loss
+
+   In every state, BBR responds to (filtered) congestion signals,
+   including loss.  The response to those congestion signals depends on
+   the flow's current state, since the information that the flow can
+   infer depends on what the flow was doing when the flow experienced
+   the signal.
+
+4.5.10.1.  Probing for Bandwidth In Startup
+
+   In Startup, if the congestion signals meet the Startup exit criteria,
+   the flow exits Startup and enters Drain (see Section 4.3.1.3).
+
+4.5.10.2.  Probing for Bandwidth In ProbeBW
+
+   BBR searches for the maximum volume of data that can be sensibly
+   placed in flight in the network.  A key precondition is that the flow
+   is actually trying robustly to find that operating point.  To
+   implement this, when a flow is in ProbeBW, and an ACK covers data
+   sent in one of the accelerating phases (REFILL or UP), and the ACK
+   indicates that the loss rate over the past round trip exceeds the
+   queue pressure objective, and the flow is not application limited,
+   and has not yet responded to congestion signals from the most recent
+   REFILL or UP phase, then the flow estimates that the volume of data
+   it allowed in flight exceeded what matches the current delivery
+   process on the path, and reduces BBR.inflight_longterm:
+
+     /* Do loss signals suggest inflight is too high? */
+     IsInflightTooHigh():
+       return (rs.lost > rs.tx_in_flight * BBRLossThresh)
+
+     BBRHandleInflightTooHigh():
+       BBR.bw_probe_samples = 0;  /* only react once per bw probe */
+       if (!rs.is_app_limited)
+         BBR.inflight_longterm = max(rs.tx_in_flight,
+                               BBRTargetInflight() * BBRBeta))
+       If (BBR.state == ProbeBW_UP)
+         BBRStartProbeBW_DOWN()
+
+   Here rs.tx_in_flight is the amount of data that was estimated to be
+   in flight when the most recently ACKed packet was sent.  And the
+   BBRBeta (0.7x) bound is to try to ensure that BBR does not react more
+   dramatically than CUBIC's 0.7x multiplicative decrease factor.
+
+   Some loss detection algorithms, including RACK [RFC8985] or QUIC loss
+   detection [RFC9002], delay loss marking to wait for potential
+   reordering, so packets can be declared lost long after the loss
+   itself. happened.  In such cases, the tx_in_flight for the delivered
+   sequence range that allowed the loss to be detected may be
+   considerably smaller than the tx_in_flight of the lost packet itself.
+   In such cases using the former tx_in_flight rather than the latter
+   can cause BBR.inflight_longterm to be significantly underestimated.
+   To avoid such issues, BBR processes each loss detection event to more
+   precisely estimate the volume of in-flight data at which loss rates
+   cross BBRLossThresh, noting that this may have happened mid-way
+   through some TSO/GSO offload burst (represented as a "packet" in the
+   pseudocode in this document).  To estimate this threshold volume of
+   data, we can solve for "lost_prefix" in the following way, where
+   inflight_prev represents the volume of in-flight data preceding this
+   packet, and lost_prev represents the data lost among that previous
+   in-flight data.
+
+   First we start with:
+
+     lost / inflight >= BBRLossThresh
+
+   Expanding this, we get:
+
+     (lost_prev + lost_prefix) /    >= BBRLossThresh
+     (inflight_prev + lost_prefix)
+
+   Solving for lost_prefix, we arrive at:
+
+     lost_prefix >= (BBRLossThresh * inflight_prev - lost_prev) /
+                       (1 - BBRLossThresh)
+
+   In pseudocode:
+
+     BBRNoteLoss()
+       if (!BBR.loss_in_round)   /* first loss in this round trip? */
+         BBR.loss_round_delivered = C.delivered
+       BBR.loss_in_round = 1
+
+     BBRHandleLostPacket(packet):
+       BBRNoteLoss()
+       if (!BBR.bw_probe_samples)
+         return /* not a packet sent while probing bandwidth */
+       rs.tx_in_flight = packet.tx_in_flight /* inflight at transmit */
+       rs.lost = C.lost - packet.lost /* data lost since transmit */
+       rs.is_app_limited = packet.is_app_limited;
+       if (IsInflightTooHigh())
+         rs.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
+         BBRHandleInflightTooHigh()
+
+     /* At what prefix of packet did losses exceed BBRLossThresh? */
+     BBRInflightLongtermFromLostPacket(rs, packet):
+       size = packet.size
+       /* What was in flight before this packet? */
+       inflight_prev = rs.tx_in_flight - size
+       /* What was lost before this packet? */
+       lost_prev = rs.lost - size
+       lost_prefix = (BBRLossThresh * inflight_prev - lost_prev) /
+                     (1 - BBRLossThresh)
+       /* At what inflight value did losses cross BBRLossThresh? */
+       inflight = inflight_prev + lost_prefix
+       return inflight
+
+4.5.10.3.  When not Probing for Bandwidth
+
+   When not explicitly accelerating to probe for bandwidth (Drain,
+   ProbeRTT, ProbeBW_DOWN, ProbeBW_CRUISE), BBR responds to loss by
+   slowing down to some extent.  This is because loss suggests that the
+   available bandwidth and safe volume of in-flight data may have
+   decreased recently, and the flow needs to adapt, slowing down toward
+   the latest delivery process.  BBR flows implement this response by
+   reducing the short-term model parameters, BBR.bw_shortterm and
+   BBR.inflight_shortterm.
+
+   When encountering packet loss when the flow is not probing for
+   bandwidth, the strategy is to gradually adapt to the current measured
+   delivery process (the rate and volume of data that is delivered
+   through the network path over the last round trip).  This applies
+   generally: whether in fast recovery, RTO recovery, TLP recovery;
+   whether application-limited or not.
+
+   There are two key parameters the algorithm tracks, to measure the
+   current delivery process:
+
+   BBR.bw_latest: a 1-round-trip max of delivered bandwidth
+   (rs.delivery_rate).
+
+   BBR.inflight_latest: a 1-round-trip max of delivered volume of data
+   (rs.delivered).
+
+   Upon the ACK at the end of each round that encountered a newly-marked
+   loss, the flow updates its model (bw_shortterm and
+   inflight_shortterm) as follows:
+
+      bw_shortterm = max(       bw_latest, BBRBeta *       bw_shortterm )
+inflight_shortterm = max( inflight_latest, BBRBeta * inflight_shortterm )
+
+   This logic can be represented as follows:
+
+     /* Near start of ACK processing: */
+     BBRUpdateLatestDeliverySignals():
+       BBR.loss_round_start = 0
+       BBR.bw_latest       = max(BBR.bw_latest,       rs.delivery_rate)
+       BBR.inflight_latest = max(BBR.inflight_latest, rs.delivered)
+       if (rs.prior_delivered >= BBR.loss_round_delivered)
+         BBR.loss_round_delivered = C.delivered
+         BBR.loss_round_start = 1
+
+     /* Near end of ACK processing: */
+     BBRAdvanceLatestDeliverySignals():
+       if (BBR.loss_round_start)
+         BBR.bw_latest       = rs.delivery_rate
+         BBR.inflight_latest = rs.delivered
+
+     BBRResetCongestionSignals():
+       BBR.loss_in_round = 0
+       BBR.bw_latest = 0
+       BBR.inflight_latest = 0
+
+     /* Update congestion state on every ACK */
+     BBRUpdateCongestionSignals():
+       BBRUpdateMaxBw()
+       if (!BBR.loss_round_start)
+         return  /* wait until end of round trip */
+       BBRAdaptLowerBoundsFromCongestion()  /* once per round, adapt */
+       BBR.loss_in_round = 0
+
+     /* Once per round-trip respond to congestion */
+     BBRAdaptLowerBoundsFromCongestion():
+       if (BBRIsProbingBW())
+         return
+       if (BBR.loss_in_round)
+         BBRInitLowerBounds()
+         BBRLossLowerBounds()
+
+     /* Handle the first congestion episode in this cycle */
+     BBRInitLowerBounds():
+       if (BBR.bw_shortterm == Infinity)
+         BBR.bw_shortterm = BBR.max_bw
+       if (BBR.inflight_shortterm == Infinity)
+         BBR.inflight_shortterm = cwnd
+
+     /* Adjust model once per round based on loss */
+     BBRLossLowerBounds()
+       BBR.bw_shortterm       = max(BBR.bw_latest,
+                             BBRBeta * BBR.bw_shortterm)
+       BBR.inflight_shortterm = max(BBR.inflight_latest,
+                             BBRBeta * BBR.inflight_shortterm)
+
+     BBRResetShortTermModel():
+       BBR.bw_shortterm       = Infinity
+       BBR.inflight_shortterm = Infinity
+
+     BBRBoundBWForModel():
+       BBR.bw = min(BBR.max_bw, BBR.bw_shortterm)
+
 4.6.  Delivery Rate Samples
 
    This section describes a generic algorithm for a transport protocol
@@ -2413,445 +2852,6 @@ Table of Contents
    Reno and [RFC5681] estimates that each duplicate ACK indicates that a
    data packet has been delivered).
 
-4.6.4.  BBR.max_bw Max Filter
-
-   Delivery rate samples are often below the typical bottleneck
-   bandwidth available to the flow, due to "noise" introduced by random
-   variation in physical transmission processes (e.g. radio link layer
-   noise) or queues or along the network path.  To filter these effects
-   BBR uses a max filter: BBR estimates BBR.max_bw using the windowed
-   maximum recent delivery rate sample seen by the connection over
-   recent history.
-
-   The BBR.max_bw max filter window covers a time period extending over
-   the past two ProbeBW cycles.  The BBR.max_bw max filter window length
-   is driven by trade-offs among several considerations:
-
-   *  It is long enough to cover at least one entire ProbeBW cycle (see
-      the "ProbeBW" section).  This ensures that the window contains at
-      least some delivery rate samples that are the result of data
-      transmitted with a super-unity pacing_gain (a pacing_gain larger
-      than 1.0).  Such super-unity delivery rate samples are
-      instrumental in revealing the path's underlying available
-      bandwidth even when there is noise from delivery rate shortfalls
-      due to aggregation delays, queuing delays from variable cross-
-      traffic, lossy link layers with uncorrected losses, or short-term
-      buffer exhaustion (e.g., brief coincident bursts in a shallow
-      buffer).
-
-   *  It aims to be long enough to cover short-term fluctuations in the
-      network's delivery rate due to the aforementioned sources of
-      noise.  In particular, the delivery rate for radio link layers
-      (e.g., wifi and cellular technologies) can be highly variable, and
-      the filter window needs to be long enough to remember "good"
-      delivery rate samples in order to be robust to such variations.
-
-   *  It aims to be short enough to respond in a timely manner to
-      sustained reductions in the bandwidth available to a flow, whether
-      this is because other flows are using a larger share of the
-      bottleneck, or the bottleneck link service rate has reduced due to
-      layer 1 or layer 2 changes, policy changes, or routing changes.
-      In any of these cases, existing BBR flows traversing the
-      bottleneck should, in a timely manner, reduce their BBR.max_bw
-      estimates and thus pacing rate and in-flight data, in order to
-      match the sending behavior to the new available bandwidth.
-
-4.6.5.  BBR.max_bw and Application-limited Delivery Rate Samples
-
-   Transmissions can be application-limited, meaning the transmission
-   rate is limited by the application rather than the congestion control
-   algorithm.  This is quite common because of request/response traffic.
-   When there is a transmission opportunity but no data to send, the
-   delivery rate sampler marks the corresponding bandwidth sample(s) as
-   application-limited Section 4.6.  The BBR.max_bw estimator carefully
-   decides which samples to include in the bandwidth model to ensure
-   that BBR.max_bw reflects network limits, not application limits.  By
-   default, the estimator discards application-limited samples, since by
-   definition they reflect application limits.  However, the estimator
-   does use application-limited samples if the measured delivery rate
-   happens to be larger than the current BBR.max_bw estimate, since this
-   indicates the current BBR.Max_bw estimate is too low.
-
-4.6.6.  Updating the BBR.max_bw Max Filter
-
-   For every ACK that acknowledges some data packets as delivered, BBR
-   invokes BBRUpdateMaxBw() to update the BBR.max_bw estimator as
-   follows (here rs.delivery_rate is the delivery rate sample obtained
-   from the ACK that is being processed, as specified in Section 4.6):
-
-     BBRUpdateMaxBw()
-       BBRUpdateRound()
-       if (rs.delivery_rate >= BBR.max_bw || !rs.is_app_limited)
-           BBR.max_bw = UpdateWindowedMaxFilter(
-                         filter=BBR.MaxBwFilter,
-                         value=rs.delivery_rate,
-                         time=BBR.cycle_count,
-                         window_length=MaxBwFilterLen)
-
-4.6.7.  Tracking Time for the BBR.max_bw Max Filter
-
-   BBR tracks time for the BBR.max_bw filter window using a virtual
-   (non-wall-clock) time tracked by counting the cyclical progression
-   through ProbeBW cycles.  Each time through the Probe bw cycle, one
-   round trip after exiting ProbeBW_UP (the point at which the flow has
-   its best chance to measure the highest throughput of the cycle), BBR
-   increments BBR.cycle_count, the virtual time used by the BBR.max_bw
-   filter window.  Note that BBR.cycle_count only needs to be tracked
-   with a single bit, since the BBR.max_bw filter only needs to track
-   samples from two time slots: the previous ProbeBW cycle and the
-   current ProbeBW cycle:
-
-     BBRAdvanceMaxBwFilter():
-       BBR.cycle_count++
-
-4.6.8.  BBR.min_rtt: Estimated Minimum Round-Trip Time
-
-   BBR.min_rtt is BBR's estimate of the round-trip propagation delay of
-   the path over which a transport connection is sending.  The path's
-   round-trip propagation delay determines the minimum amount of time
-   over which the connection must be willing to sustain transmissions at
-   the BBR.bw rate, and thus the minimum amount of data needed in
-   flight, for the connection to reach full utilization (a "Full Pipe").
-   The round-trip propagation delay can vary over the life of a
-   connection, so BBR continually estimates BBR.min_rtt using recent
-   round-trip delay samples.
-
-4.6.8.1.  Round-Trip Time Samples for Estimating BBR.min_rtt
-
-   For every data packet a connection sends, BBR calculates an RTT
-   sample that measures the time interval from sending a data packet
-   until that packet is acknowledged.
-
-   The only divergence from RTT estimation for retransmission timeouts
-   is in the case where a given acknowledgment ACKs more than one data
-   packet.  In order to be conservative and schedule long timeouts to
-   avoid spurious retransmissions, the maximum among such potential RTT
-   samples is typically used for computing retransmission timeouts;
-   i.e., SRTT is typically calculated using the data packet with the
-   earliest transmission time.  By contrast, in order for BBR to try to
-   reach the minimum amount of data in flight to fill the pipe, BBR uses
-   the minimum among such potential RTT samples; i.e., BBR calculates
-   the RTT using the data packet with the latest transmission time.
-
-4.6.8.2.  BBR.min_rtt Min Filter
-
-   RTT samples tend to be above the round-trip propagation delay of the
-   path, due to "noise" introduced by random variation in physical
-   transmission processes (e.g. radio link layer noise), queues along
-   the network path, the receiver's delayed ack strategy, ack
-   aggregation, etc.  Thus to filter out these effects BBR uses a min
-   filter: BBR estimates BBR.min_rtt using the minimum recent RTT sample
-   seen by the connection over that past MinRTTFilterLen seconds.  (Many
-   of the same network effects that can decrease delivery rate
-   measurements can increase RTT samples, which is why BBR's min-
-   filtering approach for RTTs is the complement of its max-filtering
-   approach for delivery rates.)
-
-   The length of the BBR.min_rtt min filter window is MinRTTFilterLen =
-   10 secs.  This is driven by trade-offs among several considerations:
-
-   *  The MinRTTFilterLen is longer than ProbeRTTInterval, so that it
-      covers an entire ProbeRTT cycle (see the "ProbeRTT" section
-      below).  This helps ensure that the window can contain RTT samples
-      that are the result of data transmitted with inflight below the
-      estimated BDP of the flow.  Such RTT samples are important for
-      helping to reveal the path's underlying two-way propagation delay
-      even when the aforementioned "noise" effects can often obscure it.
-
-   *  The MinRTTFilterLen aims to be long enough to avoid needing to
-      reduce in-flight data and throughput often.  Measuring two-way
-      propagation delay requires in-flight data to be at or below the
-      BDP, which risks some amount of underutilization, so BBR uses a
-      filter window long enough that such underutilization events can be
-      rare.
-
-   *  The MinRTTFilterLen aims to be long enough that many applications
-      have a "natural" moment of silence or low utilization that can
-      reduce in-flight data below the BDP and naturally serve to refresh
-      the BBR.min_rtt, without requiring BBR to force an artificial
-      reduction in in-flight data.  This applies to many popular
-      applications, including Web, RPC, or chunked audio/video traffic.
-
-   *  The MinRTTFilterLen aims to be short enough to respond in a timely
-      manner to real increases in the two-way propagation delay of the
-      path, e.g. due to route changes, which are expected to typically
-      happen on longer time scales.
-
-   A BBR implementation MAY use a generic windowed min filter to track
-   BBR.min_rtt.  However, a significant savings in space and improvement
-   in freshness can be achieved by integrating the BBR.min_rtt
-   estimation into the ProbeRTT state machine, so this document
-   discusses that approach in the ProbeRTT section.
-
-4.6.9.  BBR.offload_budget
-
-   BBR.offload_budget is the estimate of the minimum volume of data
-   necessary to achieve full throughput using sender (TSO/GSO) and
-   receiver (LRO, GRO) host offload mechanisms.  This varies based on
-   the transport protocol and operating environment.
-
-   For TCP, offload_budget can be computed as follows:
-
-       BBRUpdateOffloadBudget():
-         BBR.offload_budget = 3 * BBR.send_quantum
-
-   The factor of 3 is chosen to allow maintaining at least:
-
-   *  1 quantum in the sending host's queuing discipline layer
-
-   *  1 quantum being segmented in the sending host TSO/GSO engine
-
-   *  1 quantum being reassembled or otherwise remaining unacknowledged
-      due to the receiver host's LRO/GRO/delayed-ACK engine
-
-4.6.10.  BBR.extra_acked
-
-   BBR.extra_acked is a volume of data that is the estimate of the
-   recent degree of aggregation in the network path.  For each ACK, the
-   algorithm computes a sample of the estimated extra ACKed data beyond
-   the amount of data that the sender expected to be ACKed over the
-   timescale of a round-trip, given the BBR.bw.  Then it computes
-   BBR.extra_acked as the windowed maximum sample over the last
-   BBRExtraAckedFilterLen=10 packet-timed round-trips.  If the ACK rate
-   falls below the expected bandwidth, then the algorithm estimates an
-   aggregation episode has terminated, and resets the sampling interval
-   to start from the current time.
-
-   The BBR.extra_acked thus reflects the recently-measured magnitude of
-   data and ACK aggregation effects such as batching and slotting at
-   shared-medium L2 hops (wifi, cellular, DOCSIS), as well as end-host
-   offload mechanisms (TSO, GSO, LRO, GRO), and end host or middlebox
-   ACK decimation/thinning.
-
-   BBR augments its cwnd by BBR.extra_acked to allow the connection to
-   keep sending during inter-ACK silences, to an extent that matches the
-   recently measured degree of aggregation.
-
-   More precisely, this is computed as:
-
-     BBRUpdateACKAggregation():
-       /* Find excess ACKed beyond expected amount over this interval */
-       interval = (Now() - BBR.extra_acked_interval_start)
-       expected_delivered = BBR.bw * interval
-       /* Reset interval if ACK rate is below expected rate: */
-       if (BBR.extra_acked_delivered <= expected_delivered)
-           BBR.extra_acked_delivered = 0
-           BBR.extra_acked_interval_start = Now()
-           expected_delivered = 0
-       BBR.extra_acked_delivered += rs.newly_acked
-       extra = BBR.extra_acked_delivered - expected_delivered
-       extra = min(extra, cwnd)
-       if (BBR.full_bw_reached)
-         filter_len = BBRExtraAckedFilterLen
-       else
-         filter_len = 1  /* in Startup, just remember 1 round */
-       BBR.extra_acked =
-         UpdateWindowedMaxFilter(
-           filter=BBR.ExtraACKedFilter,
-           value=extra,
-           time=BBR.round_count,
-           window_length=filter_len)
-
-4.6.11.  Updating the Model Upon Packet Loss
-
-   In every state, BBR responds to (filtered) congestion signals,
-   including loss.  The response to those congestion signals depends on
-   the flow's current state, since the information that the flow can
-   infer depends on what the flow was doing when the flow experienced
-   the signal.
-
-4.6.11.1.  Probing for Bandwidth In Startup
-
-   In Startup, if the congestion signals meet the Startup exit criteria,
-   the flow exits Startup and enters Drain (see Section 4.3.1.3).
-
-4.6.11.2.  Probing for Bandwidth In ProbeBW
-
-   BBR searches for the maximum volume of data that can be sensibly
-   placed in flight in the network.  A key precondition is that the flow
-   is actually trying robustly to find that operating point.  To
-   implement this, when a flow is in ProbeBW, and an ACK covers data
-   sent in one of the accelerating phases (REFILL or UP), and the ACK
-   indicates that the loss rate over the past round trip exceeds the
-   queue pressure objective, and the flow is not application limited,
-   and has not yet responded to congestion signals from the most recent
-   REFILL or UP phase, then the flow estimates that the volume of data
-   it allowed in flight exceeded what matches the current delivery
-   process on the path, and reduces BBR.inflight_longterm:
-
-     /* Do loss signals suggest inflight is too high? */
-     IsInflightTooHigh():
-       return (rs.lost > rs.tx_in_flight * BBRLossThresh)
-
-     BBRHandleInflightTooHigh():
-       BBR.bw_probe_samples = 0;  /* only react once per bw probe */
-       if (!rs.is_app_limited)
-         BBR.inflight_longterm = max(rs.tx_in_flight,
-                               BBRTargetInflight() * BBRBeta))
-       If (BBR.state == ProbeBW_UP)
-         BBRStartProbeBW_DOWN()
-
-   Here rs.tx_in_flight is the amount of data that was estimated to be
-   in flight when the most recently ACKed packet was sent.  And the
-   BBRBeta (0.7x) bound is to try to ensure that BBR does not react more
-   dramatically than CUBIC's 0.7x multiplicative decrease factor.
-
-   Some loss detection algorithms, including RACK [RFC8985] or QUIC loss
-   detection [RFC9002], delay loss marking to wait for potential
-   reordering, so packets can be declared lost long after the loss
-   itself. happened.  In such cases, the tx_in_flight for the delivered
-   sequence range that allowed the loss to be detected may be
-   considerably smaller than the tx_in_flight of the lost packet itself.
-   In such cases using the former tx_in_flight rather than the latter
-   can cause BBR.inflight_longterm to be significantly underestimated.
-   To avoid such issues, BBR processes each loss detection event to more
-   precisely estimate the volume of in-flight data at which loss rates
-   cross BBRLossThresh, noting that this may have happened mid-way
-   through some TSO/GSO offload burst (represented as a "packet" in the
-   pseudocode in this document).  To estimate this threshold volume of
-   data, we can solve for "lost_prefix" in the following way, where
-   inflight_prev represents the volume of in-flight data preceding this
-   packet, and lost_prev represents the data lost among that previous
-   in-flight data.
-
-   First we start with:
-
-     lost / inflight >= BBRLossThresh
-
-   Expanding this, we get:
-
-     (lost_prev + lost_prefix) /    >= BBRLossThresh
-     (inflight_prev + lost_prefix)
-
-   Solving for lost_prefix, we arrive at:
-
-     lost_prefix >= (BBRLossThresh * inflight_prev - lost_prev) /
-                       (1 - BBRLossThresh)
-
-   In pseudocode:
-
-     BBRNoteLoss()
-       if (!BBR.loss_in_round)   /* first loss in this round trip? */
-         BBR.loss_round_delivered = C.delivered
-       BBR.loss_in_round = 1
-
-     BBRHandleLostPacket(packet):
-       BBRNoteLoss()
-       if (!BBR.bw_probe_samples)
-         return /* not a packet sent while probing bandwidth */
-       rs.tx_in_flight = packet.tx_in_flight /* inflight at transmit */
-       rs.lost = C.lost - packet.lost /* data lost since transmit */
-       rs.is_app_limited = packet.is_app_limited;
-       if (IsInflightTooHigh())
-         rs.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
-         BBRHandleInflightTooHigh()
-
-     /* At what prefix of packet did losses exceed BBRLossThresh? */
-     BBRInflightLongtermFromLostPacket(rs, packet):
-       size = packet.size
-       /* What was in flight before this packet? */
-       inflight_prev = rs.tx_in_flight - size
-       /* What was lost before this packet? */
-       lost_prev = rs.lost - size
-       lost_prefix = (BBRLossThresh * inflight_prev - lost_prev) /
-                     (1 - BBRLossThresh)
-       /* At what inflight value did losses cross BBRLossThresh? */
-       inflight = inflight_prev + lost_prefix
-       return inflight
-
-4.6.11.3.  When not Probing for Bandwidth
-
-   When not explicitly accelerating to probe for bandwidth (Drain,
-   ProbeRTT, ProbeBW_DOWN, ProbeBW_CRUISE), BBR responds to loss by
-   slowing down to some extent.  This is because loss suggests that the
-   available bandwidth and safe volume of in-flight data may have
-   decreased recently, and the flow needs to adapt, slowing down toward
-   the latest delivery process.  BBR flows implement this response by
-   reducing the short-term model parameters, BBR.bw_shortterm and
-   BBR.inflight_shortterm.
-
-   When encountering packet loss when the flow is not probing for
-   bandwidth, the strategy is to gradually adapt to the current measured
-   delivery process (the rate and volume of data that is delivered
-   through the network path over the last round trip).  This applies
-   generally: whether in fast recovery, RTO recovery, TLP recovery;
-   whether application-limited or not.
-
-   There are two key parameters the algorithm tracks, to measure the
-   current delivery process:
-
-   BBR.bw_latest: a 1-round-trip max of delivered bandwidth
-   (rs.delivery_rate).
-
-   BBR.inflight_latest: a 1-round-trip max of delivered volume of data
-   (rs.delivered).
-
-   Upon the ACK at the end of each round that encountered a newly-marked
-   loss, the flow updates its model (bw_shortterm and
-   inflight_shortterm) as follows:
-
-      bw_shortterm = max(       bw_latest, BBRBeta *       bw_shortterm )
-inflight_shortterm = max( inflight_latest, BBRBeta * inflight_shortterm )
-
-   This logic can be represented as follows:
-
-     /* Near start of ACK processing: */
-     BBRUpdateLatestDeliverySignals():
-       BBR.loss_round_start = 0
-       BBR.bw_latest       = max(BBR.bw_latest,       rs.delivery_rate)
-       BBR.inflight_latest = max(BBR.inflight_latest, rs.delivered)
-       if (rs.prior_delivered >= BBR.loss_round_delivered)
-         BBR.loss_round_delivered = C.delivered
-         BBR.loss_round_start = 1
-
-     /* Near end of ACK processing: */
-     BBRAdvanceLatestDeliverySignals():
-       if (BBR.loss_round_start)
-         BBR.bw_latest       = rs.delivery_rate
-         BBR.inflight_latest = rs.delivered
-
-     BBRResetCongestionSignals():
-       BBR.loss_in_round = 0
-       BBR.bw_latest = 0
-       BBR.inflight_latest = 0
-
-     /* Update congestion state on every ACK */
-     BBRUpdateCongestionSignals():
-       BBRUpdateMaxBw()
-       if (!BBR.loss_round_start)
-         return  /* wait until end of round trip */
-       BBRAdaptLowerBoundsFromCongestion()  /* once per round, adapt */
-       BBR.loss_in_round = 0
-
-     /* Once per round-trip respond to congestion */
-     BBRAdaptLowerBoundsFromCongestion():
-       if (BBRIsProbingBW())
-         return
-       if (BBR.loss_in_round)
-         BBRInitLowerBounds()
-         BBRLossLowerBounds()
-
-     /* Handle the first congestion episode in this cycle */
-     BBRInitLowerBounds():
-       if (BBR.bw_shortterm == Infinity)
-         BBR.bw_shortterm = BBR.max_bw
-       if (BBR.inflight_shortterm == Infinity)
-         BBR.inflight_shortterm = cwnd
-
-     /* Adjust model once per round based on loss */
-     BBRLossLowerBounds()
-       BBR.bw_shortterm       = max(BBR.bw_latest,
-                             BBRBeta * BBR.bw_shortterm)
-       BBR.inflight_shortterm = max(BBR.inflight_latest,
-                             BBRBeta * BBR.inflight_shortterm)
-
-     BBRResetShortTermModel():
-       BBR.bw_shortterm       = Infinity
-       BBR.inflight_shortterm = Infinity
-
-     BBRBoundBWForModel():
-       BBR.bw = min(BBR.max_bw, BBR.bw_shortterm)
-
 4.7.  Updating Control Parameters
 
    BBR uses three distinct but interrelated control parameters: pacing
@@ -3099,7 +3099,7 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    "cwnd Adjustment Mechanism" in Section 4.7.4.6.
 
    When a BBR sender is in Fast Recovery it uses the response described
-   in "Updating the Model Upon Packet Loss" in Section 4.6.11.
+   in "Updating the Model Upon Packet Loss" in Section 4.5.10.
 
    When BBR exits loss recovery it restores the cwnd to the "last known
    good" value that cwnd held before entering recovery.  This applies
