@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-22T01:41:29.874390+00:00",
+  "timestamp": "2025-05-27T01:40:57.747348+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -224,7 +224,7 @@
       ],
       "body": "I believe all 3 are used in the draft today, so we should probably standardize on one.",
       "createdAt": "2025-02-06T03:41:23Z",
-      "updatedAt": "2025-05-21T20:45:23Z",
+      "updatedAt": "2025-05-25T14:38:03Z",
       "closedAt": null,
       "comments": [
         {
@@ -247,6 +247,13 @@
           "body": "I'm fine with \"inflight\".\n\nIn this case, I don't see a need to do camel case (ie: InFlight), but I don't have any objection to it.",
           "createdAt": "2025-05-21T20:45:23Z",
           "updatedAt": "2025-05-21T20:45:23Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Re-reading the draft and thinking about the grammatical considerations, AFAIK the following grammatical and semantic considerations are in play:\n\n+ \"in-flight data\" is correct, because in this case \"in-flight\" is\n   an compound adjective describing the data, and compound\n   adjectives are hyphenated\n\n+ \"data in flight\" is correct, because in this case \"in flight\" is \n   an adverbial phrase describing the action or state of the data\n\n+ \"inflight\" as a noun (for the parameter that could be called either\n    \"in-flight data\" or \"data in flight\") is OK, as long as we define\n    what \"inflight\" means\n\nFor a first round of changes (some editorial improvements for \"in flight\" and \"in-flight\"), I mis-remembered the default github action, and forgot to click the radio button to create a pull request, so ended up committing directly to the repo:\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/commit/0ac05f78833a8605b373af9549ca362016857905\n@ianswett and @jbeshay  PTAL and LMK if you would prefer changes to that.\n\nFor a second round of changes (define \"inflight\" and use it more precisely and consistently), I correctly clicked the radio button to create a pull request:\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/41\n",
+          "createdAt": "2025-05-25T14:38:03Z",
+          "updatedAt": "2025-05-25T14:38:03Z"
         }
       ]
     },
@@ -617,6 +624,22 @@
           "updatedAt": "2025-04-12T15:04:53Z"
         }
       ]
+    },
+    {
+      "number": 42,
+      "id": "I_kwDOL3MllM64JZ9h",
+      "title": "Application-limited detection depends on implementation of pacing",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/42",
+      "state": "OPEN",
+      "author": "huitema",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The tracking of \"application-limited\" status is defined in [4.5.2.2.3. ](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/draft-ietf-ccwg-bbr.html#section-4.5.2.2.3)[Tracking application-limited phases](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/draft-ietf-ccwg-bbr.html#name-tracking-application-limite). The text suggests detecting a \"bubble\" during which the application fails to send data.\n\nPacing is going to interfere with this detection. If pacing is implemented via some kind of \"leaky bucket\" algorithm, the first effect of the \"bubble\" is to increase the number of tokens available, up to the \"quantum\" value. As long as the available tokens do not exceed the quantum, the transport does not really know whether the opportunity to send is lost, or whether the application is going to send a batch of data that catches up with pacing. In the later case, the transport is not really \"application-limited\".",
+      "createdAt": "2025-05-25T18:05:49Z",
+      "updatedAt": "2025-05-25T18:05:49Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -2175,6 +2198,146 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 41,
+      "id": "PR_kwDOL3MllM6Xis2O",
+      "title": "define \"inflight\" and use it more precisely and consistently",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/41",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "jbeshay",
+        "ianswett"
+      ],
+      "labels": [],
+      "body": "Define \"inflight\" and use it more precisely and consistently.\r\n\r\nRephrase text using the phrase or variable name \"inflight\" for values that are not exactly consistent with the definition of \"inflight\".\r\n\r\nPart of a fix for #14.\r\n",
+      "createdAt": "2025-05-25T14:27:00Z",
+      "updatedAt": "2025-05-25T23:40:47Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "0ac05f78833a8605b373af9549ca362016857905",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-1",
+      "headRefOid": "9d212df08a22ff5757f4faca4deafa9878c826c8",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc: @ianswett @jbeshay ",
+          "createdAt": "2025-05-25T14:29:12Z",
+          "updatedAt": "2025-05-25T14:29:12Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> That's an improvement, I approve, but I am concerned that we have a related issue on how to use \"inflight\". Graphs from the log of QUIC connections show that inflight follows a saw-tooth pattern. The inflight is lower after an ACK is received, and then climbs up as pacing authorizes more packets to be sent. This does not directly affect this PR, but it can lead to issue when estimating \"app-limited\" by comparing inflight to cwnd.\r\n\r\nAFAICT that inherent sawtooth should be OK, because the draft defines the point at which the inflight should be checked to look for applicaiton-limited behavior: \"The algorithm detects that an application-limited phase has started when the sending application requests to send new data, or the connection's retransmission mechanisms decide to retransmit data\"",
+          "createdAt": "2025-05-25T16:05:15Z",
+          "updatedAt": "2025-05-25T16:05:15Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "NONE",
+          "body": "As I said in my comment, this is a good edit, editorial in nature. Sorry for starting a discussion here on how to detect \"application-limited\" status. I entered issue #42 to properly discuss that. Or should we do it on the ccwg mailing list?",
+          "createdAt": "2025-05-25T18:08:34Z",
+          "updatedAt": "2025-05-25T18:08:34Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> As I said in my comment, this is a good edit, editorial in nature. Sorry for starting a discussion here on how to detect \"application-limited\" status. I entered issue #42 to properly discuss that. Or should we do it on the ccwg mailing list?\r\n\r\nThanks, @huitema. Discussing the application-limited question in issue #42 SGTM. Feel free to mention the issue on the ccwg mailing list if you like.\r\n",
+          "createdAt": "2025-05-25T23:40:45Z",
+          "updatedAt": "2025-05-25T23:40:45Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6q4R3Q",
+          "commit": {
+            "abbreviatedOid": "8ab79be"
+          },
+          "author": "huitema",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "That's an improvement, I approve, but I am concerned that we have a related issue on how to use \"inflight\". Graphs from the log of QUIC connections show that inflight follows a saw-tooth pattern. The inflight is lower after an ACK is received, and then climbs up as pacing authorizes more packets to be sent. This does not directly affect this PR, but it can lead to issue when estimating \"app-limited\" by comparing inflight to cwnd.",
+          "createdAt": "2025-05-25T15:38:43Z",
+          "updatedAt": "2025-05-25T15:38:43Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6q4VXD",
+          "commit": {
+            "abbreviatedOid": "a7e3072"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-05-25T16:40:20Z",
+          "updatedAt": "2025-05-25T16:41:06Z",
+          "comments": [
+            {
+              "originalPosition": 292,
+              "body": "The indent on this line is a bit odd.  Is this supposed to line up with the two previous lines?",
+              "createdAt": "2025-05-25T16:40:21Z",
+              "updatedAt": "2025-05-25T16:41:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6q4pMC",
+          "commit": {
+            "abbreviatedOid": "a7e3072"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-25T23:39:16Z",
+          "updatedAt": "2025-05-25T23:39:16Z",
+          "comments": [
+            {
+              "originalPosition": 292,
+              "body": "Thanks, @ianswett. Good catch! Tried to fix this in a new commit tacked onto this PR:\r\n\r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/41/files#diff-9265ceb047b645a452dd43f3cfa4354bf6d63fb7251f8da997a987cef1758281\r\n",
+              "createdAt": "2025-05-25T23:39:16Z",
+              "updatedAt": "2025-05-25T23:39:16Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 43,
+      "id": "PR_kwDOL3MllM6Xr9pT",
+      "title": "Reduce nesting of the \"Delivery Rate Samples\" section",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/43",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "It's currently a subsection of the BBR.max_bw, so it doesn't even show up in the table of Contents:  https://www.ietf.org/archive/id/draft-ietf-ccwg-bbr-02.html#section-4.5.2.1\r\n\r\nI also moved it under section 4.5 as a new 4.6.  I'm not sure if that's the correct organization?  Maybe bandwidth estimation should be its own top-level section?\r\n\r\nI did not change any text, only location and level of nesting.",
+      "createdAt": "2025-05-26T22:01:10Z",
+      "updatedAt": "2025-05-26T22:21:58Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "0ac05f78833a8605b373af9549ca362016857905",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-less-nesting",
+      "headRefOid": "68f94363c4b8353bb854885f2f49d49016f86694",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
