@@ -223,10 +223,10 @@ Table of Contents
    This document defines state variables and constants used by the BBR
    algorithm.
 
-   Constant values use CamelCase names and are used by BBR througout its
-   operation for a given connection.  Variables use snake_case names.
-   All names are prefixed with the context they belong to: (C) for
-   connection state, (P) for per-packet state, (rs) for per-ack rate
+   Constant values have CamelCase names and are used by BBR throughout
+   its operation for a given connection.  Variables have snake_case
+   names.  All names are prefixed with the context they belong to: (C)
+   for connection state, (P) for per-packet state, (rs) for per-ack rate
    sample, or (BBR) for the algorithm's internal state.  Variables that
    are not defined below are defined in Section 4.5.2.1, "Delivery Rate
    Samples".
