@@ -1042,7 +1042,7 @@ connection), and uses BBR.full_bw_reached to decide when to exit Startup
 and enter Drain.
 
 The full pipe estimator works as follows: if BBR counts several (three)
-non-application-limited rounds where attempts to significantly increase the
+non- rounds where attempts to significantly increase the
 delivery rate actually result in little increase (less than 25 percent),
 then it estimates that it has fully utilized the per-flow available bandwidth,
 and sets both BBR.full_bw_now and BBR.full_bw_reached to true.
@@ -1058,7 +1058,7 @@ for an increase in bandwidth), the following steps are taken:
 ~~~~
 
 While running the full pipe detection process, upon an ACK that acknowledges
-new data, and when the delivery rate sample is not application-limited
+new data, and when the delivery rate sample is not 
 (see {{delivery-rate-samples}}), BBR runs the "full pipe" estimator:
 
 ~~~~
@@ -1230,7 +1230,7 @@ only (1 - BBR.Headroom)\*BBR.inflight_longterm.
 
 Exit conditions: The flow exits ProbeBW_REFILL after one packet-timed round
 trip, and enters ProbeBW_UP. This is because after one full round trip of
-sending in ProbeBW_REFILL the flow (if not application-limited) has had an
+sending in ProbeBW_REFILL the flow (if not ) has had an
 opportunity to place as many packets in flight as its BBR.bw and BBR.inflight_longterm
 permit. Correspondingly, at this point the flow starts to see bandwidth samples
 reflecting its ProbeBW_REFILL behavior, which may be putting too much data
@@ -1386,7 +1386,7 @@ are chosen to be 62-63 with the following considerations in mind:
 * Choosing a value that is too large would prevent BBR from reaching its goal
   of tolerating 1% loss per round trip.
   Given that the steady-state (non-bandwidth-probing) BBR response to
-  a non-application-limited round trip with X% packet loss is to
+  a non- round trip with X% packet loss is to
   reduce the sending rate by X% (see "Updating the Model Upon Packet
   Loss" in {{updating-the-model-upon-packet-loss}}), this means that the
   BBR sending rate after N rounds of packet loss at a rate loss_rate
@@ -1830,7 +1830,7 @@ To summarize, the logic for exiting ProbeRTT is as follows:
 When restarting from idle in ProbeBW states, BBR leaves C.cwnd as-is and
 paces packets at exactly BBR.bw, aiming to return as quickly as possible
 to its target operating point of rate balance and a full pipe. Specifically, if
-the flow's BBR.state is ProbeBW, and the flow is application-limited, and there
+the flow's BBR.state is ProbeBW, and the flow is , and there
 are no packets in flight currently, then before the flow sends one or more
 packets BBR sets C.pacing_rate to exactly BBR.bw.
 
@@ -1962,7 +1962,7 @@ used by BBR to get fresh, reliable, and inexpensive delivery rate information.
 
 At a high level, the algorithm estimates the rate at which the network
 delivered the most recent flight of outbound data packets for a single flow. In
-addition, it tracks whether the rate sample was application-limited, meaning
+addition, it tracks whether the rate sample was , meaning
 the transmission rate was limited by the sending application rather than the
 congestion control algorithm.
 
@@ -2157,13 +2157,14 @@ all of the following conditions:
 1. The transport send buffer has less than one C.SMSS of unsent data available
   to send.
 
-2. The sending flow is not currently in the process of transmitting a packet.
+2. All the packets considered lost have been retransmitted.
 
-3. The amount of data considered in flight is less than the congestion window
-  (C.cwnd).
+3. The sending flow is not currently in the process of transmitting a packet.
 
-4. All the packets considered lost have been retransmitted.
-
+4. The pacing enforcement mechanism permits a packet to be sent now.
+   
+5. The congestion window permits a packet to be sent now, i.e.,
+   C.inflight is less than C.cwnd.
 
 If these conditions are all met then the sender has run out of data to feed the
 network. This would effectively create a "bubble" of idle time in the data
