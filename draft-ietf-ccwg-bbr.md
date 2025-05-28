@@ -2763,7 +2763,7 @@ reduces BBR.inflight_longterm:
       BBRStartProbeBW_DOWN()
 ~~~~
 
-Here rs.tx_in_flight is the amount of data that was estimated to be in flight
+Here rs.tx_in_flight is the C.inflight value from
 when the most recently ACKed packet was sent. And the BBR.Beta (0.7x) bound
 is to try to ensure that BBR does not react more dramatically than CUBIC's
 0.7x multiplicative decrease factor.
