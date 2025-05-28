@@ -292,6 +292,10 @@ e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
 C.delivered: The total amount of data (tracked in octets or in packets)
 delivered so far over the lifetime of the transport connection C.
 
+inflight: The connection's best estimate of the number of bytes
+outstanding in the network. This includes the number of bytes that
+have been sent but have not been acknowledged or marked as lost.
+
 SMSS: The Sender Maximum Segment Size.
 
 is_cwnd_limited: True if the connection has fully utilized its cwnd at any
@@ -308,8 +312,7 @@ connection C.
 
 packet.departure_time: The earliest pacing departure time for the given packet.
 
-packet.tx_in_flight: The volume of data that was estimated to be in flight
-at the time of the transmission of the packet.
+packet.tx_in_flight: The inflight at the time of the packet transmission.
 
 
 ## Per-ACK Rate Sample State {#per-ack-rate-sample-state}
@@ -330,7 +333,7 @@ upon the ACK that was just received. (This quantity is referred to as
 rs.newly_lost: The volume of data newly marked lost upon the ACK that was
 just received.
 
-rs.tx_in_flight: The volume of data that was estimated to be in flight at
+rs.tx_in_flight: The inflight at
 the time of the transmission of the packet that has just been ACKed (the
 most recently sent segment among segments ACKed by the ACK that was just
 received).
@@ -342,8 +345,8 @@ sent segment among segments ACKed by the ACK that was just received).
 
 ## Output Control Parameters {#output-control-parameters}
 
-cwnd: The transport sender's congestion window, which limits the amount of
-data in flight.
+cwnd: The transport sender's congestion window. When transmitting data,
+the sending connection ensures that inflight does not exceed cwnd.
 
 BBR.pacing_rate: The current pacing rate for a BBR flow, which controls
 inter-packet spacing.
@@ -448,9 +451,9 @@ and bw_shortterm.
 
 ### Data Volume Network Path Model Parameters {#data-volume-network-path-model-parameters}
 
-The data volume model parameters together estimate both the volume of in-flight
-data required to reach the full bandwidth available to the flow
-(BBR.max_inflight), and the maximum volume of data that is consistent with the
+The data volume model parameters together estimate both the inflight
+required to reach the full bandwidth available to the flow
+(BBR.max_inflight), and the maximum inflight that is consistent with the
 queue pressure objective (cwnd).
 
 BBR.min_rtt: The windowed minimum round-trip time sample measured over the
@@ -470,21 +473,21 @@ BBR.offload_budget: The estimate of the minimum volume of data necessary
 to achieve full throughput when using sender (TSO/GSO)  and receiver (LRO,
 GRO) host offload mechanisms.
 
-BBR.max_inflight: The estimate of the volume of in-flight data required to
+BBR.max_inflight: The estimate of inflight required to
 fully utilize the bottleneck bandwidth available to the flow, based on the
 BDP estimate (BBR.bdp), the aggregation estimate (BBR.extra_acked), the offload
 budget (BBR.offload_budget), and BBRMinPipeCwnd.
 
-BBR.inflight_longterm: The long-term maximum volume of in-flight data that the
+BBR.inflight_longterm: The long-term maximum inflight that the
 algorithm estimates will produce acceptable queue pressure, based on signals
 in the current or previous bandwidth probing cycle, as measured by loss. That
 is, if a flow is probing for bandwidth, and observes that sending a particular
-volume of in-flight data causes a loss rate higher than the loss rate
-objective, it sets inflight_longterm to that volume of data. (Part of the long-term
+inflight causes a loss rate higher than the loss rate
+threshold, it sets inflight_longterm to that volume of data. (Part of the long-term
 model.)
 
 BBR.inflight_shortterm: Analogous to BBR.bw_shortterm, the short-term maximum
-volume of in-flight data that the algorithm estimates is safe for matching the
+inflight that the algorithm estimates is safe for matching the
 current network path delivery process, based on any loss signals in the current
 bandwidth probing cycle. This is generally lower than max_inflight or
 inflight_longterm. (Part of the short-term model.)
@@ -611,7 +614,7 @@ match the network delivery process, in two dimensions:
   rate at which the network delivers the flow's data (the available bottleneck
   bandwidth)
 
-2. data volume: the amount of unacknowledged data in flight in the network
+2. data volume: the amount of data in flight in the network
   should ideally match the bandwidth-delay product (BDP) of the path
 
 Both the control of the data rate (via the pacing rate) and data volume
@@ -620,11 +623,11 @@ rate) are important. A mismatch in either dimension can cause the sender to
 fail to meet its high-level design goals:
 
 1. volume mismatch: If a sender perfectly matches its sending rate to the
-  available bandwidth, but its volume of in-flight data exceeds the BDP, then
+  available bandwidth, but its inflight exceeds the BDP, then
   the sender can maintain a large standing queue, increasing network latency
   and risking packet loss.
 
-2. rate mismatch: If a sender's volume of in-flight data matches the BDP
+2. rate mismatch: If a sender's inflight matches the BDP
   perfectly but its sending rate exceeds the available bottleneck bandwidth
   (e.g. the sender transmits a BDP of data in an unpaced fashion, at the
   sender's link rate), then up to a full BDP of data can burst into the
@@ -733,8 +736,8 @@ abated and more capacity is available.
 ## Control Parameter Overview {#control-parameter-overview}
 
 BBR uses its model to control the connection's sending behavior. Rather than
-using a single control parameter, like the cwnd parameter that limits the
-volume of in-flight data in the Reno and CUBIC congestion control algorithms,
+using a single control parameter, like the cwnd parameter that limits
+inflight in the Reno and CUBIC congestion control algorithms,
 BBR uses three distinct control parameters:
 
 1. pacing rate: the maximum rate at which BBR sends data.
@@ -743,8 +746,7 @@ BBR uses three distinct control parameters:
   implementation may need to transmit as a unit to amortize per-packet
   transmission overheads.
 
-3. cwnd: the maximum volume of data BBR allows in flight in the network at any
-  time.
+3. cwnd: the maximum inflight BBR allows.
 
 ## Environment and Usage {#environment-and-usage}
 
@@ -1157,15 +1159,15 @@ when the flow estimates that both of the following conditions have been
 met:
 
 * There is free headroom: If inflight_longterm is set, then BBR remains in
-  ProbeBW_DOWN at least until the volume of in-flight data is less than or
+  ProbeBW_DOWN at least until inflight is less than or
   equal to a target calculated based on (1 - BBRHeadroom)\*BBR.inflight_longterm.
   The goal of this constraint is to ensure that in cases where loss signals
-  suggest an upper limit on the volume of in-flight data, then the flow attempts
+  suggest an upper limit on inflight, then the flow attempts
   to leave some free headroom in the path (e.g. free space in the bottleneck
   buffer or free time slots in the bottleneck link) that can be used by
   cross traffic (both for convergence of bandwidth shares and for burst tolerance).
 
-* The volume of in-flight data is less than or equal to BBR.bdp, i.e. the flow
+* inflight is less than or equal to BBR.bdp, i.e. the flow
   estimates that it has drained any queue at the bottleneck.
 
 
@@ -1180,7 +1182,7 @@ available bandwidth without increasing queue pressure. It does this by
 switching to a pacing_gain of 1.0, sending at 100% of BBR.bw. Notably, while
 in this state it responds to concrete congestion signals (loss) by reducing
 BBR.bw_shortterm and BBR.inflight_shortterm, because these signals suggest that
-the available bandwidth and deliverable volume of in-flight data have likely
+the available bandwidth and deliverable inflight have likely
 reduced, and the flow needs to change to adapt, slowing down to match the
 latest delivery process.
 
@@ -1215,9 +1217,9 @@ packets arrive at the bottleneck. If the flow were to neglect to fill the
 pipe before it causes this loss signal, then these very quick signals of excess
 queue could cause the flow's estimate of the path's capacity (i.e. inflight_longterm)
 to significantly underestimate. In particular, if the flow were to transition
-directly from ProbeBW_CRUISE to ProbeBW_UP, the volume of in-flight data
+directly from ProbeBW_CRUISE to ProbeBW_UP, inflight
 (at the time the first accelerating packets were sent) may often be still very
-close to the volume of in-flight data maintained in CRUISE, which may be
+close to the inflight maintained in CRUISE, which may be
 only (1 - BBRHeadroom)\*inflight_longterm.
 
 Exit conditions: The flow exits ProbeBW_REFILL after one packet-timed round
@@ -1239,7 +1241,7 @@ can send faster than it had been, even if cwnd was previously limiting the
 sending process.
 
 If the flow has not set BBR.inflight_longterm, it implicitly tries to raise the
-volume of in-flight data to at least BBR.pacing_gain \* BBR.bdp = 1.25 \*
+inflight to at least BBR.pacing_gain \* BBR.bdp = 1.25 \*
 BBR.bdp.
 
 If the flow has set BBR.inflight_longterm and encounters that limit, it then
@@ -1253,7 +1255,7 @@ following approach:
   available to the flow may be quite tight (even just a single packet or
   less). The increasingly rapid growth over time is motivated by the fact that
   in a high-speed WAN the increase in available bandwidth (and thus the estimated
-  BDP) may require the flow to grow the volume of its inflight data by up to
+  BDP) may require the flow to grow inflight by up to
   O(1,000,000) packets; even a high-speed WAN BDP like
   10Gbps \* 100ms is around 83,000 packets (with a 1500-byte MTU). The additive
   increase to BBR.inflight_longterm exponentially doubles each round trip;
@@ -1270,7 +1272,7 @@ of the following conditions are met:
   estimator (see {{exiting-acceleration-based-on-bandwidth-plateau}}) to
   estimate whether the flow has saturated the available per-flow bandwidth
   ("filled the pipe"), by looking for a plateau in the measured
-  rs.delivery_rate. If, during this process, the volume of data is constrained
+  rs.delivery_rate. If, during this process, inflight is constrained
   by BBR.inflight_longterm (the flow becomes cwnd-limited while cwnd is limited by
   BBR.inflight_longterm), then the flow cannot fully explore the available bandwidth,
   and so it resets the "full pipe" estimator by calling BBRResetFullBW().
@@ -1618,8 +1620,8 @@ loops of ever-increasing queues and RTT samples.
 
 The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
 every ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
-by setting its cwnd_gain to BBRProbeRTTCwndGain = 0.5 to reduce its volume of
-inflight data to half of its estimated BDP, to try to measure the unloaded
+by setting its cwnd_gain to BBRProbeRTTCwndGain = 0.5 to reduce its
+inflight to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.
 
 There are two main motivations for making the MinRTTFilterLen roughly twice
@@ -1638,7 +1640,7 @@ BBR.probe_rtt_min_delay estimate has not been updated (i.e., by getting a
 lower RTT measurement) for more than ProbeRTTInterval = 5 seconds, then BBR
 enters ProbeRTT and reduces the BBR.cwnd_gain to BBRProbeRTTCwndGain = 0.5.
 
-Exit conditions: After maintaining the volume of in-flight data at
+Exit conditions: After maintaining inflight at
 BBRProbeRTTCwndGain\*BBR.bdp for at least ProbeRTTDuration (200 ms) and at
 least one packet-timed round trip, BBR leaves ProbeRTT and transitions to
 ProbeBW if it estimates the pipe was filled already, or Startup otherwise.
@@ -1870,9 +1872,9 @@ calculates and uses its value. We can group the parameter into three groups:
 
 * core state machine parameters
 
-* parameters to model the data rate
+* parameters to model the appropriate data rate
 
-* parameters to model the volume of in-flight data
+* parameters to model the appropriate inflight
 
 
 ### BBR.round_count: Tracking Packet-Timed Round Trips {#bbrroundcount-tracking-packet-timed-round-trips}
@@ -2222,7 +2224,7 @@ are being retransmitted.
 
 C.pipe: The sender's estimate of the amount of data outstanding in the network
 (measured in octets or packets). This includes data packets in the current
-outstanding window that are inflight and have not been acknowledged or marked lost
+outstanding window that are in flight and have not been acknowledged or marked lost
 (e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
 This MUST NOT include pure ACK packets.
 
@@ -2768,12 +2770,12 @@ that allowed the loss to be detected may be considerably smaller than the
 tx_in_flight of the lost packet itself. In such cases using the former
 tx_in_flight rather than the latter can cause BBR.inflight_longterm to be
 significantly underestimated. To avoid such issues, BBR processes each loss
-detection event to more precisely estimate the volume of in-flight data at
+detection event to more precisely estimate inflight at
 which loss rates cross BBRLossThresh, noting that this may have happened
 mid-way through some TSO/GSO offload burst (represented as a "packet" in
 the pseudocode in this document). To estimate this threshold volume of data,
 we can solve for "lost_prefix" in the following way, where inflight_prev
-represents the volume of in-flight data preceding this packet, and lost_prev
+represents inflight preceding this packet, and lost_prev
 represents the data lost among that previous in-flight data.
 
 First we start with:
@@ -2825,8 +2827,8 @@ In pseudocode:
     lost_prefix = (BBRLossThresh * inflight_prev - lost_prev) /
                   (1 - BBRLossThresh)
     /* At what inflight value did losses cross BBRLossThresh? */
-    inflight = inflight_prev + lost_prefix
-    return inflight
+    inflight_at_loss = inflight_prev + lost_prefix
+    return inflight_at_loss
 ~~~~
 
 
@@ -2835,7 +2837,7 @@ In pseudocode:
 When not explicitly accelerating to probe for bandwidth (Drain, ProbeRTT,
 ProbeBW_DOWN, ProbeBW_CRUISE), BBR  responds to loss by slowing down to some
 extent. This is because loss suggests that the available bandwidth and safe
-volume of in-flight data may have decreased recently, and the flow needs
+inflight may have decreased recently, and the flow needs
 to adapt, slowing down toward the latest delivery process. BBR flows implement
 this response by reducing the short-term model parameters, BBR.bw_shortterm and
 BBR.inflight_shortterm.
@@ -3082,9 +3084,9 @@ to use the smallest feasible quanta.
 
 ### Congestion Window {#congestion-window}
 
-The congestion window, or cwnd, controls the maximum volume of data BBR allows
-in flight in the network at any time. It is the maximum volume of in-flight
-data that the algorithm estimates is appropriate for matching the current
+The congestion window, or cwnd, controls the maximum inflight.
+It is the maximum inflight
+that the algorithm estimates is appropriate for matching the current
 network path delivery process, given all available signals in the model,
 at any time scale. BBR adapts the cwnd based on its model of the network
 path and the state machine's decisions about how to probe that path.
@@ -3127,22 +3129,22 @@ as follows:
     BBR.bdp = BBR.bw * BBR.min_rtt
     return gain * BBR.bdp
 
-  BBRQuantizationBudget(inflight)
+  BBRQuantizationBudget(inflight_cap)
     BBRUpdateOffloadBudget()
-    inflight = max(inflight, BBR.offload_budget)
-    inflight = max(inflight, BBRMinPipeCwnd)
-      if (BBR.state == ProbeBW_UP)
-      inflight += 2*SMSS
-    return inflight
+    inflight_cap = max(inflight_cap, BBR.offload_budget)
+    inflight_cap = max(inflight_cap, BBRMinPipeCwnd)
+    if (BBR.state == ProbeBW_UP)
+      inflight_cap += 2*SMSS
+    return inflight_cap
 
   BBRInflight(gain):
-    inflight = BBRBDPMultiple(gain)
-    return BBRQuantizationBudget(inflight)
+    inflight_cap = BBRBDPMultiple(gain)
+    return BBRQuantizationBudget(inflight_cap)
 
   BBRUpdateMaxInflight():
-    inflight = BBRBDPMultiple(BBR.cwnd_gain)
-    inflight += BBR.extra_acked
-    BBR.max_inflight = BBRQuantizationBudget(inflight)
+    inflight_cap = BBRBDPMultiple(BBR.cwnd_gain)
+    inflight_cap += BBR.extra_acked
+    BBR.max_inflight = BBRQuantizationBudget(inflight_cap)
 ~~~~
 
 The "estimated_bdp" term tries to allow enough packets in flight to fully
@@ -3233,7 +3235,7 @@ ProbeRTT), and is defined as follows:
 #### Modulating cwnd in ProbeRTT {#modulating-cwnd-in-probertt}
 
 If BBR decides it needs to enter the ProbeRTT state (see the "ProbeRTT" section
-below), its goal is to quickly reduce the volume of in-flight data and drain
+below), its goal is to quickly reduce inflight and drain
 the bottleneck queue, thereby allowing measurement of BBR.min_rtt. To implement
 this mode, BBR bounds the cwnd to BBRMinPipeCwnd, the minimal value that
 allows pipelining (see the "Minimum cwnd for Pipelining" section, above):
