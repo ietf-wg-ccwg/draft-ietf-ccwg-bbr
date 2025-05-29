@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-27T01:40:57.747348+00:00",
+  "timestamp": "2025-05-29T01:42:28.354836+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -383,7 +383,7 @@
       "labels": [],
       "body": "When trying to add consistency by fixing #14 I realized that the text refers to packets in flight.  The Google quiche QUIC implementation of BBR uses bytes, not packets.  I believe the Linux TCP implementation uses packets, and the BSD implementation uses bytes?  I'm unsure what mvfst uses?\n\nPossibly we can define a term at the beginning of the document, ie: \"Inflight\" and define it to be in bytes or packets depending upon the implementation?\n\nI'm a bit worried we'll have unit issues, since bytes and packets are not the same, but I haven't attempted this PR yet.",
       "createdAt": "2025-03-18T10:25:58Z",
-      "updatedAt": "2025-04-23T21:25:39Z",
+      "updatedAt": "2025-05-28T21:09:05Z",
       "closedAt": null,
       "comments": [
         {
@@ -406,6 +406,13 @@
           "body": "Interestingly, it looks like the CUBIC RFC ( https://datatracker.ietf.org/doc/html/rfc9438 ) specifies that cwnd and related quantities are in segments, and has an explicit section about these issues:\n\nhttps://datatracker.ietf.org/doc/html/rfc9438#name-definitions\n\n> The unit of all window sizes in this document is segments of the SMSS, and the unit of all times is seconds. Implementations can use bytes to express window sizes, which would require factoring in the SMSS wherever necessary and replacing segments_acked ([Figure 4](https://datatracker.ietf.org/doc/html/rfc9438#eq4)) with the number of acknowledged bytes.\n\nI would propose for the BBR draft:\n\n+ (a) Like the CUBIC RFC, we should be explicit about units, and either explicitly pick bytes or packets. I would vote to specify the algorithm in terms of bytes (or octets if we want to be very IETF-y about it?), since tracking in bytes is much more correct than packets for cases where packet sizes vary, either due to application write sizes or path MTU changes.\n\n+ (b) Like the CUBIC RFC, we should add a section like that to explain the units, and explain that implementors \"MAY\" use alternate units as long as they do factor in MSS appropriately.\n",
           "createdAt": "2025-04-23T21:25:38Z",
           "updatedAt": "2025-04-23T21:25:38Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm still a fan of specifying the algorithm in terms of:\n\n+ data in units of bytes\n+ data rates in units of bytes/sec\n\nIn meeting discussions today, someone pointed out that inflight, cwnd, C.delivered, and other quantities should be kept in sync in the way that we talk about them.\n\nThere are at least the following variables that are impacted by our decision about units, and where we might want to specify the units:\n\n```\nvolumes of data:\n---\ninflight\ncwnd\nInitialCwnd\nBBR.MinPipeCwnd\nC.delivered\nP.delivered\nP.tx_in_flight\nrs.delivered\nrs.newly_acked\nrs.newly_lost\nrs.tx_in_flight\nrs.lost\nBBR.send_quantum\nBBR.bdp\nBR.inflight_longterm\n\ndata rates (data/time):\n---\nC.pacing_rate\nrs.delivery_rate\nBBR.max_bw\nBBR.bw_shortterm\nBBR.bw\n```\n\n",
+          "createdAt": "2025-05-28T21:09:04Z",
+          "updatedAt": "2025-05-28T21:09:04Z"
         }
       ]
     },
@@ -414,7 +421,7 @@
       "id": "I_kwDOL3MllM6u9AbL",
       "title": "Do we need to use \"C.\" in front of connection variables?",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/28",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -423,8 +430,8 @@
       ],
       "body": "The document only describes a single connection, so there's no ambiguity about the connection.\n\nSome variables like is_cwnd_limited don't have a \"C.\" in front of them, but they also seem connection local?",
       "createdAt": "2025-03-20T12:02:37Z",
-      "updatedAt": "2025-04-09T20:28:56Z",
-      "closedAt": null,
+      "updatedAt": "2025-05-28T20:59:54Z",
+      "closedAt": "2025-05-28T20:59:53Z",
       "comments": [
         {
           "author": "jbeshay",
@@ -439,6 +446,13 @@
           "body": "Based on discussion, cwnd should be prefixed by BBR. but we want to keep the \"C.\" variable naming and explain the convention at the top.",
           "createdAt": "2025-04-09T20:28:55Z",
           "updatedAt": "2025-04-09T20:28:55Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Closing with #44 ",
+          "createdAt": "2025-05-28T20:59:53Z",
+          "updatedAt": "2025-05-28T20:59:53Z"
         }
       ]
     },
@@ -447,7 +461,7 @@
       "id": "I_kwDOL3MllM6u9CZe",
       "title": "Be consistent about CamelCase vs '_' state variable names",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/29",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -456,8 +470,8 @@
       ],
       "body": "Today, sometimes the draft uses camelcase (ie: InitialCwnd), and sometimes uses lowercase with underscores (ie: is_cwnd_limited).  I don't have a strong preference, but the inconsistency is potentially confusing for readers, because I think the choice of which to use is somewhat arbitrary today?",
       "createdAt": "2025-03-20T12:04:57Z",
-      "updatedAt": "2025-04-23T21:00:59Z",
-      "closedAt": null,
+      "updatedAt": "2025-05-28T20:59:34Z",
+      "closedAt": "2025-05-28T20:59:33Z",
       "comments": [
         {
           "author": "ianswett",
@@ -472,6 +486,13 @@
           "body": "Yeah, I think so far the doc was trying to use CamelCase for constants and lower_case_with_underscores for variables. IMHO it seems good to use some kind of scheme that makes it immediately obvious what's a constant and what's a variable, like all-caps for constants (A_CONSTANT_VAL vs a_variable_val), or CamelCase for constants. Thanks!\n",
           "createdAt": "2025-04-23T21:00:58Z",
           "updatedAt": "2025-04-23T21:00:58Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Closing with #44 ",
+          "createdAt": "2025-05-28T20:59:33Z",
+          "updatedAt": "2025-05-28T20:59:33Z"
         }
       ]
     },
@@ -637,9 +658,17 @@
       "labels": [],
       "body": "The tracking of \"application-limited\" status is defined in [4.5.2.2.3. ](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/draft-ietf-ccwg-bbr.html#section-4.5.2.2.3)[Tracking application-limited phases](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/draft-ietf-ccwg-bbr.html#name-tracking-application-limite). The text suggests detecting a \"bubble\" during which the application fails to send data.\n\nPacing is going to interfere with this detection. If pacing is implemented via some kind of \"leaky bucket\" algorithm, the first effect of the \"bubble\" is to increase the number of tokens available, up to the \"quantum\" value. As long as the available tokens do not exceed the quantum, the transport does not really know whether the opportunity to send is lost, or whether the application is going to send a batch of data that catches up with pacing. In the later case, the transport is not really \"application-limited\".",
       "createdAt": "2025-05-25T18:05:49Z",
-      "updatedAt": "2025-05-25T18:05:49Z",
+      "updatedAt": "2025-05-29T00:31:41Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@huitema thanks for filing the issue! I agree that the draft did not adequately specify how pacing fits into detecting application-limited traffic.\n\nThe previous text, \"The sending flow is not currently in the process of transmitting a packet,\" was an imprecise description of the condition that was checked in the Linux TCP stack to handle tracking of application-limited traffic for fq-based pacing. But this text was not precise, and does not correctly capture the checks needed for other pacing implementations.\n\nI have taken a stab at adding a simple specification for how pacing should fit in, in this PR. Please take a look at let me know what you think:\n\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/47\n\nThanks!\n",
+          "createdAt": "2025-05-29T00:31:40Z",
+          "updatedAt": "2025-05-29T00:31:40Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -2204,7 +2233,7 @@
       "id": "PR_kwDOL3MllM6Xis2O",
       "title": "define \"inflight\" and use it more precisely and consistently",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/41",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -2214,17 +2243,19 @@
       "labels": [],
       "body": "Define \"inflight\" and use it more precisely and consistently.\r\n\r\nRephrase text using the phrase or variable name \"inflight\" for values that are not exactly consistent with the definition of \"inflight\".\r\n\r\nPart of a fix for #14.\r\n",
       "createdAt": "2025-05-25T14:27:00Z",
-      "updatedAt": "2025-05-25T23:40:47Z",
+      "updatedAt": "2025-05-28T14:09:28Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "0ac05f78833a8605b373af9549ca362016857905",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-patch-1",
       "headRefOid": "9d212df08a22ff5757f4faca4deafa9878c826c8",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-05-28T14:09:28Z",
+      "mergedAt": "2025-05-28T14:09:28Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "b91e1daef34e8cf55ad285565820a94fa6d76b26"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -2308,6 +2339,19 @@
               "updatedAt": "2025-05-25T23:39:16Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rK-h0",
+          "commit": {
+            "abbreviatedOid": "9d212df"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-05-27T16:29:14Z",
+          "updatedAt": "2025-05-27T16:29:14Z",
+          "comments": []
         }
       ]
     },
@@ -2325,13 +2369,177 @@
       ],
       "body": "It's currently a subsection of the BBR.max_bw, so it doesn't even show up in the table of Contents:  https://www.ietf.org/archive/id/draft-ietf-ccwg-bbr-02.html#section-4.5.2.1\r\n\r\nI also moved it under section 4.5 as a new 4.6.  I'm not sure if that's the correct organization?  Maybe bandwidth estimation should be its own top-level section?\r\n\r\nI did not change any text, only location and level of nesting.",
       "createdAt": "2025-05-26T22:01:10Z",
-      "updatedAt": "2025-05-26T22:21:58Z",
+      "updatedAt": "2025-05-28T17:34:32Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "0ac05f78833a8605b373af9549ca362016857905",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-less-nesting",
       "headRefOid": "68f94363c4b8353bb854885f2f49d49016f86694",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@ianswett I love the idea to reduce the nesting of the \"Delivery Rate Samples\" section.\r\n\r\nI would vote to place the new \"Delivery Rate Samples\" somewhere before the \"Updating Network Path Model Parameters\" section. Rationale: I notice that the \"BBR.max_bw Max Filter\" subsection makes 5 mentions of the phrase \"Delivery rate samples\" in its first few paragraphs. For folks reading the spec linearly, IMHO it would be great to clearly define  \"Delivery Rate Samples\" before the reader gets to the  \"BBR.max_bw Max Filter\" section, which naturally/heavily uses the \"Delivery Rate Samples\"  concept.\r\n\r\nThinking about the overall organization of the sections, I would suggest the following:\r\n\r\n```\r\n4. Detailed Algorithm\r\n  4.1 State Machine\r\n  4.2 Algorithm Organization\r\n  4.3 State Machine Operation\r\n  4.4 Input Signals [NEW]\r\n    4.4.1 Delivery Rate Samples [MOVED HERE from current \"4.5.2.1 Delivery Rate Samples\" section]\r\n    4.4.2 RTT Samples [MOVED HERE and renamed from. current \"4.3.4.3 Calculating the rs.rtt RTT Sample\" section]\r\n  4.5 Updating Network Path Model Parameters\r\n     ...\r\n     4.5.5 Updating the BBR.max_bw Max Filter\r\n     ...\r\n     4.5.10 Restarting From Idle [MOVED HERE from \"4.4 Restarting from Idle\"\r\n  4.6 Updating Control Parameters\r\n```\r\n\r\n@ianswett @jbeshay WDYT?\r\n",
+          "createdAt": "2025-05-28T14:34:05Z",
+          "updatedAt": "2025-05-28T14:35:15Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "```\r\n4.4 Input Signals [NEW]\r\n    4.4.1 Delivery Rate Samples [MOVED HERE from current \"4.5.2.1 Delivery Rate Samples\" section]\r\n    4.4.2 RTT Samples [MOVED HERE and renamed from. current \"4.3.4.3 Calculating the rs.rtt RTT Sample\" section]\r\n```\r\nI like having a section for Input Signals. It fits better in the flow as you mentioned. It's still a bit too big for a section, but it helps to have it at a higher level with less nesting.\r\nAs a followup, we should also integrate the delivery estimate pseudocode a like we do with other parts. I.e. BBR ack processing and packet transmission references restart from idle and model update pseudocode but not rate estimation.",
+          "createdAt": "2025-05-28T17:34:31Z",
+          "updatedAt": "2025-05-28T17:34:31Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 44,
+      "id": "PR_kwDOL3MllM6X3XYD",
+      "title": "Use consistent prefixes and casing for variable and constant names",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/44",
+      "state": "MERGED",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "- Use CamelCase for constant names\r\n- Use snake_case for variable names\r\n- All names have prefixes:\r\n    - C: connection state\r\n    - P: per-packet state\r\n    -  rs: per-ack rate sample\r\n    - BBR: bbr's internal state",
+      "createdAt": "2025-05-27T23:16:40Z",
+      "updatedAt": "2025-05-28T20:58:09Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "b91e1daef34e8cf55ad285565820a94fa6d76b26",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb-consistent-naming",
+      "headRefOid": "6ffb4d0bf57b83f017863ad32bb30066a4110a1d",
+      "closedAt": "2025-05-28T20:57:53Z",
+      "mergedAt": "2025-05-28T20:57:53Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "b61a33f73bb464e1ef9663d29407f9763a57b62f"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6rY1nw",
+          "commit": {
+            "abbreviatedOid": "81f0358"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Looks great! This is a vast improvement in clarity and consistency. Thanks, @jbeshay!",
+          "createdAt": "2025-05-28T14:50:22Z",
+          "updatedAt": "2025-05-28T14:50:22Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 45,
+      "id": "PR_kwDOL3MllM6YCoks",
+      "title": "\"the amount of data that was estimated to be in flight\" => C.inflight",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/45",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Try to make this sentence a bit more concise.",
+      "createdAt": "2025-05-28T23:45:59Z",
+      "updatedAt": "2025-05-28T23:47:55Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "b61a33f73bb464e1ef9663d29407f9763a57b62f",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-2",
+      "headRefOid": "3a2e4ce1101f18e970500713ee8fab45c58599f7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6rdwwX",
+          "commit": {
+            "abbreviatedOid": "3a2e4ce"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-28T23:47:55Z",
+          "updatedAt": "2025-05-28T23:47:55Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "nit\r\n```suggestion\r\nHere rs.tx_in_flight is the C.inflight value\r\nwhen the most recently ACKed packet was sent. And the BBR.Beta (0.7x) bound\r\n```",
+              "createdAt": "2025-05-28T23:47:55Z",
+              "updatedAt": "2025-05-28T23:47:55Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 46,
+      "id": "PR_kwDOL3MllM6YCq3L",
+      "title": "Fix pacing specification in \"application-limited\" section",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/46",
+      "state": "CLOSED",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fix the pacing specification in \"Tracking application-limited phases\" section.\r\n\r\nThe previous text, \"The sending flow is not currently in the process  of transmitting a packet,\" was an imprecise description of the condition that was checked in the Linux TCP stack to handle tracking of application-limited traffic for fq-based pacing. But this text was not precise, and does not correctly capture the checks needed for other pacing implementations.\r\n\r\nFixes #42",
+      "createdAt": "2025-05-28T23:56:21Z",
+      "updatedAt": "2025-05-28T23:59:13Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "b61a33f73bb464e1ef9663d29407f9763a57b62f",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-3",
+      "headRefOid": "b68cce28154f7b436a9ac865b7e02cabd4f39d65",
+      "closedAt": "2025-05-28T23:59:13Z",
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Somehow the github editor deleted a bunch of occurrences of \"application-limited\" all around the doc... Weird. I'm going to cancel this one and retry...",
+          "createdAt": "2025-05-28T23:59:13Z",
+          "updatedAt": "2025-05-28T23:59:13Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 47,
+      "id": "PR_kwDOL3MllM6YCsDR",
+      "title": "Fix pacing spec in \"application-limited\" section",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/47",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fix the pacing specification in \"Tracking application-limited phases\" section.\r\n\r\nThe previous text, \"The sending flow is not currently in the process of transmitting a packet,\" was an imprecise description of the condition that was checked in the Linux TCP stack to handle tracking of application-limited traffic for fq-based pacing. But this text was not precise, and does not correctly capture the checks needed for other pacing implementations.\r\n\r\nFixes #42",
+      "createdAt": "2025-05-29T00:01:59Z",
+      "updatedAt": "2025-05-29T00:02:00Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "b61a33f73bb464e1ef9663d29407f9763a57b62f",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-4",
+      "headRefOid": "61155b438b0767721c4908514e739691522be26a",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
