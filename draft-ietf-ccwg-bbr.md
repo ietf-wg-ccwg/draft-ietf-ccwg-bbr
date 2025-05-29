@@ -2157,13 +2157,14 @@ all of the following conditions:
 1. The transport send buffer has less than one C.SMSS of unsent data available
   to send.
 
-2. The sending flow is not currently in the process of transmitting a packet.
+2. All the packets considered lost have been retransmitted.
 
-3. The amount of data considered in flight is less than the congestion window
-  (C.cwnd).
+3. The sending flow is not currently in the process of transmitting a packet.
 
-4. All the packets considered lost have been retransmitted.
+4. The pacing enforcement mechanism permits a packet to be sent now.
 
+5. The congestion window permits a packet to be sent now, i.e.,
+   C.inflight is less than C.cwnd.
 
 If these conditions are all met then the sender has run out of data to feed the
 network. This would effectively create a "bubble" of idle time in the data
