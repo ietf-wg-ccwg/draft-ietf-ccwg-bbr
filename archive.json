@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-29T01:42:28.354836+00:00",
+  "timestamp": "2025-06-01T01:59:06.964521+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -215,7 +215,7 @@
       "id": "I_kwDOL3MllM6o8l4X",
       "title": "\"inflight\" or \"in-flight data\" or \"data in flight\"",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/14",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -224,8 +224,8 @@
       ],
       "body": "I believe all 3 are used in the draft today, so we should probably standardize on one.",
       "createdAt": "2025-02-06T03:41:23Z",
-      "updatedAt": "2025-05-25T14:38:03Z",
-      "closedAt": null,
+      "updatedAt": "2025-05-29T17:57:04Z",
+      "closedAt": "2025-05-29T17:57:03Z",
       "comments": [
         {
           "author": "ianswett",
@@ -254,6 +254,20 @@
           "body": "Re-reading the draft and thinking about the grammatical considerations, AFAIK the following grammatical and semantic considerations are in play:\n\n+ \"in-flight data\" is correct, because in this case \"in-flight\" is\n   an compound adjective describing the data, and compound\n   adjectives are hyphenated\n\n+ \"data in flight\" is correct, because in this case \"in flight\" is \n   an adverbial phrase describing the action or state of the data\n\n+ \"inflight\" as a noun (for the parameter that could be called either\n    \"in-flight data\" or \"data in flight\") is OK, as long as we define\n    what \"inflight\" means\n\nFor a first round of changes (some editorial improvements for \"in flight\" and \"in-flight\"), I mis-remembered the default github action, and forgot to click the radio button to create a pull request, so ended up committing directly to the repo:\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/commit/0ac05f78833a8605b373af9549ca362016857905\n@ianswett and @jbeshay  PTAL and LMK if you would prefer changes to that.\n\nFor a second round of changes (define \"inflight\" and use it more precisely and consistently), I correctly clicked the radio button to create a pull request:\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/41\n",
           "createdAt": "2025-05-25T14:38:03Z",
           "updatedAt": "2025-05-25T14:38:03Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think the text reads quite well now.  Do we think we can consider this as closed by #41?",
+          "createdAt": "2025-05-29T17:28:29Z",
+          "updatedAt": "2025-05-29T17:28:29Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes, agreed. Closed by #41 \n",
+          "createdAt": "2025-05-29T17:57:03Z",
+          "updatedAt": "2025-05-29T17:57:03Z"
         }
       ]
     },
@@ -377,13 +391,11 @@
       "state": "OPEN",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [
-        "ianswett"
-      ],
+      "assignees": [],
       "labels": [],
       "body": "When trying to add consistency by fixing #14 I realized that the text refers to packets in flight.  The Google quiche QUIC implementation of BBR uses bytes, not packets.  I believe the Linux TCP implementation uses packets, and the BSD implementation uses bytes?  I'm unsure what mvfst uses?\n\nPossibly we can define a term at the beginning of the document, ie: \"Inflight\" and define it to be in bytes or packets depending upon the implementation?\n\nI'm a bit worried we'll have unit issues, since bytes and packets are not the same, but I haven't attempted this PR yet.",
       "createdAt": "2025-03-18T10:25:58Z",
-      "updatedAt": "2025-05-28T21:09:05Z",
+      "updatedAt": "2025-05-29T17:27:36Z",
       "closedAt": null,
       "comments": [
         {
@@ -669,6 +681,22 @@
           "updatedAt": "2025-05-29T00:31:40Z"
         }
       ]
+    },
+    {
+      "number": 49,
+      "id": "I_kwDOL3MllM641bvr",
+      "title": "integrate steps for delivery rate samples into BBR pseudocode",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/49",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "\n@jbeshay in PR #43 noted:\n\n\"we should also integrate the delivery estimate pseudocode a like we do with other parts. I.e. BBR ack processing and packet transmission references restart from idle and model update pseudocode but not rate estimation.\"\n\nFiling this issue so that does not fall through the cracks.\n\ncc: @jbeshay @ianswett \n",
+      "createdAt": "2025-05-29T17:35:03Z",
+      "updatedAt": "2025-05-29T17:35:03Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -2360,7 +2388,7 @@
       "id": "PR_kwDOL3MllM6Xr9pT",
       "title": "Reduce nesting of the \"Delivery Rate Samples\" section",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/43",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -2369,14 +2397,14 @@
       ],
       "body": "It's currently a subsection of the BBR.max_bw, so it doesn't even show up in the table of Contents:  https://www.ietf.org/archive/id/draft-ietf-ccwg-bbr-02.html#section-4.5.2.1\r\n\r\nI also moved it under section 4.5 as a new 4.6.  I'm not sure if that's the correct organization?  Maybe bandwidth estimation should be its own top-level section?\r\n\r\nI did not change any text, only location and level of nesting.",
       "createdAt": "2025-05-26T22:01:10Z",
-      "updatedAt": "2025-05-28T17:34:32Z",
+      "updatedAt": "2025-05-29T17:35:24Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "0ac05f78833a8605b373af9549ca362016857905",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-less-nesting",
       "headRefOid": "68f94363c4b8353bb854885f2f49d49016f86694",
-      "closedAt": null,
+      "closedAt": "2025-05-29T17:20:28Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -2394,6 +2422,13 @@
           "body": "```\r\n4.4 Input Signals [NEW]\r\n    4.4.1 Delivery Rate Samples [MOVED HERE from current \"4.5.2.1 Delivery Rate Samples\" section]\r\n    4.4.2 RTT Samples [MOVED HERE and renamed from. current \"4.3.4.3 Calculating the rs.rtt RTT Sample\" section]\r\n```\r\nI like having a section for Input Signals. It fits better in the flow as you mentioned. It's still a bit too big for a section, but it helps to have it at a higher level with less nesting.\r\nAs a followup, we should also integrate the delivery estimate pseudocode a like we do with other parts. I.e. BBR ack processing and packet transmission references restart from idle and model update pseudocode but not rate estimation.",
           "createdAt": "2025-05-28T17:34:31Z",
           "updatedAt": "2025-05-28T17:34:31Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> ```\r\n> 4.4 Input Signals [NEW]\r\n>     4.4.1 Delivery Rate Samples [MOVED HERE from current \"4.5.2.1 Delivery Rate Samples\" section]\r\n>     4.4.2 RTT Samples [MOVED HERE and renamed from. current \"4.3.4.3 Calculating the rs.rtt RTT Sample\" section]\r\n> ```\r\n> \r\n> I like having a section for Input Signals. It fits better in the flow as you mentioned. It's still a bit too big for a section, but it helps to have it at a higher level with less nesting. As a followup, we should also integrate the delivery estimate pseudocode a like we do with other parts. I.e. BBR ack processing and packet transmission references restart from idle and model update pseudocode but not rate estimation.\r\n\r\nGood idea. Filed a new issue for that:\r\n\r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/49",
+          "createdAt": "2025-05-29T17:35:22Z",
+          "updatedAt": "2025-05-29T17:35:22Z"
         }
       ],
       "reviews": []
@@ -2445,24 +2480,26 @@
       "id": "PR_kwDOL3MllM6YCoks",
       "title": "\"the amount of data that was estimated to be in flight\" => C.inflight",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/45",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Try to make this sentence a bit more concise.",
       "createdAt": "2025-05-28T23:45:59Z",
-      "updatedAt": "2025-05-28T23:47:55Z",
+      "updatedAt": "2025-05-29T14:34:01Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b61a33f73bb464e1ef9663d29407f9763a57b62f",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-patch-2",
-      "headRefOid": "3a2e4ce1101f18e970500713ee8fab45c58599f7",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "dbf3595170d9f12f985fdfe7ce48a02ab213807e",
+      "closedAt": "2025-05-29T14:33:56Z",
+      "mergedAt": "2025-05-29T14:33:56Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "c225ebb0400e6e067a3b3e4023ecd792ce8499ec"
+      },
       "comments": [],
       "reviews": [
         {
@@ -2484,6 +2521,19 @@
               "updatedAt": "2025-05-28T23:47:55Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rkjHX",
+          "commit": {
+            "abbreviatedOid": "3a2e4ce"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-05-29T14:19:29Z",
+          "updatedAt": "2025-05-29T14:19:29Z",
+          "comments": []
         }
       ]
     },
@@ -2533,7 +2583,7 @@
       "labels": [],
       "body": "Fix the pacing specification in \"Tracking application-limited phases\" section.\r\n\r\nThe previous text, \"The sending flow is not currently in the process of transmitting a packet,\" was an imprecise description of the condition that was checked in the Linux TCP stack to handle tracking of application-limited traffic for fq-based pacing. But this text was not precise, and does not correctly capture the checks needed for other pacing implementations.\r\n\r\nFixes #42",
       "createdAt": "2025-05-29T00:01:59Z",
-      "updatedAt": "2025-05-29T00:02:00Z",
+      "updatedAt": "2025-05-29T23:09:02Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b61a33f73bb464e1ef9663d29407f9763a57b62f",
@@ -2545,7 +2595,216 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6renEy",
+          "commit": {
+            "abbreviatedOid": "61155b4"
+          },
+          "author": "huitema",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-29T03:21:33Z",
+          "updatedAt": "2025-05-29T03:21:33Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "Nice, but does not capture the timing issue of an implementation that waits until enough \"pacing tokens\" are ready to send a train of packets.",
+              "createdAt": "2025-05-29T03:21:33Z",
+              "updatedAt": "2025-05-29T03:21:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rkWzi",
+          "commit": {
+            "abbreviatedOid": "61155b4"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-29T14:02:38Z",
+          "updatedAt": "2025-05-29T14:02:38Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "Isn't that a variation of \"The pacing enforcement mechanism permits a packet to be sent now.\"?  If you're waiting for more tokens before sending, then you'd be congestion control limited, not app limited.",
+              "createdAt": "2025-05-29T14:02:38Z",
+              "updatedAt": "2025-05-29T14:02:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rkZSZ",
+          "commit": {
+            "abbreviatedOid": "61155b4"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-29T14:05:59Z",
+          "updatedAt": "2025-05-29T14:05:59Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "> Nice, but does not capture the timing issue of an implementation that waits until enough \"pacing tokens\" are ready to send a train of packets.\r\n\r\nAFAICT this text does, in fact, capture such a timing issue.\r\n\r\nIf there is data newly presented to the connection for sending, and there are *not* enough pacing tokens to send,  then pacing does not permit the connection to send, and then this will *not* meet the new \"4. The pacing enforcement mechanism permits a packet to be sent now\" criterion, so the connection will *not* mark itself application-limited (because the connection was not permitted to send by the pacing rate, and thus was CCA-pacing-limited rather than application-limited).\r\n\r\nIf there is data newly presented to the connection for sending, and there *are* enough pacing tokens to send,  then pacing *does* permit the connection to send, and then this will meet the new \"4. The pacing enforcement mechanism permits a packet to be sent now\" criterion. So if all other criteria are met, then the connection will mark itself application-limited (because the connection was already permitted to send by pacing rate and cwnd, and yet did not have any data to send, and thus was application-limited).\r\n\r\nAFAICT that is the correct behavior. What did I miss? :-)\r\n\r\ncc: @ianswett @jbeshay \r\n",
+              "createdAt": "2025-05-29T14:05:59Z",
+              "updatedAt": "2025-05-29T14:05:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rkcEg",
+          "commit": {
+            "abbreviatedOid": "61155b4"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-29T14:09:50Z",
+          "updatedAt": "2025-05-29T14:09:50Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "> Isn't that a variation of \"The pacing enforcement mechanism permits a packet to be sent now.\"? If you're waiting for more tokens before sending, then you'd be congestion control limited, not app limited.\r\n\r\n+1, what Ian said. :-) Ian's version was a more concise version of what I was posting concurrently. ( The github UI doesn't do a good job of letting you know someone posted to a bug while you were drafting an update, I guess... :-) )",
+              "createdAt": "2025-05-29T14:09:50Z",
+              "updatedAt": "2025-05-29T14:09:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rkiMT",
+          "commit": {
+            "abbreviatedOid": "61155b4"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-05-29T14:18:12Z",
+          "updatedAt": "2025-05-29T14:18:12Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rmtP8",
+          "commit": {
+            "abbreviatedOid": "61155b4"
+          },
+          "author": "huitema",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-29T17:22:02Z",
+          "updatedAt": "2025-05-29T17:22:02Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "We could certainly read \"The pacing enforcement mechanism permits a packet to be sent now\" to mean \"the pacing enforcement mechanism permits a train of packets to be sent now\" -- and same for the C.cwnd test. That would be exactly what I suggest. But doesn't that require a bit of \"reading between the lines\"? Can we think of a way to make that reading a bit more explicit?\r\n",
+              "createdAt": "2025-05-29T17:22:02Z",
+              "updatedAt": "2025-05-29T17:22:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rnRdo",
+          "commit": {
+            "abbreviatedOid": "61155b4"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-29T18:16:39Z",
+          "updatedAt": "2025-05-29T18:16:39Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "In my view:\r\nApplication Limited = The congestion controller asked for data to send or would have allowed you to send data, and the application had nothing to send\r\n\r\nThere are a number of mechanisms to implement pacing, batching, GSO/TSO/offload/etc, but the more we get into the details of them, the more likely what we say will be wrong.  Possibly we need less text, not more?",
+              "createdAt": "2025-05-29T18:16:39Z",
+              "updatedAt": "2025-05-29T18:16:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rpjxQ",
+          "commit": {
+            "abbreviatedOid": "61155b4"
+          },
+          "author": "huitema",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-29T23:09:01Z",
+          "updatedAt": "2025-05-29T23:09:02Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "@ianswett, you may well be right. But \"the congestion controller asked for data\" is kinda application specific. Maybe specify the intent, and then add a qualifier. Such as:\r\n\r\nThe algorithm detects that an application-limited phase has started when\r\ncongestion control and pacing control would have allowed the application to send data, \r\nand the application had nothing to send. The precise determination of this\r\ncondition depends on how the application uses mechanisms to implement pacing,\r\nbatching, GSO/TSO/offload/etc.\r\n",
+              "createdAt": "2025-05-29T23:09:01Z",
+              "updatedAt": "2025-05-29T23:09:02Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 48,
+      "id": "PR_kwDOL3MllM6YInS9",
+      "title": "Move Delivery Rate Samples and RTT into \"Input Signals\"",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/48",
+      "state": "MERGED",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #43\r\n\r\nThe intent is:\r\n```\r\n4.4 Input Signals [NEW]\r\n  4.1 Delivery Rate Samples [MOVED HERE from current \"4.5.2.1 Delivery Rate Samples\" section]\r\n  4.2 RTT Samples [MOVED HERE and renamed from. current \"4.3.4.3 Calculating the rs.rtt RTT Sample\" section]\r\n5. Detailed Algorithm\r\n  5.1 State Machine\r\n  ...\r\n```",
+      "createdAt": "2025-05-29T14:39:30Z",
+      "updatedAt": "2025-05-29T17:20:27Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "c225ebb0400e6e067a3b3e4023ecd792ce8499ec",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-input-signals",
+      "headRefOid": "7ef029106610cf2af745a318d30648bad836ad0e",
+      "closedAt": "2025-05-29T17:20:27Z",
+      "mergedAt": "2025-05-29T17:20:27Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "ced56e9fe21f83fcf16253406defafdd6905a130"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6rlCft",
+          "commit": {
+            "abbreviatedOid": "7ef0291"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Looks great to me. Thanks!\r\n",
+          "createdAt": "2025-05-29T15:01:47Z",
+          "updatedAt": "2025-05-29T15:01:47Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6rl40C",
+          "commit": {
+            "abbreviatedOid": "7ef0291"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "lgtm!",
+          "createdAt": "2025-05-29T16:07:51Z",
+          "updatedAt": "2025-05-29T16:07:51Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
