@@ -499,15 +499,17 @@ inflight_longterm. (Part of the short-term model.)
 
 ## State for Responding to Congestion {#state-for-responding-to-congestion}
 
-BBR.bw_latest: a 1-round-trip max of delivered bandwidth (rs.delivery_rate).
+BBR.rs: The rate sample calculated from the most recent acknowledgement.
+
+BBR.bw_latest: a 1-round-trip max of delivered bandwidth (BBR.rs.delivery_rate).
 
 BBR.inflight_latest: a 1-round-trip max of delivered volume of data
-(rs.delivered).
+(BBR.rs.delivered).
 
 
 ## Estimating BBR.max_bw {#estimating-bbrmaxbw}
 
-BBR.max_bw_filter: The filter for tracking the maximum recent rs.delivery_rate
+BBR.max_bw_filter: The filter for tracking the maximum recent BBR.rs.delivery_rate
 sample, for estimating BBR.max_bw.
 
 BBR.MaxBwFilterLen: A constant specifying the filter window length for
@@ -1061,6 +1063,8 @@ outstanding window that are in flight and have not been acknowledged or marked l
 (e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
 This MUST NOT include pure ACK packets.
 
+C.min_rtt: The minimum observed RTT over the lifetime of the connection.
+
 
 ##### Per-packet (P) state {#per-packet-p-state}
 
@@ -1123,8 +1127,8 @@ interval between now and the next ACK.
 After each packet transmission, the sender executes the following steps:
 
 ~~~~
-  SendPacket(Packet P):
-    if (SND.NXT == SND.UNA)  /* no packets in flight yet? */
+  OnPacketSent(Packet P):
+    if (C.inflight == 0)
       C.first_sent_time  = C.delivered_time = P.sent_time
 
     P.first_sent_time = C.first_sent_time
@@ -1169,7 +1173,7 @@ packet, i.e., the packet with the highest "P.delivered" value.
      * measuring the delivery rate during loss recovery is crucial
      * for connections that suffer heavy or prolonged losses.
      */
-    if (rs.interval <  MinRTT(tp))
+    if (rs.interval <  C.min_rtt)
       rs.interval = -1
       return false  /* no reliable sample */
 
@@ -1481,7 +1485,7 @@ steps:
 
 ### Per-Transmit Steps {#per-transmit-steps}
 
-When transmitting, BBR merely needs to check for the case where the flow
+Before transmitting, BBR merely needs to check for the case where the flow
 is restarting from idle:
 
 ~~~~
@@ -1498,6 +1502,7 @@ adjust its control parameters to adapt to the updated model:
 
 ~~~~
   BBRUpdateOnACK():
+    GenerateRateSample(BBR.rs)
     BBRUpdateModelAndState()
     BBRUpdateControlParameters()
 
@@ -1587,7 +1592,7 @@ In phases where BBR is accelerating to probe the available bandwidth -
 Startup and ProbeBW_UP - BBR runs a state machine to estimate whether an
 accelerating sending rate has saturated the available per-flow bandwidth
 ("filled the pipe") by looking for a plateau in the measured
-rs.delivery_rate.
+BBR.rs.delivery_rate.
 
 BBR tracks the status of the current full-pipe estimation process in the
 boolean BBR.full_bw_now, and uses BBR.full_bw_now to exit ProbeBW_UP. BBR
@@ -1618,11 +1623,11 @@ new data, and when the delivery rate sample is not application-limited
 
 ~~~~
   BBRCheckFullBWReached():
-    if (BBR.full_bw_now or !BBR.round_start or rs.is_app_limited)
+    if (BBR.full_bw_now or !BBR.round_start or BBR.rs.is_app_limited)
       return  /* no need to check for a full pipe now */
-    if (rs.delivery_rate >= BBR.full_bw * 1.25)
+    if (BBR.rs.delivery_rate >= BBR.full_bw * 1.25)
       BBRResetFullBW()       /* bw is still growing, so reset */
-      BBR.full_bw = rs.delivery_rate  /* record new baseline bw */
+      BBR.full_bw = BBR.rs.delivery_rate  /* record new baseline bw */
       return
     BBR.full_bw_count++   /* another round w/o much growth */
     BBR.full_bw_now = (BBR.full_bw_count >= 3)
@@ -1655,7 +1660,7 @@ If these criteria are all met, then BBRCheckStartupHighLoss() takes the
 following steps. First, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
-BBR.inflight_latest is the max delivered volume of data (rs.delivered) over
+BBR.inflight_latest is the max delivered volume of data (BBR.rs.delivered) over
 the last round trip. Finally, it exits Startup and enters Drain.
 
 The algorithm waits until all three criteria are met to filter out noise
@@ -1833,7 +1838,7 @@ of the following conditions are met:
   estimator (see {{exiting-acceleration-based-on-bandwidth-plateau}}) to
   estimate whether the flow has saturated the available per-flow bandwidth
   ("filled the pipe"), by looking for a plateau in the measured
-  rs.delivery_rate. If, during this process, C.inflight is constrained
+  BBR.rs.delivery_rate. If, during this process, C.inflight is constrained
   by BBR.inflight_longterm (the flow becomes cwnd-limited while cwnd is limited by
   BBR.inflight_longterm), then the flow cannot fully explore the available bandwidth,
   and so it resets the "full pipe" estimator by calling BBRResetFullBW().
@@ -2038,7 +2043,7 @@ The core logic for entering each state:
     BBR.ack_phase = ACKS_PROBE_STARTING
     BBRStartRound()
     BBRResetFullBW()
-    BBR.full_bw = rs.delivery_rate
+    BBR.full_bw = BBR.rs.delivery_rate
     BBR.state = ProbeBW_UP
     BBRRaiseInflightLongtermSlope()
 ~~~~
@@ -2099,7 +2104,7 @@ The ancillary logic to implement the ProbeBW state machine:
   BBRIsTimeToGoDown():
     if (C.is_cwnd_limited and C.cwnd >= BBR.inflight_longterm)
       BBRResetFullBW()   /* bw is limited by BBR.inflight_longterm */
-      BBR.full_bw = rs.delivery_rate
+      BBR.full_bw = BBR.rs.delivery_rate
     else if (BBR.full_bw_now)
       return true  /* we estimate we've fully used path bw */
     return false
@@ -2133,7 +2138,7 @@ The ancillary logic to implement the ProbeBW state machine:
   BBRProbeInflightLongtermUpward():
     if (!C.is_cwnd_limited or C.cwnd < BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
-   BBR.bw_probe_up_acks += rs.newly_acked
+   BBR.bw_probe_up_acks += BBR.rs.newly_acked
    if (BBR.bw_probe_up_acks >= BBR.probe_up_cnt)
      delta = BBR.bw_probe_up_acks / BBR.probe_up_cnt
      BBR.bw_probe_up_acks -= delta * BBR.bw_probe_up_cnt
@@ -2149,7 +2154,7 @@ The ancillary logic to implement the ProbeBW state machine:
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
     if (BBR.ack_phase == ACKS_PROBE_STOPPING and BBR.round_start)
       /* end of samples from bw probing phase */
-      if (IsInAProbeBWState() and !rs.is_app_limited)
+      if (IsInAProbeBWState() and !BBR.rs.is_app_limited)
         BBRAdvanceMaxBwFilter()
 
     if (!IsInflightTooHigh())
@@ -2157,7 +2162,7 @@ The ancillary logic to implement the ProbeBW state machine:
       if (BBR.inflight_longterm == Infinity)
         return /* no upper bounds to raise */
       if (rs.tx_in_flight > BBR.inflight_longterm)
-        BBR.inflight_longterm = rs.tx_in_flight
+        BBR.inflight_longterm = BBR.rs.tx_in_flight
       if (BBR.state == ProbeBW_UP)
         BBRProbeInflightLongtermUpward()
 ~~~~
@@ -2257,10 +2262,10 @@ estimate:
   BBRUpdateMinRTT()
     BBR.probe_rtt_expired =
       Now() > BBR.probe_rtt_min_stamp + ProbeRTTInterval
-    if (rs.rtt >= 0 and
-        (rs.rtt < BBR.probe_rtt_min_delay or
+    if (BBR.rs.rtt >= 0 and
+        (BBR.rs.rtt < BBR.probe_rtt_min_delay or
          BBR.probe_rtt_expired))
-       BBR.probe_rtt_min_delay = rs.rtt
+       BBR.probe_rtt_min_delay = BBR.rs.rtt
        BBR.probe_rtt_min_stamp = Now()
 
     min_rtt_expired =
@@ -2290,7 +2295,7 @@ to the ProbeRTT state as follows:
       BBRStartRound()
     if (BBR.state == ProbeRTT)
       BBRHandleProbeRTT()
-    if (rs.delivered > 0)
+    if (BBR.rs.delivered > 0)
       BBR.idle_restart = false
 
   BBREnterProbeRTT():
@@ -2548,17 +2553,15 @@ estimate, since this indicates the current BBR.Max_bw estimate is too low.
 ### Updating the BBR.max_bw Max Filter {#updating-the-bbrmaxbw-max-filter}
 
 For every ACK that acknowledges some data packets as delivered, BBR invokes
-BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows (here
-rs.delivery_rate is the delivery rate sample obtained from the ACK that is
-being processed, as specified in {{delivery-rate-samples}}):
+BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows:
 
 ~~~~
   BBRUpdateMaxBw()
     BBRUpdateRound()
-    if (rs.delivery_rate >= BBR.max_bw || !rs.is_app_limited)
+    if (BBR.rs.delivery_rate >= BBR.max_bw || !BBR.rs.is_app_limited)
         BBR.max_bw = UpdateWindowedMaxFilter(
                       filter=BBR.MaxBwFilter,
-                      value=rs.delivery_rate,
+                      value=BBR.rs.delivery_rate,
                       time=BBR.cycle_count,
                       window_length=MaxBwFilterLen)
 ~~~~
@@ -2712,7 +2715,7 @@ More precisely, this is computed as:
         BBR.extra_acked_delivered = 0
         BBR.extra_acked_interval_start = Now()
         expected_delivered = 0
-    BBR.extra_acked_delivered += rs.newly_acked
+    BBR.extra_acked_delivered += BBR.rs.newly_acked
     extra = BBR.extra_acked_delivered - expected_delivered
     extra = min(extra, C.cwnd)
     if (BBR.full_bw_reached)
@@ -2757,18 +2760,18 @@ reduces BBR.inflight_longterm:
 ~~~~
   /* Do loss signals suggest C.inflight is too high? */
   IsInflightTooHigh():
-    return (rs.lost > rs.tx_in_flight * BBR.LossThresh)
+    return (BBR.rs.lost > rs.tx_in_flight * BBR.LossThresh)
 
   BBRHandleInflightTooHigh():
     BBR.bw_probe_samples = 0;  /* only react once per bw probe */
-    if (!rs.is_app_limited)
-      BBR.inflight_longterm = max(rs.tx_in_flight,
+    if (!BBR.rs.is_app_limited)
+      BBR.inflight_longterm = max(BBR.rs.tx_in_flight,
                             BBRTargetInflight() * BBR.Beta))
     If (BBR.state == ProbeBW_UP)
       BBRStartProbeBW_DOWN()
 ~~~~
 
-Here rs.tx_in_flight is the C.inflight value
+Here BBR.rs.tx_in_flight is the C.inflight value
 when the most recently ACKed packet was sent. And the BBR.Beta (0.7x) bound
 is to try to ensure that BBR does not react more dramatically than CUBIC's
 0.7x multiplicative decrease factor.
@@ -2821,20 +2824,20 @@ In pseudocode:
     BBRNoteLoss()
     if (!BBR.bw_probe_samples)
       return /* not a packet sent while probing bandwidth */
-    rs.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
-    rs.lost = C.lost - P.lost /* data lost since transmit */
-    rs.is_app_limited = P.is_app_limited;
+    BBR.rs.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
+    BBR.rs.lost = C.lost - P.lost /* data lost since transmit */
+    BBR.rs.is_app_limited = P.is_app_limited;
     if (IsInflightTooHigh())
-      rs.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
+      BBR.rs.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
       BBRHandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
   BBRInflightLongtermFromLostPacket(rs, packet):
     size = packet.size
     /* What was in flight before this packet? */
-    inflight_prev = rs.tx_in_flight - size
+    inflight_prev = BBR.rs.tx_in_flight - size
     /* What was lost before this packet? */
-    lost_prev = rs.lost - size
+    lost_prev = BBR.rs.lost - size
     lost_prefix = (BBR.LossThresh * inflight_prev - lost_prev) /
                   (1 - BB.RLossThresh)
     /* At what C.inflight value did losses cross BBR.LossThresh? */
@@ -2862,10 +2865,10 @@ recovery, TLP recovery; whether application-limited or not.
 There are two key parameters the algorithm tracks, to measure the current
 delivery process:
 
-BBR.bw_latest: a 1-round-trip max of delivered bandwidth (rs.delivery_rate).
+BBR.bw_latest: a 1-round-trip max of delivered bandwidth (BBR.rs.delivery_rate).
 
 BBR.inflight_latest: a 1-round-trip max of delivered volume of data
-(rs.delivered).
+(BBR.rs.delivered).
 
 Upon the ACK at the end of each round that encountered a newly-marked loss,
 the flow updates its model (BBR.bw_shortterm and BBR.inflight_shortterm) as follows:
@@ -2881,17 +2884,17 @@ This logic can be represented as follows:
   /* Near start of ACK processing: */
   BBRUpdateLatestDeliverySignals():
     BBR.loss_round_start = 0
-    BBR.bw_latest       = max(BBR.bw_latest,       rs.delivery_rate)
-    BBR.inflight_latest = max(BBR.inflight_latest, rs.delivered)
-    if (rs.prior_delivered >= BBR.loss_round_delivered)
+    BBR.bw_latest       = max(BBR.bw_latest,       BBR.rs.delivery_rate)
+    BBR.inflight_latest = max(BBR.inflight_latest, BBR.rs.delivered)
+    if (BBR.rs.prior_delivered >= BBR.loss_round_delivered)
       BBR.loss_round_delivered = C.delivered
       BBR.loss_round_start = 1
 
   /* Near end of ACK processing: */
   BBRAdvanceLatestDeliverySignals():
     if (BBR.loss_round_start)
-      BBR.bw_latest       = rs.delivery_rate
-      BBR.inflight_latest = rs.delivered
+      BBR.bw_latest       = BBR.rs.delivery_rate
+      BBR.inflight_latest = BBR.rs.delivered
 
   BBRResetCongestionSignals():
     BBR.loss_in_round = 0
@@ -3273,16 +3276,16 @@ to the BBR.max_inflight. When C.cwnd is below BBR.max_inflight, BBR raises
 C.cwnd gradually and cautiously, increasing C.cwnd by no more than the amount of
 data acknowledged (cumulatively or selectively) upon each ACK.
 
-Specifically, on each ACK that acknowledges "rs.newly_acked" packets as newly
+Specifically, on each ACK that acknowledges "BBR.rs.newly_acked" packets as newly
 acknowledged, BBR runs the following BBRSetCwnd() steps to update C.cwnd:
 
 ~~~~
   BBRSetCwnd():
     BBRUpdateMaxInflight()
     if (BBR.full_bw_reached)
-      C.cwnd = min(C.cwnd + rs.newly_acked, BBR.max_inflight)
+      C.cwnd = min(C.cwnd + BBR.rs.newly_acked, BBR.max_inflight)
     else if (C.cwnd < BBR.max_inflight || C.delivered < C.InitialCwnd)
-      C.cwnd = C.cwnd + rs.newly_acked
+      C.cwnd = C.cwnd + BBR.rs.newly_acked
     C.cwnd = max(C.cwnd, BBR.MinPipeCwnd)
     BBRBoundCwndForProbeRTT()
     BBRBoundCwndForModel()
