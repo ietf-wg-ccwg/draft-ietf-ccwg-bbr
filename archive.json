@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-01T01:59:06.964521+00:00",
+  "timestamp": "2025-06-05T01:43:00.016838+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -2805,6 +2805,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 50,
+      "id": "PR_kwDOL3MllM6ZG64g",
+      "title": "Improve consistency between core BBR and delivery rate estimation pseudocode",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/50",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This is an attempt to make the pseudocode for BBR and the delivery estimation work together a little bit better.\r\n- Adds BBR.rs as a new BBR state variable rather than using \"rs\" ambiguously.\r\n- Adds C.min_rtt instead of MinRTT(tp) that was used by the delivery estimation psuedocode but not defined.\r\n- Remove usage of SND.NXT and SND.UNA\r\n- BBRUpdateOnAck now calls GenerateRateSample().\r\n\r\nBBROnTransmit() and OnPacketSent() are still separate because the former is before a packet is transmitted and the latter is after.",
+      "createdAt": "2025-06-04T23:54:22Z",
+      "updatedAt": "2025-06-04T23:54:24Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_integrate_bwest_pseudocode",
+      "headRefOid": "d344394c1a9314d57241a1f0aa8bc79a7a98eabb",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
