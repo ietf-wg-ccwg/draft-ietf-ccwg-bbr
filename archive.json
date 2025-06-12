@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-08T01:51:28.122809+00:00",
+  "timestamp": "2025-06-12T01:43:45.682023+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -516,11 +516,13 @@
       "state": "OPEN",
       "author": "martinduke",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "ianswett"
+      ],
       "labels": [],
       "body": "Sec 3.2 of RFC 9743 suggests this.\n\nJust a little text about the areas of interest that require more data.",
       "createdAt": "2025-03-24T22:39:58Z",
-      "updatedAt": "2025-03-24T22:39:58Z",
+      "updatedAt": "2025-06-11T20:42:36Z",
       "closedAt": null,
       "comments": []
     },
@@ -2818,7 +2820,7 @@
       "labels": [],
       "body": "This is an attempt to make the pseudocode for BBR and the delivery estimation work together a little bit better.\r\n- Adds BBR.rs as a new BBR state variable rather than using \"rs\" ambiguously.\r\n- Adds C.min_rtt instead of MinRTT(tp) that was used by the delivery estimation psuedocode but not defined.\r\n- Remove usage of SND.NXT and SND.UNA\r\n- BBRUpdateOnAck now calls GenerateRateSample().\r\n\r\nBBROnTransmit() and OnPacketSent() are still separate because the former is before a packet is transmitted and the latter is after.\r\n\r\nAddresses #49 ",
       "createdAt": "2025-06-04T23:54:22Z",
-      "updatedAt": "2025-06-05T17:53:47Z",
+      "updatedAt": "2025-06-10T19:04:45Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
@@ -2829,8 +2831,30 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yeah, I would prefer to use rs rather than BBR.rs, for a few reasons:\r\n\r\n+ rs.foo is more succinct and IMHO easier to read than BBR.rs.foo\r\n\r\n+ IMHO it's nice to keep the rate sampling algorithm (rs) somewhat separate from BBR itself. Partly because it's conceptually more clear that the rs algorithm is independent, and does not depend on BBR. Partly to encourage other algorithms to use the rate sampling algorithm if it is useful.\r\n\r\n+ I like the approach we had of saying C.foo is for connection state outside BBR, P.foo is for packet state, rs.foo is for rate sample state, BBR.foo is for BBR algorithm state.\r\n\r\nI guess as a related change we could make BBR.send_quantum called C.send_quantum instead, so the control variables are:\r\nC.cwnd, C.pacing_rate, C.send_quantum (instead of the current C.cwnd, C.pacing_rate, BBR.send_quantum)\r\n",
+          "createdAt": "2025-06-10T19:04:45Z",
+          "updatedAt": "2025-06-10T19:04:45Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6ttyPF",
+          "commit": {
+            "abbreviatedOid": "d344394"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "LGTM, though I didn't know if we were only using rs before and not BBR.rs in an effort to keep the rate sampling algorithm somewhat separate from BBR itself?\r\n\r\nI'll let @nealcardwell answer that question.",
+          "createdAt": "2025-06-10T17:24:02Z",
+          "updatedAt": "2025-06-10T17:24:02Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
