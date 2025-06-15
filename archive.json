@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-12T01:43:45.682023+00:00",
+  "timestamp": "2025-06-15T01:53:43.315544+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -2820,7 +2820,7 @@
       "labels": [],
       "body": "This is an attempt to make the pseudocode for BBR and the delivery estimation work together a little bit better.\r\n- Adds BBR.rs as a new BBR state variable rather than using \"rs\" ambiguously.\r\n- Adds C.min_rtt instead of MinRTT(tp) that was used by the delivery estimation psuedocode but not defined.\r\n- Remove usage of SND.NXT and SND.UNA\r\n- BBRUpdateOnAck now calls GenerateRateSample().\r\n\r\nBBROnTransmit() and OnPacketSent() are still separate because the former is before a packet is transmitted and the latter is after.\r\n\r\nAddresses #49 ",
       "createdAt": "2025-06-04T23:54:22Z",
-      "updatedAt": "2025-06-10T19:04:45Z",
+      "updatedAt": "2025-06-12T15:18:02Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
@@ -2838,6 +2838,20 @@
           "body": "Yeah, I would prefer to use rs rather than BBR.rs, for a few reasons:\r\n\r\n+ rs.foo is more succinct and IMHO easier to read than BBR.rs.foo\r\n\r\n+ IMHO it's nice to keep the rate sampling algorithm (rs) somewhat separate from BBR itself. Partly because it's conceptually more clear that the rs algorithm is independent, and does not depend on BBR. Partly to encourage other algorithms to use the rate sampling algorithm if it is useful.\r\n\r\n+ I like the approach we had of saying C.foo is for connection state outside BBR, P.foo is for packet state, rs.foo is for rate sample state, BBR.foo is for BBR algorithm state.\r\n\r\nI guess as a related change we could make BBR.send_quantum called C.send_quantum instead, so the control variables are:\r\nC.cwnd, C.pacing_rate, C.send_quantum (instead of the current C.cwnd, C.pacing_rate, BBR.send_quantum)\r\n",
           "createdAt": "2025-06-10T19:04:45Z",
           "updatedAt": "2025-06-10T19:04:45Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "While we're discussing naming, should rs be capitalized if it's a top level item?",
+          "createdAt": "2025-06-12T14:35:00Z",
+          "updatedAt": "2025-06-12T14:35:00Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> While we're discussing naming, should rs be capitalized if it's a top level item?\r\n\r\nYes, good point. So how about:\r\n\r\n+ rate sample is RS; its fields are RS.foo\r\n\r\n+ connection is C; C.foo is for connection state outside BBR; connection control parameters are: C.cwnd, C.pacing_rate, C.send_quantum\r\n\r\n+ packet is P; P.foo is for packet state\r\n\r\n+ BBR.foo is for BBR algorithm state foo\r\n",
+          "createdAt": "2025-06-12T15:18:02Z",
+          "updatedAt": "2025-06-12T15:18:02Z"
         }
       ],
       "reviews": [
