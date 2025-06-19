@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-15T01:53:43.315544+00:00",
+  "timestamp": "2025-06-19T01:45:34.003928+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -2820,7 +2820,7 @@
       "labels": [],
       "body": "This is an attempt to make the pseudocode for BBR and the delivery estimation work together a little bit better.\r\n- Adds BBR.rs as a new BBR state variable rather than using \"rs\" ambiguously.\r\n- Adds C.min_rtt instead of MinRTT(tp) that was used by the delivery estimation psuedocode but not defined.\r\n- Remove usage of SND.NXT and SND.UNA\r\n- BBRUpdateOnAck now calls GenerateRateSample().\r\n\r\nBBROnTransmit() and OnPacketSent() are still separate because the former is before a packet is transmitted and the latter is after.\r\n\r\nAddresses #49 ",
       "createdAt": "2025-06-04T23:54:22Z",
-      "updatedAt": "2025-06-12T15:18:02Z",
+      "updatedAt": "2025-06-18T20:34:55Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
@@ -2866,6 +2866,19 @@
           "body": "LGTM, though I didn't know if we were only using rs before and not BBR.rs in an effort to keep the rate sampling algorithm somewhat separate from BBR itself?\r\n\r\nI'll let @nealcardwell answer that question.",
           "createdAt": "2025-06-10T17:24:02Z",
           "updatedAt": "2025-06-10T17:24:02Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6vRco5",
+          "commit": {
+            "abbreviatedOid": "d344394"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "Thanks for doing this, but I'd like to see Neal's suggestions before this lands.",
+          "createdAt": "2025-06-18T20:34:55Z",
+          "updatedAt": "2025-06-18T20:34:55Z",
           "comments": []
         }
       ]
