@@ -764,7 +764,7 @@ protocols, and these implementations have been used in production
 for a large volume of Internet traffic. An open source implementation of
 BBR is also available for DCCP {{RFC4340}}  {{draft-romo-iccrg-ccid5}}.
 
-## ECN
+## ECN {#ecn}
 
 This experimental version of BBR does not specify a specific response to
 Classic {{RFC3168}}, Alternative Backoff with ECN (ABE) {{RFC8511}} or
@@ -782,8 +782,8 @@ The congestion response requirements of L4S are detailed in
 This draft is experimental because there are some known areas that
 could be improved, as described below.
 
-As note above in ECN, BBR as described in this draft does not specify
-a specific response to ECN, and instead leaves it as an area for
+As noted above in {{ecn}}, BBR as described in this draft does not
+specify a specific response to ECN, and instead leaves it as an area for
 future work.
 
 The delivery rate sampling algorithm in {{delivery-rate-samples}}
