@@ -787,10 +787,12 @@ a specific response to ECN, and instead leaves it as an area for
 future work.
 
 The delivery rate sampling algorithm in {{delivery-rate-samples}}
-has an ability to over-estimate bandwidth, which when combined with BBR's
-windowed maximum bandwidth filter, can cause BBR to send too quickly.
+has an ability to over-estimate delivery rate, as described in
+{{compression-and-aggregation}}. When combined with BBR's windowed
+maximum bandwidth filter, this can cause BBR to send too quickly.
 BBR mitigates this by limiting any bandwidth sample by the sending rate,
-but that still might be too high, particularly in STARTUP.
+but that still might be higher than the available bandwidth,
+particularly in STARTUP.
 
 BBR does not deal well with persistently application limited traffic
 {{detecting-application-limited-phases}} , such as low latency audio or
