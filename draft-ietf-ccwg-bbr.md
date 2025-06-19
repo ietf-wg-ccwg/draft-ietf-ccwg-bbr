@@ -797,9 +797,10 @@ particularly in STARTUP.
 BBR does not deal well with persistently application limited traffic
 {{detecting-application-limited-phases}} , such as low latency audio or
 video flows.  When unable to fill the pipe for a full round trip,
-BBR will not be able to measure the full link bandwidth and because
-all bandwidth samples are app-limited, it will not discard old max
-bandwidth samples that were not app-limited.
+BBR will not be able to measure the full link bandwidth, and will mark
+a bandwidth sample as app-limited. In cases where an application enters
+a phase where all bandwidth samples are app-limited, BBR will not
+discard old max bandwidth samples that were not app-limited.
 
 # Input Signals
 
