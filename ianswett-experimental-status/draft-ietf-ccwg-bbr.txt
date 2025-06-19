@@ -740,9 +740,9 @@ Table of Contents
    This draft is experimental because there are some known areas that
    could be improved, as described below.
 
-   As note above in ECN, BBR as described in this draft does not specify
-   a specific response to ECN, and instead leaves it as an area for
-   future work.
+   As noted above in Section 3.7, BBR as described in this draft does
+   not specify a specific response to ECN, and instead leaves it as an
+   area for future work.
 
    The delivery rate sampling algorithm in Section 4.1 has an ability to
    over-estimate delivery rate, as described in Section 4.1.1.2.2.  When
