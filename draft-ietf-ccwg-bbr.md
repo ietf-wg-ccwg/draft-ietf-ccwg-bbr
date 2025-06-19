@@ -300,6 +300,8 @@ implementation for the connection at initialization time.
 
 C.delivered: The total amount of data (tracked in octets or in packets)
 delivered so far over the lifetime of the transport connection C.
+This MUST NOT include pure ACK packets. It SHOULD include spurious
+retransmissions that have been acknowledged as delivered.
 
 C.inflight: The connection's best estimate of the number of bytes
 outstanding in the network. This includes the number of bytes that
@@ -1021,11 +1023,6 @@ well in practice for congestion control and telemetry purposes.
 
 This algorithm requires the following new state variables for each transport
 connection:
-
-C.delivered: The total amount of data (measured in octets or in packets)
-delivered so far over the lifetime of the transport connection. This MUST
-NOT include pure ACK packets. It SHOULD include spurious retransmissions
-that have been acknowledged as delivered.
 
 C.delivered_time: The wall clock time when C.delivered was last updated.
 
