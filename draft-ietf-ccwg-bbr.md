@@ -777,6 +777,28 @@ congestion response to CE marks be identical to packet loss.
 The congestion response requirements of L4S are detailed in
 {{RFC9330, Section 4.3}}.
 
+## Experimental Status
+
+This draft is experimental because there are some known areas that
+could be improved, as described below.
+
+As note above in ECN, BBR as described in this draft does not specify
+a specific response to ECN, and instead leaves it as an area for
+future work.
+
+The delivery rate measurement {{#delivery-rate-samples}} specified
+has an ability to over-estimate bandwidth, which when combined with BBR's
+windowed maximum bandwidth filter, can cause BBR to send too quickly.
+BBR mitigates this by limiting any bandwidth sample by the sending rate,
+but that still might be too high, particularly in STARTUP.
+
+BBR does not deal well with persistently application limited traffic
+{{#detecting-application-limited-phases}} , such as low latency audio or
+video flows.  When unable to fill the pipe for a full round trip,
+BBR will not be able to measure the full link bandwidth and because
+all bandwidth samples are app-limited, it will not discard old max
+bandwidth samples that were not app-limited.
+
 # Input Signals
 
 BBR uses estimated delivery rate and RTT as two critical inputs.
