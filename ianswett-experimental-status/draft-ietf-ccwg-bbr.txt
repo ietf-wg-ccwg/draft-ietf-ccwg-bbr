@@ -745,10 +745,11 @@ Table of Contents
    future work.
 
    The delivery rate sampling algorithm in Section 4.1 has an ability to
-   over-estimate bandwidth, which when combined with BBR's windowed
-   maximum bandwidth filter, can cause BBR to send too quickly.  BBR
-   mitigates this by limiting any bandwidth sample by the sending rate,
-   but that still might be too high, particularly in STARTUP.
+   over-estimate delivery rate, as described in Section 4.1.1.2.2.  When
+   combined with BBR's windowed maximum bandwidth filter, this can cause
+   BBR to send too quickly.  BBR mitigates this by limiting any
+   bandwidth sample by the sending rate, but that still might be higher
+   than the available bandwidth, particularly in STARTUP.
 
    BBR does not deal well with persistently application limited traffic
    Section 4.1.2.4 , such as low latency audio or video flows.  When

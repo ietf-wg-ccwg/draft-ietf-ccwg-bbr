@@ -2109,10 +2109,12 @@ could be improved, as described below.<a href="#section-3.8-1" class="pilcrow">�
 a specific response to ECN, and instead leaves it as an area for
 future work.<a href="#section-3.8-2" class="pilcrow">¶</a></p>
 <p id="section-3.8-3">The delivery rate sampling algorithm in <a href="#delivery-rate-samples" class="auto internal xref">Section 4.1</a>
-has an ability to over-estimate bandwidth, which when combined with BBR's
-windowed maximum bandwidth filter, can cause BBR to send too quickly.
+has an ability to over-estimate delivery rate, as described in
+<a href="#compression-and-aggregation" class="auto internal xref">Section 4.1.1.2.2</a>. When combined with BBR's windowed
+maximum bandwidth filter, this can cause BBR to send too quickly.
 BBR mitigates this by limiting any bandwidth sample by the sending rate,
-but that still might be too high, particularly in STARTUP.<a href="#section-3.8-3" class="pilcrow">¶</a></p>
+but that still might be higher than the available bandwidth,
+particularly in STARTUP.<a href="#section-3.8-3" class="pilcrow">¶</a></p>
 <p id="section-3.8-4">BBR does not deal well with persistently application limited traffic
 <a href="#detecting-application-limited-phases" class="auto internal xref">Section 4.1.2.4</a> , such as low latency audio or
 video flows.  When unable to fill the pipe for a full round trip,
