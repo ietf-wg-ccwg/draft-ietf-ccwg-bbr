@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-19T01:45:34.003928+00:00",
+  "timestamp": "2025-06-22T01:52:42.711567+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -594,9 +594,17 @@
       ],
       "body": "And explain that's one reason we limit bandwidth measurements to the send rate.",
       "createdAt": "2025-04-04T15:46:47Z",
-      "updatedAt": "2025-04-23T20:47:36Z",
+      "updatedAt": "2025-06-19T17:17:48Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I found the \"Compression and Aggregation\" section, which notes this fact, and is probably sufficient?\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/main/draft-ietf-ccwg-bbr.md#compression-and-aggregation-compression-and-aggregation",
+          "createdAt": "2025-06-19T17:17:48Z",
+          "updatedAt": "2025-06-19T17:17:48Z"
+        }
+      ]
     },
     {
       "number": 35,
@@ -2882,6 +2890,149 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 51,
+      "id": "PR_kwDOL3MllM6bSR4t",
+      "title": "Describe why BBR is experimental",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/51",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "Fixes #31 \r\n\r\nRelated to #34",
+      "createdAt": "2025-06-19T16:07:39Z",
+      "updatedAt": "2025-06-19T17:48:46Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-experimental-status",
+      "headRefOid": "e172c5bb25abc67ebd65bad95b33783fa052b4b8",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks for the great comments Neal, I've updated the PR.",
+          "createdAt": "2025-06-19T17:48:46Z",
+          "updatedAt": "2025-06-19T17:48:46Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6vc38K",
+          "commit": {
+            "abbreviatedOid": "8de9ca3"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-19T16:19:00Z",
+          "updatedAt": "2025-06-19T16:27:05Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "I'd suggest adding a hyperlink by changing \"ECN\" here to:\r\n\r\n```\r\nECN {{ecn}}\r\n```\r\n\r\nand then changing the:\r\n\r\n```\r\n## ECN\r\n```\r\n\r\nto:\r\n\r\n```\r\n## ECN {#ecn}\r\n```",
+              "createdAt": "2025-06-19T16:19:00Z",
+              "updatedAt": "2025-06-19T16:27:05Z"
+            },
+            {
+              "originalPosition": 13,
+              "body": "IIUC this should be:\r\n\r\n```\r\n{{delivery-rate-samples}}\r\n```\r\n\r\ne.g., elsewhere in the text we have:\r\n```\r\ndelivery rate sampling algorithm in {{delivery-rate-samples}}\r\n```\r\n",
+              "createdAt": "2025-06-19T16:20:28Z",
+              "updatedAt": "2025-06-19T16:27:05Z"
+            },
+            {
+              "originalPosition": 20,
+              "body": "```\r\n{{detecting-application-limited-phases}}\r\n```\r\n",
+              "createdAt": "2025-06-19T16:21:31Z",
+              "updatedAt": "2025-06-19T16:27:05Z"
+            },
+            {
+              "originalPosition": 24,
+              "body": "I found this \"because all bandwidth samples are app-limited, it will not discard old max\r\nbandwidth samples that were not app-limited\" sentence to be confusing... (this is stating that \"all bandwidth samples are app-limited\", so then how could there be \"old max bandwidth samples that were not app-limited\"?)\r\n\r\nHow about something like:\r\n\r\nWhen unable to fill the pipe for a full round trip, BBR will not be able to measure the full link bandwidth, and will mark a bandwidth sample as app-limited. In cases where an application enters a phase where all bandwidth samples are app-limited, BBR will not discard old max bandwidth samples that were not app-limited.\r\n\r\n",
+              "createdAt": "2025-06-19T16:26:58Z",
+              "updatedAt": "2025-06-19T16:27:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6vdRx9",
+          "commit": {
+            "abbreviatedOid": "8de9ca3"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-19T17:16:16Z",
+          "updatedAt": "2025-06-19T17:16:17Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "```suggestion\r\nThe delivery rate sampling algorithm in {{delivery-rate-samples}}\r\n```",
+              "createdAt": "2025-06-19T17:16:16Z",
+              "updatedAt": "2025-06-19T17:16:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6vdR46",
+          "commit": {
+            "abbreviatedOid": "297ec3b"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-19T17:16:37Z",
+          "updatedAt": "2025-06-19T17:16:37Z",
+          "comments": [
+            {
+              "originalPosition": 20,
+              "body": "```suggestion\r\n{{detecting-application-limited-phases}} , such as low latency audio or\r\n```",
+              "createdAt": "2025-06-19T17:16:37Z",
+              "updatedAt": "2025-06-19T17:16:37Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 52,
+      "id": "PR_kwDOL3MllM6bSrWO",
+      "title": "Remove second definition of C.delivered",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/52",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "Also merge the descriptions, since they were slightly different.",
+      "createdAt": "2025-06-19T17:05:30Z",
+      "updatedAt": "2025-06-19T17:05:30Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-double-cdelivered",
+      "headRefOid": "d4babc2644f528c77c440241442758a6deecae27",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
