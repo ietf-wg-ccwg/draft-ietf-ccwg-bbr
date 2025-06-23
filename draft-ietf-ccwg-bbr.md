@@ -779,8 +779,9 @@ The congestion response requirements of L4S are detailed in
 
 ## Experimental Status
 
-This draft is experimental because there are some known areas that
-could be improved, as described below.
+This draft is experimental because there are some known aspects of BBR
+for which the community is encouraged to conduct experiments and develop
+algorithm improvements, as described below.
 
 As noted above in {{ecn}}, BBR as described in this draft does not
 specify a specific response to ECN, and instead leaves it as an area for
