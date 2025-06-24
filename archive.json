@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-22T01:52:42.711567+00:00",
+  "timestamp": "2025-06-24T01:45:46.123199+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -594,7 +594,7 @@
       ],
       "body": "And explain that's one reason we limit bandwidth measurements to the send rate.",
       "createdAt": "2025-04-04T15:46:47Z",
-      "updatedAt": "2025-06-19T17:17:48Z",
+      "updatedAt": "2025-06-22T13:48:34Z",
       "closedAt": null,
       "comments": [
         {
@@ -603,6 +603,13 @@
           "body": "I found the \"Compression and Aggregation\" section, which notes this fact, and is probably sufficient?\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/main/draft-ietf-ccwg-bbr.md#compression-and-aggregation-compression-and-aggregation",
           "createdAt": "2025-06-19T17:17:48Z",
           "updatedAt": "2025-06-19T17:17:48Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Agreed. That section seems sufficient to me. Thanks!\n",
+          "createdAt": "2025-06-22T13:48:34Z",
+          "updatedAt": "2025-06-22T13:48:34Z"
         }
       ]
     },
@@ -2903,15 +2910,15 @@
       "labels": [
         "Editorial"
       ],
-      "body": "Fixes #31 \r\n\r\nRelated to #34",
+      "body": "Fixes #31 \r\nFixes #34",
       "createdAt": "2025-06-19T16:07:39Z",
-      "updatedAt": "2025-06-19T17:48:46Z",
+      "updatedAt": "2025-06-23T20:23:21Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-experimental-status",
-      "headRefOid": "e172c5bb25abc67ebd65bad95b33783fa052b4b8",
+      "headRefOid": "f0be93b909096d36be38ccd18667f7ec1da1652b",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -2923,6 +2930,48 @@
           "body": "Thanks for the great comments Neal, I've updated the PR.",
           "createdAt": "2025-06-19T17:48:46Z",
           "updatedAt": "2025-06-19T17:48:46Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "My hope is that we'll experiment with ways to fix these issues, but we don't have any fixes for them today that are known to work well in simulation and production.",
+          "createdAt": "2025-06-23T15:25:46Z",
+          "updatedAt": "2025-06-23T15:25:46Z"
+        },
+        {
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "body": "> My hope is that we'll experiment with ways to fix these issues, but we don't have any fixes for them today that are known to work well in simulation and production.\r\n\r\nOK, maybe my comment is editorial. Describe the same problems but frame it as problems we hope that experimenters will solve? I don't have suggested text. I do think that what you have here checks the box for RFC9743.",
+          "createdAt": "2025-06-23T15:30:05Z",
+          "updatedAt": "2025-06-23T15:30:05Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> > My hope is that we'll experiment with ways to fix these issues, but we don't have any fixes for them today that are known to work well in simulation and production.\r\n> \r\n> OK, maybe my comment is editorial. Describe the same problems but frame it as problems we hope that experimenters will solve? I don't have suggested text. I do think that what you have here checks the box for RFC9743.\r\n\r\nSGTM to \"frame it as problems we hope that experimenters will solve\".\r\n\r\nFor suggested text, how about:\r\n\r\nOLD: \"This draft is experimental because there are some known areas that could be improved, as described below.\"\r\n\r\nNEW: \"This draft is experimental because there are some known aspects of BBR for which the community is encouraged to conduct experiments and develop algorithm improvements, as described below.\"\r\n",
+          "createdAt": "2025-06-23T16:29:34Z",
+          "updatedAt": "2025-06-23T16:29:34Z"
+        },
+        {
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "body": "> > > My hope is that we'll experiment with ways to fix these issues, but we don't have any fixes for them today that are known to work well in simulation and production.\r\n> > \r\n> > \r\n> > OK, maybe my comment is editorial. Describe the same problems but frame it as problems we hope that experimenters will solve? I don't have suggested text. I do think that what you have here checks the box for RFC9743.\r\n> \r\n> SGTM to \"frame it as problems we hope that experimenters will solve\".\r\n> \r\n> For suggested text, how about:\r\n> \r\n> OLD: \"This draft is experimental because there are some known areas that could be improved, as described below.\"\r\n> \r\n> NEW: \"This draft is experimental because there are some known aspects of BBR for which the community is encouraged to conduct experiments and develop algorithm improvements, as described below.\"\r\n\r\nLGTM",
+          "createdAt": "2025-06-23T16:30:16Z",
+          "updatedAt": "2025-06-23T16:30:16Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks, I updated the PR with Neal's suggestion.",
+          "createdAt": "2025-06-23T20:06:19Z",
+          "updatedAt": "2025-06-23T20:06:19Z"
+        },
+        {
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "body": "BTW I have merge permission for this repo, which is probably residue of being AD and should be removed.",
+          "createdAt": "2025-06-23T20:23:21Z",
+          "updatedAt": "2025-06-23T20:23:21Z"
         }
       ],
       "reviews": [
@@ -3003,6 +3052,45 @@
               "updatedAt": "2025-06-19T17:16:37Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6v3bM-",
+          "commit": {
+            "abbreviatedOid": "e172c5b"
+          },
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "I hate to be pedantic about this, but this is framed more as \"things BBR doesn't do well/doesn't try to do\" than \"things we'll learn from an experiment\". Maybe the hope is that more deployment will gather data to fix this problem?",
+          "createdAt": "2025-06-23T15:23:18Z",
+          "updatedAt": "2025-06-23T15:23:18Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6v6vm7",
+          "commit": {
+            "abbreviatedOid": "f0be93b"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "LGTM, thanks!\r\n",
+          "createdAt": "2025-06-23T20:14:39Z",
+          "updatedAt": "2025-06-23T20:14:39Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6v6zZQ",
+          "commit": {
+            "abbreviatedOid": "f0be93b"
+          },
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-06-23T20:22:06Z",
+          "updatedAt": "2025-06-23T20:22:06Z",
+          "comments": []
         }
       ]
     },
