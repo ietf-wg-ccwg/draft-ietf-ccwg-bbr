@@ -3265,7 +3265,7 @@ ProbeRTT), and is defined as follows:
 #### Modulating cwnd in ProbeRTT {#modulating-cwnd-in-probertt}
 
 If BBR decides it needs to enter the ProbeRTT state (see the "ProbeRTT" section
-below), its goal is to quickly reduce  and drain
+below), its goal is to quickly reduce C.inflight and drain
 the bottleneck queue, thereby allowing measurement of BBR.min_rtt. To implement
 this mode, BBR bounds C.cwnd to BBR.MinPipeCwnd, the minimal value that
 allows pipelining (see the "Minimum cwnd for Pipelining" section, above):
