@@ -3141,7 +3141,7 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
 
      BBROnEnterRTO():
        BBRSaveCwnd()
-       C.cwnd =  + 1
+       C.cwnd = C.inflight + 1
 
    Upon entering Fast Recovery:
 

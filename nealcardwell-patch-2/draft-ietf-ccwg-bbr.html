@@ -4865,7 +4865,7 @@ event was spurious.<a href="#section-5.6.4.4-4" class="pilcrow">¶</a></p>
 <pre>
   BBROnEnterRTO():
     BBRSaveCwnd()
-    C.cwnd =  + 1
+    C.cwnd = C.inflight + 1
 </pre><a href="#section-5.6.4.4-7" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6.4.4-8">Upon entering Fast Recovery:<a href="#section-5.6.4.4-8" class="pilcrow">¶</a></p>
