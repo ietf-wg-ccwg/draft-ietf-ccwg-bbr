@@ -105,6 +105,7 @@ Table of Contents
      3.5.  Control Parameter Overview
      3.6.  Environment and Usage
      3.7.  ECN
+     3.8.  Experimental Status
    4.  Input Signals
      4.1.  Delivery Rate Samples
        4.1.1.  Delivery Rate Sampling Algorithm Overview
@@ -733,6 +734,31 @@ Table of Contents
    congestion response to CE marks be identical to packet loss.  The
    congestion response requirements of L4S are detailed in [RFC9330],
    Section 4.3.
+
+3.8.  Experimental Status
+
+   This draft is experimental because there are some known aspects of
+   BBR for which the community is encouraged to conduct experiments and
+   develop algorithm improvements, as described below.
+
+   As noted above in Section 3.7, BBR as described in this draft does
+   not specify a specific response to ECN, and instead leaves it as an
+   area for future work.
+
+   The delivery rate sampling algorithm in Section 4.1 has an ability to
+   over-estimate delivery rate, as described in Section 4.1.1.2.2.  When
+   combined with BBR's windowed maximum bandwidth filter, this can cause
+   BBR to send too quickly.  BBR mitigates this by limiting any
+   bandwidth sample by the sending rate, but that still might be higher
+   than the available bandwidth, particularly in STARTUP.
+
+   BBR does not deal well with persistently application limited traffic
+   Section 4.1.2.4 , such as low latency audio or video flows.  When
+   unable to fill the pipe for a full round trip, BBR will not be able
+   to measure the full link bandwidth, and will mark a bandwidth sample
+   as app-limited.  In cases where an application enters a phase where
+   all bandwidth samples are app-limited, BBR will not discard old max
+   bandwidth samples that were not app-limited.
 
 4.  Input Signals
 

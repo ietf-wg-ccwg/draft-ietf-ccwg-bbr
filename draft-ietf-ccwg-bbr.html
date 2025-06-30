@@ -24,22 +24,22 @@ acknowledgment. Thus far, open source implementations are available
 for TCP   and QUIC  . This document
 specifies version 3 of the BBR algorithm, BBRv3. 
     " name="description">
-<meta content="xml2rfc 3.28.1" name="generator">
+<meta content="xml2rfc 3.29.0" name="generator">
 <meta content="Congestion Control" name="keyword">
 <meta content="draft-ietf-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.28.1
-    Python 3.12.10
+  xml2rfc 3.29.0
+    Python 3.12.11
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.6
-    lxml 5.3.0
+    lxml 5.3.1
     platformdirs 4.3.8
     pycountry 24.6.1
     PyYAML 6.0.2
-    requests 2.32.3
-    setuptools 70.3.0
+    requests 2.32.4
+    setuptools 80.9.0
     wcwidth 0.2.13
 -->
 <link href="draft-ietf-ccwg-bbr.xml" rel="alternate" type="application/rfc+xml">
@@ -1277,6 +1277,9 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.7">
                 <p id="section-toc.1-1.3.2.7.1"><a href="#section-3.7" class="auto internal xref">3.7</a>.  <a href="#name-ecn" class="internal xref">ECN</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.8">
+                <p id="section-toc.1-1.3.2.8.1"><a href="#section-3.8" class="auto internal xref">3.8</a>.  <a href="#name-experimental-status" class="internal xref">Experimental Status</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
@@ -2093,6 +2096,33 @@ the congestion controller response MUST treat any CE marks as congestion.<a href
 congestion response to CE marks be identical to packet loss.
 The congestion response requirements of L4S are detailed in
 <span>[<a href="#RFC9330" class="cite xref">RFC9330</a>], <a href="https://rfc-editor.org/rfc/rfc9330#section-4.3" class="relref">Section 4.3</a></span>.<a href="#section-3.7-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="experimental-status">
+<section id="section-3.8">
+        <h3 id="name-experimental-status">
+<a href="#section-3.8" class="section-number selfRef">3.8. </a><a href="#name-experimental-status" class="section-name selfRef">Experimental Status</a>
+        </h3>
+<p id="section-3.8-1">This draft is experimental because there are some known aspects of BBR
+for which the community is encouraged to conduct experiments and develop
+algorithm improvements, as described below.<a href="#section-3.8-1" class="pilcrow">¶</a></p>
+<p id="section-3.8-2">As noted above in <a href="#ecn" class="auto internal xref">Section 3.7</a>, BBR as described in this draft does not
+specify a specific response to ECN, and instead leaves it as an area for
+future work.<a href="#section-3.8-2" class="pilcrow">¶</a></p>
+<p id="section-3.8-3">The delivery rate sampling algorithm in <a href="#delivery-rate-samples" class="auto internal xref">Section 4.1</a>
+has an ability to over-estimate delivery rate, as described in
+<a href="#compression-and-aggregation" class="auto internal xref">Section 4.1.1.2.2</a>. When combined with BBR's windowed
+maximum bandwidth filter, this can cause BBR to send too quickly.
+BBR mitigates this by limiting any bandwidth sample by the sending rate,
+but that still might be higher than the available bandwidth,
+particularly in STARTUP.<a href="#section-3.8-3" class="pilcrow">¶</a></p>
+<p id="section-3.8-4">BBR does not deal well with persistently application limited traffic
+<a href="#detecting-application-limited-phases" class="auto internal xref">Section 4.1.2.4</a> , such as low latency audio or
+video flows.  When unable to fill the pipe for a full round trip,
+BBR will not be able to measure the full link bandwidth, and will mark
+a bandwidth sample as app-limited. In cases where an application enters
+a phase where all bandwidth samples are app-limited, BBR will not
+discard old max bandwidth samples that were not app-limited.<a href="#section-3.8-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
