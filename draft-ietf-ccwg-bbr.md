@@ -305,7 +305,10 @@ retransmissions that have been acknowledged as delivered.
 
 C.inflight: The connection's best estimate of the number of bytes
 outstanding in the network. This includes the number of bytes that
-have been sent but have not been acknowledged or marked as lost.
+have been sent and have not been acknowledged or
+marked as lost since their last transmission
+(e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
+This MUST NOT include pure ACK packets.
 
 C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
 point in the last packet-timed round trip.
@@ -1078,13 +1081,6 @@ are marked as lost.
 C.retrans_out: The number of packets in the current outstanding window that
 are being retransmitted.
 
-C.pipe: The sender's estimate of the amount of data outstanding in the network
-(measured in octets or packets). This includes data packets in the current
-outstanding window that are in flight and have not been acknowledged or marked lost
-(e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
-This MUST NOT include pure ACK packets.
-
-
 ##### Per-packet (P) state {#per-packet-p-state}
 
 This algorithm requires the following new state variables for each packet
@@ -1264,9 +1260,9 @@ application-limited:
   CheckIfApplicationLimited():
     if (C.write_seq - SND.NXT < SND.MSS and
         C.pending_transmissions == 0 and
-        C.pipe < C.cwnd and
+        C.inflight < C.cwnd and
         C.lost_out <= C.retrans_out)
-      C.app_limited = (C.delivered + C.pipe) ? : 1
+      C.app_limited = (C.delivered + C.inflight) ? : 1
 ~~~~
 
 
@@ -1709,7 +1705,7 @@ this, upon every ACK BBR executes:
 
 ~~~~
   BBRCheckDrainDone():
-    if (BBR.state == Drain and C.pipe <= BBRInflight(1.0))
+    if (BBR.state == Drain and C.inflight <= BBRInflight(1.0))
       BBREnterProbeBW()  /* BBR estimates the queue was drained */
 ~~~~
 
@@ -2325,7 +2321,7 @@ to the ProbeRTT state as follows:
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
     if (BBR.probe_rtt_done_stamp == 0 and
-        C.pipe <= BBRProbeRTTCwnd())
+        C.inflight <= BBRProbeRTTCwnd())
       /* Wait for at least ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
         Now() + ProbeRTTDuration
@@ -2348,7 +2344,7 @@ to the ProbeRTT state as follows:
 
   MarkConnectionAppLimited():
     C.app_limited =
-      (C.delivered + C.pipe) ? : 1
+      (C.delivered + C.inflight) ? : 1
 ~~~~
 
 
@@ -2403,7 +2399,7 @@ BBRHandleRestartFromIdle() before sending a packet for a flow:
 
 ~~~~
   BBRHandleRestartFromIdle():
-    if (C.pipe == 0 and C.app_limited)
+    if (C.inflight == 0 and C.app_limited)
       BBR.idle_restart = true
       BBR.extra_acked_interval_start = Now()
       if (IsInAProbeBWState())
@@ -3227,7 +3223,7 @@ Upon retransmission timeout (RTO):
 ~~~~
   BBROnEnterRTO():
     BBRSaveCwnd()
-    C.cwnd = C.pipe + 1
+    C.cwnd = C.inflight + 1
 ~~~~
 
 Upon entering Fast Recovery:
