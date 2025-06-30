@@ -3176,11 +3176,11 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
 5.6.4.5.  Modulating cwnd in ProbeRTT
 
    If BBR decides it needs to enter the ProbeRTT state (see the
-   "ProbeRTT" section below), its goal is to quickly reduce and drain
-   the bottleneck queue, thereby allowing measurement of BBR.min_rtt.
-   To implement this mode, BBR bounds C.cwnd to BBR.MinPipeCwnd, the
-   minimal value that allows pipelining (see the "Minimum cwnd for
-   Pipelining" section, above):
+   "ProbeRTT" section below), its goal is to quickly reduce C.inflight
+   and drain the bottleneck queue, thereby allowing measurement of
+   BBR.min_rtt.  To implement this mode, BBR bounds C.cwnd to
+   BBR.MinPipeCwnd, the minimal value that allows pipelining (see the
+   "Minimum cwnd for Pipelining" section, above):
 
      BBRProbeRTTCwnd():
        probe_rtt_cwnd = BBRBDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)

@@ -4910,7 +4910,7 @@ ProbeRTT), and is defined as follows:<a href="#section-5.6.4.4-13" class="pilcro
 <a href="#section-5.6.4.5" class="section-number selfRef">5.6.4.5. </a><a href="#name-modulating-cwnd-in-probertt" class="section-name selfRef">Modulating cwnd in ProbeRTT</a>
             </h5>
 <p id="section-5.6.4.5-1">If BBR decides it needs to enter the ProbeRTT state (see the "ProbeRTT" section
-below), its goal is to quickly reduce  and drain
+below), its goal is to quickly reduce C.inflight and drain
 the bottleneck queue, thereby allowing measurement of BBR.min_rtt. To implement
 this mode, BBR bounds C.cwnd to BBR.MinPipeCwnd, the minimal value that
 allows pipelining (see the "Minimum cwnd for Pipelining" section, above):<a href="#section-5.6.4.5-1" class="pilcrow">¶</a></p>
