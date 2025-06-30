@@ -1550,8 +1550,8 @@ This MUST NOT include pure ACK packets. It SHOULD include spurious
 retransmissions that have been acknowledged as delivered.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
 <p id="section-2.1-4">C.inflight: The connection's best estimate of the number of bytes
 outstanding in the network. This includes the number of bytes that
-have been sent but since their last transmission
-have not been acknowledged or marked as lost
+have been sent and have not been acknowledged or
+marked as lost since their last transmission
 (e.g. "pipe" from <span>[<a href="#RFC6675" class="cite xref">RFC6675</a>]</span> or "bytes_in_flight" from <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>).
 This MUST NOT include pure ACK packets.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
 <p id="section-2.1-5">C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
