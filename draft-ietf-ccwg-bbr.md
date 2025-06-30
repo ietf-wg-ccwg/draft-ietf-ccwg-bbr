@@ -764,7 +764,7 @@ protocols, and these implementations have been used in production
 for a large volume of Internet traffic. An open source implementation of
 BBR is also available for DCCP {{RFC4340}}  {{draft-romo-iccrg-ccid5}}.
 
-## ECN
+## ECN {#ecn}
 
 This experimental version of BBR does not specify a specific response to
 Classic {{RFC3168}}, Alternative Backoff with ECN (ABE) {{RFC8511}} or
@@ -776,6 +776,32 @@ the congestion controller response MUST treat any CE marks as congestion.
 congestion response to CE marks be identical to packet loss.
 The congestion response requirements of L4S are detailed in
 {{RFC9330, Section 4.3}}.
+
+## Experimental Status
+
+This draft is experimental because there are some known aspects of BBR
+for which the community is encouraged to conduct experiments and develop
+algorithm improvements, as described below.
+
+As noted above in {{ecn}}, BBR as described in this draft does not
+specify a specific response to ECN, and instead leaves it as an area for
+future work.
+
+The delivery rate sampling algorithm in {{delivery-rate-samples}}
+has an ability to over-estimate delivery rate, as described in
+{{compression-and-aggregation}}. When combined with BBR's windowed
+maximum bandwidth filter, this can cause BBR to send too quickly.
+BBR mitigates this by limiting any bandwidth sample by the sending rate,
+but that still might be higher than the available bandwidth,
+particularly in STARTUP.
+
+BBR does not deal well with persistently application limited traffic
+{{detecting-application-limited-phases}} , such as low latency audio or
+video flows.  When unable to fill the pipe for a full round trip,
+BBR will not be able to measure the full link bandwidth, and will mark
+a bandwidth sample as app-limited. In cases where an application enters
+a phase where all bandwidth samples are app-limited, BBR will not
+discard old max bandwidth samples that were not app-limited.
 
 # Input Signals
 
