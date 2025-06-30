@@ -3223,7 +3223,7 @@ Upon retransmission timeout (RTO):
 ~~~~
   BBROnEnterRTO():
     BBRSaveCwnd()
-    C.cwnd =  + 1
+    C.cwnd = C.inflight + 1
 ~~~~
 
 Upon entering Fast Recovery:
