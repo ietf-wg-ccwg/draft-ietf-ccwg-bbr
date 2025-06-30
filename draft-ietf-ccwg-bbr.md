@@ -305,8 +305,8 @@ retransmissions that have been acknowledged as delivered.
 
 C.inflight: The connection's best estimate of the number of bytes
 outstanding in the network. This includes the number of bytes that
-have been sent but since their last transmission
-have not been acknowledged or marked as lost
+have been sent and have not been acknowledged or
+marked as lost since their last transmission
 (e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
 This MUST NOT include pure ACK packets.
 
