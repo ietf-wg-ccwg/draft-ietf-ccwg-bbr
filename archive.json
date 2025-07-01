@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-24T01:45:46.123199+00:00",
+  "timestamp": "2025-07-01T01:55:53.580635+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -513,7 +513,7 @@
       "id": "I_kwDOL3MllM6vg5rv",
       "title": "Experimental RFCs should have an Experiment",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/31",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "martinduke",
       "authorAssociation": "NONE",
       "assignees": [
@@ -522,8 +522,8 @@
       "labels": [],
       "body": "Sec 3.2 of RFC 9743 suggests this.\n\nJust a little text about the areas of interest that require more data.",
       "createdAt": "2025-03-24T22:39:58Z",
-      "updatedAt": "2025-06-11T20:42:36Z",
-      "closedAt": null,
+      "updatedAt": "2025-06-30T12:35:35Z",
+      "closedAt": "2025-06-30T12:35:35Z",
       "comments": []
     },
     {
@@ -583,7 +583,7 @@
       "id": "I_kwDOL3MllM6xMQkN",
       "title": "Document when/why the bandwidth estimator overestimates",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/34",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -594,8 +594,8 @@
       ],
       "body": "And explain that's one reason we limit bandwidth measurements to the send rate.",
       "createdAt": "2025-04-04T15:46:47Z",
-      "updatedAt": "2025-06-22T13:48:34Z",
-      "closedAt": null,
+      "updatedAt": "2025-06-30T12:35:36Z",
+      "closedAt": "2025-06-30T12:35:36Z",
       "comments": [
         {
           "author": "ianswett",
@@ -2903,7 +2903,7 @@
       "id": "PR_kwDOL3MllM6bSR4t",
       "title": "Describe why BBR is experimental",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/51",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -2912,17 +2912,19 @@
       ],
       "body": "Fixes #31 \r\nFixes #34",
       "createdAt": "2025-06-19T16:07:39Z",
-      "updatedAt": "2025-06-23T20:23:21Z",
+      "updatedAt": "2025-06-30T12:35:34Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-experimental-status",
       "headRefOid": "f0be93b909096d36be38ccd18667f7ec1da1652b",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-06-30T12:35:33Z",
+      "mergedAt": "2025-06-30T12:35:33Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "665966b5a99d5c2e493bbb8299c00ad24f3ebead"
+      },
       "comments": [
         {
           "author": "ianswett",
@@ -3099,7 +3101,7 @@
       "id": "PR_kwDOL3MllM6bSrWO",
       "title": "Remove second definition of C.delivered",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/52",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -3108,19 +3110,143 @@
       ],
       "body": "Also merge the descriptions, since they were slightly different.",
       "createdAt": "2025-06-19T17:05:30Z",
-      "updatedAt": "2025-06-19T17:05:30Z",
+      "updatedAt": "2025-06-30T12:43:57Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-double-cdelivered",
       "headRefOid": "d4babc2644f528c77c440241442758a6deecae27",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-06-30T12:43:57Z",
+      "mergedAt": "2025-06-30T12:43:57Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "25bd8e23fb37a4b25e18789d0860d231d384dba4"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6xFzNP",
+          "commit": {
+            "abbreviatedOid": "d4babc2"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-06-30T12:43:45Z",
+          "updatedAt": "2025-06-30T12:43:45Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 53,
+      "id": "PR_kwDOL3MllM6cvQ9T",
+      "title": "Replace C.pipe with synonym C.inflight and clarify C.inflight",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/53",
+      "state": "MERGED",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Replace occurrences of C.pipe with the synonym C.inflight, and clarify the definition of C.inflight.\r\n\r\nNote that \"pipe\" is from RFC6675. During the recent PRRbis review process we received the reasonable comment\r\nthat using  \"pipe\" is incorrect (or at least \r\nconfusing/misleading) if the implementation\r\nis not using RFC6675 for loss detection.\r\n\r\nSo let's standardize on \"C.inflight\", which is consistent with PRRbis.",
+      "createdAt": "2025-06-30T17:20:27Z",
+      "updatedAt": "2025-06-30T17:50:31Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "25bd8e23fb37a4b25e18789d0860d231d384dba4",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-2",
+      "headRefOid": "143bd005b41775a9c62ace62de74be0dae64953c",
+      "closedAt": "2025-06-30T17:50:30Z",
+      "mergedAt": "2025-06-30T17:50:30Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "1afb70ea0bc729f50333405a706b78d970c01477"
+      },
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Apprently I'm doing a terrible job with the primitive github editor, and introducing empty strings left and right, and need to switch to my native emacs environment... :-)",
+          "createdAt": "2025-06-30T17:48:12Z",
+          "updatedAt": "2025-06-30T17:48:12Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6xJssx",
+          "commit": {
+            "abbreviatedOid": "b14301e"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Some small comments, but this is definitely a good change.",
+          "createdAt": "2025-06-30T17:34:48Z",
+          "updatedAt": "2025-06-30T17:37:50Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "This reads a bit awkwardly, how about:\r\n```suggestion\r\nhave been sent and have not been acknowledged or\r\nmarked as lost since their last transmission\r\n```",
+              "createdAt": "2025-06-30T17:34:48Z",
+              "updatedAt": "2025-06-30T17:37:50Z"
+            },
+            {
+              "originalPosition": 17,
+              "body": "This said (measured in octets or packets) is it important to preserve that?",
+              "createdAt": "2025-06-30T17:35:58Z",
+              "updatedAt": "2025-06-30T17:37:50Z"
+            },
+            {
+              "originalPosition": 79,
+              "body": "```suggestion\r\n    C.cwnd = C.inflight + 1\r\n```",
+              "createdAt": "2025-06-30T17:36:32Z",
+              "updatedAt": "2025-06-30T17:37:50Z"
+            },
+            {
+              "originalPosition": 88,
+              "body": "Did you mean to make this change?\r\n\r\n```suggestion\r\nbelow), its goal is to quickly reduce C.inflight and drain\r\n```",
+              "createdAt": "2025-06-30T17:37:20Z",
+              "updatedAt": "2025-06-30T17:37:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6xJzrI",
+          "commit": {
+            "abbreviatedOid": "b14301e"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-30T17:44:28Z",
+          "updatedAt": "2025-06-30T17:44:28Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "I thought about that, but C.inflight (in the pre-existing BBR draft text) is already defined in terms of \"number of bytes\".  Plus  \"pipe\" from {{RFC6675}}  and \"bytes_in_flight\" from {{RFC9002}} are both explicitly defined in bytes, so if we want to cross-reference those we should probably stick with bytes, for consistency. So IMHO we should stick with bytes. The whole doc will need an overhaul to use bytes, but we have an open issue for that anyway: https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/27",
+              "createdAt": "2025-06-30T17:44:28Z",
+              "updatedAt": "2025-06-30T17:44:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6xJ2sh",
+          "commit": {
+            "abbreviatedOid": "143bd00"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-06-30T17:48:41Z",
+          "updatedAt": "2025-06-30T17:48:41Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
