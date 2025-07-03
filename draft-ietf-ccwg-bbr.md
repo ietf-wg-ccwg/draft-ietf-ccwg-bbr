@@ -1171,7 +1171,7 @@ packet, i.e., the packet with the highest "P.delivered" value.
   /* Upon receiving ACK, fill in delivery rate sample RS. */
   GenerateRateSample(RS):
     for each newly acknowledged packet P
-      UpdateRateSample(P, rs)
+      UpdateRateSample(P, RS)
 
     /* Clear app-limited field if bubble is ACKed and gone. */
     if (C.app_limited and C.delivered > C.app_limited)
