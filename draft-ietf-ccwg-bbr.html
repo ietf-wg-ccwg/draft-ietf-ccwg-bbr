@@ -1590,7 +1590,7 @@ the time of the transmission of the packet that has just been ACKed (the
 most recently sent segment among segments ACKed by the ACK that was just
 received).<a href="#section-2.3-6" class="pilcrow">¶</a></p>
 <p id="section-2.3-7">RS.lost: The volume of data that was declared lost between the transmission
-and acknowledgement of the packet that has just been ACKed (the most recently
+and acknowledgment of the packet that has just been ACKed (the most recently
 sent segment among segments ACKed by the ACK that was just received).<a href="#section-2.3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1604,7 +1604,7 @@ the sending connection ensures that C.inflight does not exceed C.cwnd.<a href="#
 <p id="section-2.4-2">C.pacing_rate: The current pacing rate for a BBR flow, which controls
 inter-packet spacing.<a href="#section-2.4-2" class="pilcrow">¶</a></p>
 <p id="section-2.4-3">C.send_quantum: The maximum size of a data aggregate scheduled and transmitted
-together.<a href="#section-2.4-3" class="pilcrow">¶</a></p>
+together as a unit, e.g., to amortize per-packet transmission overheads.<a href="#section-2.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="pacing-state-and-parameters">
@@ -1753,7 +1753,7 @@ inflight_longterm. (Part of the short-term model.)<a href="#section-2.9.2-8" cla
         <h3 id="name-state-for-responding-to-con">
 <a href="#section-2.10" class="section-number selfRef">2.10. </a><a href="#name-state-for-responding-to-con" class="section-name selfRef">State for Responding to Congestion</a>
         </h3>
-<p id="section-2.10-1">RS: The rate sample calculated from the most recent acknowledgement.<a href="#section-2.10-1" class="pilcrow">¶</a></p>
+<p id="section-2.10-1">RS: The rate sample calculated from the most recent acknowledgment.<a href="#section-2.10-1" class="pilcrow">¶</a></p>
 <p id="section-2.10-2">BBR.bw_latest: a 1-round-trip max of delivered bandwidth (RS.delivery_rate).<a href="#section-2.10-2" class="pilcrow">¶</a></p>
 <p id="section-2.10-3">BBR.inflight_latest: a 1-round-trip max of delivered volume of data
 (RS.delivered).<a href="#section-2.10-3" class="pilcrow">¶</a></p>
@@ -2058,20 +2058,8 @@ abated and more capacity is available.<a href="#section-3.4.2.3-1" class="pilcro
 <p id="section-3.5-1">BBR uses its model to control the connection's sending behavior. Rather than
 using a single control parameter, like the C.cwnd parameter that limits
 C.inflight in the Reno and CUBIC congestion control algorithms,
-BBR uses three distinct control parameters:<a href="#section-3.5-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-3.5-2">
-<li id="section-3.5-2.1">
-            <p id="section-3.5-2.1.1">C.pacing_rate: the maximum rate at which BBR sends data.<a href="#section-3.5-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-3.5-2.2">
-            <p id="section-3.5-2.2.1">C.send_quantum: the maximum size of any aggregate that the transport sender
-  implementation may need to transmit as a unit to amortize per-packet
-  transmission overheads.<a href="#section-3.5-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-3.5-2.3">
-            <p id="section-3.5-2.3.1">C.cwnd: the maximum C.inflight BBR allows.<a href="#section-3.5-2.3.1" class="pilcrow">¶</a></p>
-</li>
-        </ol>
+BBR uses three distinct control parameters: C.pacing_race, C.send_quantum,
+and C.cwnd, defined in (<a href="#output-control-parameters" class="auto internal xref">Section 2.4</a>):<a href="#section-3.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="environment-and-usage">
@@ -4004,7 +3992,7 @@ calculates and uses its value. We can group the parameter into three groups:<a h
           </h4>
 <p id="section-5.5.1-1">Several aspects of BBR depend on counting the progress of "packet-timed"
 round trips, which start at the transmission of some segment, and then end
-at the acknowledgement of that segment. BBR.round_count is a count of the number
+at the acknowledgment of that segment. BBR.round_count is a count of the number
 of these "packet-timed" round trips elapsed so far. BBR uses this virtual
 BBR.round_count because it is more robust than using wall clock time. In
 particular, arbitrary intervals of wall clock time can elapse due to
