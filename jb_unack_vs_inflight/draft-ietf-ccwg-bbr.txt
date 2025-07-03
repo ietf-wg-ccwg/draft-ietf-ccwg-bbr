@@ -1098,25 +1098,23 @@ Table of Contents
    deliver that data completely in the sampling interval between now and
    the next ACK.
 
+   Note that this logic uses UnacknowledgedBytes() rather that
+   C.inflight because C.inflight is an estimate based on loss detection
+   heuristics.  It is important to avoid having spurious loss detection
+   episodes cause a spuriously small time interval, causing a spuriously
+   high delivery rate samples.
+
    After each packet transmission, the sender executes the following
    steps:
 
-   Note that this logic uses UnacknowledgedBytes() rather that C.inflight
-   because C.inflight is an estimate based on loss detection heuristics.
-   It is important to avoid having spurious loss detection episodes cause
-   a spuriously small time interval, causing a spuriously high
-   delivery rate samples.
+     OnPacketSent(Packet P):
+       if (UnacknowledgedBytes() == 0)
+         C.first_sent_time  = C.delivered_time = P.sent_time
 
-   After each packet transmission, the sender executes the following steps:
-
-  OnPacketSent(Packet P):
-    if (UnacknowledgedBytes() == 0)
-      C.first_sent_time  = C.delivered_time = P.sent_time
-
-    P.first_sent_time = C.first_sent_time
-    P.delivered_time  = C.delivered_time
-    P.delivered       = C.delivered
-    P.is_app_limited  = (C.app_limited != 0)
+       P.first_sent_time = C.first_sent_time
+       P.delivered_time  = C.delivered_time
+       P.delivered       = C.delivered
+       P.is_app_limited  = (C.app_limited != 0)
 
 4.1.2.3.  Upon receiving an ACK
 

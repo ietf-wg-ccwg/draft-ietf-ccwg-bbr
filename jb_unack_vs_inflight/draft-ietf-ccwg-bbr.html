@@ -2495,17 +2495,14 @@ If there is no data in flight yet, then we can start the delivery rate
 interval at the current time, since we know that any ACKs after now indicate
 that the network was able to deliver that data completely in the sampling
 interval between now and the next ACK.<a href="#section-4.1.2.2-2" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.2-3">After each packet transmission, the sender executes the following steps:<a href="#section-4.1.2.2-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.1.2.2-4">
+<p id="section-4.1.2.2-3">Note that this logic uses UnacknowledgedBytes() rather that C.inflight
+because C.inflight is an estimate based on loss detection heuristics.
+It is important to avoid having spurious loss detection episodes cause
+a spuriously small time interval, causing a spuriously high
+delivery rate samples.<a href="#section-4.1.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.2-4">After each packet transmission, the sender executes the following steps:<a href="#section-4.1.2.2-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.1.2.2-5">
 <pre>
-   Note that this logic uses UnacknowledgedBytes() rather that C.inflight
-   because C.inflight is an estimate based on loss detection heuristics.
-   It is important to avoid having spurious loss detection episodes cause
-   a spuriously small time interval, causing a spuriously high
-   delivery rate samples.
-
-   After each packet transmission, the sender executes the following steps:
-
   OnPacketSent(Packet P):
     if (UnacknowledgedBytes() == 0)
       C.first_sent_time  = C.delivered_time = P.sent_time
@@ -2514,7 +2511,7 @@ interval between now and the next ACK.<a href="#section-4.1.2.2-2" class="pilcro
     P.delivered_time  = C.delivered_time
     P.delivered       = C.delivered
     P.is_app_limited  = (C.app_limited != 0)
-</pre><a href="#section-4.1.2.2-4" class="pilcrow">¶</a>
+</pre><a href="#section-4.1.2.2-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
