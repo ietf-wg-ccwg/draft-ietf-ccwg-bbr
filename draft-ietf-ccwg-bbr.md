@@ -346,7 +346,7 @@ most recently sent segment among segments ACKed by the ACK that was just
 received).
 
 RS.lost: The volume of data that was declared lost between the transmission
-and acknowledgement of the packet that has just been ACKed (the most recently
+and acknowledgment of the packet that has just been ACKed (the most recently
 sent segment among segments ACKed by the ACK that was just received).
 
 
@@ -359,7 +359,7 @@ C.pacing_rate: The current pacing rate for a BBR flow, which controls
 inter-packet spacing.
 
 C.send_quantum: The maximum size of a data aggregate scheduled and transmitted
-together.
+together as a unit, e.g., to amortize per-packet transmission overheads.
 
 
 ## Pacing State and Parameters {#pacing-state-and-parameters}
@@ -504,7 +504,7 @@ inflight_longterm. (Part of the short-term model.)
 
 ## State for Responding to Congestion {#state-for-responding-to-congestion}
 
-RS: The rate sample calculated from the most recent acknowledgement.
+RS: The rate sample calculated from the most recent acknowledgment.
 
 BBR.bw_latest: a 1-round-trip max of delivered bandwidth (RS.delivery_rate).
 
@@ -751,15 +751,8 @@ abated and more capacity is available.
 BBR uses its model to control the connection's sending behavior. Rather than
 using a single control parameter, like the C.cwnd parameter that limits
 C.inflight in the Reno and CUBIC congestion control algorithms,
-BBR uses three distinct control parameters:
-
-1. C.pacing_rate: the maximum rate at which BBR sends data.
-
-2. C.send_quantum: the maximum size of any aggregate that the transport sender
-  implementation may need to transmit as a unit to amortize per-packet
-  transmission overheads.
-
-3. C.cwnd: the maximum C.inflight BBR allows.
+BBR uses three distinct control parameters: C.pacing_race, C.send_quantum,
+and C.cwnd, defined in ({{output-control-parameters}}):
 
 ## Environment and Usage {#environment-and-usage}
 
@@ -2446,7 +2439,7 @@ calculates and uses its value. We can group the parameter into three groups:
 
 Several aspects of BBR depend on counting the progress of "packet-timed"
 round trips, which start at the transmission of some segment, and then end
-at the acknowledgement of that segment. BBR.round_count is a count of the number
+at the acknowledgment of that segment. BBR.round_count is a count of the number
 of these "packet-timed" round trips elapsed so far. BBR uses this virtual
 BBR.round_count because it is more robust than using wall clock time. In
 particular, arbitrary intervals of wall clock time can elapse due to
