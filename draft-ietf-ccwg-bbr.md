@@ -1177,6 +1177,11 @@ C.pending_transmissions: The number of bytes queued for transmission on the
 sending host at layers lower than the transport layer (i.e. network layer,
 traffic shaping layer, network device layer).
 
+C.unacked: The amount of data that has been sent and not yet acknowledged,
+including data marked as lost. For TCP, this is SND.NXT - SND.UNA. For QUIC,
+this is the data in sent packets that the sender is still tracking for
+acknowledgment, including packets declared lost.
+
 C.lost_out: The amount of data in the current outstanding window that
 is marked as lost.
 
@@ -1254,19 +1259,25 @@ information in per-packet state. This will allow the sender
 to generate a rate sample later, in the UpdateRateSample() step, when the
 packet is (S)ACKed.
 
-If there are packets already in flight, then we need to start delivery rate
+If there is already unacknowledged data, then we need to start delivery rate
 samples from the time we received the most recent ACK, to try to ensure that
 we include the full time the network needs to deliver all in-flight data.
-If there is no data in flight yet, then we can start the delivery rate
+If there is no unacknowledged data, then we can start the delivery rate
 interval at the current time, since we know that any ACKs after now indicate
 that the network was able to deliver that data completely in the sampling
 interval between now and the next ACK.
+
+Note that this logic uses C.unacked rather than C.inflight
+because C.inflight is an estimate based on loss detection heuristics.
+It is important to avoid having spurious loss detection episodes cause
+a spuriously small time interval, causing spuriously high
+delivery rate samples.
 
 After each packet transmission, the sender executes the following steps:
 
 ~~~~
   OnPacketSent(Packet P):
-    if (C.inflight == 0)
+    if (C.unacked == 0)
       C.first_send_time  = C.delivered_time = P.send_time
 
     P.first_send_time = C.first_send_time
