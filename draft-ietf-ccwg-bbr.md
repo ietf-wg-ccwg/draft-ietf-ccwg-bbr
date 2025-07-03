@@ -1143,11 +1143,17 @@ interval at the current time, since we know that any ACKs after now indicate
 that the network was able to deliver that data completely in the sampling
 interval between now and the next ACK.
 
+Note that this logic uses UnacknowledgedBytes() rather that C.inflight
+because C.inflight is an estimate based on loss detection heuristics.
+It is important to avoid having spurious loss detection episodes cause
+a spuriously small time interval, causing a spuriously high
+delivery rate samples.
+
 After each packet transmission, the sender executes the following steps:
 
 ~~~~
   OnPacketSent(Packet P):
-    if (C.inflight == 0)
+    if (UnacknowledgedBytes() == 0)
       C.first_sent_time  = C.delivered_time = P.sent_time
 
     P.first_sent_time = C.first_sent_time
