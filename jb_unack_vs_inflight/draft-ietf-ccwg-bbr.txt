@@ -1101,7 +1101,7 @@ Table of Contents
    After each packet transmission, the sender executes the following
    steps:
 
-   Note that this logic uses UnacknolwedgedBytes() rather that C.inflight
+   Note that this logic uses UnacknowledgedBytes() rather that C.inflight
    because C.inflight is an estimate based on loss detection heuristics.
    It is important to avoid having spurious loss detection episodes cause
    a spuriously small time interval, causing a spuriously high
@@ -1110,7 +1110,7 @@ Table of Contents
    After each packet transmission, the sender executes the following steps:
 
   OnPacketSent(Packet P):
-    if (UnacknolwedgedBytes() == 0)
+    if (UnacknowledgedBytes() == 0)
       C.first_sent_time  = C.delivered_time = P.sent_time
 
     P.first_sent_time = C.first_sent_time
