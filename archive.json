@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-03T01:45:46.937999+00:00",
+  "timestamp": "2025-07-06T01:53:34.730173+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -704,15 +704,39 @@
       "id": "I_kwDOL3MllM641bvr",
       "title": "integrate steps for delivery rate samples into BBR pseudocode",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/49",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "\n@jbeshay in PR #43 noted:\n\n\"we should also integrate the delivery estimate pseudocode a like we do with other parts. I.e. BBR ack processing and packet transmission references restart from idle and model update pseudocode but not rate estimation.\"\n\nFiling this issue so that does not fall through the cracks.\n\ncc: @jbeshay @ianswett \n",
       "createdAt": "2025-05-29T17:35:03Z",
-      "updatedAt": "2025-05-29T17:35:03Z",
-      "closedAt": null,
+      "updatedAt": "2025-07-03T20:00:55Z",
+      "closedAt": "2025-07-03T20:00:55Z",
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Closed by #50 ",
+          "createdAt": "2025-07-03T20:00:55Z",
+          "updatedAt": "2025-07-03T20:00:55Z"
+        }
+      ]
+    },
+    {
+      "number": 54,
+      "id": "I_kwDOL3MllM6-w7Yc",
+      "title": "Remove duplicate definitions for output control parameters",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/54",
+      "state": "CLOSED",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "There are duplicate definitions under \"Output Control Parameters\" and \"Control Parameter Overview\"",
+      "createdAt": "2025-07-03T19:59:49Z",
+      "updatedAt": "2025-07-03T20:50:53Z",
+      "closedAt": "2025-07-03T20:50:53Z",
       "comments": []
     }
   ],
@@ -2828,24 +2852,26 @@
       "id": "PR_kwDOL3MllM6ZG64g",
       "title": "Improve consistency between core BBR and delivery rate estimation pseudocode",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/50",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
-      "body": "This is an attempt to make the pseudocode for BBR and the delivery estimation work together a little bit better.\r\n- Adds BBR.rs as a new BBR state variable rather than using \"rs\" ambiguously.\r\n- Adds C.min_rtt instead of MinRTT(tp) that was used by the delivery estimation psuedocode but not defined.\r\n- Remove usage of SND.NXT and SND.UNA\r\n- BBRUpdateOnAck now calls GenerateRateSample().\r\n\r\nBBROnTransmit() and OnPacketSent() are still separate because the former is before a packet is transmitted and the latter is after.\r\n\r\nAddresses #49 ",
+      "body": "This is an attempt to make the pseudocode for BBR and the delivery estimation work together a little bit better.\r\n- Adds RS as a new BBR state variable.\r\n- Adds C.min_rtt instead of MinRTT(tp) that was used by the delivery estimation psuedocode but not defined.\r\n- Remove usage of SND.NXT and SND.UNA\r\n- BBRUpdateOnAck now calls GenerateRateSample().\r\n\r\nBBROnTransmit() and OnPacketSent() are still separate because the former is before a packet is transmitted and the latter is after.\r\n\r\nAddresses #49 ",
       "createdAt": "2025-06-04T23:54:22Z",
-      "updatedAt": "2025-07-02T23:14:11Z",
+      "updatedAt": "2025-07-03T20:06:14Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
-      "baseRefOid": "ced56e9fe21f83fcf16253406defafdd6905a130",
+      "baseRefOid": "1afb70ea0bc729f50333405a706b78d970c01477",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_integrate_bwest_pseudocode",
-      "headRefOid": "d344394c1a9314d57241a1f0aa8bc79a7a98eabb",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "82ebc3b4ae95abfdcc6453e18fa71e39a7bee3ea",
+      "closedAt": "2025-07-03T20:00:13Z",
+      "mergedAt": "2025-07-03T20:00:13Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "5ef7c04fbf2e2668e7ccc4b4d33546eff56828df"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -2874,6 +2900,20 @@
           "body": "The reason I initially added BBR.rs is to make a distinction between the definition of fields in the rate sampling section from the rate sample variable in the BBR algorithm, but I see that it can also be confusing. I will update the diff according to Neal's suggestions above.",
           "createdAt": "2025-07-02T23:14:11Z",
           "updatedAt": "2025-07-02T23:14:11Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@nealcardwell Thanks. I will open another PR to address your comments shortly.",
+          "createdAt": "2025-07-03T20:05:33Z",
+          "updatedAt": "2025-07-03T20:05:33Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> @nealcardwell Thanks. I will open another PR to address your comments shortly.\r\n\r\nGreat, thanks! :-)\r\n",
+          "createdAt": "2025-07-03T20:06:14Z",
+          "updatedAt": "2025-07-03T20:06:14Z"
         }
       ],
       "reviews": [
@@ -2902,6 +2942,84 @@
           "createdAt": "2025-06-18T20:34:55Z",
           "updatedAt": "2025-06-18T20:34:55Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM6x4Kcy",
+          "commit": {
+            "abbreviatedOid": "8764e2d"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "It looks like one variable might be defined twice in slightly different ways, but that's not new, so LGTM.",
+          "createdAt": "2025-07-03T18:42:45Z",
+          "updatedAt": "2025-07-03T18:46:32Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "This appears to be a duplicate definition.  Can we combine them?",
+              "createdAt": "2025-07-03T18:42:45Z",
+              "updatedAt": "2025-07-03T18:46:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6x4-ao",
+          "commit": {
+            "abbreviatedOid": "8764e2d"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-03T19:58:43Z",
+          "updatedAt": "2025-07-03T19:58:43Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "The the three output parameters are defined twice. I will open a separate issue to track that.\r\n\r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/54",
+              "createdAt": "2025-07-03T19:58:43Z",
+              "updatedAt": "2025-07-03T20:00:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6x4lA8",
+          "commit": {
+            "abbreviatedOid": "8764e2d"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Thanks, Joseph! This is a very nice improvements. A few quick thoughts...",
+          "createdAt": "2025-07-03T19:09:02Z",
+          "updatedAt": "2025-07-03T20:03:12Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "Good catch! Let's keep a C.send_quantum definition in the \"Output Control Parameters\" section above and drop this one.\r\n\r\nI would suggest melding the definitions together into the following:\r\n\r\nC.send_quantum: The maximum size of a data aggregate scheduled and transmitted\r\ntogether as a unit, e.g., to amortize per-packet transmission overheads.\r\n",
+              "createdAt": "2025-07-03T19:09:02Z",
+              "updatedAt": "2025-07-03T20:03:12Z"
+            },
+            {
+              "originalPosition": 77,
+              "body": "Looks like this C.pacing_rate definition is a duplicate definition as well. I'd suggest dropping this definition and keeping the definition in the \"Output Control Parameters\" section above. I prefer the definition above (\"The current pacing rate for a BBR flow, which controls inter-packet spacing\"), unless someone has another suggestion.\r\n\r\nOr feel free to put that in a separate PR if you prefer. Or I can do it if you prefer.... :-)\r\n",
+              "createdAt": "2025-07-03T19:11:55Z",
+              "updatedAt": "2025-07-03T20:03:12Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "nit: s/acknowledgement/acknowledgment/ since the doc tries to be consistent in using the \"acknowledgment\" version (without the \"e\" after \"g\") that seems to be the primary spelling in IETF RFCS (at least https://datatracker.ietf.org/doc/html/rfc9293 and https://datatracker.ietf.org/doc/html/rfc5681 and https://datatracker.ietf.org/doc/html/rfc9000 ).\r\n\r\nThough I see there are 2 existing spots in the doc that use \"acknowledgement\" if you want to fix those as well... (Or I can, if you prefer...)\r\n",
+              "createdAt": "2025-07-03T19:19:30Z",
+              "updatedAt": "2025-07-03T20:03:12Z"
+            },
+            {
+              "originalPosition": 134,
+              "body": "The (SND.NXT == SND.UNA) rather than (C.inflight == 0) was intentional.\r\n\r\nIn TCP BBR we started with (C.inflight == 0) but then changed to (SND.NXT == SND.UNA) because C.inflight == 0)  caused buggy behavior.  Here is the comment and code we put in the Linux TCP rate sample code at that spot:\r\n\r\n```\r\n\t  * Note that we use packets_out instead of tcp_packets_in_flight(tp)\r\n\t  * because the latter is a guess based on RTO and loss-marking\r\n\t  * heuristics. We don't want spurious RTOs or loss markings to cause\r\n\t  * a spuriously small time interval, causing a spuriously high\r\n\t  * bandwidth estimate.\r\n\tif (!tp->packets_out) {\r\n\t\tu64 tstamp_us = tcp_skb_timestamp_us(skb);\r\n\r\n\t\ttp->first_tx_mstamp  = tstamp_us;\r\n\t\ttp->delivered_mstamp = tstamp_us;\r\n\t}\t \r\n```\r\n\r\nNot sure how to express this in a transport-agnostic way that would work for TCP and QUIC. How about something like:\r\n\r\n```\r\n   Note that this logic uses UnacknolwedgedBytes() rather that C.inflight\r\n   because C.inflight is an estimate based on loss detection heuristics.\r\n   It is important to avoid having spurious loss detection episodes cause\r\n   a spuriously small time interval, causing a spuriously high\r\n   delivery rate samples.\r\n\r\n   After each packet transmission, the sender executes the following steps:\r\n\r\n   if (UnacknolwedgedBytes() == 0)\r\n```\r\n\r\n",
+              "createdAt": "2025-07-03T19:37:40Z",
+              "updatedAt": "2025-07-03T20:03:12Z"
+            }
+          ]
         }
       ]
     },
@@ -3251,6 +3369,163 @@
           "body": "",
           "createdAt": "2025-06-30T17:48:41Z",
           "updatedAt": "2025-06-30T17:48:41Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 55,
+      "id": "PR_kwDOL3MllM6dVRnH",
+      "title": "Remove duplicate definitions for the output parameters and fix \"acknowledgment\" spelling",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/55",
+      "state": "MERGED",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "* Remove duplicate definitions for the output parameters\r\n* Use consistent spelling for \"acknowledgment\"\r\n\r\nFixes https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/54",
+      "createdAt": "2025-07-03T20:38:48Z",
+      "updatedAt": "2025-07-03T20:50:59Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "5ef7c04fbf2e2668e7ccc4b4d33546eff56828df",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_fixdupdefs",
+      "headRefOid": "53850f3a3f19a8720d581494aa2d0c86d8f26545",
+      "closedAt": "2025-07-03T20:50:52Z",
+      "mergedAt": "2025-07-03T20:50:52Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "2f894a4a1abba33774ea2403404a715b1ed51768"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6x5aBM",
+          "commit": {
+            "abbreviatedOid": "53850f3"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thanks!\r\n",
+          "createdAt": "2025-07-03T20:45:26Z",
+          "updatedAt": "2025-07-03T20:45:26Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 56,
+      "id": "PR_kwDOL3MllM6dVVdX",
+      "title": "Clarify Unacknowledged rather than inflight for rate sample",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/56",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Neal noted this difference between unacknowledged and inflight in this comment: \r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/50#discussion_r2183626841",
+      "createdAt": "2025-07-03T20:44:15Z",
+      "updatedAt": "2025-07-05T20:14:50Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "2f894a4a1abba33774ea2403404a715b1ed51768",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_unack_vs_inflight",
+      "headRefOid": "5ba2408e4f4cbc0fb71a888cb67196302cfbd0bd",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I'm a bit unclear as to what the difference is between inflight and UnacknowledgedBytes()?\r\n\r\nWhat I meant was something like:\r\n\r\ninflight = \"bytes that are estimated to be in flight in the network somewhere, given loss detection estimates\"\r\ninflight = bytes_sent - bytes_acked - bytes_lost\r\n\r\nUnacknowledgedBytes() = \"bytes that might conceivably be ACKed at some point in the future\"\r\nUnacknowledgedBytes() = bytes_sent - bytes_acked\r\n\r\n> For QUIC, there will be packets that will never be acknowledged, and in some cases the data in those packets might never be acknowledged because the stream was cancelled.\r\n\r\nBasically the intent is that we only want to advance C.first_sent_time and C.delivered_time to P.sent_time if the connection is absolutely certain there is nothing in the network that could be ACKed in the future.\r\n\r\n@ianswett @jbeshay  Any ideas on how to express that better, in a transport-agnostic way?\r\n\r\nWhat does Google QUIC BBR use for this logic?\r\n\r\nHow about MVFST QUIC BBR?\r\n",
+          "createdAt": "2025-07-04T18:06:55Z",
+          "updatedAt": "2025-07-04T18:06:55Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> \r\n> @ianswett @jbeshay Any ideas on how to express that better, in a transport-agnostic way?\r\n> \r\n> What does Google QUIC BBR use for this logic?\r\n\r\nWe use inflight instead.  In QUIC, a packet sent a long time ago might be ACKed, but at some point you decide it's unlikely enough.  I believe one big difference is that when PTO (aka RTO) fires in QUIC, inflight > 0, but I think TCP declares everything unacked as lost and starts over?  Put another way, QUIC never declares a packet lost due to an RTO/PTO.  Is this the main problematic case, or are there others?   If this is it, we could check bytes_in_flight == 0 and that we're not in RTO?\r\n\r\n> \r\n> How about MVFST QUIC BBR?\r\n\r\n",
+          "createdAt": "2025-07-05T20:14:50Z",
+          "updatedAt": "2025-07-05T20:14:50Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6x5bgW",
+          "commit": {
+            "abbreviatedOid": "39f9942"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-03T20:47:20Z",
+          "updatedAt": "2025-07-03T20:47:26Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "nit: typo (sorry if that was my typo!) s/UnacknolwedgedBytes()/UnacknowledgedBytes()/\r\n",
+              "createdAt": "2025-07-03T20:47:20Z",
+              "updatedAt": "2025-07-03T20:47:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6x5jvN",
+          "commit": {
+            "abbreviatedOid": "59ccc59"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-03T20:56:39Z",
+          "updatedAt": "2025-07-03T20:56:43Z",
+          "comments": [
+            {
+              "originalPosition": 3,
+              "body": "Oops, sorry I wasn't more clear... I was intending to keep the \"After each packet transmission, the sender executes the following steps:\" phrase in the prose (not pseudocode) and to put the new \"Note that this logic uses UnacknowledgedBytes()...\" paragraph in the prose paragraph before the \"After each packet transmission, the sender executes the following steps:\" phrase.\r\n\r\nSo can we move the ~~~~ marker so that it remains on the line before the OnPacketSent()?\r\n",
+              "createdAt": "2025-07-03T20:56:40Z",
+              "updatedAt": "2025-07-03T20:56:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6x5mLF",
+          "commit": {
+            "abbreviatedOid": "59ccc59"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-03T20:59:31Z",
+          "updatedAt": "2025-07-03T20:59:31Z",
+          "comments": [
+            {
+              "originalPosition": 3,
+              "body": "No worries. I didn't read it very well either. I just copy/pasted into a new PR :)",
+              "createdAt": "2025-07-03T20:59:31Z",
+              "updatedAt": "2025-07-03T20:59:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6x6XVL",
+          "commit": {
+            "abbreviatedOid": "5ba2408"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "I'm a bit unclear as to what the difference is between inflight and UnacknowledgedBytes()?\r\n\r\nFor QUIC, there will be packets that will never be acknowledged, and in some cases the data in those packets might never be acknowledged because the stream was cancelled.",
+          "createdAt": "2025-07-03T22:27:22Z",
+          "updatedAt": "2025-07-03T22:27:22Z",
           "comments": []
         }
       ]
