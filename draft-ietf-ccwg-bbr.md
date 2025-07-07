@@ -1252,7 +1252,7 @@ application-limited:
 
 ~~~~
   CheckIfApplicationLimited():
-    if (NoDataToWrite() and
+    if (NoUnsentData() and
         C.pending_transmissions == 0 and
         C.inflight < C.cwnd and
         C.lost_out <= C.retrans_out)
