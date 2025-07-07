@@ -2612,7 +2612,7 @@ application-limited:<a href="#section-4.1.2.4-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1.2.4-4">
 <pre>
   CheckIfApplicationLimited():
-    if (NoDataToWrite() and
+    if (NoUnsentData() and
         C.pending_transmissions == 0 and
         C.inflight &lt; C.cwnd and
         C.lost_out &lt;= C.retrans_out)
