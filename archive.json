@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-06T01:53:34.730173+00:00",
+  "timestamp": "2025-07-08T01:46:21.350021+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -2624,7 +2624,7 @@
       "labels": [],
       "body": "Fix the pacing specification in \"Tracking application-limited phases\" section.\r\n\r\nThe previous text, \"The sending flow is not currently in the process of transmitting a packet,\" was an imprecise description of the condition that was checked in the Linux TCP stack to handle tracking of application-limited traffic for fq-based pacing. But this text was not precise, and does not correctly capture the checks needed for other pacing implementations.\r\n\r\nFixes #42",
       "createdAt": "2025-05-29T00:01:59Z",
-      "updatedAt": "2025-05-29T23:09:02Z",
+      "updatedAt": "2025-07-08T00:56:56Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b61a33f73bb464e1ef9663d29407f9763a57b62f",
@@ -2635,7 +2635,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> 2. All the packets considered lost have been retransmitted.\r\n\r\nThis doesn't work well for QUIC, where packets are never retransmitted.\r\n\r\n\r\nCan we write something based on what @huitema suggested, and possibly add a few more other examples (data to retransmit, is data queued, etc)?\r\n\r\nChristian's suggestion:\r\n\"The algorithm detects that an application-limited phase has started when\r\ncongestion control and pacing control would have allowed the application to send data,\r\nand the application had nothing to send. The precise determination of this\r\ncondition depends on how the application uses mechanisms to implement pacing,\r\nbatching, GSO/TSO/offload/etc.\"\r\n\r\n",
+          "createdAt": "2025-07-08T00:56:56Z",
+          "updatedAt": "2025-07-08T00:56:56Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM6renEy",
@@ -2787,6 +2795,26 @@
               "body": "@ianswett, you may well be right. But \"the congestion controller asked for data\" is kinda application specific. Maybe specify the intent, and then add a qualifier. Such as:\r\n\r\nThe algorithm detects that an application-limited phase has started when\r\ncongestion control and pacing control would have allowed the application to send data, \r\nand the application had nothing to send. The precise determination of this\r\ncondition depends on how the application uses mechanisms to implement pacing,\r\nbatching, GSO/TSO/offload/etc.\r\n",
               "createdAt": "2025-05-29T23:09:01Z",
               "updatedAt": "2025-05-29T23:09:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6roCOQ",
+          "commit": {
+            "abbreviatedOid": "61155b4"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "I just realized that this long post I drafted on May 29 is still considered by github to be \"pending\", and did not get sent, I guess. so I'm posting now...\r\n\r\n(this is my post starting: 'I am considering some alternatives based on the suggestion ...')",
+          "createdAt": "2025-05-29T19:31:41Z",
+          "updatedAt": "2025-07-07T19:45:35Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "I am considering some alternatives based on the suggestion from @huitema :\r\n\r\n(1) \"The pacing enforcement mechanism permits a train of packets to be sent now.\": IMHO this is not a good option because \"train\" is not defined or even mentioned in the draft. :-)\r\n\r\n(2) \"The pacing enforcement mechanism permits a full quantum of packets to be sent now.\": this is well-defined, but AFAICT is incorrect. If newly-available data arrives at the connection and the pacing mechanism allows sending even a single packet, then that connection was not pacing limited, but rather was application-limited (essentially, waiting for the application to send that single packet that was already permisable to send).\r\n\r\n(3) One potential way to perhaps clear up some of the fuzziness would be to mention the quantum enforcement explicitly. Something like the following (note the new number 4 item):\r\n\r\n```\r\n2. All the packets considered lost have been retransmitted.\r\n\r\n3. The sending flow is not currently in the process of transmitting a packet.\r\n\r\n4. The quantum scheduler permits an aggregate containing one or more packets to be sent now.\r\n\r\n6. The pacing enforcement mechanism permits a packet to be sent now.\r\n\r\n7. The congestion window permits a packet to be sent now, i.e.,\r\n   C.inflight is less than C.cwnd.\r\n\r\n```\r\n@ianswett @jbeshay @huitema what do you think of this version (3)?\r\n\r\n@huitema : if you don't like this (3) proposal, to ease the process of making forward progress, can you please make a specific, concrete suggestion for text you would like to see?\r\n",
+              "createdAt": "2025-05-29T19:31:41Z",
+              "updatedAt": "2025-07-07T19:45:35Z"
             }
           ]
         }
@@ -3427,7 +3455,7 @@
       "labels": [],
       "body": "Neal noted this difference between unacknowledged and inflight in this comment: \r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/50#discussion_r2183626841",
       "createdAt": "2025-07-03T20:44:15Z",
-      "updatedAt": "2025-07-05T20:14:50Z",
+      "updatedAt": "2025-07-07T17:32:45Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "2f894a4a1abba33774ea2403404a715b1ed51768",
@@ -3452,6 +3480,34 @@
           "body": "> \r\n> @ianswett @jbeshay Any ideas on how to express that better, in a transport-agnostic way?\r\n> \r\n> What does Google QUIC BBR use for this logic?\r\n\r\nWe use inflight instead.  In QUIC, a packet sent a long time ago might be ACKed, but at some point you decide it's unlikely enough.  I believe one big difference is that when PTO (aka RTO) fires in QUIC, inflight > 0, but I think TCP declares everything unacked as lost and starts over?  Put another way, QUIC never declares a packet lost due to an RTO/PTO.  Is this the main problematic case, or are there others?   If this is it, we could check bytes_in_flight == 0 and that we're not in RTO?\r\n\r\n> \r\n> How about MVFST QUIC BBR?\r\n\r\n",
           "createdAt": "2025-07-05T20:14:50Z",
           "updatedAt": "2025-07-05T20:14:50Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> > @ianswett @jbeshay Any ideas on how to express that better, in a transport-agnostic way?\r\n> > What does Google QUIC BBR use for this logic?\r\n> \r\n> We use inflight instead. In QUIC, a packet sent a long time ago might be ACKed, but at some point you decide it's unlikely enough. I believe one big difference is that when PTO (aka RTO) fires in QUIC, inflight > 0, but I think TCP declares everything unacked as lost and starts over? Put another way, QUIC never declares a packet lost due to an RTO/PTO. \r\n\r\nFWIW, in TCP PTO and RTO are very different:\r\n\r\n+ At PTO, nothing is marked lost,  cwnd stays the same, and the sender sends 1 packet.\r\n\r\n+ At RTO, everything sent more than 1 RTT ago is marked as lost, cwnd is reset to inflight + 1 packet, and the sender sends 1 packet.\r\n\r\n> Is this the main problematic case, or are there others? If this is it, we could check bytes_in_flight == 0 and that we're not in RTO?\r\n\r\nThe problematic case is a spurious loss detection event: the data-sending connection thinks there is nothing in the network that could be ACKed in the future, but the connection is wrong; there is something in the network that is ACKed in the future.\r\n\r\nRTO is one of the problematic cases, but the problematic case can happen with any kind of loss recovery, including ACK/SACK-triggered fast recovery. Any decision that a packet was lost in the network is a heuristic, and can be wrong; the packet may simply have been delayed or reordered.\r\n\r\nThis code path that sets \"C.first_sent_time = C.delivered_time = P.sent_time\", is basically switching from the normal \"delivery_rate = \u0394delivered /\u0394time\" calculation to a \"delivery_rate = \u0394delivered / RTT\" calculation.\r\n\r\nIf there is a spurious loss detection event, and the delivery rate sampling code thinks inflight is 0, and erroneously executes this code path to set \"C.first_sent_time = C.delivered_time = P.sent_time\", then basically the data sender is erroneously switching from the normal \"delivery_rate = \u0394delivered /\u0394time\" calculation to a \"delivery_rate = \u0394delivered / RTT\" calculation.\r\n\r\nAs noted in slides 7-8 that I cooked for the BBR IETF 99 slides ( https://www.ietf.org/proceedings/99/slides/slides-99-iccrg-iccrg-presentation-2-00.pdf ) the \"delivery_rate = \u0394delivered / RTT\" approach is not safe in the general case where data is outstanding at the time of transmission.\r\n\r\n+ Here is what  \"delivery_rate = \u0394delivered /\u0394time\"  looks like: https://www.ietf.org/proceedings/99/slides/slides-99-iccrg-iccrg-presentation-2-00.pdf#page=7\r\n\r\n+ Here is what \"delivery_rate = \u0394delivered / RTT\" looks like: https://www.ietf.org/proceedings/99/slides/slides-99-iccrg-iccrg-presentation-2-00.pdf#page=8\r\n\r\nIn the diagram, note that the \"delivery_rate = \u0394delivered / RTT\" approach overestimates the slope of the \"y = delivered packets vs x = time\" step function, by calculating the slope of a line that is neither tangent to the \"knee\" of each step, nor tangent to the \"ankle\" of each step. The problem with \"delivery_rate = \u0394delivered / RTT\" is that it can essentially estimate an inter-ACK delay of epsilon seconds instead of the real inter-ACK delay represented by the \"knee to knee\" (or \"ankle to ankle\") time.\r\n\r\nAFAICT, when erroneously using \"delivery_rate = \u0394delivered / RTT\", a plausible worst-case delivery rate overestimation factor is something like 3x. That's in the case where the delivery rate for the path is 1 packet per RTT, and the connection has 2 packets in flight, spuriously marks both packets as lost, transmits a new packet, then epsilon secs later gets the ACKs for the 2 packets it spuriously marked as lost, then 1 RTT later gets the ACK for the 1 packet it most recently transmitted. That causes the delivery_rate sample to be \"delivery_rate = (3 packets) / (1 RTT) = 3 packets/RTT\" when the real delivery_rate is 1 packet/RTT.\r\n\r\nThis is an issue I noticed in actual testing, not a purely theoretical issue, and (at least in TCP) the fix is simple, has 0 space overhead, and actually makes the code faster than using inflight.\r\n\r\nSo IMHO it's important that both the spec and the QUIC implementations use UnacknolwedgedBytes() here. :-)\r\n\r\nSo IMHO we just have to figure out how to express this in a clear and transport-agnostic way. I think this boils down to needing to find a way to express \"there is nothing in the network that could be ACKed in the future\" in a transport-agnostic way. In TCP this is a simple (SND.NXT == SND.UNA)... but I don't know how to express this in QUIC... :-)\r\n\r\n",
+          "createdAt": "2025-07-06T14:25:55Z",
+          "updatedAt": "2025-07-06T14:30:53Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks for the explanation, this makes sense.  The solution is not immediately obvious, but let me add some more detail.\r\n\r\nThe only way a QUIC packet could not be ACKed in the future in our code is if the data structure that tracks sent packets stopped tracking the packet because it was 'Useless', because it's already been ACKed, the keys were discarded, etc.\r\n\r\nThe case where bytes_in_flight is 0, but there is an ackable packet outstanding is if a data packet is spuriously declared lost and prior to that, the stream is cancelled, so there's no data to retransmit.  At that point, bytes_in_flight would be 0, but that spuriously lost packet could still be acked in the future.\r\n\r\nThe cases it's important to use RTT is when coming out of quiescence, correct?  Possibly it'd be easier to determine that at the time we take the bandwidth sample than the time we send the packet?  By then we'd know if indeed nothing was in the network at the time the packet was sent.\r\n\r\n",
+          "createdAt": "2025-07-07T15:49:34Z",
+          "updatedAt": "2025-07-07T15:49:34Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> The only way a QUIC packet could not be ACKed in the future in our code is if the data structure that tracks sent packets stopped tracking the packet because it was 'Useless', because it's already been ACKed, the keys were discarded, etc.\r\n> \r\n> The case where bytes_in_flight is 0, but there is an ackable packet outstanding is if a data packet is spuriously declared lost and prior to that, the stream is cancelled, so there's no data to retransmit. At that point, bytes_in_flight would be 0, but that spuriously lost packet could still be acked in the future.\r\n\r\nI find that confusing. :-)\r\n\r\nI would have thought that it's also possible to have \"bytes_in_flight is 0, but there is an ackable packet outstanding\"  if a data packet is spuriously declared lost and the stream is still active.\r\n\r\nThat's certainly the case in TCP, since there's no cancellation mechanism, so all \"streams\" are always active. :-)\r\n\r\n> The cases it's important to use RTT is when coming out of quiescence, correct? \r\n\r\nYes, exactly.\r\n\r\nDoes QUIC already have a \"coming out of quiescence\" detector? If so, then that would be a good place to fire this logic.\r\n\r\n> Possibly it'd be easier to determine that at the time we take the bandwidth sample than the time we send the packet? By then we'd know if indeed nothing was in the network at the time the packet was sent.\r\n\r\nPossibly. What logic did you have in mind?\r\n",
+          "createdAt": "2025-07-07T16:40:22Z",
+          "updatedAt": "2025-07-07T16:40:22Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> > The only way a QUIC packet could not be ACKed in the future in our code is if the data structure that tracks sent packets stopped tracking the packet because it was 'Useless', because it's already been ACKed, the keys were discarded, etc.\r\n> > The case where bytes_in_flight is 0, but there is an ackable packet outstanding is if a data packet is spuriously declared lost and prior to that, the stream is cancelled, so there's no data to retransmit. At that point, bytes_in_flight would be 0, but that spuriously lost packet could still be acked in the future.\r\n> \r\n> I find that confusing. :-)\r\n\r\nSorry, I can try to explain better, possibly on VC.\r\n\r\n> \r\n> I would have thought that it's also possible to have \"bytes_in_flight is 0, but there is an ackable packet outstanding\" if a data packet is spuriously declared lost and the stream is still active.\r\n> \r\n> That's certainly the case in TCP, since there's no cancellation mechanism, so all \"streams\" are always active. :-)\r\n> \r\n> > The cases it's important to use RTT is when coming out of quiescence, correct?\r\n> \r\n> Yes, exactly.\r\n> \r\n> Does QUIC already have a \"coming out of quiescence\" detector? If so, then that would be a good place to fire this logic.\r\n\r\nThere's a check to skip ProbeRTT if inflight is low for long enough, and there's information about whether BBR is app-limited.  A simple check we could do today is that bytes_in_flight is 0 and we were app-limited?  Though I don't think that's perfect.\r\n\r\n> \r\n> > Possibly it'd be easier to determine that at the time we take the bandwidth sample than the time we send the packet? By then we'd know if indeed nothing was in the network at the time the packet was sent.\r\n> \r\n> Possibly. What logic did you have in mind?\r\n\r\nWhen taking a bandwidth sample, if the P.delivered of any packet being acknowledged is identical to C.delivered, then\r\nno packets were acked since the packet was sent, which I think captures the same logic?",
+          "createdAt": "2025-07-07T17:32:45Z",
+          "updatedAt": "2025-07-07T17:32:45Z"
         }
       ],
       "reviews": [
@@ -3526,6 +3582,86 @@
           "body": "I'm a bit unclear as to what the difference is between inflight and UnacknowledgedBytes()?\r\n\r\nFor QUIC, there will be packets that will never be acknowledged, and in some cases the data in those packets might never be acknowledged because the stream was cancelled.",
           "createdAt": "2025-07-03T22:27:22Z",
           "updatedAt": "2025-07-03T22:27:22Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 57,
+      "id": "PR_kwDOL3MllM6dzVEM",
+      "title": "Remove C.write_seq because it's TCP-specific",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/57",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "C.write_seq and SND.UNA and SND.MSS are only used in one spot in psuedocode, which I attempted to generalize, but there is likely a better approach.",
+      "createdAt": "2025-07-07T17:39:52Z",
+      "updatedAt": "2025-07-07T23:09:43Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "2f894a4a1abba33774ea2403404a715b1ed51768",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-write-seq",
+      "headRefOid": "67054b8f92dd7479e91c0cdecea7a28ffc7a5f93",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6yhbVZ",
+          "commit": {
+            "abbreviatedOid": "2433724"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-07T19:52:01Z",
+          "updatedAt": "2025-07-07T19:52:09Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "In the TCP nomenclature, \"data to write\" would be data in application-level buffers, waiting for a later write() system call.\r\n\r\nWhat we mean is something more like: there is no data in the L4 connection that has not been sent yet.\r\n\r\nHow about:\r\n\r\n    if (NoUnsentData() and\r\n\r\nOr alternatively we could first decide what we want to write in the prose in the  \"application-limited\" section, which is under discussion at:\r\n\r\nApplication-limited detection depends on implementation of pacing #42\r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/42\r\n\r\nFix pacing spec in \"application-limited\" section #47\r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/47\r\n\r\nOnce we decide how we want to phrase the prose in the   \"application-limited\" section, we could then revise this pseudocode to be closer to the prose?\r\n",
+              "createdAt": "2025-07-07T19:52:01Z",
+              "updatedAt": "2025-07-07T19:52:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6yhp-Z",
+          "commit": {
+            "abbreviatedOid": "2433724"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-07T20:19:30Z",
+          "updatedAt": "2025-07-07T20:19:30Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "I agree that we might want to rework this based on the application-limited update(s), I just happened to notice this state variable was TCP specific and largely unused.\r\n\r\nHappy to wait or land this now and cleanup later, whatever makes more sense.",
+              "createdAt": "2025-07-07T20:19:30Z",
+              "updatedAt": "2025-07-07T20:19:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6yhvBh",
+          "commit": {
+            "abbreviatedOid": "67054b8"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Changing it now to NoUnsentData() SGTM. Commit LGTM. Thanks!\r\n",
+          "createdAt": "2025-07-07T20:29:27Z",
+          "updatedAt": "2025-07-07T20:29:27Z",
           "comments": []
         }
       ]
