@@ -1063,9 +1063,6 @@ following state per connection. If the following state variables are not
 tracked by an existing implementation, all the following parameters MUST
 be tracked to implement this algorithm:
 
-C.write_seq: The data sequence number one higher than that of the last octet
-queued for transmission in the transport layer write buffer.
-
 C.pending_transmissions: The number of bytes queued for transmission on the
 sending host at layers lower than the transport layer (i.e. network layer,
 traffic shaping layer, network device layer).
@@ -1255,7 +1252,7 @@ application-limited:
 
 ~~~~
   CheckIfApplicationLimited():
-    if (C.write_seq - SND.NXT < SND.MSS and
+    if (NoUnsentData() and
         C.pending_transmissions == 0 and
         C.inflight < C.cwnd and
         C.lost_out <= C.retrans_out)
