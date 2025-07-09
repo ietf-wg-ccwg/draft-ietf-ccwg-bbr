@@ -2416,16 +2416,14 @@ application-limited.<a href="#section-4.1.2.1.1-4" class="pilcrow">¶</a></p>
 following state per connection. If the following state variables are not
 tracked by an existing implementation, all the following parameters MUST
 be tracked to implement this algorithm:<a href="#section-4.1.2.1.1-5" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-6">C.write_seq: The data sequence number one higher than that of the last octet
-queued for transmission in the transport layer write buffer.<a href="#section-4.1.2.1.1-6" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-7">C.pending_transmissions: The number of bytes queued for transmission on the
+<p id="section-4.1.2.1.1-6">C.pending_transmissions: The number of bytes queued for transmission on the
 sending host at layers lower than the transport layer (i.e. network layer,
-traffic shaping layer, network device layer).<a href="#section-4.1.2.1.1-7" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-8">C.lost_out: The number of packets in the current outstanding window that
-are marked as lost.<a href="#section-4.1.2.1.1-8" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-9">C.retrans_out: The number of packets in the current outstanding window that
-are being retransmitted.<a href="#section-4.1.2.1.1-9" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-10">C.min_rtt: The minimum observed RTT over the lifetime of the connection.<a href="#section-4.1.2.1.1-10" class="pilcrow">¶</a></p>
+traffic shaping layer, network device layer).<a href="#section-4.1.2.1.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-7">C.lost_out: The number of packets in the current outstanding window that
+are marked as lost.<a href="#section-4.1.2.1.1-7" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-8">C.retrans_out: The number of packets in the current outstanding window that
+are being retransmitted.<a href="#section-4.1.2.1.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-9">C.min_rtt: The minimum observed RTT over the lifetime of the connection.<a href="#section-4.1.2.1.1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="per-packet-p-state">
@@ -2614,7 +2612,7 @@ application-limited:<a href="#section-4.1.2.4-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1.2.4-4">
 <pre>
   CheckIfApplicationLimited():
-    if (C.write_seq - SND.NXT &lt; SND.MSS and
+    if (NoUnsentData() and
         C.pending_transmissions == 0 and
         C.inflight &lt; C.cwnd and
         C.lost_out &lt;= C.retrans_out)
