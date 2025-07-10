@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-08T01:46:21.350021+00:00",
+  "timestamp": "2025-07-10T01:47:49.252677+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -3455,7 +3455,7 @@
       "labels": [],
       "body": "Neal noted this difference between unacknowledged and inflight in this comment: \r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/50#discussion_r2183626841",
       "createdAt": "2025-07-03T20:44:15Z",
-      "updatedAt": "2025-07-07T17:32:45Z",
+      "updatedAt": "2025-07-08T19:03:55Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "2f894a4a1abba33774ea2403404a715b1ed51768",
@@ -3508,6 +3508,20 @@
           "body": "> > The only way a QUIC packet could not be ACKed in the future in our code is if the data structure that tracks sent packets stopped tracking the packet because it was 'Useless', because it's already been ACKed, the keys were discarded, etc.\r\n> > The case where bytes_in_flight is 0, but there is an ackable packet outstanding is if a data packet is spuriously declared lost and prior to that, the stream is cancelled, so there's no data to retransmit. At that point, bytes_in_flight would be 0, but that spuriously lost packet could still be acked in the future.\r\n> \r\n> I find that confusing. :-)\r\n\r\nSorry, I can try to explain better, possibly on VC.\r\n\r\n> \r\n> I would have thought that it's also possible to have \"bytes_in_flight is 0, but there is an ackable packet outstanding\" if a data packet is spuriously declared lost and the stream is still active.\r\n> \r\n> That's certainly the case in TCP, since there's no cancellation mechanism, so all \"streams\" are always active. :-)\r\n> \r\n> > The cases it's important to use RTT is when coming out of quiescence, correct?\r\n> \r\n> Yes, exactly.\r\n> \r\n> Does QUIC already have a \"coming out of quiescence\" detector? If so, then that would be a good place to fire this logic.\r\n\r\nThere's a check to skip ProbeRTT if inflight is low for long enough, and there's information about whether BBR is app-limited.  A simple check we could do today is that bytes_in_flight is 0 and we were app-limited?  Though I don't think that's perfect.\r\n\r\n> \r\n> > Possibly it'd be easier to determine that at the time we take the bandwidth sample than the time we send the packet? By then we'd know if indeed nothing was in the network at the time the packet was sent.\r\n> \r\n> Possibly. What logic did you have in mind?\r\n\r\nWhen taking a bandwidth sample, if the P.delivered of any packet being acknowledged is identical to C.delivered, then\r\nno packets were acked since the packet was sent, which I think captures the same logic?",
           "createdAt": "2025-07-07T17:32:45Z",
           "updatedAt": "2025-07-07T17:32:45Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Catching up on the discussion. Thanks for the detailed explanation @nealcardwell \r\n\r\n>  How about MVFST QUIC BBR?\r\n\r\nMvfst currently achieves the intention of measuring the send rate by using this:  \u0394delivered / (P.sent_time - P.last_acked.send_time). This is less accurate and can overestimate the RTT but avoids having to track first_sent_time. \r\n\r\n> > > The cases it's important to use RTT is when coming out of quiescence, correct?\r\n> > \r\n> > \r\n> > Yes, exactly.\r\n> > Does QUIC already have a \"coming out of quiescence\" detector? If so, then that would be a good place to fire this logic.\r\n> \r\n> There's a check to skip ProbeRTT if inflight is low for long enough, and there's information about whether BBR is app-limited. A simple check we could do today is that bytes_in_flight is 0 and we were app-limited? Though I don't think that's perfect.\r\n\r\nWe have that logic in BBR itself, not quic-specific. We set idle restart on packet sent `if (C.inflight == 0 and C.app_limited)`. Re-using that wouldn't be too bad.\r\n",
+          "createdAt": "2025-07-08T18:35:43Z",
+          "updatedAt": "2025-07-08T18:35:43Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> \r\n> We have that logic in BBR itself, not quic-specific. We set idle restart on packet sent `if (C.inflight == 0 and C.app_limited)`. Re-using that wouldn't be too bad.\r\n\r\nI was thinking that adding the app_limited check would help here.  I don't think it fixes the issue in all possible circumstances, but it's likely good enough?\r\n",
+          "createdAt": "2025-07-08T19:03:55Z",
+          "updatedAt": "2025-07-08T19:03:55Z"
         }
       ],
       "reviews": [
@@ -3591,24 +3605,26 @@
       "id": "PR_kwDOL3MllM6dzVEM",
       "title": "Remove C.write_seq because it's TCP-specific",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/57",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "C.write_seq and SND.UNA and SND.MSS are only used in one spot in psuedocode, which I attempted to generalize, but there is likely a better approach.",
       "createdAt": "2025-07-07T17:39:52Z",
-      "updatedAt": "2025-07-07T23:09:43Z",
+      "updatedAt": "2025-07-09T19:08:42Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "2f894a4a1abba33774ea2403404a715b1ed51768",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-write-seq",
       "headRefOid": "67054b8f92dd7479e91c0cdecea7a28ffc7a5f93",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-07-09T19:08:42Z",
+      "mergedAt": "2025-07-09T19:08:42Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "1ddc88321d7f6d29cda206015d223ebcc3e9e16a"
+      },
       "comments": [],
       "reviews": [
         {
