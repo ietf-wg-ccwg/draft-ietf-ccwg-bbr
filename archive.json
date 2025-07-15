@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-13T01:58:40.285453+00:00",
+  "timestamp": "2025-07-15T01:54:15.065188+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -379,9 +379,24 @@
       ],
       "body": "I believe the draft is fairly transport agnostic, but the bandwidth estimation section still has some references to end_seq and similar names that don't cleanly translate to QUIC.\n\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/draft-ietf-ccwg-bbr-02/draft-ietf-ccwg-bbr.md#bbrmax_bw-estimated-maximum-bandwidth-bbrmaxbw-estimated-maximum-bandwidth",
       "createdAt": "2025-03-16T00:39:46Z",
-      "updatedAt": "2025-05-21T20:36:54Z",
+      "updatedAt": "2025-07-14T14:52:40Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "marten-seemann",
+          "authorAssociation": "NONE",
+          "body": "Similar for Section 4.1.2.4 (Detecting application-limited phases):\n```\nCheckIfApplicationLimited():\n    if (C.write_seq - SND.NXT < SND.MSS and\n        C.pending_transmissions == 0 and\n        C.inflight < C.cwnd and\n        C.lost_out <= C.retrans_out)\n      C.app_limited = (C.delivered + C.inflight) ? : 1\n```\n\nIt is not immediately obvious how one would implement this for QUIC.",
+          "createdAt": "2025-07-13T03:41:14Z",
+          "updatedAt": "2025-07-13T03:41:14Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> Similar for Section 4.1.2.4 (Detecting application-limited phases):\n> \n> ```\n> CheckIfApplicationLimited():\n>     if (C.write_seq - SND.NXT < SND.MSS and\n>         C.pending_transmissions == 0 and\n>         C.inflight < C.cwnd and\n>         C.lost_out <= C.retrans_out)\n>       C.app_limited = (C.delivered + C.inflight) ? : 1\n> ```\n> \n> It is not immediately obvious how one would implement this for QUIC.\n\n#57 removes the TCP nomenclature, but adds NoUnsentData().  I think that's a net win, but it's possible more clarification is necessary.",
+          "createdAt": "2025-07-14T14:52:40Z",
+          "updatedAt": "2025-07-14T14:52:40Z"
+        }
+      ]
     },
     {
       "number": 27,
@@ -742,7 +757,7 @@
     {
       "number": 58,
       "id": "I_kwDOL3MllM7ARYrQ",
-      "title": "clarify function parameters of BBRUpdateOnACK",
+      "title": "clarify function parameters of `BBRUpdateOnACK`",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/58",
       "state": "OPEN",
       "author": "marten-seemann",
@@ -751,9 +766,17 @@
       "labels": [],
       "body": "`BBRUpdateOnACK` utilizes information about the packets that were acknowledged. I suspect the draft would become easier to implement if it was spelled out explicitly what information is needed, by adding the required function parameters.\n\nOn a related note, `GenerateRateSample` would probably be easier if it returned (instead of updated) the rate sample.",
       "createdAt": "2025-07-12T21:15:55Z",
-      "updatedAt": "2025-07-12T21:15:55Z",
+      "updatedAt": "2025-07-13T02:27:56Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "marten-seemann",
+          "authorAssociation": "NONE",
+          "body": "It would also be very helpful to spell out if `BBRUpdateOnACK` could be implemented such that it deals with one packet at a time (and would then be called multiple times if the ACK acknowledges multiple packets), or if `BBRUpdateOnACK` necessarily needs to operate on a batch of packets.",
+          "createdAt": "2025-07-13T02:27:56Z",
+          "updatedAt": "2025-07-13T02:27:56Z"
+        }
+      ]
     },
     {
       "number": 59,
@@ -880,6 +903,54 @@
       "body": "Section 4.1.3.1 says:\n> If a transport sender implementation uses an offload mechanism (such as TSO, GSO, etc.) to combine multiple C.SMSS of data into a single packet \"aggregate\" for the purposes of scheduling transmissions, then it is RECOMMENDED that the per-packet state be tracked for each packet \"aggregate\" rather than each SMSS. For simplicity this document refers to such state as \"per-packet\", whether it is per \"aggregate\" or per C.SMSS.\n\nIf I understand correctly, I only need to track 3 variables per packet (section 2.2):\n* the departure time\n* the number of delivered bytes at the time the packet was sent\n* the number of bytes in flight at the time the packet was sent\n\nThe first one is easy: obviously, the departure time for packets sent in a batch is the same.\n\nDoes this mean that when I send a GSO batch, one should set the number of delivered bytes and the number of bytes in flight for each packet sent in that batch to the value _before sending the entire batch_?",
       "createdAt": "2025-07-12T22:57:32Z",
       "updatedAt": "2025-07-12T22:57:32Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 67,
+      "id": "I_kwDOL3MllM7ASSkD",
+      "title": "What is `BBR.offload_budget` for QUIC?",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/67",
+      "state": "OPEN",
+      "author": "marten-seemann",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Section 5.5.8 defines the `BBR.offload_budget` for TCP. What would one use for QUIC?",
+      "createdAt": "2025-07-13T02:08:39Z",
+      "updatedAt": "2025-07-13T02:08:39Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 68,
+      "id": "I_kwDOL3MllM7ASZYQ",
+      "title": "Per-Packet and Connection State variables are spread across multiple Sections",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/68",
+      "state": "OPEN",
+      "author": "marten-seemann",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Section 2.1 and section 4.1.2.1.1 define connection state. Similarly, per-packet state is defined in both section 2.2 and section 4.1.2.1.2.\n\nI assume this split exists to highlight that the some variables are only used by the Delivery Rate Sampling Algorithm, but I think it would be helpful to see all the state in one place. If the intention is to keep these separate, I'd argue that section 2.1 should link to 4.1.2.1.1 and say something like:\n> More per-connection variables used for the Delivery Rate Sampling Algorithm are defined in section 4.1.2.1.1.",
+      "createdAt": "2025-07-13T02:52:07Z",
+      "updatedAt": "2025-07-13T02:52:07Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 69,
+      "id": "I_kwDOL3MllM7ASaOM",
+      "title": "Section 5.5.9 sounds very TCP-specific",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/69",
+      "state": "OPEN",
+      "author": "marten-seemann",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "> The BBR.extra_acked thus reflects the recently-measured magnitude of data and ACK aggregation effects such as batching and slotting at shared-medium L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms (TSO, GSO, LRO, GRO), and end host or middlebox ACK decimation/thinning.\n\nMiddlebox ACK decimation is not possible when using QUIC. Instead, RFC 9002 requires that at least every other ack-eliciting packet elicits a fresh ACK frame.\n\nIt would be very useful if this section could give some guidance on how to use the [QUIC ACK-FREQUENCY](https://datatracker.ietf.org/doc/draft-ietf-quic-ack-frequency/) extension, which allows the sender to control how frequently the receiver sends an ACK frame.",
+      "createdAt": "2025-07-13T02:57:07Z",
+      "updatedAt": "2025-07-13T02:57:07Z",
       "closedAt": null,
       "comments": []
     }
@@ -3754,9 +3825,9 @@
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
-      "body": "C.write_seq and SND.UNA and SND.MSS are only used in one spot in psuedocode, which I attempted to generalize, but there is likely a better approach.",
+      "body": "C.write_seq and SND.UNA and SND.MSS are only used in one spot in psuedocode, which I attempted to generalize, but there is likely a better approach.\r\n\r\nAddresses part of #26 ",
       "createdAt": "2025-07-07T17:39:52Z",
-      "updatedAt": "2025-07-09T19:08:42Z",
+      "updatedAt": "2025-07-14T14:52:05Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "2f894a4a1abba33774ea2403404a715b1ed51768",
