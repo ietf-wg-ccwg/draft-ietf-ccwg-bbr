@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-15T01:54:15.065188+00:00",
+  "timestamp": "2025-07-17T01:51:33.851462+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -3827,7 +3827,7 @@
       "labels": [],
       "body": "C.write_seq and SND.UNA and SND.MSS are only used in one spot in psuedocode, which I attempted to generalize, but there is likely a better approach.\r\n\r\nAddresses part of #26 ",
       "createdAt": "2025-07-07T17:39:52Z",
-      "updatedAt": "2025-07-14T14:52:05Z",
+      "updatedAt": "2025-07-15T19:38:39Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "2f894a4a1abba33774ea2403404a715b1ed51768",
@@ -3894,6 +3894,26 @@
           "createdAt": "2025-07-07T20:29:27Z",
           "updatedAt": "2025-07-07T20:29:27Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM60IMYg",
+          "commit": {
+            "abbreviatedOid": "67054b8"
+          },
+          "author": "marten-seemann",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-15T19:38:38Z",
+          "updatedAt": "2025-07-15T19:38:39Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "Maybe better: `!HasPendingDataToSend()`?",
+              "createdAt": "2025-07-15T19:38:38Z",
+              "updatedAt": "2025-07-15T19:38:39Z"
+            }
+          ]
         }
       ]
     }
