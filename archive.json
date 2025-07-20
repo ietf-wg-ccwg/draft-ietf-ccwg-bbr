@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-17T01:51:33.851462+00:00",
+  "timestamp": "2025-07-20T02:00:02.087471+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -790,25 +790,69 @@
       "labels": [],
       "body": "The `BBR` struct holds connection-scoped variable, as does the the `C` struct. I might be missing something, but it is not clear to me why these are split into two different structs.",
       "createdAt": "2025-07-12T21:58:22Z",
-      "updatedAt": "2025-07-12T21:58:22Z",
+      "updatedAt": "2025-07-18T21:14:50Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "They are defined here:\n\n```\nConstant values have CamelCase names and are used by BBR throughout\nits operation for a given connection. Variables have snake_case names.\nAll names are prefixed with the context they\nbelong to: (C) for connection state, (P) for per-packet state, (RS) for\nper-ack rate sample, or (BBR) for the algorithm's internal state.\n```\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/main/draft-ietf-ccwg-bbr.md?plain=1#L281-L285",
+          "createdAt": "2025-07-17T21:09:37Z",
+          "updatedAt": "2025-07-17T21:09:37Z"
+        },
+        {
+          "author": "marten-seemann",
+          "authorAssociation": "NONE",
+          "body": "I understand `P` and `RS`, but since every connection has exactly one congestion controller, it's not clear to me which variables would go on `BBR` and which one on `C`.",
+          "createdAt": "2025-07-17T22:23:49Z",
+          "updatedAt": "2025-07-17T22:23:49Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I agree that it's not self-explanatory but here is how I understand it: `C` variables are ones that may/can exist in a transport's connection state regardless of the type of congestion controller being used. For example, some delivery rate sample variables are defined under `C` to keep the the delivery rate estimation independent of BBR. It can technically be used with any other congestion controller.\n\nGenerally, yes, a connection has one congestion controller but it could change or have its state reset (e.g. for quic connection migration). The `C` variables would not be reset in that case, just `BBR`.",
+          "createdAt": "2025-07-17T23:04:08Z",
+          "updatedAt": "2025-07-17T23:04:08Z"
+        },
+        {
+          "author": "marten-seemann",
+          "authorAssociation": "NONE",
+          "body": "> Generally, yes, a connection has one congestion controller but it could change or have its state reset (e.g. for quic connection migration). The `C` variables would not be reset in that case, just `BBR`.\n\nThis framing makes sense to me, but I'm not sure if it applies here (taking a look at the variables defined in section 2.1):\n* `C.SMSS`: might differ between network interfaces, and therefore not stay constant when migrating to a new path.\n* `C.inflight`: I'm not sure how useful it is to aggregate in-flight bytes across multiple network paths.\n* `C.is_cwnd_limited`: cwnd is a per-path property, hence it can't apply to multiple paths at the same time.\n* `C.delivered` is used to calculate the ACK rate, among others. This seems like a path-dependent property as well.",
+          "createdAt": "2025-07-18T21:14:50Z",
+          "updatedAt": "2025-07-18T21:14:50Z"
+        }
+      ]
     },
     {
       "number": 60,
       "id": "I_kwDOL3MllM7ARl2D",
       "title": "`C.delivered` is undefined",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/60",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Section 4.1.2.1.1 doesn't define `C.delivered`. 5.1.1 suggests that it's the number of bytes sent so far.",
       "createdAt": "2025-07-12T22:11:43Z",
-      "updatedAt": "2025-07-12T22:11:43Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2025-07-18T21:05:03Z",
+      "closedAt": "2025-07-18T21:05:02Z",
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "It's defined here: https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/main/draft-ietf-ccwg-bbr.md?plain=1#L301",
+          "createdAt": "2025-07-17T21:07:43Z",
+          "updatedAt": "2025-07-17T21:07:43Z"
+        },
+        {
+          "author": "marten-seemann",
+          "authorAssociation": "NONE",
+          "body": "Sorry, I must have missed that!",
+          "createdAt": "2025-07-18T21:05:02Z",
+          "updatedAt": "2025-07-18T21:05:02Z"
+        }
+      ]
     },
     {
       "number": 61,
@@ -854,9 +898,31 @@
       "labels": [],
       "body": "The `BBR` struct, as described in the draft, has both member variables (e.g. `BBR.state`) and constants (e.g. `BBR.Beta`). When implementing the algorithm, these are dealt with very differently. I'd suggest using a different notation for constants (maybe just upper-case them without any prefix, e.g. `BETA`)?",
       "createdAt": "2025-07-12T22:27:38Z",
-      "updatedAt": "2025-07-12T22:27:38Z",
+      "updatedAt": "2025-07-17T23:06:21Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "```\nConstant values have CamelCase names and are used by BBR throughout\nits operation for a given connection. Variables have snake_case names.\nAll names are prefixed with the context they\nbelong to: (C) for connection state, (P) for per-packet state, (RS) for\nper-ack rate sample, or (BBR) for the algorithm's internal state.\n```\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/main/draft-ietf-ccwg-bbr.md?plain=1#L281-L285\n\nDoes this address the notation suggestion? There is value in namespacing the constants with the C/rs/BBR prefixes.\n",
+          "createdAt": "2025-07-17T21:06:51Z",
+          "updatedAt": "2025-07-17T21:06:51Z"
+        },
+        {
+          "author": "marten-seemann",
+          "authorAssociation": "NONE",
+          "body": "I didn't see any constants for `C` or `RS` (only `BBR`), but I might have missed something. I can live with them being camel-case though, although I was slightly surprised by this choice.",
+          "createdAt": "2025-07-17T22:27:28Z",
+          "updatedAt": "2025-07-17T22:27:28Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Yeah, there are no constants for `RS`. For `C`, there is `C.InitialCwnd` and `C.SMSS`. ",
+          "createdAt": "2025-07-17T23:06:21Z",
+          "updatedAt": "2025-07-17T23:06:21Z"
+        }
+      ]
     },
     {
       "number": 64,
@@ -883,10 +949,12 @@
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "Editorial"
+      ],
       "body": "I\u2019m confused about the filters used throughout the document. For example, `UpdateWindowedMaxFilter` is used multiple times, but it\u2019s never defined.\n\nAdditionally, several invocations refer to filters like `BBR.MaxBwFilter` and `BBR.ExtraACKedFilter`, which also lack definitions. Some clarification or inclusion of these definitions would be helpful.",
       "createdAt": "2025-07-12T22:36:42Z",
-      "updatedAt": "2025-07-12T22:36:42Z",
+      "updatedAt": "2025-07-17T21:50:45Z",
       "closedAt": null,
       "comments": []
     },
@@ -914,11 +982,13 @@
       "state": "OPEN",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "ianswett"
+      ],
       "labels": [],
       "body": "Section 5.5.8 defines the `BBR.offload_budget` for TCP. What would one use for QUIC?",
       "createdAt": "2025-07-13T02:08:39Z",
-      "updatedAt": "2025-07-13T02:08:39Z",
+      "updatedAt": "2025-07-17T21:38:57Z",
       "closedAt": null,
       "comments": []
     },
@@ -931,10 +1001,12 @@
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "Editorial"
+      ],
       "body": "Section 2.1 and section 4.1.2.1.1 define connection state. Similarly, per-packet state is defined in both section 2.2 and section 4.1.2.1.2.\n\nI assume this split exists to highlight that the some variables are only used by the Delivery Rate Sampling Algorithm, but I think it would be helpful to see all the state in one place. If the intention is to keep these separate, I'd argue that section 2.1 should link to 4.1.2.1.1 and say something like:\n> More per-connection variables used for the Delivery Rate Sampling Algorithm are defined in section 4.1.2.1.1.",
       "createdAt": "2025-07-13T02:52:07Z",
-      "updatedAt": "2025-07-13T02:52:07Z",
+      "updatedAt": "2025-07-17T21:46:56Z",
       "closedAt": null,
       "comments": []
     },
@@ -950,9 +1022,24 @@
       "labels": [],
       "body": "> The BBR.extra_acked thus reflects the recently-measured magnitude of data and ACK aggregation effects such as batching and slotting at shared-medium L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms (TSO, GSO, LRO, GRO), and end host or middlebox ACK decimation/thinning.\n\nMiddlebox ACK decimation is not possible when using QUIC. Instead, RFC 9002 requires that at least every other ack-eliciting packet elicits a fresh ACK frame.\n\nIt would be very useful if this section could give some guidance on how to use the [QUIC ACK-FREQUENCY](https://datatracker.ietf.org/doc/draft-ietf-quic-ack-frequency/) extension, which allows the sender to control how frequently the receiver sends an ACK frame.",
       "createdAt": "2025-07-13T02:57:07Z",
-      "updatedAt": "2025-07-13T02:57:07Z",
+      "updatedAt": "2025-07-18T15:41:12Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Good points.\n\nFrom our co-editor meeting, consensus is that we should have some light wording about the fact that a sender MAY incorporate the ACK frequency into the extra_acked estimate.\n\nBut even if this is not done, the automatic measurement of extra_acked should pick up the dynamics an RTT later or so.\n",
+          "createdAt": "2025-07-17T21:46:55Z",
+          "updatedAt": "2025-07-17T21:46:55Z"
+        },
+        {
+          "author": "marten-seemann",
+          "authorAssociation": "NONE",
+          "body": "My point was that the ACK Frequency extension allows the sender to request certain acknowledgment behavior on the receiver side. I was wondering if it would be appropriate for this document to give some advice on how to tune these parameters.",
+          "createdAt": "2025-07-18T15:41:12Z",
+          "updatedAt": "2025-07-18T15:41:12Z"
+        }
+      ]
     }
   ],
   "pulls": [
