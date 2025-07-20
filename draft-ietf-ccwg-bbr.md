@@ -12,7 +12,7 @@ abbrev: BBR
 area: IETF
 wg: CCWG
 kw: Congestion Control
-date: 2024-10-16
+
 author:
 - role: editor
   name: Neal Cardwell
