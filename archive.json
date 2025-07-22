@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-20T02:00:02.087471+00:00",
+  "timestamp": "2025-07-22T01:52:05.085352+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -283,7 +283,7 @@
       "labels": [],
       "body": "\nIncreasing ProbeRTT interval to 10s in internet facing connections improves application performance in initial experiments, most probably due to reducing the cwnd dips for connections with long transfers. \n\nI haven't measured its impact on the speed of convergence to a fair of the bandwidth but the 10s value is already used in some of the implementations as well.",
       "createdAt": "2025-02-21T18:15:30Z",
-      "updatedAt": "2025-03-16T00:58:03Z",
+      "updatedAt": "2025-07-21T13:23:40Z",
       "closedAt": null,
       "comments": [
         {
@@ -306,6 +306,13 @@
           "body": "I expect DASH and HLS video playback may have app-limited behavior more often than 10 seconds, but not always less than every 5 seconds.  Since the app-limited behavior will fully drain the pipe, it will delay the next ProbeRTT.  This is a bit like the app doing ProbeRTT on a timescale of it's choosing rather than BBR choosing when to drain the pipe.\n\nI'm curious what simulations say in this case.",
           "createdAt": "2025-03-16T00:58:01Z",
           "updatedAt": "2025-03-16T00:58:01Z"
+        },
+        {
+          "author": "martinduke",
+          "authorAssociation": "NONE",
+          "body": "As I said in Madrid, maybe the Experiment section indicates that 10s is a guess, and a different value (or a dynamic value) are part of the experiment. then the draft can proceed.",
+          "createdAt": "2025-07-21T13:23:40Z",
+          "updatedAt": "2025-07-21T13:23:40Z"
         }
       ]
     },
@@ -1040,6 +1047,22 @@
           "updatedAt": "2025-07-18T15:41:12Z"
         }
       ]
+    },
+    {
+      "number": 71,
+      "id": "I_kwDOL3MllM7BqS0r",
+      "title": "Consider adding test cases to an appendix",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/71",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Today in CCWG there was interest in example test cases of some form for BBR, so implementers could ensure they implemented it correctly.\n\nQLog was mentioned as a common logging framework for QUIC that could be used for congestion control debugging and might allow implementations to compare traces.",
+      "createdAt": "2025-07-21T15:22:28Z",
+      "updatedAt": "2025-07-21T15:22:28Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -2926,7 +2949,7 @@
       "labels": [],
       "body": "Fix the pacing specification in \"Tracking application-limited phases\" section.\r\n\r\nThe previous text, \"The sending flow is not currently in the process of transmitting a packet,\" was an imprecise description of the condition that was checked in the Linux TCP stack to handle tracking of application-limited traffic for fq-based pacing. But this text was not precise, and does not correctly capture the checks needed for other pacing implementations.\r\n\r\nFixes #42",
       "createdAt": "2025-05-29T00:01:59Z",
-      "updatedAt": "2025-07-08T00:56:56Z",
+      "updatedAt": "2025-07-21T02:21:35Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b61a33f73bb464e1ef9663d29407f9763a57b62f",
@@ -2944,6 +2967,27 @@
           "body": "> 2. All the packets considered lost have been retransmitted.\r\n\r\nThis doesn't work well for QUIC, where packets are never retransmitted.\r\n\r\n\r\nCan we write something based on what @huitema suggested, and possibly add a few more other examples (data to retransmit, is data queued, etc)?\r\n\r\nChristian's suggestion:\r\n\"The algorithm detects that an application-limited phase has started when\r\ncongestion control and pacing control would have allowed the application to send data,\r\nand the application had nothing to send. The precise determination of this\r\ncondition depends on how the application uses mechanisms to implement pacing,\r\nbatching, GSO/TSO/offload/etc.\"\r\n\r\n",
           "createdAt": "2025-07-08T00:56:56Z",
           "updatedAt": "2025-07-08T00:56:56Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> > 2. All the packets considered lost have been retransmitted.\r\n> \r\n> This doesn't work well for QUIC, where packets are never retransmitted.\r\n> \r\n> Can we write something based on what @huitema suggested, and possibly add a few more other examples (data to retransmit, is data queued, etc)?\r\n> \r\n> Christian's suggestion: \"The algorithm detects that an application-limited phase has started when congestion control and pacing control would have allowed the application to send data, and the application had nothing to send. The precise determination of this condition depends on how the application uses mechanisms to implement pacing, batching, GSO/TSO/offload/etc.\"\r\n\r\n\r\nOK, sounds good. Let's start with Christian's suggestion and attempt to fold in Ian's suggestions. Also, I think it is important to separate the \"application\" from the \"connection\", since the connection may have unsent or retransmit data  (or one day FEC data?)  queued for transmission even when the application has nothing to send. How about:\r\n\r\n \"BBR detects that an application-limited phase has started for a connection when congestion control and pacing control would have allowed the connection to send data, and yet the connection is not currently sending data and has no data to send (i.e.,  no unsent/new data, no retransmit data, and no other data, such as encoded data blocks for forward error correction). The precise determination of this condition depends on how the connection uses mechanisms to implement pacing, batching, GSO/TSO/offload, etc.\"",
+          "createdAt": "2025-07-20T16:55:47Z",
+          "updatedAt": "2025-07-20T16:55:47Z"
+        },
+        {
+          "author": "huitema",
+          "authorAssociation": "NONE",
+          "body": "I obviously like the latest proposal from @nealcardwell.\r\n\r\nI think there is a bit more, but we probably want a new issue for that. The \"application limited\" condition is used in two ways:\r\n\r\n- To manage the up-down nature of some applications, with periods of high activity separated by periods of silence or lower activity, the concern being that parameters measured in the past might not be valid when high activity resumes;\r\n- To determine whether a low measurement of the path throughput is due to an actual shrinking of the bottleneck's capacity, or simply due to the application not sending enough data to test that capacity.\r\n\r\nThe first case is reasonably simple to manage, but the second is much more sensitive to batching and TSO issues. Suppose that the window is about 10 packets -- or 10 batches of packets if using TSO. On a given interval, the connection will sometimes send 10 packets, and sometimes 9. If it sends 9, the measurement is likely to fall under the bottleneck bandwidth, but taking that as an estimate of shrinking capacity could be wrong.\r\n\r\nI wonder whether we should consider a different test than \"application limited\". BBR has the concept of the \"nominal CWND\", the product of bottleneck bandwidth estimate and min RTT. If the number of bytes in flight is lower than that, then the measurement will never be larger than the bottleneck bandwidth. Maybe that could be used as a confirmation test: do not lower the bandwidth estimate if not enough data was sent during the period.",
+          "createdAt": "2025-07-20T18:04:48Z",
+          "updatedAt": "2025-07-20T18:05:46Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I agree that the second case is overly sensitive in that if one is application limited for 1ms of every 100ms RTT, you'd have no 'good' samples, but in reality they're likely all quite good. One can make the logic a bit more flexible to these transitory issues, but you still end up with a non-linearity.\r\n\r\nBut yes, let's discuss that on a separate issue.  I am not sure there's an 'easy' fix for that general problem.",
+          "createdAt": "2025-07-21T02:21:35Z",
+          "updatedAt": "2025-07-21T02:21:35Z"
         }
       ],
       "reviews": [
@@ -4001,6 +4045,48 @@
               "updatedAt": "2025-07-15T19:38:39Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 70,
+      "id": "PR_kwDOL3MllM6fuuO-",
+      "title": "Remove the date from the metadata",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/70",
+      "state": "MERGED",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The date should get inserted by the tooling upon submission, and explicitly specifying it seems to be overriding that.",
+      "createdAt": "2025-07-20T10:44:14Z",
+      "updatedAt": "2025-07-20T10:49:45Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "1ddc88321d7f6d29cda206015d223ebcc3e9e16a",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-nodate",
+      "headRefOid": "eeb34b4806a345c7e6bbf027b7edbd09693aa38c",
+      "closedAt": "2025-07-20T10:49:45Z",
+      "mergedAt": "2025-07-20T10:49:45Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "aa5402b965b98a343fcbb4399e90c4c86b5e61cb"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM609UR1",
+          "commit": {
+            "abbreviatedOid": "eeb34b4"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thanks!\r\n",
+          "createdAt": "2025-07-20T10:49:17Z",
+          "updatedAt": "2025-07-20T10:49:17Z",
+          "comments": []
         }
       ]
     }
