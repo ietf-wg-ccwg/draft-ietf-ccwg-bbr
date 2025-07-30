@@ -24,11 +24,11 @@ acknowledgment. Thus far, open source implementations are available
 for TCP   and QUIC  . This document
 specifies version 3 of the BBR algorithm, BBRv3. 
     " name="description">
-<meta content="xml2rfc 3.29.0" name="generator">
+<meta content="xml2rfc 3.30.0" name="generator">
 <meta content="Congestion Control" name="keyword">
 <meta content="draft-ietf-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.29.0
+  xml2rfc 3.30.0
     Python 3.12.11
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
@@ -1059,11 +1059,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">October 2024</td>
+<td class="right">July 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 19 April 2025</td>
+<td class="center">Expires 31 January 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1076,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-10-16" class="published">16 October 2024</time>
+<time datetime="2025-07-30" class="published">30 July 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-04-19">19 April 2025</time></dd>
+<dd class="expires"><time datetime="2026-01-31">31 January 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1150,7 +1150,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 19 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 31 January 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1159,7 +1159,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
 <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
         </h2>
 <p id="section-boilerplate.2-1">
-            Copyright (c) 2024 IETF Trust and the persons identified as the
+            Copyright (c) 2025 IETF Trust and the persons identified as the
             document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.2-2">
             This document is subject to BCP 78 and the IETF Trust's Legal
@@ -1411,7 +1411,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
                     <p id="section-toc.1-1.5.2.6.2.2.1"><a href="#section-5.6.2" class="auto internal xref">5.6.2</a>.  <a href="#name-pacing-rate-cpacing_rate" class="internal xref">Pacing Rate: C.pacing_rate</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.6.2.3">
-                    <p id="section-toc.1-1.5.2.6.2.3.1"><a href="#section-5.6.3" class="auto internal xref">5.6.3</a>.  <a href="#name-send-quantum-bbrsend_quantu" class="internal xref">Send Quantum: BBR.send_quantum</a></p>
+                    <p id="section-toc.1-1.5.2.6.2.3.1"><a href="#section-5.6.3" class="auto internal xref">5.6.3</a>.  <a href="#name-send-quantum-csend_quantum" class="internal xref">Send Quantum: C.send_quantum</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.6.2.4">
                     <p id="section-toc.1-1.5.2.6.2.4.1"><a href="#section-5.6.4" class="auto internal xref">5.6.4</a>.  <a href="#name-congestion-window" class="internal xref">Congestion Window</a></p>
@@ -1528,7 +1528,7 @@ and section 8 closes with Acknowledgments.<a href="#section-1-6" class="pilcrow"
 <p id="section-2-2">Constant values have CamelCase names and are used by BBR throughout
 its operation for a given connection. Variables have snake_case names.
 All names are prefixed with the context they
-belong to: (C) for connection state, (P) for per-packet state, (rs) for
+belong to: (C) for connection state, (P) for per-packet state, (RS) for
 per-ack rate sample, or (BBR) for the algorithm's internal state.
 Variables that are not defined below are defined in
 <a href="#delivery-rate-samples" class="auto internal xref">Section 4.1</a>, "Delivery Rate Samples".<a href="#section-2-2" class="pilcrow">¶</a></p>
@@ -1541,7 +1541,8 @@ e.g., via a QUIC ACK Range <span>[<a href="#RFC9000" class="cite xref">RFC9000</
         <h3 id="name-transport-connection-state">
 <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-transport-connection-state" class="section-name selfRef">Transport Connection State</a>
         </h3>
-<p id="section-2.1-1">C.SMSS: The Sender Maximum Segment Size.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-1">C.SMSS: The Sender Maximum Segment Size in bytes. This is equivalent to PMTU
+in QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>], <a href="https://rfc-editor.org/rfc/rfc9000#section-14.2" class="relref">Section 14.2</a></span>.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
 <p id="section-2.1-2">C.InitialCwnd: The initial congestion window set by the transport protocol
 implementation for the connection at initialization time.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
 <p id="section-2.1-3">C.delivered: The total amount of data (tracked in octets or in packets)
@@ -1574,24 +1575,24 @@ connection C.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
         <h3 id="name-per-ack-rate-sample-state">
 <a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-per-ack-rate-sample-state" class="section-name selfRef">Per-ACK Rate Sample State</a>
         </h3>
-<p id="section-2.3-1">rs.delivered: The volume of data delivered between the transmission of the
+<p id="section-2.3-1">RS.delivered: The volume of data delivered between the transmission of the
 packet that has just been ACKed and the current time.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
-<p id="section-2.3-2">rs.delivery_rate: The delivery rate (aka bandwidth) sample obtained from
+<p id="section-2.3-2">RS.delivery_rate: The delivery rate (aka bandwidth) sample obtained from
 the packet that has just been ACKed.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
-<p id="section-2.3-3">rs.rtt: The RTT sample calculated based on the most recently-sent segment
-of the segments that have just been ACKed.<a href="#section-2.3-3" class="pilcrow">¶</a></p>
-<p id="section-2.3-4">rs.newly_acked: The volume of data cumulatively or selectively acknowledged
+<p id="section-2.3-3">RS.rtt: The RTT sample calculated based on the most recently-sent packet
+of the packets that have just been ACKed.<a href="#section-2.3-3" class="pilcrow">¶</a></p>
+<p id="section-2.3-4">RS.newly_acked: The volume of data cumulatively or selectively acknowledged
 upon the ACK that was just received. (This quantity is referred to as
 "DeliveredData" in <span>[<a href="#RFC6937" class="cite xref">RFC6937</a>]</span>.)<a href="#section-2.3-4" class="pilcrow">¶</a></p>
-<p id="section-2.3-5">rs.newly_lost: The volume of data newly marked lost upon the ACK that was
+<p id="section-2.3-5">RS.newly_lost: The volume of data newly marked lost upon the ACK that was
 just received.<a href="#section-2.3-5" class="pilcrow">¶</a></p>
-<p id="section-2.3-6">rs.tx_in_flight: C.inflight at
+<p id="section-2.3-6">RS.tx_in_flight: C.inflight at
 the time of the transmission of the packet that has just been ACKed (the
-most recently sent segment among segments ACKed by the ACK that was just
+most recently sent packet among packets ACKed by the ACK that was just
 received).<a href="#section-2.3-6" class="pilcrow">¶</a></p>
-<p id="section-2.3-7">rs.lost: The volume of data that was declared lost between the transmission
-and acknowledgement of the packet that has just been ACKed (the most recently
-sent segment among segments ACKed by the ACK that was just received).<a href="#section-2.3-7" class="pilcrow">¶</a></p>
+<p id="section-2.3-7">RS.lost: The volume of data that was declared lost between the transmission
+and acknowledgment of the packet that has just been ACKed (the most recently
+sent packet among packets ACKed by the ACK that was just received).<a href="#section-2.3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="output-control-parameters">
@@ -1603,8 +1604,8 @@ sent segment among segments ACKed by the ACK that was just received).<a href="#s
 the sending connection ensures that C.inflight does not exceed C.cwnd.<a href="#section-2.4-1" class="pilcrow">¶</a></p>
 <p id="section-2.4-2">C.pacing_rate: The current pacing rate for a BBR flow, which controls
 inter-packet spacing.<a href="#section-2.4-2" class="pilcrow">¶</a></p>
-<p id="section-2.4-3">BBR.send_quantum: The maximum size of a data aggregate scheduled and transmitted
-together.<a href="#section-2.4-3" class="pilcrow">¶</a></p>
+<p id="section-2.4-3">C.send_quantum: The maximum size of a data aggregate scheduled and transmitted
+together as a unit, e.g., to amortize per-packet transmission overheads.<a href="#section-2.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="pacing-state-and-parameters">
@@ -1753,9 +1754,10 @@ inflight_longterm. (Part of the short-term model.)<a href="#section-2.9.2-8" cla
         <h3 id="name-state-for-responding-to-con">
 <a href="#section-2.10" class="section-number selfRef">2.10. </a><a href="#name-state-for-responding-to-con" class="section-name selfRef">State for Responding to Congestion</a>
         </h3>
-<p id="section-2.10-1">BBR.bw_latest: a 1-round-trip max of delivered bandwidth (rs.delivery_rate).<a href="#section-2.10-1" class="pilcrow">¶</a></p>
-<p id="section-2.10-2">BBR.inflight_latest: a 1-round-trip max of delivered volume of data
-(rs.delivered).<a href="#section-2.10-2" class="pilcrow">¶</a></p>
+<p id="section-2.10-1">RS: The rate sample calculated from the most recent acknowledgment.<a href="#section-2.10-1" class="pilcrow">¶</a></p>
+<p id="section-2.10-2">BBR.bw_latest: a 1-round-trip max of delivered bandwidth (RS.delivery_rate).<a href="#section-2.10-2" class="pilcrow">¶</a></p>
+<p id="section-2.10-3">BBR.inflight_latest: a 1-round-trip max of delivered volume of data
+(RS.delivered).<a href="#section-2.10-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="estimating-bbrmaxbw">
@@ -1763,7 +1765,7 @@ inflight_longterm. (Part of the short-term model.)<a href="#section-2.9.2-8" cla
         <h3 id="name-estimating-bbrmax_bw">
 <a href="#section-2.11" class="section-number selfRef">2.11. </a><a href="#name-estimating-bbrmax_bw" class="section-name selfRef">Estimating BBR.max_bw</a>
         </h3>
-<p id="section-2.11-1">BBR.max_bw_filter: The filter for tracking the maximum recent rs.delivery_rate
+<p id="section-2.11-1">BBR.max_bw_filter: The filter for tracking the maximum recent RS.delivery_rate
 sample, for estimating BBR.max_bw.<a href="#section-2.11-1" class="pilcrow">¶</a></p>
 <p id="section-2.11-2">BBR.MaxBwFilterLen: A constant specifying the filter window length for
 BBR.max_bw_filter = 2 (representing
@@ -2057,20 +2059,8 @@ abated and more capacity is available.<a href="#section-3.4.2.3-1" class="pilcro
 <p id="section-3.5-1">BBR uses its model to control the connection's sending behavior. Rather than
 using a single control parameter, like the C.cwnd parameter that limits
 C.inflight in the Reno and CUBIC congestion control algorithms,
-BBR uses three distinct control parameters:<a href="#section-3.5-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-3.5-2">
-<li id="section-3.5-2.1">
-            <p id="section-3.5-2.1.1">C.pacing_rate: the maximum rate at which BBR sends data.<a href="#section-3.5-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-3.5-2.2">
-            <p id="section-3.5-2.2.1">BBR.send_quantum: the maximum size of any aggregate that the transport sender
-  implementation may need to transmit as a unit to amortize per-packet
-  transmission overheads.<a href="#section-3.5-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-3.5-2.3">
-            <p id="section-3.5-2.3.1">C.cwnd: the maximum C.inflight BBR allows.<a href="#section-3.5-2.3.1" class="pilcrow">¶</a></p>
-</li>
-        </ol>
+BBR uses three distinct control parameters: C.pacing_race, C.send_quantum,
+and C.cwnd, defined in (<a href="#output-control-parameters" class="auto internal xref">Section 2.4</a>):<a href="#section-3.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="environment-and-usage">
@@ -2427,15 +2417,14 @@ application-limited.<a href="#section-4.1.2.1.1-4" class="pilcrow">¶</a></p>
 following state per connection. If the following state variables are not
 tracked by an existing implementation, all the following parameters MUST
 be tracked to implement this algorithm:<a href="#section-4.1.2.1.1-5" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-6">C.write_seq: The data sequence number one higher than that of the last octet
-queued for transmission in the transport layer write buffer.<a href="#section-4.1.2.1.1-6" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-7">C.pending_transmissions: The number of bytes queued for transmission on the
+<p id="section-4.1.2.1.1-6">C.pending_transmissions: The number of bytes queued for transmission on the
 sending host at layers lower than the transport layer (i.e. network layer,
-traffic shaping layer, network device layer).<a href="#section-4.1.2.1.1-7" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-8">C.lost_out: The number of packets in the current outstanding window that
-are marked as lost.<a href="#section-4.1.2.1.1-8" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-9">C.retrans_out: The number of packets in the current outstanding window that
-are being retransmitted.<a href="#section-4.1.2.1.1-9" class="pilcrow">¶</a></p>
+traffic shaping layer, network device layer).<a href="#section-4.1.2.1.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-7">C.lost_out: The number of packets in the current outstanding window that
+are marked as lost.<a href="#section-4.1.2.1.1-7" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-8">C.retrans_out: The number of packets in the current outstanding window that
+are being retransmitted.<a href="#section-4.1.2.1.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-9">C.min_rtt: The minimum observed RTT over the lifetime of the connection.<a href="#section-4.1.2.1.1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="per-packet-p-state">
@@ -2461,17 +2450,17 @@ sent, else false.<a href="#section-4.1.2.1.2-5" class="pilcrow">¶</a></p>
               </h6>
 <p id="section-4.1.2.1.3-1">This algorithm provides its output in a RateSample structure rs, containing
 the following fields:<a href="#section-4.1.2.1.3-1" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.3-2">rs.delivery_rate: The delivery rate sample (in most cases rs.delivered /
-rs.interval).<a href="#section-4.1.2.1.3-2" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.3-3">rs.is_app_limited: The P.is_app_limited from the most recent packet delivered;
+<p id="section-4.1.2.1.3-2">RS.delivery_rate: The delivery rate sample (in most cases RS.delivered /
+RS.interval).<a href="#section-4.1.2.1.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.3-3">RS.is_app_limited: The P.is_app_limited from the most recent packet delivered;
 indicates whether the rate sample is application-limited.<a href="#section-4.1.2.1.3-3" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.3-4">rs.interval: The length of the sampling interval.<a href="#section-4.1.2.1.3-4" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.3-5">rs.delivered: The amount of data marked as delivered over the sampling interval.<a href="#section-4.1.2.1.3-5" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.3-6">rs.prior_delivered: The P.delivered count from the most recent packet delivered.<a href="#section-4.1.2.1.3-6" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.3-7">rs.prior_time: The P.delivered_time from the most recent packet delivered.<a href="#section-4.1.2.1.3-7" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.3-8">rs.send_elapsed: Send time interval calculated from the most recent packet
+<p id="section-4.1.2.1.3-4">RS.interval: The length of the sampling interval.<a href="#section-4.1.2.1.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.3-5">RS.delivered: The amount of data marked as delivered over the sampling interval.<a href="#section-4.1.2.1.3-5" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.3-6">RS.prior_delivered: The P.delivered count from the most recent packet delivered.<a href="#section-4.1.2.1.3-6" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.3-7">RS.prior_time: The P.delivered_time from the most recent packet delivered.<a href="#section-4.1.2.1.3-7" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.3-8">RS.send_elapsed: Send time interval calculated from the most recent packet
 delivered (see the "Send Rate" section above).<a href="#section-4.1.2.1.3-8" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.3-9">rs.ack_elapsed: ACK time interval calculated from the most recent packet
+<p id="section-4.1.2.1.3-9">RS.ack_elapsed: ACK time interval calculated from the most recent packet
 delivered (see the "ACK Rate" section above).<a href="#section-4.1.2.1.3-9" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2496,8 +2485,8 @@ interval between now and the next ACK.<a href="#section-4.1.2.2-2" class="pilcro
 <p id="section-4.1.2.2-3">After each packet transmission, the sender executes the following steps:<a href="#section-4.1.2.2-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1.2.2-4">
 <pre>
-  SendPacket(Packet P):
-    if (SND.NXT == SND.UNA)  /* no packets in flight yet? */
+  OnPacketSent(Packet P):
+    if (C.inflight == 0)
       C.first_sent_time  = C.delivered_time = P.sent_time
 
     P.first_sent_time = C.first_sent_time
@@ -2522,22 +2511,22 @@ packets. In this case we use the information from the most recently sent
 packet, i.e., the packet with the highest "P.delivered" value.<a href="#section-4.1.2.3-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1.2.3-2">
 <pre>
-  /* Upon receiving ACK, fill in delivery rate sample rs. */
-  GenerateRateSample(RateSample rs):
+  /* Upon receiving ACK, fill in delivery rate sample RS. */
+  GenerateRateSample(RS):
     for each newly acknowledged packet P
-      UpdateRateSample(P, rs)
+      UpdateRateSample(P, RS)
 
     /* Clear app-limited field if bubble is ACKed and gone. */
     if (C.app_limited and C.delivered &gt; C.app_limited)
       C.app_limited = 0
 
-    if (rs.prior_time == 0)
+    if (RS.prior_time == 0)
       return false  /* nothing delivered on this ACK */
 
     /* Use the longer of the send_elapsed and ack_elapsed */
-    rs.interval = max(rs.send_elapsed, rs.ack_elapsed)
+    RS.interval = max(RS.send_elapsed, RS.ack_elapsed)
 
-    rs.delivered = C.delivered - rs.prior_delivered
+    RS.delivered = C.delivered - RS.prior_delivered
 
     /* Normally we expect interval &gt;= MinRTT.
      * Note that rate may still be overestimated when a spuriously
@@ -2546,12 +2535,12 @@ packet, i.e., the packet with the highest "P.delivered" value.<a href="#section-
      * measuring the delivery rate during loss recovery is crucial
      * for connections that suffer heavy or prolonged losses.
      */
-    if (rs.interval &lt;  MinRTT(tp))
-      rs.interval = -1
+    if (RS.interval &lt;  C.min_rtt)
+      RS.interval = -1
       return false  /* no reliable sample */
 
-    if (rs.interval != 0)
-      rs.delivery_rate = rs.delivered / rs.interval
+    if (RS.interval != 0)
+      RS.delivery_rate = RS.delivered / RS.interval
 
     return true;  /* we filled in rs with a rate sample */
 
@@ -2564,14 +2553,14 @@ packet, i.e., the packet with the highest "P.delivered" value.<a href="#section-
     C.delivered_time = Now()
 
     /* Update info using the newest packet: */
-    if (!rs.has_data or IsNewestPacket(P, rs))
-      rs.has_data         = true
-      rs.prior_delivered  = P.delivered
-      rs.prior_time       = P.delivered_time
-      rs.is_app_limited   = P.is_app_limited
-      rs.send_elapsed     = P.sent_time - P.first_sent_time
-      rs.ack_elapsed      = C.delivered_time - P.delivered_time
-      rs.last_end_seq     = P.end_seq
+    if (!RS.has_data or IsNewestPacket(P, rs))
+      RS.has_data         = true
+      RS.prior_delivered  = P.delivered
+      RS.prior_time       = P.delivered_time
+      RS.is_app_limited   = P.is_app_limited
+      RS.send_elapsed     = P.sent_time - P.first_sent_time
+      RS.ack_elapsed      = C.delivered_time - P.delivered_time
+      RS.last_end_seq     = P.end_seq
       C.first_sent_time   = P.sent_time
 
     /* Mark the packet as delivered once it's acknowleged. */
@@ -2582,7 +2571,7 @@ packet, i.e., the packet with the highest "P.delivered" value.<a href="#section-
   IsNewestPacket(Packet P, RateSample rs):
     return (P.sent_time &gt; C.first_sent_time or
             (P.sent_time == C.first_sent_time and
-             after(P.end_seq, rs.last_end_seq))
+             after(P.end_seq, RS.last_end_seq))
 </pre><a href="#section-4.1.2.3-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -2613,7 +2602,7 @@ C.pacing_rate.<a href="#section-4.1.2.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.1.2.4-2.3">
                 <p id="section-4.1.2.4-2.3.1">At the beginning of connection timer processing, for all timers that might
-result in the transmission of one or more data segments. For example: RTO
+result in the transmission of one or more data packets. For example: RTO
 timers, TLP timers, RACK reordering timers, or Zero Window Probe timers.<a href="#section-4.1.2.4-2.3.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
@@ -2624,7 +2613,7 @@ application-limited:<a href="#section-4.1.2.4-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1.2.4-4">
 <pre>
   CheckIfApplicationLimited():
-    if (C.write_seq - SND.NXT &lt; SND.MSS and
+    if (NoUnsentData() and
         C.pending_transmissions == 0 and
         C.inflight &lt; C.cwnd and
         C.lost_out &lt;= C.retrans_out)
@@ -2663,7 +2652,7 @@ both cumulative and selective acknowledgment information. Losing an ACK results
 in losing the delivery rate sample corresponding to that ACK, and generating a
 delivery rate sample at later a time (upon the arrival of the next ACK). This
 can underestimate the delivery rate due the artificially inflated
-"rs.interval". The impact of this effect is mitigated using the BBR.max_bw
+"RS.interval". The impact of this effect is mitigated using the BBR.max_bw
 filter.<a href="#section-4.1.3.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2695,7 +2684,7 @@ retransmitted sequence ranges, then the following approaches MAY be used:<a href
 <li id="section-4.1.3.4-4.1">
                 <p id="section-4.1.3.4-4.1.1">The sender MAY choose to filter out implausible delivery rate samples, as
   described in the GenerateRateSample() step in the "Upon receiving an ACK"
-  section, by discarding samples whose rs.interval is lower than the minimum
+  section, by discarding samples whose RS.interval is lower than the minimum
   RTT seen on the connection.<a href="#section-4.1.3.4-4.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-4.1.3.4-4.2">
@@ -2738,11 +2727,11 @@ RTT sample. The sender MUST consider any potential retransmission ambiguities
 that can arise in some transport protocols. If some of the acknowledged data
 was not retransmitted, or some of the data was retransmitted but the sender
 can still unambiguously determine the RTT of the data (e.g. QUIC or TCP with
-timestamps <span>[<a href="#RFC7323" class="cite xref">RFC7323</a>]</span>), then the sender calculates an RTT sample, rs.rtt,
+timestamps <span>[<a href="#RFC7323" class="cite xref">RFC7323</a>]</span>), then the sender calculates an RTT sample, RS.rtt,
 as follows:<a href="#section-4.2-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.2-3">
 <pre>
-  rs.rtt = Now() - P.departure_time
+  RS.rtt = Now() - P.departure_time
 </pre><a href="#section-4.2-3" class="pilcrow">¶</a>
 </div>
 </section>
@@ -2937,7 +2926,7 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
           <h4 id="name-per-transmit-steps">
 <a href="#section-5.2.2" class="section-number selfRef">5.2.2. </a><a href="#name-per-transmit-steps" class="section-name selfRef">Per-Transmit Steps</a>
           </h4>
-<p id="section-5.2.2-1">When transmitting, BBR merely needs to check for the case where the flow
+<p id="section-5.2.2-1">Before transmitting, BBR merely needs to check for the case where the flow
 is restarting from idle:<a href="#section-5.2.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.2.2-2">
 <pre>
@@ -2958,6 +2947,7 @@ adjust its control parameters to adapt to the updated model:<a href="#section-5.
 <div class="alignLeft art-text artwork" id="section-5.2.3-2">
 <pre>
   BBRUpdateOnACK():
+    GenerateRateSample(RS)
     BBRUpdateModelAndState()
     BBRUpdateControlParameters()
 
@@ -3064,7 +3054,7 @@ for packet loss. The following subsections discuss these estimators.<a href="#se
 Startup and ProbeBW_UP - BBR runs a state machine to estimate whether an
 accelerating sending rate has saturated the available per-flow bandwidth
 ("filled the pipe") by looking for a plateau in the measured
-rs.delivery_rate.<a href="#section-5.3.1.2-1" class="pilcrow">¶</a></p>
+RS.delivery_rate.<a href="#section-5.3.1.2-1" class="pilcrow">¶</a></p>
 <p id="section-5.3.1.2-2">BBR tracks the status of the current full-pipe estimation process in the
 boolean BBR.full_bw_now, and uses BBR.full_bw_now to exit ProbeBW_UP. BBR
 records in the boolean BBR.full_bw_reached whether BBR estimates that it
@@ -3092,11 +3082,11 @@ new data, and when the delivery rate sample is not application-limited
 <div class="alignLeft art-text artwork" id="section-5.3.1.2-7">
 <pre>
   BBRCheckFullBWReached():
-    if (BBR.full_bw_now or !BBR.round_start or rs.is_app_limited)
+    if (BBR.full_bw_now or !BBR.round_start or RS.is_app_limited)
       return  /* no need to check for a full pipe now */
-    if (rs.delivery_rate &gt;= BBR.full_bw * 1.25)
+    if (RS.delivery_rate &gt;= BBR.full_bw * 1.25)
       BBRResetFullBW()       /* bw is still growing, so reset */
-      BBR.full_bw = rs.delivery_rate  /* record new baseline bw */
+      BBR.full_bw = RS.delivery_rate  /* record new baseline bw */
       return
     BBR.full_bw_count++   /* another round w/o much growth */
     BBR.full_bw_now = (BBR.full_bw_count &gt;= 3)
@@ -3137,7 +3127,7 @@ lost in that round trip.<a href="#section-5.3.1.3-2.3.1" class="pilcrow">¶</a><
 following steps. First, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
-BBR.inflight_latest is the max delivered volume of data (rs.delivered) over
+BBR.inflight_latest is the max delivered volume of data (RS.delivered) over
 the last round trip. Finally, it exits Startup and enters Drain.<a href="#section-5.3.1.3-3" class="pilcrow">¶</a></p>
 <p id="section-5.3.1.3-4">The algorithm waits until all three criteria are met to filter out noise
 from burst losses, and to try to ensure the bottleneck is fully utilized
@@ -3335,7 +3325,7 @@ of the following conditions are met:<a href="#section-5.3.3.4-5" class="pilcrow"
   estimator (see <a href="#exiting-acceleration-based-on-bandwidth-plateau" class="auto internal xref">Section 5.3.1.2</a>) to
   estimate whether the flow has saturated the available per-flow bandwidth
   ("filled the pipe"), by looking for a plateau in the measured
-  rs.delivery_rate. If, during this process, C.inflight is constrained
+  RS.delivery_rate. If, during this process, C.inflight is constrained
   by BBR.inflight_longterm (the flow becomes cwnd-limited while cwnd is limited by
   BBR.inflight_longterm), then the flow cannot fully explore the available bandwidth,
   and so it resets the "full pipe" estimator by calling BBRResetFullBW().<a href="#section-5.3.3.4-6.1.1" class="pilcrow">¶</a></p>
@@ -3587,7 +3577,7 @@ as follows:<a href="#section-5.3.3.5.3-6" class="pilcrow">¶</a></p>
     BBR.ack_phase = ACKS_PROBE_STARTING
     BBRStartRound()
     BBRResetFullBW()
-    BBR.full_bw = rs.delivery_rate
+    BBR.full_bw = RS.delivery_rate
     BBR.state = ProbeBW_UP
     BBRRaiseInflightLongtermSlope()
 </pre><a href="#section-5.3.3.6-5" class="pilcrow">¶</a>
@@ -3648,7 +3638,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
   BBRIsTimeToGoDown():
     if (C.is_cwnd_limited and C.cwnd &gt;= BBR.inflight_longterm)
       BBRResetFullBW()   /* bw is limited by BBR.inflight_longterm */
-      BBR.full_bw = rs.delivery_rate
+      BBR.full_bw = RS.delivery_rate
     else if (BBR.full_bw_now)
       return true  /* we estimate we've fully used path bw */
     return false
@@ -3682,7 +3672,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
   BBRProbeInflightLongtermUpward():
     if (!C.is_cwnd_limited or C.cwnd &lt; BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
-   BBR.bw_probe_up_acks += rs.newly_acked
+   BBR.bw_probe_up_acks += RS.newly_acked
    if (BBR.bw_probe_up_acks &gt;= BBR.probe_up_cnt)
      delta = BBR.bw_probe_up_acks / BBR.probe_up_cnt
      BBR.bw_probe_up_acks -= delta * BBR.bw_probe_up_cnt
@@ -3698,15 +3688,15 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
     if (BBR.ack_phase == ACKS_PROBE_STOPPING and BBR.round_start)
       /* end of samples from bw probing phase */
-      if (IsInAProbeBWState() and !rs.is_app_limited)
+      if (IsInAProbeBWState() and !RS.is_app_limited)
         BBRAdvanceMaxBwFilter()
 
     if (!IsInflightTooHigh())
       /* Loss rate is safe. Adjust upper bounds upward. */
       if (BBR.inflight_longterm == Infinity)
         return /* no upper bounds to raise */
-      if (rs.tx_in_flight &gt; BBR.inflight_longterm)
-        BBR.inflight_longterm = rs.tx_in_flight
+      if (RS.tx_in_flight &gt; BBR.inflight_longterm)
+        BBR.inflight_longterm = RS.tx_in_flight
       if (BBR.state == ProbeBW_UP)
         BBRProbeInflightLongtermUpward()
 </pre><a href="#section-5.3.3.6-9" class="pilcrow">¶</a>
@@ -3812,10 +3802,10 @@ estimate:<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
   BBRUpdateMinRTT()
     BBR.probe_rtt_expired =
       Now() &gt; BBR.probe_rtt_min_stamp + ProbeRTTInterval
-    if (rs.rtt &gt;= 0 and
-        (rs.rtt &lt; BBR.probe_rtt_min_delay or
+    if (RS.rtt &gt;= 0 and
+        (RS.rtt &lt; BBR.probe_rtt_min_delay or
          BBR.probe_rtt_expired))
-       BBR.probe_rtt_min_delay = rs.rtt
+       BBR.probe_rtt_min_delay = RS.rtt
        BBR.probe_rtt_min_stamp = Now()
 
     min_rtt_expired =
@@ -3844,7 +3834,7 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
       BBRStartRound()
     if (BBR.state == ProbeRTT)
       BBRHandleProbeRTT()
-    if (rs.delivered &gt; 0)
+    if (RS.delivered &gt; 0)
       BBR.idle_restart = false
 
   BBREnterProbeRTT():
@@ -4000,8 +3990,8 @@ calculates and uses its value. We can group the parameter into three groups:<a h
 <a href="#section-5.5.1" class="section-number selfRef">5.5.1. </a><a href="#name-bbrround_count-tracking-pac" class="section-name selfRef">BBR.round_count: Tracking Packet-Timed Round Trips</a>
           </h4>
 <p id="section-5.5.1-1">Several aspects of BBR depend on counting the progress of "packet-timed"
-round trips, which start at the transmission of some segment, and then end
-at the acknowledgement of that segment. BBR.round_count is a count of the number
+round trips, which start at the transmission of some packet, and then end
+at the acknowledgment of that packet. BBR.round_count is a count of the number
 of these "packet-timed" round trips elapsed so far. BBR uses this virtual
 BBR.round_count because it is more robust than using wall clock time. In
 particular, arbitrary intervals of wall clock time can elapse due to
@@ -4143,17 +4133,15 @@ estimate, since this indicates the current BBR.Max_bw estimate is too low.<a hre
 <a href="#section-5.5.5" class="section-number selfRef">5.5.5. </a><a href="#name-updating-the-bbrmax_bw-max-" class="section-name selfRef">Updating the BBR.max_bw Max Filter</a>
           </h4>
 <p id="section-5.5.5-1">For every ACK that acknowledges some data packets as delivered, BBR invokes
-BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows (here
-rs.delivery_rate is the delivery rate sample obtained from the ACK that is
-being processed, as specified in <a href="#delivery-rate-samples" class="auto internal xref">Section 4.1</a>):<a href="#section-5.5.5-1" class="pilcrow">¶</a></p>
+BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows:<a href="#section-5.5.5-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.5-2">
 <pre>
   BBRUpdateMaxBw()
     BBRUpdateRound()
-    if (rs.delivery_rate &gt;= BBR.max_bw || !rs.is_app_limited)
+    if (RS.delivery_rate &gt;= BBR.max_bw || !RS.is_app_limited)
         BBR.max_bw = UpdateWindowedMaxFilter(
                       filter=BBR.MaxBwFilter,
-                      value=rs.delivery_rate,
+                      value=RS.delivery_rate,
                       time=BBR.cycle_count,
                       window_length=MaxBwFilterLen)
 </pre><a href="#section-5.5.5-2" class="pilcrow">¶</a>
@@ -4281,7 +4269,7 @@ operating environment.<a href="#section-5.5.8-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.8-3">
 <pre>
     BBRUpdateOffloadBudget():
-      BBR.offload_budget = 3 * BBR.send_quantum
+      BBR.offload_budget = 3 * C.send_quantum
 </pre><a href="#section-5.5.8-3" class="pilcrow">¶</a>
 </div>
 <p id="section-5.5.8-4">The factor of 3 is chosen to allow maintaining at least:<a href="#section-5.5.8-4" class="pilcrow">¶</a></p>
@@ -4332,7 +4320,7 @@ measured degree of aggregation.<a href="#section-5.5.9-3" class="pilcrow">¶</a>
         BBR.extra_acked_delivered = 0
         BBR.extra_acked_interval_start = Now()
         expected_delivered = 0
-    BBR.extra_acked_delivered += rs.newly_acked
+    BBR.extra_acked_delivered += RS.newly_acked
     extra = BBR.extra_acked_delivered - expected_delivered
     extra = min(extra, C.cwnd)
     if (BBR.full_bw_reached)
@@ -4386,18 +4374,18 @@ reduces BBR.inflight_longterm:<a href="#section-5.5.10.2-1" class="pilcrow">¶</
 <pre>
   /* Do loss signals suggest C.inflight is too high? */
   IsInflightTooHigh():
-    return (rs.lost &gt; rs.tx_in_flight * BBR.LossThresh)
+    return (RS.lost &gt; RS.tx_in_flight * BBR.LossThresh)
 
   BBRHandleInflightTooHigh():
     BBR.bw_probe_samples = 0;  /* only react once per bw probe */
-    if (!rs.is_app_limited)
-      BBR.inflight_longterm = max(rs.tx_in_flight,
+    if (!RS.is_app_limited)
+      BBR.inflight_longterm = max(RS.tx_in_flight,
                             BBRTargetInflight() * BBR.Beta))
     If (BBR.state == ProbeBW_UP)
       BBRStartProbeBW_DOWN()
 </pre><a href="#section-5.5.10.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-5.5.10.2-3">Here rs.tx_in_flight is the C.inflight value
+<p id="section-5.5.10.2-3">Here RS.tx_in_flight is the C.inflight value
 when the most recently ACKed packet was sent. And the BBR.Beta (0.7x) bound
 is to try to ensure that BBR does not react more dramatically than CUBIC's
 0.7x multiplicative decrease factor.<a href="#section-5.5.10.2-3" class="pilcrow">¶</a></p>
@@ -4448,20 +4436,20 @@ represents the data lost among that previous in-flight data.<a href="#section-5.
     BBRNoteLoss()
     if (!BBR.bw_probe_samples)
       return /* not a packet sent while probing bandwidth */
-    rs.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
-    rs.lost = C.lost - P.lost /* data lost since transmit */
-    rs.is_app_limited = P.is_app_limited;
+    RS.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
+    RS.lost = C.lost - P.lost /* data lost since transmit */
+    RS.is_app_limited = P.is_app_limited;
     if (IsInflightTooHigh())
-      rs.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
+      RS.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
       BBRHandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
   BBRInflightLongtermFromLostPacket(rs, packet):
     size = packet.size
     /* What was in flight before this packet? */
-    inflight_prev = rs.tx_in_flight - size
+    inflight_prev = RS.tx_in_flight - size
     /* What was lost before this packet? */
-    lost_prev = rs.lost - size
+    lost_prev = RS.lost - size
     lost_prefix = (BBR.LossThresh * inflight_prev - lost_prev) /
                   (1 - BB.RLossThresh)
     /* At what C.inflight value did losses cross BBR.LossThresh? */
@@ -4490,9 +4478,9 @@ the last round trip). This applies generally: whether in fast recovery, RTO
 recovery, TLP recovery; whether application-limited or not.<a href="#section-5.5.10.3-2" class="pilcrow">¶</a></p>
 <p id="section-5.5.10.3-3">There are two key parameters the algorithm tracks, to measure the current
 delivery process:<a href="#section-5.5.10.3-3" class="pilcrow">¶</a></p>
-<p id="section-5.5.10.3-4">BBR.bw_latest: a 1-round-trip max of delivered bandwidth (rs.delivery_rate).<a href="#section-5.5.10.3-4" class="pilcrow">¶</a></p>
+<p id="section-5.5.10.3-4">BBR.bw_latest: a 1-round-trip max of delivered bandwidth (RS.delivery_rate).<a href="#section-5.5.10.3-4" class="pilcrow">¶</a></p>
 <p id="section-5.5.10.3-5">BBR.inflight_latest: a 1-round-trip max of delivered volume of data
-(rs.delivered).<a href="#section-5.5.10.3-5" class="pilcrow">¶</a></p>
+(RS.delivered).<a href="#section-5.5.10.3-5" class="pilcrow">¶</a></p>
 <p id="section-5.5.10.3-6">Upon the ACK at the end of each round that encountered a newly-marked loss,
 the flow updates its model (BBR.bw_shortterm and BBR.inflight_shortterm) as follows:<a href="#section-5.5.10.3-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.10.3-7">
@@ -4507,17 +4495,17 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
   /* Near start of ACK processing: */
   BBRUpdateLatestDeliverySignals():
     BBR.loss_round_start = 0
-    BBR.bw_latest       = max(BBR.bw_latest,       rs.delivery_rate)
-    BBR.inflight_latest = max(BBR.inflight_latest, rs.delivered)
-    if (rs.prior_delivered &gt;= BBR.loss_round_delivered)
+    BBR.bw_latest       = max(BBR.bw_latest,       RS.delivery_rate)
+    BBR.inflight_latest = max(BBR.inflight_latest, RS.delivered)
+    if (RS.prior_delivered &gt;= BBR.loss_round_delivered)
       BBR.loss_round_delivered = C.delivered
       BBR.loss_round_start = 1
 
   /* Near end of ACK processing: */
   BBRAdvanceLatestDeliverySignals():
     if (BBR.loss_round_start)
-      BBR.bw_latest       = rs.delivery_rate
-      BBR.inflight_latest = rs.delivered
+      BBR.bw_latest       = RS.delivery_rate
+      BBR.inflight_latest = RS.delivered
 
   BBRResetCongestionSignals():
     BBR.loss_in_round = 0
@@ -4704,8 +4692,8 @@ BBR to pace at 1% below the bw, on average.<a href="#section-5.6.2-9" class="pil
 </div>
 <div id="send-quantum-bbrsendquantum">
 <section id="section-5.6.3">
-          <h4 id="name-send-quantum-bbrsend_quantu">
-<a href="#section-5.6.3" class="section-number selfRef">5.6.3. </a><a href="#name-send-quantum-bbrsend_quantu" class="section-name selfRef">Send Quantum: BBR.send_quantum</a>
+          <h4 id="name-send-quantum-csend_quantum">
+<a href="#section-5.6.3" class="section-number selfRef">5.6.3. </a><a href="#name-send-quantum-csend_quantum" class="section-name selfRef">Send Quantum: C.send_quantum</a>
           </h4>
 <p id="section-5.6.3-1">In order to amortize per-packet overheads involved in the sending process (host
 CPU, NIC processing, and interrupt processing delays), high-performance
@@ -4727,17 +4715,17 @@ in lower CPU overheads at the sending and receiving hosts, who can ship larger
 amounts of data with a single trip through the networking stack.<a href="#section-5.6.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-5.6.3-3">On each ACK, BBR runs BBRSetSendQuantum() to update BBR.send_quantum  as
+<p id="section-5.6.3-3">On each ACK, BBR runs BBRSetSendQuantum() to update C.send_quantum  as
 follows:<a href="#section-5.6.3-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.3-4">
 <pre>
   BBRSetSendQuantum():
-    BBR.send_quantum = C.pacing_rate * 1ms
-    BBR.send_quantum = min(BBR.send_quantum, 64 KBytes)
-    BBR.send_quantum = max(BBR.send_quantum, 2 * C.SMSS)
+    C.send_quantum = C.pacing_rate * 1ms
+    C.send_quantum = min(C.send_quantum, 64 KBytes)
+    C.send_quantum = max(C.send_quantum, 2 * C.SMSS)
 </pre><a href="#section-5.6.3-4" class="pilcrow">¶</a>
 </div>
-<p id="section-5.6.3-5">A BBR implementation MAY use alternate approaches to select a BBR.send_quantum,
+<p id="section-5.6.3-5">A BBR implementation MAY use alternate approaches to select a C.send_quantum,
 as appropriate for the CPU overheads anticipated for senders and receivers,
 and buffering considerations anticipated in the network path. However, for
 the sake of the network and other users, a BBR implementation SHOULD attempt
@@ -4940,16 +4928,16 @@ BBR.max_inflight derived from BBR's path model, BBR cuts C.cwnd immediately
 to the BBR.max_inflight. When C.cwnd is below BBR.max_inflight, BBR raises
 C.cwnd gradually and cautiously, increasing C.cwnd by no more than the amount of
 data acknowledged (cumulatively or selectively) upon each ACK.<a href="#section-5.6.4.6-1" class="pilcrow">¶</a></p>
-<p id="section-5.6.4.6-2">Specifically, on each ACK that acknowledges "rs.newly_acked" packets as newly
+<p id="section-5.6.4.6-2">Specifically, on each ACK that acknowledges "RS.newly_acked" packets as newly
 acknowledged, BBR runs the following BBRSetCwnd() steps to update C.cwnd:<a href="#section-5.6.4.6-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.6-3">
 <pre>
   BBRSetCwnd():
     BBRUpdateMaxInflight()
     if (BBR.full_bw_reached)
-      C.cwnd = min(C.cwnd + rs.newly_acked, BBR.max_inflight)
+      C.cwnd = min(C.cwnd + RS.newly_acked, BBR.max_inflight)
     else if (C.cwnd &lt; BBR.max_inflight || C.delivered &lt; C.InitialCwnd)
-      C.cwnd = C.cwnd + rs.newly_acked
+      C.cwnd = C.cwnd + RS.newly_acked
     C.cwnd = max(C.cwnd, BBR.MinPipeCwnd)
     BBRBoundCwndForProbeRTT()
     BBRBoundCwndForModel()
