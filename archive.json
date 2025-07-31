@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-22T01:52:05.085352+00:00",
+  "timestamp": "2025-07-31T01:54:18.176423+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -873,9 +873,17 @@
       "labels": [],
       "body": "At first glance, I assumed `delivered` was a boolean, but it\u2019s actually the total number of acknowledged bytes. A more descriptive variable name might make this clearer.",
       "createdAt": "2025-07-12T22:16:03Z",
-      "updatedAt": "2025-07-12T22:16:03Z",
+      "updatedAt": "2025-07-30T21:13:28Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "We discussed this among the co-editors, and our consensus was that it will be better for readability if we don't have the units explicitly mentioned in the many variables that refer to quantities of data, or data rates. So we would prefer to stick with \"delivered\" rather than \"bytes_delivered\",  \"cwnd\" rather than \"cwnd_bytes\", \"inflight\" rather than \"inflight_bytes\", etc.\n\nInstead, our plan is to clarify the canonical units for each quantity in the prose definition of each quantity.\n\nThis should hopefully make the draft a little easier/quicker to read, and provide less cognitive dissonance for implementations that want to use other units for tracking data (e.g., bits or packets instead of bytes).\n\nThis is tracked separately in issue: \"Should BBR inflight be described in bytes, packets or compatible with both?\" issue#27:  https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/27\n",
+          "createdAt": "2025-07-30T21:13:28Z",
+          "updatedAt": "2025-07-30T21:13:28Z"
+        }
+      ]
     },
     {
       "number": 62,
@@ -886,12 +894,22 @@
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "Editorial"
+      ],
       "body": "The draft uses both \"segments\" and \"packets\", which I assume refer to the same thing. If that\u2019s the case, it would be clearer to settle on a single term. My preference would be \"packet\" (perhaps not surprising, given my QUIC background).",
       "createdAt": "2025-07-12T22:20:01Z",
-      "updatedAt": "2025-07-12T22:20:01Z",
+      "updatedAt": "2025-07-30T20:55:35Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "OK, thanks. We have discussed this among the editors, and the plan is to consolidate the text to use the term \"packet\" rather than \"segment\", since \"segment\" is somewhat TCP-oriented. Thanks!\n",
+          "createdAt": "2025-07-30T20:55:35Z",
+          "updatedAt": "2025-07-30T20:55:35Z"
+        }
+      ]
     },
     {
       "number": 63,
@@ -4087,6 +4105,53 @@
           "createdAt": "2025-07-20T10:49:17Z",
           "updatedAt": "2025-07-20T10:49:17Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 72,
+      "id": "PR_kwDOL3MllM6hboJh",
+      "title": "Replace segment with packet",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/72",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #62",
+      "createdAt": "2025-07-30T20:59:30Z",
+      "updatedAt": "2025-07-31T01:17:45Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "aa5402b965b98a343fcbb4399e90c4c86b5e61cb",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-segment-packet",
+      "headRefOid": "77824db1c193dd361de2bd05ca66b059047a09e4",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM63NKh3",
+          "commit": {
+            "abbreviatedOid": "77824db"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-07-31T00:28:13Z",
+          "updatedAt": "2025-07-31T01:17:45Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "I suspect it will cause confusion and objections if we use \"SMSS\" and say that it \"is equivalent to PMTU in QUIC {{RFC9000, Section 14.2}}\". I can think of at least two significant differences between SMSS and PMTU:\r\n\r\n(1) TCP SMSS is constrained not just by the PMTU, but also by the MSS option the remote peer communicated in its SYN packet.\r\n\r\n(2) TCP SMSS does not include TCP/IP headers but QUIC PMTU does include UDP/IP headers. The https://datatracker.ietf.org/doc/html/rfc5681#section-2 defines SMSS such that the SMSS \"size does not include the TCP/IP headers and options\" but https://datatracker.ietf.org/doc/html/rfc9000#section-14.2 defines PMTU to include IP/UDP headers (\"The PMTU is the maximum size of the entire IP packet, including the IP header, UDP header, and UDP payload\"). \r\n\r\n(3) TCP SMSS is the size of the packet used for congestion control purposes, but in QUIC the PMTU size (full L3 packet including L3 headers and L4+ bytes) is different than the size used for CC purposes in RFC9002, where bytes_in_flight does not include L3/IP or UDP overhead.\r\n\r\n\r\nAs far as how exactly to define the packet size for BBR purposes, it seems we have a few existing approaches we could try to match:\r\n\r\n+ QUIC CC has thus far in https://datatracker.ietf.org/doc/html/rfc9002#section-b.2 defines bytes_in_flight as including L4 headers and L4 payload.\r\n\r\n+ The TCP Reno CC in https://datatracker.ietf.org/doc/html/rfc5681#section-2  defines TCP cwnd control in terms of L4 payload bytes only, and SMSS in terms of payload bytes.\r\n\r\n+ CUBIC CC in https://datatracker.ietf.org/doc/html/rfc9438#section-4.1.2 says cwnd is in segments, aka SMSS bytes. Looking at CUBIC RFC 9438, when it introduces SMSS it simply says \"Sender Maximum Segment Size (SMSS) bytes\". The definitions section says: \"The unit of all window sizes in this document is segments of the SMSS, and the unit of all times is seconds. Implementations can use bytes to express window sizes, which would require factoring in the SMSS wherever necessary and replacing segments_acked ([Figure 4](https://datatracker.ietf.org/doc/html/rfc9438#eq4)) with the number of acknowledged bytes.\"\r\n\r\nI can see two main options:\r\n\r\n(1) Just follow the CUBIC example and use  \"Sender Maximum Segment Size (SMSS)\" without defining it further.\r\n\r\n(2) Try to come up with a transport-agnostic term that avoids confusion/ambiguity. Perhaps instead of C.SMSS we could use C.SMPS: (Sender Maximum Packet Size), defined as  the maximum packet size the sender choses to send, including whatever portion of the packet that the transport protocol implentation tracks for congestion control purposes. This portion MUST include L4 payload.  This MAY be just L4 payload (like TCP SMSS). This MAY be L4 payload plus L4 headers (like QUIC max_datagram_size). Protocol implementations MAY use L2 headers through L4 payload, or L3 headers through L4 payload.\r\n\r\nI would lean toward (2), to avoid baking in this SMSS term that is TCP-centric.\r\n\r\n@ianswett @jbeshay WDYT?\r\n",
+              "createdAt": "2025-07-31T00:28:13Z",
+              "updatedAt": "2025-07-31T01:17:45Z"
+            }
+          ]
         }
       ]
     }
