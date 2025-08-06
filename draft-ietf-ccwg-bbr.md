@@ -293,7 +293,7 @@ e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
 
 ## Transport Connection State {#transport-connection-state}
 
-C.SMSS: The Sender Maximum Segment Size in bytes. This is equivalent to PMTU
+C.SMSS: The Sender Maximum Segment Size in bytes. This is similar to PMTU
 in QUIC {{RFC9000, Section 14.2}}.
 
 C.InitialCwnd: The initial congestion window set by the transport protocol
