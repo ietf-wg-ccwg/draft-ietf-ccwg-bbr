@@ -293,7 +293,8 @@ e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
 
 ## Transport Connection State {#transport-connection-state}
 
-C.SMSS: The Sender Maximum Segment Size.
+C.SMSS: The Sender Maximum Segment Size in bytes. This is similar to PMTU
+in QUIC {{RFC9000, Section 14.2}}.
 
 C.InitialCwnd: The initial congestion window set by the transport protocol
 implementation for the connection at initialization time.
@@ -330,8 +331,8 @@ packet that has just been ACKed and the current time.
 RS.delivery_rate: The delivery rate (aka bandwidth) sample obtained from
 the packet that has just been ACKed.
 
-RS.rtt: The RTT sample calculated based on the most recently-sent segment
-of the segments that have just been ACKed.
+RS.rtt: The RTT sample calculated based on the most recently-sent packet
+of the packets that have just been ACKed.
 
 RS.newly_acked: The volume of data cumulatively or selectively acknowledged
 upon the ACK that was just received. (This quantity is referred to as
@@ -342,12 +343,12 @@ just received.
 
 RS.tx_in_flight: C.inflight at
 the time of the transmission of the packet that has just been ACKed (the
-most recently sent segment among segments ACKed by the ACK that was just
+most recently sent packet among packets ACKed by the ACK that was just
 received).
 
 RS.lost: The volume of data that was declared lost between the transmission
 and acknowledgment of the packet that has just been ACKed (the most recently
-sent segment among segments ACKed by the ACK that was just received).
+sent packet among packets ACKed by the ACK that was just received).
 
 
 ## Output Control Parameters {#output-control-parameters}
@@ -1242,7 +1243,7 @@ the following situations:
   C.pacing_rate.
 
 * At the beginning of connection timer processing, for all timers that might
-  result in the transmission of one or more data segments. For example: RTO
+  result in the transmission of one or more data packets. For example: RTO
   timers, TLP timers, RACK reordering timers, or Zero Window Probe timers.
 
 When checking for application-limited behavior, the connection checks all the
@@ -2435,8 +2436,8 @@ calculates and uses its value. We can group the parameter into three groups:
 ### BBR.round_count: Tracking Packet-Timed Round Trips {#bbrroundcount-tracking-packet-timed-round-trips}
 
 Several aspects of BBR depend on counting the progress of "packet-timed"
-round trips, which start at the transmission of some segment, and then end
-at the acknowledgment of that segment. BBR.round_count is a count of the number
+round trips, which start at the transmission of some packet, and then end
+at the acknowledgment of that packet. BBR.round_count is a count of the number
 of these "packet-timed" round trips elapsed so far. BBR uses this virtual
 BBR.round_count because it is more robust than using wall clock time. In
 particular, arbitrary intervals of wall clock time can elapse due to
