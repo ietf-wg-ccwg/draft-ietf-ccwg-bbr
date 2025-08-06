@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 31 January 2026                                  J. Beshay, Ed.
+Expires: 7 February 2026                                  J. Beshay, Ed.
                                                                     Meta
-                                                            30 July 2025
+                                                           6 August 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 31 January 2026.
+   This Internet-Draft will expire on 7 February 2026.
 
 Copyright Notice
 
@@ -246,8 +246,8 @@ Table of Contents
 
 2.1.  Transport Connection State
 
-   C.SMSS: The Sender Maximum Segment Size in bytes.  This is equivalent
-   to PMTU in QUIC [RFC9000], Section 14.2.
+   C.SMSS: The Sender Maximum Segment Size in bytes.  This is similar to
+   PMTU in QUIC [RFC9000], Section 14.2.
 
    C.InitialCwnd: The initial congestion window set by the transport
    protocol implementation for the connection at initialization time.
