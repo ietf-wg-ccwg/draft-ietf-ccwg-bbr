@@ -1059,11 +1059,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">July 2025</td>
+<td class="right">August 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 21 January 2026</td>
+<td class="center">Expires 7 February 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1076,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-07-20" class="published">20 July 2025</time>
+<time datetime="2025-08-06" class="published">6 August 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-01-21">21 January 2026</time></dd>
+<dd class="expires"><time datetime="2026-02-07">7 February 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1150,7 +1150,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 21 January 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 February 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1541,7 +1541,8 @@ e.g., via a QUIC ACK Range <span>[<a href="#RFC9000" class="cite xref">RFC9000</
         <h3 id="name-transport-connection-state">
 <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-transport-connection-state" class="section-name selfRef">Transport Connection State</a>
         </h3>
-<p id="section-2.1-1">C.SMSS: The Sender Maximum Segment Size.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-1">C.SMSS: The Sender Maximum Segment Size in bytes. This is similar to PMTU
+in QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>], <a href="https://rfc-editor.org/rfc/rfc9000#section-14.2" class="relref">Section 14.2</a></span>.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
 <p id="section-2.1-2">C.InitialCwnd: The initial congestion window set by the transport protocol
 implementation for the connection at initialization time.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
 <p id="section-2.1-3">C.delivered: The total amount of data (tracked in octets or in packets)
@@ -1578,8 +1579,8 @@ connection C.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
 packet that has just been ACKed and the current time.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
 <p id="section-2.3-2">RS.delivery_rate: The delivery rate (aka bandwidth) sample obtained from
 the packet that has just been ACKed.<a href="#section-2.3-2" class="pilcrow">¶</a></p>
-<p id="section-2.3-3">RS.rtt: The RTT sample calculated based on the most recently-sent segment
-of the segments that have just been ACKed.<a href="#section-2.3-3" class="pilcrow">¶</a></p>
+<p id="section-2.3-3">RS.rtt: The RTT sample calculated based on the most recently-sent packet
+of the packets that have just been ACKed.<a href="#section-2.3-3" class="pilcrow">¶</a></p>
 <p id="section-2.3-4">RS.newly_acked: The volume of data cumulatively or selectively acknowledged
 upon the ACK that was just received. (This quantity is referred to as
 "DeliveredData" in <span>[<a href="#RFC6937" class="cite xref">RFC6937</a>]</span>.)<a href="#section-2.3-4" class="pilcrow">¶</a></p>
@@ -1587,11 +1588,11 @@ upon the ACK that was just received. (This quantity is referred to as
 just received.<a href="#section-2.3-5" class="pilcrow">¶</a></p>
 <p id="section-2.3-6">RS.tx_in_flight: C.inflight at
 the time of the transmission of the packet that has just been ACKed (the
-most recently sent segment among segments ACKed by the ACK that was just
+most recently sent packet among packets ACKed by the ACK that was just
 received).<a href="#section-2.3-6" class="pilcrow">¶</a></p>
 <p id="section-2.3-7">RS.lost: The volume of data that was declared lost between the transmission
 and acknowledgment of the packet that has just been ACKed (the most recently
-sent segment among segments ACKed by the ACK that was just received).<a href="#section-2.3-7" class="pilcrow">¶</a></p>
+sent packet among packets ACKed by the ACK that was just received).<a href="#section-2.3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="output-control-parameters">
@@ -2601,7 +2602,7 @@ C.pacing_rate.<a href="#section-4.1.2.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.1.2.4-2.3">
                 <p id="section-4.1.2.4-2.3.1">At the beginning of connection timer processing, for all timers that might
-result in the transmission of one or more data segments. For example: RTO
+result in the transmission of one or more data packets. For example: RTO
 timers, TLP timers, RACK reordering timers, or Zero Window Probe timers.<a href="#section-4.1.2.4-2.3.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
@@ -3989,8 +3990,8 @@ calculates and uses its value. We can group the parameter into three groups:<a h
 <a href="#section-5.5.1" class="section-number selfRef">5.5.1. </a><a href="#name-bbrround_count-tracking-pac" class="section-name selfRef">BBR.round_count: Tracking Packet-Timed Round Trips</a>
           </h4>
 <p id="section-5.5.1-1">Several aspects of BBR depend on counting the progress of "packet-timed"
-round trips, which start at the transmission of some segment, and then end
-at the acknowledgment of that segment. BBR.round_count is a count of the number
+round trips, which start at the transmission of some packet, and then end
+at the acknowledgment of that packet. BBR.round_count is a count of the number
 of these "packet-timed" round trips elapsed so far. BBR uses this virtual
 BBR.round_count because it is more robust than using wall clock time. In
 particular, arbitrary intervals of wall clock time can elapse due to
