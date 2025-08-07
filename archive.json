@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-31T01:54:18.176423+00:00",
+  "timestamp": "2025-08-07T01:55:53.497688+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -890,7 +890,7 @@
       "id": "I_kwDOL3MllM7ARoSV",
       "title": "segment vs packet",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/62",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [],
@@ -899,8 +899,8 @@
       ],
       "body": "The draft uses both \"segments\" and \"packets\", which I assume refer to the same thing. If that\u2019s the case, it would be clearer to settle on a single term. My preference would be \"packet\" (perhaps not surprising, given my QUIC background).",
       "createdAt": "2025-07-12T22:20:01Z",
-      "updatedAt": "2025-07-30T20:55:35Z",
-      "closedAt": null,
+      "updatedAt": "2025-08-06T20:50:16Z",
+      "closedAt": "2025-08-06T20:50:16Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -1471,7 +1471,7 @@
       "labels": [],
       "body": "We don't need to explicitly track the ack_phase in order to advance MaxBWFilter. Instead, we can advance it when entering ProbeBW_Down.\r\n\r\nThis logic is currently used in Mvfst. ",
       "createdAt": "2024-10-21T17:14:29Z",
-      "updatedAt": "2024-10-21T17:14:29Z",
+      "updatedAt": "2025-08-06T20:48:37Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "871539f6c9e8561fc77578c37f6f33e890797c8f",
@@ -4113,24 +4113,26 @@
       "id": "PR_kwDOL3MllM6hboJh",
       "title": "Replace segment with packet",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/72",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #62",
       "createdAt": "2025-07-30T20:59:30Z",
-      "updatedAt": "2025-07-31T01:17:45Z",
+      "updatedAt": "2025-08-06T20:52:41Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "aa5402b965b98a343fcbb4399e90c4c86b5e61cb",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-segment-packet",
-      "headRefOid": "77824db1c193dd361de2bd05ca66b059047a09e4",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "e820e3a49cae7a3252e74a561436837c70b8c201",
+      "closedAt": "2025-08-06T20:50:15Z",
+      "mergedAt": "2025-08-06T20:50:15Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "255cfc876e6a78f703df577670fb644501b58994"
+      },
       "comments": [],
       "reviews": [
         {
@@ -4150,6 +4152,59 @@
               "body": "I suspect it will cause confusion and objections if we use \"SMSS\" and say that it \"is equivalent to PMTU in QUIC {{RFC9000, Section 14.2}}\". I can think of at least two significant differences between SMSS and PMTU:\r\n\r\n(1) TCP SMSS is constrained not just by the PMTU, but also by the MSS option the remote peer communicated in its SYN packet.\r\n\r\n(2) TCP SMSS does not include TCP/IP headers but QUIC PMTU does include UDP/IP headers. The https://datatracker.ietf.org/doc/html/rfc5681#section-2 defines SMSS such that the SMSS \"size does not include the TCP/IP headers and options\" but https://datatracker.ietf.org/doc/html/rfc9000#section-14.2 defines PMTU to include IP/UDP headers (\"The PMTU is the maximum size of the entire IP packet, including the IP header, UDP header, and UDP payload\"). \r\n\r\n(3) TCP SMSS is the size of the packet used for congestion control purposes, but in QUIC the PMTU size (full L3 packet including L3 headers and L4+ bytes) is different than the size used for CC purposes in RFC9002, where bytes_in_flight does not include L3/IP or UDP overhead.\r\n\r\n\r\nAs far as how exactly to define the packet size for BBR purposes, it seems we have a few existing approaches we could try to match:\r\n\r\n+ QUIC CC has thus far in https://datatracker.ietf.org/doc/html/rfc9002#section-b.2 defines bytes_in_flight as including L4 headers and L4 payload.\r\n\r\n+ The TCP Reno CC in https://datatracker.ietf.org/doc/html/rfc5681#section-2  defines TCP cwnd control in terms of L4 payload bytes only, and SMSS in terms of payload bytes.\r\n\r\n+ CUBIC CC in https://datatracker.ietf.org/doc/html/rfc9438#section-4.1.2 says cwnd is in segments, aka SMSS bytes. Looking at CUBIC RFC 9438, when it introduces SMSS it simply says \"Sender Maximum Segment Size (SMSS) bytes\". The definitions section says: \"The unit of all window sizes in this document is segments of the SMSS, and the unit of all times is seconds. Implementations can use bytes to express window sizes, which would require factoring in the SMSS wherever necessary and replacing segments_acked ([Figure 4](https://datatracker.ietf.org/doc/html/rfc9438#eq4)) with the number of acknowledged bytes.\"\r\n\r\nI can see two main options:\r\n\r\n(1) Just follow the CUBIC example and use  \"Sender Maximum Segment Size (SMSS)\" without defining it further.\r\n\r\n(2) Try to come up with a transport-agnostic term that avoids confusion/ambiguity. Perhaps instead of C.SMSS we could use C.SMPS: (Sender Maximum Packet Size), defined as  the maximum packet size the sender choses to send, including whatever portion of the packet that the transport protocol implentation tracks for congestion control purposes. This portion MUST include L4 payload.  This MAY be just L4 payload (like TCP SMSS). This MAY be L4 payload plus L4 headers (like QUIC max_datagram_size). Protocol implementations MAY use L2 headers through L4 payload, or L3 headers through L4 payload.\r\n\r\nI would lean toward (2), to avoid baking in this SMSS term that is TCP-centric.\r\n\r\n@ianswett @jbeshay WDYT?\r\n",
               "createdAt": "2025-07-31T00:28:13Z",
               "updatedAt": "2025-07-31T01:17:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM64bhTl",
+          "commit": {
+            "abbreviatedOid": "77824db"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-08-06T20:45:15Z",
+          "updatedAt": "2025-08-06T20:45:15Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\r\nC.SMSS: The Sender Maximum Segment Size in bytes. This is similar to PMTU\r\n```",
+              "createdAt": "2025-08-06T20:45:15Z",
+              "updatedAt": "2025-08-06T20:45:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM64biaq",
+          "commit": {
+            "abbreviatedOid": "e820e3a"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-06T20:46:51Z",
+          "updatedAt": "2025-08-06T20:46:51Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM64bmRk",
+          "commit": {
+            "abbreviatedOid": "77824db"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-08-06T20:52:41Z",
+          "updatedAt": "2025-08-06T20:52:41Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "As discussed, I think MaxPacketSize or SenderMaxSize or MaxSendSize might be better than SMPS?",
+              "createdAt": "2025-08-06T20:52:41Z",
+              "updatedAt": "2025-08-06T20:52:41Z"
             }
           ]
         }
