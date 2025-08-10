@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-07T01:55:53.497688+00:00",
+  "timestamp": "2025-08-10T01:59:02.199093+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1079,6 +1079,22 @@
       "body": "Today in CCWG there was interest in example test cases of some form for BBR, so implementers could ensure they implemented it correctly.\n\nQLog was mentioned as a common logging framework for QUIC that could be used for congestion control debugging and might allow implementations to compare traces.",
       "createdAt": "2025-07-21T15:22:28Z",
       "updatedAt": "2025-07-21T15:22:28Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 73,
+      "id": "I_kwDOL3MllM7E0G12",
+      "title": "Mention the possibility of triggering PROBE_RTT on a known path change",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/73",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "There are circumstances it's known a path change has occurred.  Starlink apparently can change paths at 15 second intervals and a cell phone might know when it's changed network types/etc.\n\nIn this case, if the RTT decreased, that should be observed quickly, but if it increased, it might be necessary to measure a new min_rtt, otherwise the CWND could be far too small.",
+      "createdAt": "2025-08-07T21:55:57Z",
+      "updatedAt": "2025-08-07T21:55:57Z",
       "closedAt": null,
       "comments": []
     }
