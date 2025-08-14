@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-10T01:59:02.199093+00:00",
+  "timestamp": "2025-08-14T01:46:48.718621+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -797,7 +797,7 @@
       "labels": [],
       "body": "The `BBR` struct holds connection-scoped variable, as does the the `C` struct. I might be missing something, but it is not clear to me why these are split into two different structs.",
       "createdAt": "2025-07-12T21:58:22Z",
-      "updatedAt": "2025-07-18T21:14:50Z",
+      "updatedAt": "2025-08-13T18:39:52Z",
       "closedAt": null,
       "comments": [
         {
@@ -827,6 +827,13 @@
           "body": "> Generally, yes, a connection has one congestion controller but it could change or have its state reset (e.g. for quic connection migration). The `C` variables would not be reset in that case, just `BBR`.\n\nThis framing makes sense to me, but I'm not sure if it applies here (taking a look at the variables defined in section 2.1):\n* `C.SMSS`: might differ between network interfaces, and therefore not stay constant when migrating to a new path.\n* `C.inflight`: I'm not sure how useful it is to aggregate in-flight bytes across multiple network paths.\n* `C.is_cwnd_limited`: cwnd is a per-path property, hence it can't apply to multiple paths at the same time.\n* `C.delivered` is used to calculate the ACK rate, among others. This seems like a path-dependent property as well.",
           "createdAt": "2025-07-18T21:14:50Z",
           "updatedAt": "2025-07-18T21:14:50Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Maintaining these variables per-path is orthogonal, I'd argue these `C` variables would be `Path` variables in this case rather than `BBR`. \n\nThe idea is that `C` variables are ones that we expect to already exist in the Connection state for use by other parts of the transport or other congestion controllers. For example, the rate estimation algorithm described in the draft can be used independently of BBR. It references only `C` variables.",
+          "createdAt": "2025-08-13T18:39:52Z",
+          "updatedAt": "2025-08-13T18:39:52Z"
         }
       ]
     },
