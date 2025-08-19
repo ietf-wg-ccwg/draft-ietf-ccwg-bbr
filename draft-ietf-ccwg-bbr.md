@@ -296,23 +296,19 @@ e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
 C.SMSS: The Sender Maximum Send Size in bytes. The maximum
 size of a single transmission, including the portion
 of the packet that the transport protocol implementation tracks for
-congestion control purposes.
-C.SMSS MUST include transport protocol payload data.
-C.SMSS MAY include only the transport protocol payload data;
-for example, for TCP BBR implementations the C.SMSS SHOULD be the
-Eff.snd.MSS defined in {{RFC9293, Section 3.7.1}},
-which includes only the TCP transport protocol payload data,
-but not TCP or IP headers.
-C.SMSS MAY include the transport protocol payload data plus
-the transport protocol headers; for example,
-for QUIC BBR implementations
+congestion control purposes. C.SMSS MUST include transport protocol
+payload data. C.SMSS MAY include only the transport protocol payload
+data; for example, for TCP BBR implementations the C.SMSS SHOULD be
+the Eff.snd.MSS defined in {{RFC9293, Section 3.7.1}}, which includes
+only the TCP transport protocol payload data, but not TCP or IP headers.
+C.SMSS MAY include the transport protocol payload data plus the
+transport protocol headers; for example, for QUIC BBR implementations
 the C.SMSS SHOULD be the QUIC "maximum datagram size"
-{{RFC9000, Section 14}}, which includes
-the QUIC payload data plus the QUIC headers,
-but not UDP or IP headers.
-In addition to including transport protocol payload and headers,
-implementations MAY include in C.SMSS the size of other headers,
-such as network-layer or link-layer headers.
+{{RFC9000, Section 14}}, which includes the QUIC payload data plus
+the QUIC headers, but not UDP or IP headers. In addition to including
+transport protocol payload and headers, implementations MAY include
+in C.SMSS the size of other headers, such as network-layer or
+link-layer headers.
 
 C.InitialCwnd: The initial congestion window set by the transport protocol
 implementation for the connection at initialization time.
