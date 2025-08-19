@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 18 February 2026                                 J. Beshay, Ed.
+Expires: 20 February 2026                                 J. Beshay, Ed.
                                                                     Meta
-                                                          17 August 2025
+                                                          19 August 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 18 February 2026.
+   This Internet-Draft will expire on 20 February 2026.
 
 Copyright Notice
 
@@ -247,8 +247,8 @@ Table of Contents
 2.1.  Transport Connection State
 
    C.SMSS: The Sender Maximum Send Size in bytes.  The maximum size of a
-   single packet transmission, including the portion of the packet that
-   the transport protocol implementation tracks for congestion control
+   single transmission, including the portion of the packet that the
+   transport protocol implementation tracks for congestion control
    purposes.  C.SMSS MUST include transport protocol payload data.
    C.SMSS MAY include only the transport protocol payload data; for
    example, for TCP BBR implementations the C.SMSS SHOULD be the
