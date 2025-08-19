@@ -294,7 +294,7 @@ e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
 ## Transport Connection State {#transport-connection-state}
 
 C.SMSS: The Sender Maximum Send Size in bytes. The maximum
-size of a single packet transmission, including the portion
+size of a single transmission, including the portion
 of the packet that the transport protocol implementation tracks for
 congestion control purposes.
 C.SMSS MUST include transport protocol payload data.
