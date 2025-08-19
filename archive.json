@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-14T01:46:48.718621+00:00",
+  "timestamp": "2025-08-19T01:41:02.265384+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1054,7 +1054,7 @@
       "labels": [],
       "body": "> The BBR.extra_acked thus reflects the recently-measured magnitude of data and ACK aggregation effects such as batching and slotting at shared-medium L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms (TSO, GSO, LRO, GRO), and end host or middlebox ACK decimation/thinning.\n\nMiddlebox ACK decimation is not possible when using QUIC. Instead, RFC 9002 requires that at least every other ack-eliciting packet elicits a fresh ACK frame.\n\nIt would be very useful if this section could give some guidance on how to use the [QUIC ACK-FREQUENCY](https://datatracker.ietf.org/doc/draft-ietf-quic-ack-frequency/) extension, which allows the sender to control how frequently the receiver sends an ACK frame.",
       "createdAt": "2025-07-13T02:57:07Z",
-      "updatedAt": "2025-07-18T15:41:12Z",
+      "updatedAt": "2025-08-18T04:01:57Z",
       "closedAt": null,
       "comments": [
         {
@@ -1070,6 +1070,20 @@
           "body": "My point was that the ACK Frequency extension allows the sender to request certain acknowledgment behavior on the receiver side. I was wondering if it would be appropriate for this document to give some advice on how to tune these parameters.",
           "createdAt": "2025-07-18T15:41:12Z",
           "updatedAt": "2025-07-18T15:41:12Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> My point was that the ACK Frequency extension allows the sender to request certain acknowledgment behavior on the receiver side. I was wondering if it would be appropriate for this document to give some advice on how to tune these parameters.\n\n@marten-seemann by \"these parameters\" do you mean the ACK_FREQUENCY frame parameters from https://datatracker.ietf.org/doc/html/draft-ietf-quic-ack-frequency-11#section-4 ?\n\n",
+          "createdAt": "2025-08-17T18:41:50Z",
+          "updatedAt": "2025-08-17T18:41:50Z"
+        },
+        {
+          "author": "marten-seemann",
+          "authorAssociation": "NONE",
+          "body": "Yes.",
+          "createdAt": "2025-08-18T04:01:57Z",
+          "updatedAt": "2025-08-18T04:01:57Z"
         }
       ]
     },
@@ -4232,6 +4246,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 74,
+      "id": "PR_kwDOL3MllM6j_uCE",
+      "title": "Refine definition of C.SMSS",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/74",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Refine the definition of C.SMSS to make it more precise.\r\n\r\nAlso try to fix its TCP-centric definition that uses the term \"segment\", and make it general to any transport protocol implementation, and clarify what implementations MUST and MAY do.\r\n\r\nAlso clarify what TCP and QUIC implementations SHOULD do, since there is extensive experience with BBR with both of those protocols.\r\n\r\nHelps resolve Issue #62  \"segment vs packet\".",
+      "createdAt": "2025-08-17T16:47:37Z",
+      "updatedAt": "2025-08-17T16:47:38Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "255cfc876e6a78f703df577670fb644501b58994",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-5",
+      "headRefOid": "6815bf0c0ef24ffd7429ad30bc498759ff5b64b1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
