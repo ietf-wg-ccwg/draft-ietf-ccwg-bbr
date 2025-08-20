@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 7 February 2026                                  J. Beshay, Ed.
+Expires: 21 February 2026                                 J. Beshay, Ed.
                                                                     Meta
-                                                           6 August 2025
+                                                          20 August 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 February 2026.
+   This Internet-Draft will expire on 21 February 2026.
 
 Copyright Notice
 
@@ -246,8 +246,22 @@ Table of Contents
 
 2.1.  Transport Connection State
 
-   C.SMSS: The Sender Maximum Segment Size in bytes.  This is similar to
-   PMTU in QUIC [RFC9000], Section 14.2.
+   C.SMSS: The Sender Maximum Send Size in bytes.  The maximum size of a
+   single transmission, including the portion of the packet that the
+   transport protocol implementation tracks for congestion control
+   purposes.  C.SMSS MUST include transport protocol payload data.
+   C.SMSS MAY include only the transport protocol payload data; for
+   example, for TCP BBR implementations the C.SMSS SHOULD be the
+   Eff.snd.MSS defined in [RFC9293], Section 3.7.1, which includes only
+   the TCP transport protocol payload data, but not TCP or IP headers.
+   C.SMSS MAY include the transport protocol payload data plus the
+   transport protocol headers; for example, for QUIC BBR implementations
+   the C.SMSS SHOULD be the QUIC "maximum datagram size" [RFC9000],
+   Section 14, which includes the QUIC payload data plus the QUIC
+   headers, but not UDP or IP headers.  In addition to including
+   transport protocol payload and headers, implementations MAY include
+   in C.SMSS the size of other headers, such as network-layer or link-
+   layer headers.
 
    C.InitialCwnd: The initial congestion window set by the transport
    protocol implementation for the connection at initialization time.
