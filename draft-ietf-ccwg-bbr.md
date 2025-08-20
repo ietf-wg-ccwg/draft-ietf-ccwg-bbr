@@ -1159,6 +1159,7 @@ After each packet transmission, the sender executes the following steps:
     P.delivered_time  = C.delivered_time
     P.delivered       = C.delivered
     P.is_app_limited  = (C.app_limited != 0)
+    P.tx_in_flight    = C.inflight    /* includes data in P */
 ~~~~
 
 
