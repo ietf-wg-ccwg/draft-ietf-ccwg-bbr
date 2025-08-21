@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-19T01:41:02.265384+00:00",
+  "timestamp": "2025-08-21T01:38:41.617010+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -769,11 +769,13 @@
       "state": "OPEN",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "nealcardwell"
+      ],
       "labels": [],
       "body": "`BBRUpdateOnACK` utilizes information about the packets that were acknowledged. I suspect the draft would become easier to implement if it was spelled out explicitly what information is needed, by adding the required function parameters.\n\nOn a related note, `GenerateRateSample` would probably be easier if it returned (instead of updated) the rate sample.",
       "createdAt": "2025-07-12T21:15:55Z",
-      "updatedAt": "2025-07-13T02:27:56Z",
+      "updatedAt": "2025-08-20T18:37:01Z",
       "closedAt": null,
       "comments": [
         {
@@ -926,11 +928,13 @@
       "state": "OPEN",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "jbeshay"
+      ],
       "labels": [],
       "body": "The `BBR` struct, as described in the draft, has both member variables (e.g. `BBR.state`) and constants (e.g. `BBR.Beta`). When implementing the algorithm, these are dealt with very differently. I'd suggest using a different notation for constants (maybe just upper-case them without any prefix, e.g. `BETA`)?",
       "createdAt": "2025-07-12T22:27:38Z",
-      "updatedAt": "2025-07-17T23:06:21Z",
+      "updatedAt": "2025-08-20T20:49:36Z",
       "closedAt": null,
       "comments": [
         {
@@ -964,11 +968,13 @@
       "state": "OPEN",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "jbeshay"
+      ],
       "labels": [],
       "body": "Seciton 2.12 defines `BBR.extra_acked_filter`, but it isn't used anywhere.",
       "createdAt": "2025-07-12T22:32:01Z",
-      "updatedAt": "2025-07-12T22:32:01Z",
+      "updatedAt": "2025-08-20T20:49:09Z",
       "closedAt": null,
       "comments": []
     },
@@ -980,13 +986,15 @@
       "state": "OPEN",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "jbeshay"
+      ],
       "labels": [
         "Editorial"
       ],
       "body": "I\u2019m confused about the filters used throughout the document. For example, `UpdateWindowedMaxFilter` is used multiple times, but it\u2019s never defined.\n\nAdditionally, several invocations refer to filters like `BBR.MaxBwFilter` and `BBR.ExtraACKedFilter`, which also lack definitions. Some clarification or inclusion of these definitions would be helpful.",
       "createdAt": "2025-07-12T22:36:42Z",
-      "updatedAt": "2025-07-17T21:50:45Z",
+      "updatedAt": "2025-08-20T20:48:53Z",
       "closedAt": null,
       "comments": []
     },
@@ -998,11 +1006,13 @@
       "state": "OPEN",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "nealcardwell"
+      ],
       "labels": [],
       "body": "Section 4.1.3.1 says:\n> If a transport sender implementation uses an offload mechanism (such as TSO, GSO, etc.) to combine multiple C.SMSS of data into a single packet \"aggregate\" for the purposes of scheduling transmissions, then it is RECOMMENDED that the per-packet state be tracked for each packet \"aggregate\" rather than each SMSS. For simplicity this document refers to such state as \"per-packet\", whether it is per \"aggregate\" or per C.SMSS.\n\nIf I understand correctly, I only need to track 3 variables per packet (section 2.2):\n* the departure time\n* the number of delivered bytes at the time the packet was sent\n* the number of bytes in flight at the time the packet was sent\n\nThe first one is easy: obviously, the departure time for packets sent in a batch is the same.\n\nDoes this mean that when I send a GSO batch, one should set the number of delivered bytes and the number of bytes in flight for each packet sent in that batch to the value _before sending the entire batch_?",
       "createdAt": "2025-07-12T22:57:32Z",
-      "updatedAt": "2025-07-12T22:57:32Z",
+      "updatedAt": "2025-08-20T18:36:58Z",
       "closedAt": null,
       "comments": []
     },
@@ -1116,6 +1126,42 @@
       "body": "There are circumstances it's known a path change has occurred.  Starlink apparently can change paths at 15 second intervals and a cell phone might know when it's changed network types/etc.\n\nIn this case, if the RTT decreased, that should be observed quickly, but if it increased, it might be necessary to measure a new min_rtt, otherwise the CWND could be far too small.",
       "createdAt": "2025-08-07T21:55:57Z",
       "updatedAt": "2025-08-07T21:55:57Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 75,
+      "id": "I_kwDOL3MllM7HCiDO",
+      "title": "fix P.sent_time vs P.departure_time inconsistency",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/75",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "nealcardwell"
+      ],
+      "labels": [],
+      "body": "The BBR draft currently uses  P.sent_time and P.departure_time to refer to the same quantity. This is due to the P.departure_time originating from the BBR CC draft and the P.sent_time originating from the rate sampling draft.\n\nWe should clean these up and make them consistent.\n\nCurrently we have:\n\n+ P.sent_time (rate sampling pseudocode; 8 places)\n+ P.departure_time (BBR/pacing pseudocode; 4 occurrences)\n\nI'm proposing to change \"sent\" and \"departure\" to both be \"send\".\n\ns/.sent/.send/\ns/_sent/_send/\ns/.departure/.send/\ns/_departure/_send/\n\nThis should make things like this:\n```\n  send_elapsed = (P.sent_time - P.first_sent_time)\n```\n\nA little easier to read, like this:\n```\n  send_elapsed = (P.send_time - P.first_send_time)\n```\n\n\nIn addition we have:\n\n+ BBR.next_departure_time (BBR/pacing pseudocode; 7 occurrences)\n\nI'm proposing to move this to the C \"struct\", since the pacing mechanism should ideally be independent of CC:\n\ns/BBR.next_departure_time/C.next_send_time/\n\ncc: @ianswett @jbeshay \n",
+      "createdAt": "2025-08-20T19:42:12Z",
+      "updatedAt": "2025-08-20T19:42:31Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 77,
+      "id": "I_kwDOL3MllM7HC1oL",
+      "title": "set P.tx_in_flight",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/77",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "nealcardwell"
+      ],
+      "labels": [],
+      "body": "P.tx_in_flight is defined, and read in BBRHandleLostPacket() pseudocode, but there is no pseudocode to set P.tx_in_flight.\n\nThe line to set P.tx_in_flight should go in OnPacketSent() (that's the way it works in the Linux TCP BBR code).\n\ncc: @ianswett @jbeshay \n",
+      "createdAt": "2025-08-20T20:08:45Z",
+      "updatedAt": "2025-08-20T20:08:49Z",
       "closedAt": null,
       "comments": []
     }
@@ -4252,26 +4298,176 @@
       "id": "PR_kwDOL3MllM6j_uCE",
       "title": "Refine definition of C.SMSS",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/74",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Refine the definition of C.SMSS to make it more precise.\r\n\r\nAlso try to fix its TCP-centric definition that uses the term \"segment\", and make it general to any transport protocol implementation, and clarify what implementations MUST and MAY do.\r\n\r\nAlso clarify what TCP and QUIC implementations SHOULD do, since there is extensive experience with BBR with both of those protocols.\r\n\r\nHelps resolve Issue #62  \"segment vs packet\".",
       "createdAt": "2025-08-17T16:47:37Z",
-      "updatedAt": "2025-08-17T16:47:38Z",
+      "updatedAt": "2025-08-20T03:16:14Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "255cfc876e6a78f703df577670fb644501b58994",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-patch-5",
-      "headRefOid": "6815bf0c0ef24ffd7429ad30bc498759ff5b64b1",
+      "headRefOid": "7b1f6871019abd95d8d4b74ccceb8b2587425c75",
+      "closedAt": "2025-08-20T03:16:14Z",
+      "mergedAt": "2025-08-20T03:16:14Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "bf1e2b52f5d450edeb55cbc6aba5cd8ba168606f"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM66v5nG",
+          "commit": {
+            "abbreviatedOid": "6815bf0"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-19T16:53:00Z",
+          "updatedAt": "2025-08-19T16:54:49Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "Isn't this identical to the portion of the packet the transport tracks for congestion control purposes?\r\n\r\n```suggestion\r\nsize of a single transmission, including the portion\r\n```",
+              "createdAt": "2025-08-19T16:53:00Z",
+              "updatedAt": "2025-08-19T16:54:49Z"
+            },
+            {
+              "originalPosition": 14,
+              "body": "nit: can you reflow these lines to be a bit longer?",
+              "createdAt": "2025-08-19T16:54:41Z",
+              "updatedAt": "2025-08-19T16:54:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM66w82c",
+          "commit": {
+            "abbreviatedOid": "6815bf0"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-08-19T18:29:38Z",
+          "updatedAt": "2025-08-19T18:29:39Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "> nit: can you reflow these lines to be a bit longer?\r\n\r\nSure, added a commit to reflow for longer lines.\r\n",
+              "createdAt": "2025-08-19T18:29:38Z",
+              "updatedAt": "2025-08-19T18:29:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM6602uK",
+          "commit": {
+            "abbreviatedOid": "7b1f687"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-20T00:49:47Z",
+          "updatedAt": "2025-08-20T00:49:47Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 76,
+      "id": "PR_kwDOL3MllM6kkJ8H",
+      "title": "fix P.sent_time vs P.departure_time inconsistency",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/76",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The BBR draft was using P.sent_time and P.departure_time to refer to\nthe same quantity. This is due to the P.departure_time originating\nfrom the BBR CC draft and the P.sent_time originating from the rate\nsampling draft.\n\nThis commit fixes that inconsistency and performs related clean-up.\n\n- First we clean up the \"sent\" vs \"departure\" inconsistency and move\n  next_departure_time to the \"C\" per-connection \"pseudo-struct\":\n\ns/BBR.next_departure_time/C.next_send_time/\ns/.sent/.send/\ns/_sent/_send/\ns/.departure/.send/\ns/_departure/_send/\n\n- Then we move the \"Per-packet state\" section from the BBR section and\n  consolidate definitions in the \"Per-packet (P) state\" section of the\n  rate sampling section.\n",
+      "createdAt": "2025-08-20T20:04:37Z",
+      "updatedAt": "2025-08-20T20:48:10Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "bf1e2b52f5d450edeb55cbc6aba5cd8ba168606f",
+      "headRepository": "nealcardwell/draft-ietf-ccwg-bbr",
+      "headRefName": "draft-ietf-ccwg-bbr-fix-sent-vs-departure",
+      "headRefOid": "7c0dadc6bb4291024d880f573c06e76e47b963ee",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Oh, BTW, this is to fix issue #75 ...\r\n\r\n",
+          "createdAt": "2025-08-20T20:09:39Z",
+          "updatedAt": "2025-08-20T20:09:39Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM67DPD9",
+          "commit": {
+            "abbreviatedOid": "7c0dadc"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "lgtm. One more step closer to consistent variable names!",
+          "createdAt": "2025-08-20T20:48:10Z",
+          "updatedAt": "2025-08-20T20:48:10Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 78,
+      "id": "PR_kwDOL3MllM6kkWV1",
+      "title": "set P.tx_in_flight in OnPacketSent()",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/78",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Previously P.tx_in_flight was defined, and read in\nBBRHandleLostPacket() pseudocode, but there was no pseudocode to set\nP.tx_in_flight. This was an oversight.\n\nThis commit inserts a line to set P.tx_in_flight in OnPacketSent(),\nmatching the behavior in the Linux TCP BBR code.\n\nCloses issue #77 (\"set P.tx_in_flight\").\n",
+      "createdAt": "2025-08-20T20:27:09Z",
+      "updatedAt": "2025-08-20T20:52:15Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "bf1e2b52f5d450edeb55cbc6aba5cd8ba168606f",
+      "headRepository": "nealcardwell/draft-ietf-ccwg-bbr",
+      "headRefName": "draft-ietf-ccwg-bbr-set-p-tx_in_flight",
+      "headRefOid": "26d41b261b68e6713be78ad5c9ca4a3310ce8395",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM67DSxP",
+          "commit": {
+            "abbreviatedOid": "26d41b2"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-20T20:52:15Z",
+          "updatedAt": "2025-08-20T20:52:15Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
