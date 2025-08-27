@@ -188,6 +188,15 @@ informative:
     date: false
     seriesinfo:
       Proceedings of the International Conference on Communications: '1979'
+  KN_FILTER:
+    target: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/lib/win_minmax.c?id=a4f1f9ac8153e22869b6408832b5a9bb9c762bf6
+    title: Linux implementation of Kathleen Nichols' windowed min/max algorithm
+    author:
+    - name: Kathleen Nichols
+    - name: Neal Cardwell
+    - name: Van Jacobson
+    date: false
+
 
 --- abstract
 
@@ -529,8 +538,8 @@ BBR.inflight_latest: a 1-round-trip max of delivered volume of data
 
 ## Estimating BBR.max_bw {#estimating-bbrmaxbw}
 
-BBR.max_bw_filter: A windowed max filter for RS.delivery_rate 
-samples, for estimating BBR.max_bw. 
+BBR.max_bw_filter: A windowed max filter for RS.delivery_rate
+samples, for estimating BBR.max_bw.
 
 BBR.MaxBwFilterLen: A constant specifying the filter window length for
 BBR.max_bw_filter = 2 (representing
@@ -2589,6 +2598,11 @@ BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows:
                       time=BBR.cycle_count,
                       window_length=MaxBwFilterLen)
 ~~~~
+
+UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols' algorithm
+for tracking the minimum/maximum value of a data stream over some measurement
+window. The description of the algorithm and a sample implementation are
+available in Linux {{KN_FILTER}}.
 
 
 ### Tracking Time for the BBR.max_bw Max Filter {#tracking-time-for-the-bbrmaxbw-max-filter}
