@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 21 February 2026                                 J. Beshay, Ed.
+Expires: 28 February 2026                                 J. Beshay, Ed.
                                                                     Meta
-                                                          20 August 2025
+                                                          27 August 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 February 2026.
+   This Internet-Draft will expire on 28 February 2026.
 
 Copyright Notice
 
@@ -1114,6 +1114,7 @@ Table of Contents
        P.delivered_time  = C.delivered_time
        P.delivered       = C.delivered
        P.is_app_limited  = (C.app_limited != 0)
+       P.tx_in_flight    = C.inflight    /* includes data in P */
 
 4.1.2.3.  Upon receiving an ACK
 
