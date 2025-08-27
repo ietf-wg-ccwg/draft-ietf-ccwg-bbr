@@ -2748,7 +2748,7 @@ More precisely, this is computed as:
       filter_len = 1  /* in Startup, just remember 1 round */
     BBR.extra_acked =
       UpdateWindowedMaxFilter(
-        filter=BBR.ExtraACKedFilter,
+        filter=BBR.extra_acked_filter,
         value=extra,
         time=BBR.round_count,
         window_length=filter_len)
