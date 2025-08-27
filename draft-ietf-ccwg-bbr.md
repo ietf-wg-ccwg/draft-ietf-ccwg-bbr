@@ -337,8 +337,8 @@ This MUST NOT include pure ACK packets.
 C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
 point in the last packet-timed round trip.
 
-C.next_send_time: The earliest pacing departure time for the next
-packet scheduled for transmission.
+C.next_send_time: The earliest pacing departure time another packet can be
+sent.
 
 ## Per-ACK Rate Sample State {#per-ack-rate-sample-state}
 
