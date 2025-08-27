@@ -483,8 +483,8 @@ Table of Contents
 
 2.11.  Estimating BBR.max_bw
 
-   BBR.max_bw_filter: The filter for tracking the maximum recent
-   RS.delivery_rate sample, for estimating BBR.max_bw.
+   BBR.max_bw_filter: A windowed max filter for RS.delivery_rate
+   samples, for estimating BBR.max_bw.
 
    BBR.MaxBwFilterLen: A constant specifying the filter window length
    for BBR.max_bw_filter = 2 (representing up to 2 ProbeBW cycles, the
@@ -498,18 +498,18 @@ Table of Contents
 
 2.12.  Estimating BBR.extra_acked
 
-   BBR.extra_acked_interval_start: the start of the time interval for
+   BBR.extra_acked_interval_start: The start of the time interval for
    estimating the excess amount of data acknowledged due to aggregation
    effects.
 
-   BBR.extra_acked_delivered: the volume of data marked as delivered
+   BBR.extra_acked_delivered: The volume of data marked as delivered
    since BBR.extra_acked_interval_start.
 
-   BBR.extra_acked_filter: the max filter tracking the recent maximum
-   degree of aggregation in the path.
+   BBR.extra_acked_filter: A windowed max filter for tracking the degree
+   of aggregation in the path.
 
-   BBR.ExtraAckedFilterLen = A constant specifying the window length of
-   the BBR.extra_acked_filter max filter window in steady-state: 10 (in
+   BBR.ExtraAckedFilterLen: A constant specifying the window length of
+   the BBR.extra_acked_filter max filter window in steady-state = 10 (in
    units of packet-timed round trips).
 
 2.13.  Startup Parameters and State
@@ -1443,7 +1443,7 @@ Table of Contents
    initialization steps:
 
      BBROnInit():
-       InitWindowedMaxFilter(filter=BBR.MaxBwFilter, value=0, time=0)
+       InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
        BBR.min_rtt = SRTT ? SRTT : Infinity
        BBR.min_rtt_stamp = Now()
        BBR.probe_rtt_done_stamp = 0
@@ -2519,10 +2519,15 @@ Table of Contents
        BBRUpdateRound()
        if (RS.delivery_rate >= BBR.max_bw || !RS.is_app_limited)
            BBR.max_bw = UpdateWindowedMaxFilter(
-                         filter=BBR.MaxBwFilter,
+                         filter=BBR.max_bw_filter,
                          value=RS.delivery_rate,
                          time=BBR.cycle_count,
                          window_length=MaxBwFilterLen)
+
+   UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols'
+   algorithm for tracking the minimum/maximum value of a data stream
+   over some measurement window.  The description of the algorithm and a
+   sample implementation are available in Linux ([KN_FILTER]).
 
 5.5.6.  Tracking Time for the BBR.max_bw Max Filter
 
@@ -3580,6 +3585,13 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
               probabilistic problems in computer communications",
               Proceedings of the International Conference on
               Communications 1979.
+
+   [KN_FILTER]
+              Nichols, K., Cardwell, N., and V. Jacobson, "Linux
+              implementation of Kathleen Nichols' windowed min/max
+              algorithm", <https://git.kernel.org/pub/scm/linux/kernel/g
+              it/torvalds/linux.git/commit/lib/
+              win_minmax.c?id=a4f1f9ac8153e22869b6408832b5a9bb9c762bf6>.
 
    [MM19]     Mathis, M. and J. Mahdavi, "Deprecating The TCP
               Macroscopic Model", Computer Communication Review, vol.

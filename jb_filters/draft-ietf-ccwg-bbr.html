@@ -1779,8 +1779,8 @@ inflight_longterm. (Part of the short-term model.)<a href="#section-2.9.2-8" cla
         <h3 id="name-estimating-bbrmax_bw">
 <a href="#section-2.11" class="section-number selfRef">2.11. </a><a href="#name-estimating-bbrmax_bw" class="section-name selfRef">Estimating BBR.max_bw</a>
         </h3>
-<p id="section-2.11-1">BBR.max_bw_filter: The filter for tracking the maximum recent RS.delivery_rate
-sample, for estimating BBR.max_bw.<a href="#section-2.11-1" class="pilcrow">¶</a></p>
+<p id="section-2.11-1">BBR.max_bw_filter: A windowed max filter for RS.delivery_rate
+samples, for estimating BBR.max_bw.<a href="#section-2.11-1" class="pilcrow">¶</a></p>
 <p id="section-2.11-2">BBR.MaxBwFilterLen: A constant specifying the filter window length for
 BBR.max_bw_filter = 2 (representing
 up to 2 ProbeBW cycles, the current cycle and the previous full cycle).<a href="#section-2.11-2" class="pilcrow">¶</a></p>
@@ -1795,15 +1795,15 @@ ProbeBW cycle and the current ProbeBW cycle.<a href="#section-2.11-3" class="pil
         <h3 id="name-estimating-bbrextra_acked">
 <a href="#section-2.12" class="section-number selfRef">2.12. </a><a href="#name-estimating-bbrextra_acked" class="section-name selfRef">Estimating BBR.extra_acked</a>
         </h3>
-<p id="section-2.12-1">BBR.extra_acked_interval_start: the start of the time interval for estimating
+<p id="section-2.12-1">BBR.extra_acked_interval_start: The start of the time interval for estimating
 the excess amount of data acknowledged due to aggregation effects.<a href="#section-2.12-1" class="pilcrow">¶</a></p>
-<p id="section-2.12-2">BBR.extra_acked_delivered: the volume of data marked as delivered since
+<p id="section-2.12-2">BBR.extra_acked_delivered: The volume of data marked as delivered since
 BBR.extra_acked_interval_start.<a href="#section-2.12-2" class="pilcrow">¶</a></p>
-<p id="section-2.12-3">BBR.extra_acked_filter: the max filter tracking the recent maximum degree of
+<p id="section-2.12-3">BBR.extra_acked_filter: A windowed max filter for tracking the degree of
 aggregation in the path.<a href="#section-2.12-3" class="pilcrow">¶</a></p>
-<p id="section-2.12-4">BBR.ExtraAckedFilterLen = A constant specifying the window length of
+<p id="section-2.12-4">BBR.ExtraAckedFilterLen: A constant specifying the window length of
 the BBR.extra_acked_filter max
-filter window in steady-state: 10 (in units of packet-timed round trips).<a href="#section-2.12-4" class="pilcrow">¶</a></p>
+filter window in steady-state = 10 (in units of packet-timed round trips).<a href="#section-2.12-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="startup-parameters-and-state">
@@ -2915,7 +2915,7 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.2.1-2">
 <pre>
   BBROnInit():
-    InitWindowedMaxFilter(filter=BBR.MaxBwFilter, value=0, time=0)
+    InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
     BBR.min_rtt = SRTT ? SRTT : Infinity
     BBR.min_rtt_stamp = Now()
     BBR.probe_rtt_done_stamp = 0
@@ -4154,12 +4154,16 @@ BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows:<a href="#section
     BBRUpdateRound()
     if (RS.delivery_rate &gt;= BBR.max_bw || !RS.is_app_limited)
         BBR.max_bw = UpdateWindowedMaxFilter(
-                      filter=BBR.MaxBwFilter,
+                      filter=BBR.max_bw_filter,
                       value=RS.delivery_rate,
                       time=BBR.cycle_count,
                       window_length=MaxBwFilterLen)
 </pre><a href="#section-5.5.5-2" class="pilcrow">¶</a>
 </div>
+<p id="section-5.5.5-3">UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols' algorithm
+for tracking the minimum/maximum value of a data stream over some measurement
+window. The description of the algorithm and a sample implementation are
+available in Linux (<span>[<a href="#KN_FILTER" class="cite xref">KN_FILTER</a>]</span>).<a href="#section-5.5.5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="tracking-time-for-the-bbrmaxbw-max-filter">
@@ -5357,6 +5361,10 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dt id="K79">[K79]</dt>
         <dd>
 <span class="refAuthor">Kleinrock, L.</span>, <span class="refTitle">"Power and deterministic rules of thumb for probabilistic problems in computer communications"</span>, <span class="seriesInfo">Proceedings of the International Conference on Communications 1979</span>. </dd>
+<dd class="break"></dd>
+<dt id="KN_FILTER">[KN_FILTER]</dt>
+        <dd>
+<span class="refAuthor">Nichols, K.</span>, <span class="refAuthor">Cardwell, N.</span>, and <span class="refAuthor">V. Jacobson</span>, <span class="refTitle">"Linux implementation of Kathleen Nichols' windowed min/max algorithm"</span>, <span>&lt;<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/lib/win_minmax.c?id=a4f1f9ac8153e22869b6408832b5a9bb9c762bf6">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/lib/win_minmax.c?id=a4f1f9ac8153e22869b6408832b5a9bb9c762bf6</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="MM19">[MM19]</dt>
         <dd>
