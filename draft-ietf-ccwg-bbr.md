@@ -337,14 +337,8 @@ This MUST NOT include pure ACK packets.
 C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
 point in the last packet-timed round trip.
 
-## Per-Packet State {#per-packet-state}
-
-P.delivered: C.delivered when the given packet was sent by transport
-connection C.
-
-P.departure_time: The earliest pacing departure time for the given packet.
-
-P.tx_in_flight: C.inflight at the time of the packet transmission.
+C.next_send_time: The earliest pacing departure time for the next
+packet scheduled for transmission.
 
 ## Per-ACK Rate Sample State {#per-ack-rate-sample-state}
 
@@ -390,9 +384,6 @@ together as a unit, e.g., to amortize per-packet transmission overheads.
 
 BBR.pacing_gain: The dynamic gain factor used to scale BBR.bw to produce
 C.pacing_rate.
-
-BBR.next_departure_time: The earliest pacing departure time for the next
-packet BBR schedules for transmission.
 
 BBR.StartupPacingGain: A constant specifying the minimum gain value for
 calculating the pacing rate that will allow the sending rate to double each
@@ -958,13 +949,13 @@ each flight of data, as follows.
 ##### Send Rate {#send-rate}
 
 The sender calculates the send rate, "send_rate", for a flight of data as
-follows. Define "P.first_sent_time" as the time of the first send in a flight
-of data, and "P.sent_time" as the time the final send in that flight of data
+follows. Define "P.first_send_time" as the time of the first send in a flight
+of data, and "P.send_time" as the time the final send in that flight of data
 (the send that transmits packet "P"). The elapsed time for sending the flight
 is:
 
 ~~~~
-  send_elapsed = (P.sent_time - P.first_sent_time)
+  send_elapsed = (P.send_time - P.first_send_time)
 ~~~~
 
 Then we calculate the send_rate as:
@@ -1074,7 +1065,7 @@ connection:
 
 C.delivered_time: The wall clock time when C.delivered was last updated.
 
-C.first_sent_time: If packets are in flight, then this holds the send time of
+C.first_send_time: If packets are in flight, then this holds the send time of
 the packet that was most recently marked as delivered. Else, if the connection
 was recently idle, then this holds the send time of most recently sent packet.
 
@@ -1109,12 +1100,15 @@ C.
 
 P.delivered_time: C.delivered_time when the packet was sent.
 
-P.first_sent_time: C.first_sent_time when the packet was sent.
+P.first_send_time: C.first_send_time when the packet was sent.
 
 P.is_app_limited: true if C.app_limited was non-zero when the packet was
 sent, else false.
 
-P.sent_time: The time when the packet was sent.
+P.send_time: The pacing departure time selected when the packet was scheduled
+to be sent.
+
+P.tx_in_flight: C.inflight at the time of the packet transmission.
 
 ##### Rate Sample (rs) Output {#rate-sample-rs-output}
 
@@ -1162,9 +1156,9 @@ After each packet transmission, the sender executes the following steps:
 ~~~~
   OnPacketSent(Packet P):
     if (C.inflight == 0)
-      C.first_sent_time  = C.delivered_time = P.sent_time
+      C.first_send_time  = C.delivered_time = P.send_time
 
-    P.first_sent_time = C.first_sent_time
+    P.first_send_time = C.first_send_time
     P.delivered_time  = C.delivered_time
     P.delivered       = C.delivered
     P.is_app_limited  = (C.app_limited != 0)
@@ -1230,10 +1224,10 @@ packet, i.e., the packet with the highest "P.delivered" value.
       RS.prior_delivered  = P.delivered
       RS.prior_time       = P.delivered_time
       RS.is_app_limited   = P.is_app_limited
-      RS.send_elapsed     = P.sent_time - P.first_sent_time
+      RS.send_elapsed     = P.send_time - P.first_send_time
       RS.ack_elapsed      = C.delivered_time - P.delivered_time
       RS.last_end_seq     = P.end_seq
-      C.first_sent_time   = P.sent_time
+      C.first_send_time   = P.send_time
 
     /* Mark the packet as delivered once it's acknowleged. */
     P.delivered_time = 0
@@ -1241,8 +1235,8 @@ packet, i.e., the packet with the highest "P.delivered" value.
   /* Is the given Packet the most recently sent packet
    * that has been delivered? */
   IsNewestPacket(Packet P, RateSample rs):
-    return (P.sent_time > C.first_sent_time or
-            (P.sent_time == C.first_sent_time and
+    return (P.send_time > C.first_send_time or
+            (P.send_time == C.first_send_time and
              after(P.end_seq, RS.last_end_seq))
 ~~~~
 
@@ -1354,7 +1348,7 @@ that each duplicate ACK indicates that a data packet has been delivered).
 
 Upon transmitting each packet, BBR or the associated transport protocol
 stores in per-packet data the wall-clock scheduled transmission time of the
-packet in P.departure_time (see "Pacing Rate: C.pacing_rate" in
+packet in P.send_time (see "Pacing Rate: C.pacing_rate" in
 {{pacing-rate-bbrpacingrate}} for how this is calculated).
 
 For every ACK that newly acknowledges data, the sender's BBR implementation
@@ -1367,7 +1361,7 @@ timestamps {{RFC7323}}), then the sender calculates an RTT sample, RS.rtt,
 as follows:
 
 ~~~~
-  RS.rtt = Now() - P.departure_time
+  RS.rtt = Now() - P.send_time
 ~~~~
 
 
@@ -3048,14 +3042,14 @@ BBR schedules quanta of packets for transmission.
 
 The sending host implements pacing by maintaining inter-quantum spacing at
 the time each packet is scheduled for departure, calculating the next departure
-time for a packet for a given flow (BBR.next_departure_time) as a function
+time for a packet for a given flow (C.next_send_time) as a function
 of the most recent packet size and the current pacing rate, as follows:
 
 ~~~~
-  BBR.next_departure_time = max(Now(), BBR.next_departure_time)
-  P.departure_time = BBR.next_departure_time
+  C.next_send_time = max(Now(), C.next_send_time)
+  P.send_time = C.next_send_time
   pacing_delay = packet.size / C.pacing_rate
-  BBR.next_departure_time = BBR.next_departure_time + pacing_delay
+  C.next_send_time = C.next_send_time + pacing_delay
 ~~~~
 
 To adapt to the bottleneck, in general BBR sets the pacing rate to be
