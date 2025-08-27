@@ -538,7 +538,7 @@ up to 2 ProbeBW cycles, the current cycle and the previous full cycle).
 
 BBR.cycle_count: The virtual time used by the BBR.max_bw filter window. Note
 that BBR.cycle_count only needs to be tracked with a single bit, since the
-BBR.MaxBwFilter only needs to track samples from two time slots: the previous
+BBR.max_bw_filter only needs to track samples from two time slots: the previous
 ProbeBW cycle and the current ProbeBW cycle.
 
 
