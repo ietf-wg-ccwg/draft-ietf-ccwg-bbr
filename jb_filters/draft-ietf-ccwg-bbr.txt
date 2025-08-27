@@ -2527,7 +2527,7 @@ Table of Contents
    UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols'
    algorithm for tracking the minimum/maximum value of a data stream
    over some measurement window.  The description of the algorithm and a
-   sample implementation are available in Linux ([KN_FILTER]).
+   sample implementation are available in Linux [KN_FILTER].
 
 5.5.6.  Tracking Time for the BBR.max_bw Max Filter
 
