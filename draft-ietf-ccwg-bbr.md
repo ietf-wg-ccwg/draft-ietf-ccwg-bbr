@@ -188,6 +188,15 @@ informative:
     date: false
     seriesinfo:
       Proceedings of the International Conference on Communications: '1979'
+  KN_FILTER:
+    target: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/lib/win_minmax.c?id=a4f1f9ac8153e22869b6408832b5a9bb9c762bf6
+    title: Linux implementation of Kathleen Nichols' windowed min/max algorithm
+    author:
+    - name: Kathleen Nichols
+    - name: Neal Cardwell
+    - name: Van Jacobson
+    date: false
+
 
 --- abstract
 
@@ -529,8 +538,8 @@ BBR.inflight_latest: a 1-round-trip max of delivered volume of data
 
 ## Estimating BBR.max_bw {#estimating-bbrmaxbw}
 
-BBR.max_bw_filter: The filter for tracking the maximum recent RS.delivery_rate
-sample, for estimating BBR.max_bw.
+BBR.max_bw_filter: A windowed max filter for RS.delivery_rate
+samples, for estimating BBR.max_bw.
 
 BBR.MaxBwFilterLen: A constant specifying the filter window length for
 BBR.max_bw_filter = 2 (representing
@@ -538,24 +547,24 @@ up to 2 ProbeBW cycles, the current cycle and the previous full cycle).
 
 BBR.cycle_count: The virtual time used by the BBR.max_bw filter window. Note
 that BBR.cycle_count only needs to be tracked with a single bit, since the
-BBR.MaxBwFilter only needs to track samples from two time slots: the previous
+BBR.max_bw_filter only needs to track samples from two time slots: the previous
 ProbeBW cycle and the current ProbeBW cycle.
 
 
 ## Estimating BBR.extra_acked {#estimating-bbrextraacked}
 
-BBR.extra_acked_interval_start: the start of the time interval for estimating
+BBR.extra_acked_interval_start: The start of the time interval for estimating
 the excess amount of data acknowledged due to aggregation effects.
 
-BBR.extra_acked_delivered: the volume of data marked as delivered since
+BBR.extra_acked_delivered: The volume of data marked as delivered since
 BBR.extra_acked_interval_start.
 
-BBR.extra_acked_filter: the max filter tracking the recent maximum degree of
+BBR.extra_acked_filter: A windowed max filter for tracking the degree of
 aggregation in the path.
 
-BBR.ExtraAckedFilterLen = A constant specifying the window length of
+BBR.ExtraAckedFilterLen: A constant specifying the window length of
 the BBR.extra_acked_filter max
-filter window in steady-state: 10 (in units of packet-timed round trips).
+filter window in steady-state = 10 (in units of packet-timed round trips).
 
 
 ## Startup Parameters and State {#startup-parameters-and-state}
@@ -1489,7 +1498,7 @@ steps:
 
 ~~~~
   BBROnInit():
-    InitWindowedMaxFilter(filter=BBR.MaxBwFilter, value=0, time=0)
+    InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
     BBR.min_rtt = SRTT ? SRTT : Infinity
     BBR.min_rtt_stamp = Now()
     BBR.probe_rtt_done_stamp = 0
@@ -2585,11 +2594,16 @@ BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows:
     BBRUpdateRound()
     if (RS.delivery_rate >= BBR.max_bw || !RS.is_app_limited)
         BBR.max_bw = UpdateWindowedMaxFilter(
-                      filter=BBR.MaxBwFilter,
+                      filter=BBR.max_bw_filter,
                       value=RS.delivery_rate,
                       time=BBR.cycle_count,
                       window_length=MaxBwFilterLen)
 ~~~~
+
+UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols' algorithm
+for tracking the minimum/maximum value of a data stream over some measurement
+window. The description of the algorithm and a sample implementation are
+available in Linux {{KN_FILTER}}.
 
 
 ### Tracking Time for the BBR.max_bw Max Filter {#tracking-time-for-the-bbrmaxbw-max-filter}
@@ -2749,7 +2763,7 @@ More precisely, this is computed as:
       filter_len = 1  /* in Startup, just remember 1 round */
     BBR.extra_acked =
       UpdateWindowedMaxFilter(
-        filter=BBR.ExtraACKedFilter,
+        filter=BBR.extra_acked_filter,
         value=extra,
         time=BBR.round_count,
         window_length=filter_len)
