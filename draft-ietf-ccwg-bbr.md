@@ -529,8 +529,8 @@ BBR.inflight_latest: a 1-round-trip max of delivered volume of data
 
 ## Estimating BBR.max_bw {#estimating-bbrmaxbw}
 
-BBR.max_bw_filter: The filter for tracking the maximum recent RS.delivery_rate
-sample, for estimating BBR.max_bw.
+BBR.max_bw_filter: A windowed max filter for RS.delivery_rate 
+samples, for estimating BBR.max_bw. 
 
 BBR.MaxBwFilterLen: A constant specifying the filter window length for
 BBR.max_bw_filter = 2 (representing
@@ -544,18 +544,18 @@ ProbeBW cycle and the current ProbeBW cycle.
 
 ## Estimating BBR.extra_acked {#estimating-bbrextraacked}
 
-BBR.extra_acked_interval_start: the start of the time interval for estimating
+BBR.extra_acked_interval_start: The start of the time interval for estimating
 the excess amount of data acknowledged due to aggregation effects.
 
-BBR.extra_acked_delivered: the volume of data marked as delivered since
+BBR.extra_acked_delivered: The volume of data marked as delivered since
 BBR.extra_acked_interval_start.
 
-BBR.extra_acked_filter: the max filter tracking the recent maximum degree of
+BBR.extra_acked_filter: A windowed max filter for tracking the degree of
 aggregation in the path.
 
-BBR.ExtraAckedFilterLen = A constant specifying the window length of
+BBR.ExtraAckedFilterLen: A constant specifying the window length of
 the BBR.extra_acked_filter max
-filter window in steady-state: 10 (in units of packet-timed round trips).
+filter window in steady-state = 10 (in units of packet-timed round trips).
 
 
 ## Startup Parameters and State {#startup-parameters-and-state}
@@ -1488,7 +1488,7 @@ steps:
 
 ~~~~
   BBROnInit():
-    InitWindowedMaxFilter(filter=BBR.MaxBwFilter, value=0, time=0)
+    InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
     BBR.min_rtt = SRTT ? SRTT : Infinity
     BBR.min_rtt_stamp = Now()
     BBR.probe_rtt_done_stamp = 0
@@ -2584,7 +2584,7 @@ BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows:
     BBRUpdateRound()
     if (RS.delivery_rate >= BBR.max_bw || !RS.is_app_limited)
         BBR.max_bw = UpdateWindowedMaxFilter(
-                      filter=BBR.MaxBwFilter,
+                      filter=BBR.max_bw_filter,
                       value=RS.delivery_rate,
                       time=BBR.cycle_count,
                       window_length=MaxBwFilterLen)
