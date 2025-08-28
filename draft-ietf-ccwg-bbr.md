@@ -295,6 +295,12 @@ per-ack rate sample, or (BBR) for the algorithm's internal state.
 Variables that are not defined below are defined in
 {{delivery-rate-samples}}, "Delivery Rate Samples".
 
+In the pseudocode in this document, all functions have implicit access to the
+(C) connection state and (BBR) congestion control algorithm state for that
+connection. All functions involved in ACK processing additionally have implicit
+access to the the (RS) for per-ack rate sample state for the rate sample
+populated during that ACK processing episode.
+
 In this document, "acknowledged" or "delivered" data means any transmitted
 data that the remote transport endpoint has confirmed that it has received,
 e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
@@ -1168,50 +1174,29 @@ After each packet transmission, the sender executes the following steps:
 
 #### Upon receiving an ACK {#upon-receiving-an-ack}
 
-When an ACK arrives, the sender invokes GenerateRateSample() to fill in a
-rate sample. For each  packet that was newly acknowledged, UpdateRateSample()
-updates the rate sample based on a snapshot of connection delivery information
-from the time at which the packet was last transmitted. UpdateRateSample()
-is invoked multiple times when a stretched ACK acknowledges multiple data
-packets. In this case we use the information from the most recently sent
-packet, i.e., the packet with the highest "P.delivered" value.
+When an ACK arrives, the connection first calls InitRateSample() to initialize
+the per-ACK RateSample RS:
 
 ~~~~
-  /* Upon receiving ACK, fill in delivery rate sample RS. */
-  GenerateRateSample(RS):
-    for each newly acknowledged packet P
-      UpdateRateSample(P, RS)
+  /* Initialize the rate sample generated using the ACK being processed. */
+  InitRateSample():
+    RS.rtt           = -1
+    RS.has_data      = false
+    RS.prior_time    = 0
+    RS.interval      = 0
+    RS.delivery_rate = 0
+~~~~
 
-    /* Clear app-limited field if bubble is ACKed and gone. */
-    if (C.app_limited and C.delivered > C.app_limited)
-      C.app_limited = 0
+Next, for each packet that was newly acknowledged, the connection calls
+UpdateRateSample() to update the per-ACK rate sample based on a snapshot of
+connection delivery information from the time at which the packet was last
+transmitted. The connection invokes UpdateRateSample() multiple times when a
+stretched ACK acknowledges multiple data packets. The connection uses the
+information from the most recently sent packet to update the rate sample:
 
-    if (RS.prior_time == 0)
-      return false  /* nothing delivered on this ACK */
-
-    /* Use the longer of the send_elapsed and ack_elapsed */
-    RS.interval = max(RS.send_elapsed, RS.ack_elapsed)
-
-    RS.delivered = C.delivered - RS.prior_delivered
-
-    /* Normally we expect interval >= MinRTT.
-     * Note that rate may still be overestimated when a spuriously
-     * retransmitted skb was first (s)acked because "interval"
-     * is under-estimated (up to an RTT). However, continuously
-     * measuring the delivery rate during loss recovery is crucial
-     * for connections that suffer heavy or prolonged losses.
-     */
-    if (RS.interval <  C.min_rtt)
-      RS.interval = -1
-      return false  /* no reliable sample */
-
-    if (RS.interval != 0)
-      RS.delivery_rate = RS.delivered / RS.interval
-
-    return true;  /* we filled in rs with a rate sample */
-
+~~~~
   /* Update rs when a packet is acknowledged. */
-  UpdateRateSample(Packet P, RateSample rs):
+  UpdateRateSample(Packet P):
     if (P.delivered_time == 0)
       return /* P already acknowledged */
 
@@ -1234,10 +1219,45 @@ packet, i.e., the packet with the highest "P.delivered" value.
 
   /* Is the given Packet the most recently sent packet
    * that has been delivered? */
-  IsNewestPacket(Packet P, RateSample rs):
+  IsNewestPacket(Packet P):
     return (P.send_time > C.first_send_time or
             (P.send_time == C.first_send_time and
              after(P.end_seq, RS.last_end_seq))
+~~~~
+
+Finally, after the connection has processed all packets acknowledged by this
+ACK by calling UpdateRateSample() for each packet, the connection invokes
+GenerateRateSample() to finish populating the rate sample, RS:
+
+~~~~
+  /* Upon receiving ACK, fill in delivery rate sample RS. */
+  GenerateRateSample():
+    /* Clear app-limited field if bubble is ACKed and gone. */
+    if (C.app_limited and C.delivered > C.app_limited)
+      C.app_limited = 0
+
+    if (RS.prior_time == 0)
+      return /* nothing delivered on this ACK */
+
+    /* Use the longer of the send_elapsed and ack_elapsed */
+    RS.interval = max(RS.send_elapsed, RS.ack_elapsed)
+
+    RS.delivered = C.delivered - RS.prior_delivered
+
+    /* Normally we expect interval >= MinRTT.
+     * Note that rate may still be overestimated when a spuriously
+     * retransmitted skb was first (s)acked because "interval"
+     * is under-estimated (up to an RTT). However, continuously
+     * measuring the delivery rate during loss recovery is crucial
+     * for connections that suffer heavy or prolonged losses.
+     */
+    if (RS.interval <  C.min_rtt)
+      return  /* no reliable rate sample */
+
+    if (RS.interval != 0)
+      RS.delivery_rate = RS.delivered / RS.interval
+
+    return    /* filled in RS with a rate sample */
 ~~~~
 
 
@@ -1530,7 +1550,7 @@ adjust its control parameters to adapt to the updated model:
 
 ~~~~
   BBRUpdateOnACK():
-    GenerateRateSample(RS)
+    GenerateRateSample()
     BBRUpdateModelAndState()
     BBRUpdateControlParameters()
 
@@ -2586,7 +2606,8 @@ BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows:
 ~~~~
   BBRUpdateMaxBw()
     BBRUpdateRound()
-    if (RS.delivery_rate >= BBR.max_bw || !RS.is_app_limited)
+    if (RS.delivery_rate > 0 &&
+        (RS.delivery_rate >= BBR.max_bw || !RS.is_app_limited))
         BBR.max_bw = UpdateWindowedMaxFilter(
                       filter=BBR.max_bw_filter,
                       value=RS.delivery_rate,
