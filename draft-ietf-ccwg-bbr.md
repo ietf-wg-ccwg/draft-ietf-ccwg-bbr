@@ -1173,8 +1173,8 @@ rate sample. For each  packet that was newly acknowledged, UpdateRateSample()
 updates the rate sample based on a snapshot of connection delivery information
 from the time at which the packet was last transmitted. UpdateRateSample()
 is invoked multiple times when a stretched ACK acknowledges multiple data
-packets. In this case we use the information from the most recently sent
-packet, i.e., the packet with the highest "P.delivered" value.
+packets. In this case UpdateRateSample() uses the information from the most
+recently sent packet, as indicated by IsNewestPacket().
 
 ~~~~
   /* Upon receiving ACK, fill in delivery rate sample RS. */
@@ -1219,7 +1219,7 @@ packet, i.e., the packet with the highest "P.delivered" value.
     C.delivered_time = Now()
 
     /* Update info using the newest packet: */
-    if (!RS.has_data or IsNewestPacket(P, rs))
+    if (!RS.has_data or IsNewestPacket(P, RS))
       RS.has_data         = true
       RS.prior_delivered  = P.delivered
       RS.prior_time       = P.delivered_time
@@ -1234,7 +1234,7 @@ packet, i.e., the packet with the highest "P.delivered" value.
 
   /* Is the given Packet the most recently sent packet
    * that has been delivered? */
-  IsNewestPacket(Packet P, RateSample rs):
+  IsNewestPacket(Packet P, RateSample RS):
     return (P.send_time > C.first_send_time or
             (P.send_time == C.first_send_time and
              after(P.end_seq, RS.last_end_seq))
@@ -2865,7 +2865,7 @@ In pseudocode:
       BBRHandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
-  BBRInflightLongtermFromLostPacket(rs, packet):
+  BBRInflightLongtermFromLostPacket(RS, packet):
     size = packet.size
     /* What was in flight before this packet? */
     inflight_prev = RS.tx_in_flight - size
