@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-21T01:38:41.617010+00:00",
+  "timestamp": "2025-08-28T01:36:20.387802+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -965,7 +965,7 @@
       "id": "I_kwDOL3MllM7ARrlx",
       "title": "`BBR.extra_acked_filter` is unused",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/64",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
@@ -974,8 +974,8 @@
       "labels": [],
       "body": "Seciton 2.12 defines `BBR.extra_acked_filter`, but it isn't used anywhere.",
       "createdAt": "2025-07-12T22:32:01Z",
-      "updatedAt": "2025-08-20T20:49:09Z",
-      "closedAt": null,
+      "updatedAt": "2025-08-27T20:40:56Z",
+      "closedAt": "2025-08-27T20:40:56Z",
       "comments": []
     },
     {
@@ -983,7 +983,7 @@
       "id": "I_kwDOL3MllM7ARs3u",
       "title": "What are filters?",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/65",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
@@ -994,8 +994,8 @@
       ],
       "body": "I\u2019m confused about the filters used throughout the document. For example, `UpdateWindowedMaxFilter` is used multiple times, but it\u2019s never defined.\n\nAdditionally, several invocations refer to filters like `BBR.MaxBwFilter` and `BBR.ExtraACKedFilter`, which also lack definitions. Some clarification or inclusion of these definitions would be helpful.",
       "createdAt": "2025-07-12T22:36:42Z",
-      "updatedAt": "2025-08-20T20:48:53Z",
-      "closedAt": null,
+      "updatedAt": "2025-08-27T20:40:56Z",
+      "closedAt": "2025-08-27T20:40:56Z",
       "comments": []
     },
     {
@@ -1134,7 +1134,7 @@
       "id": "I_kwDOL3MllM7HCiDO",
       "title": "fix P.sent_time vs P.departure_time inconsistency",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/75",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -1143,8 +1143,8 @@
       "labels": [],
       "body": "The BBR draft currently uses  P.sent_time and P.departure_time to refer to the same quantity. This is due to the P.departure_time originating from the BBR CC draft and the P.sent_time originating from the rate sampling draft.\n\nWe should clean these up and make them consistent.\n\nCurrently we have:\n\n+ P.sent_time (rate sampling pseudocode; 8 places)\n+ P.departure_time (BBR/pacing pseudocode; 4 occurrences)\n\nI'm proposing to change \"sent\" and \"departure\" to both be \"send\".\n\ns/.sent/.send/\ns/_sent/_send/\ns/.departure/.send/\ns/_departure/_send/\n\nThis should make things like this:\n```\n  send_elapsed = (P.sent_time - P.first_sent_time)\n```\n\nA little easier to read, like this:\n```\n  send_elapsed = (P.send_time - P.first_send_time)\n```\n\n\nIn addition we have:\n\n+ BBR.next_departure_time (BBR/pacing pseudocode; 7 occurrences)\n\nI'm proposing to move this to the C \"struct\", since the pacing mechanism should ideally be independent of CC:\n\ns/BBR.next_departure_time/C.next_send_time/\n\ncc: @ianswett @jbeshay \n",
       "createdAt": "2025-08-20T19:42:12Z",
-      "updatedAt": "2025-08-20T19:42:31Z",
-      "closedAt": null,
+      "updatedAt": "2025-08-27T20:44:41Z",
+      "closedAt": "2025-08-27T20:44:40Z",
       "comments": []
     },
     {
@@ -1152,7 +1152,7 @@
       "id": "I_kwDOL3MllM7HC1oL",
       "title": "set P.tx_in_flight",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/77",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -1161,8 +1161,8 @@
       "labels": [],
       "body": "P.tx_in_flight is defined, and read in BBRHandleLostPacket() pseudocode, but there is no pseudocode to set P.tx_in_flight.\n\nThe line to set P.tx_in_flight should go in OnPacketSent() (that's the way it works in the Linux TCP BBR code).\n\ncc: @ianswett @jbeshay \n",
       "createdAt": "2025-08-20T20:08:45Z",
-      "updatedAt": "2025-08-20T20:08:49Z",
-      "closedAt": null,
+      "updatedAt": "2025-08-27T20:37:31Z",
+      "closedAt": "2025-08-27T20:37:31Z",
       "comments": []
     }
   ],
@@ -4386,24 +4386,26 @@
       "id": "PR_kwDOL3MllM6kkJ8H",
       "title": "fix P.sent_time vs P.departure_time inconsistency",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/76",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "The BBR draft was using P.sent_time and P.departure_time to refer to\nthe same quantity. This is due to the P.departure_time originating\nfrom the BBR CC draft and the P.sent_time originating from the rate\nsampling draft.\n\nThis commit fixes that inconsistency and performs related clean-up.\n\n- First we clean up the \"sent\" vs \"departure\" inconsistency and move\n  next_departure_time to the \"C\" per-connection \"pseudo-struct\":\n\ns/BBR.next_departure_time/C.next_send_time/\ns/.sent/.send/\ns/_sent/_send/\ns/.departure/.send/\ns/_departure/_send/\n\n- Then we move the \"Per-packet state\" section from the BBR section and\n  consolidate definitions in the \"Per-packet (P) state\" section of the\n  rate sampling section.\n",
+      "body": "The BBR draft was using P.sent_time and P.departure_time to refer to\r\nthe same quantity. This is due to the P.departure_time originating\r\nfrom the BBR CC draft and the P.sent_time originating from the rate\r\nsampling draft.\r\n\r\nThis commit fixes that inconsistency and performs related clean-up.\r\n\r\n- First we clean up the \"sent\" vs \"departure\" inconsistency and move\r\n  next_departure_time to the \"C\" per-connection \"pseudo-struct\":\r\n\r\ns/BBR.next_departure_time/C.next_send_time/\r\ns/.sent/.send/\r\ns/_sent/_send/\r\ns/.departure/.send/\r\ns/_departure/_send/\r\n\r\n- Then we move the \"Per-packet state\" section from the BBR section and\r\n  consolidate definitions in the \"Per-packet (P) state\" section of the\r\n  rate sampling section.\r\n\r\nFixes #75 ",
       "createdAt": "2025-08-20T20:04:37Z",
-      "updatedAt": "2025-08-20T20:48:10Z",
+      "updatedAt": "2025-08-27T20:44:40Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "bf1e2b52f5d450edeb55cbc6aba5cd8ba168606f",
       "headRepository": "nealcardwell/draft-ietf-ccwg-bbr",
       "headRefName": "draft-ietf-ccwg-bbr-fix-sent-vs-departure",
       "headRefOid": "7c0dadc6bb4291024d880f573c06e76e47b963ee",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-08-27T20:44:40Z",
+      "mergedAt": "2025-08-27T20:44:40Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "36a7e95c82c7d1b7b3db22ad2b97e55f5bb4d71f"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -4426,6 +4428,58 @@
           "createdAt": "2025-08-20T20:48:10Z",
           "updatedAt": "2025-08-20T20:48:10Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM68cvz0",
+          "commit": {
+            "abbreviatedOid": "7c0dadc"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-27T20:27:43Z",
+          "updatedAt": "2025-08-27T20:37:32Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "nit: Is this the earliest time another packet can be sent, or the time a packet is already scheduled to be sent.  I think they're subtly different?",
+              "createdAt": "2025-08-27T20:27:43Z",
+              "updatedAt": "2025-08-27T20:37:32Z"
+            },
+            {
+              "originalPosition": 34,
+              "body": "Nit: Should this be P.send_complete_time or something similar?  Happy to do a rename like that in a separate PR, though.",
+              "createdAt": "2025-08-27T20:31:42Z",
+              "updatedAt": "2025-08-27T20:37:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM68c31-",
+          "commit": {
+            "abbreviatedOid": "7c0dadc"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-08-27T20:41:04Z",
+          "updatedAt": "2025-08-27T20:43:22Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Yes, good point. This is the \"earliest time another packet can be sent\". Feel free to cook another PR if you like. :-)\r\n",
+              "createdAt": "2025-08-27T20:41:04Z",
+              "updatedAt": "2025-08-27T20:43:22Z"
+            },
+            {
+              "originalPosition": 34,
+              "body": "Hmm, I'm not sure what \"P.send_complete_time\" would be. :-) But feel free to cook a PR if there are ideas about how to clarify.\r\n",
+              "createdAt": "2025-08-27T20:43:18Z",
+              "updatedAt": "2025-08-27T20:43:22Z"
+            }
+          ]
         }
       ]
     },
@@ -4434,24 +4488,26 @@
       "id": "PR_kwDOL3MllM6kkWV1",
       "title": "set P.tx_in_flight in OnPacketSent()",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/78",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "Previously P.tx_in_flight was defined, and read in\nBBRHandleLostPacket() pseudocode, but there was no pseudocode to set\nP.tx_in_flight. This was an oversight.\n\nThis commit inserts a line to set P.tx_in_flight in OnPacketSent(),\nmatching the behavior in the Linux TCP BBR code.\n\nCloses issue #77 (\"set P.tx_in_flight\").\n",
+      "body": "Previously P.tx_in_flight was defined, and read in\r\nBBRHandleLostPacket() pseudocode, but there was no pseudocode to set\r\nP.tx_in_flight. This was an oversight.\r\n\r\nThis commit inserts a line to set P.tx_in_flight in OnPacketSent(),\r\nmatching the behavior in the Linux TCP BBR code.\r\n\r\nCloses #77 (\"set P.tx_in_flight\").\r\n",
       "createdAt": "2025-08-20T20:27:09Z",
-      "updatedAt": "2025-08-20T20:52:15Z",
+      "updatedAt": "2025-08-27T20:37:30Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "bf1e2b52f5d450edeb55cbc6aba5cd8ba168606f",
       "headRepository": "nealcardwell/draft-ietf-ccwg-bbr",
       "headRefName": "draft-ietf-ccwg-bbr-set-p-tx_in_flight",
       "headRefOid": "26d41b261b68e6713be78ad5c9ca4a3310ce8395",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-08-27T20:37:30Z",
+      "mergedAt": "2025-08-27T20:37:30Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "eac7cce456d6242add3a038f0b00e24c6b00d380"
+      },
       "comments": [],
       "reviews": [
         {
@@ -4465,6 +4521,171 @@
           "body": "",
           "createdAt": "2025-08-20T20:52:15Z",
           "updatedAt": "2025-08-20T20:52:15Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM68ct6m",
+          "commit": {
+            "abbreviatedOid": "26d41b2"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-27T20:24:57Z",
+          "updatedAt": "2025-08-27T20:24:57Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 79,
+      "id": "PR_kwDOL3MllM6lph_5",
+      "title": "Clarify the definition and usage of max filters for extra_acked_fitlter and max_bw_filter",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/79",
+      "state": "MERGED",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #64\r\nCloses #65",
+      "createdAt": "2025-08-27T17:44:30Z",
+      "updatedAt": "2025-08-27T20:41:00Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "bf1e2b52f5d450edeb55cbc6aba5cd8ba168606f",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_filters",
+      "headRefOid": "94276bd0b3ed1c7c00fd0b790b974ee1db48a537",
+      "closedAt": "2025-08-27T20:40:55Z",
+      "mergedAt": "2025-08-27T20:40:55Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "c80575b0485015004b42ba0196e4fb6b4c06ea95"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM68alCK",
+          "commit": {
+            "abbreviatedOid": "fe99564"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-08-27T17:45:09Z",
+          "updatedAt": "2025-08-27T17:45:10Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "I am using this since I couldn't find a better reference for this algorithm.",
+              "createdAt": "2025-08-27T17:45:10Z",
+              "updatedAt": "2025-08-27T17:45:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM68at1X",
+          "commit": {
+            "abbreviatedOid": "fe99564"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-08-27T17:52:34Z",
+          "updatedAt": "2025-08-27T17:52:34Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "> I am using this since I couldn't find a better reference for this algorithm.\r\n\r\nSGTM, thanks!\r\n",
+              "createdAt": "2025-08-27T17:52:34Z",
+              "updatedAt": "2025-08-27T17:52:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM68azuF",
+          "commit": {
+            "abbreviatedOid": "fe99564"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-27T17:57:01Z",
+          "updatedAt": "2025-08-27T17:57:01Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM68c3hh",
+          "commit": {
+            "abbreviatedOid": "94276bd"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-27T20:40:25Z",
+          "updatedAt": "2025-08-27T20:40:25Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 80,
+      "id": "PR_kwDOL3MllM6lrUDk",
+      "title": "Tweak C.next_send_time",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/80",
+      "state": "MERGED",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "Minor update to the description based on reviewing #76",
+      "createdAt": "2025-08-27T20:53:31Z",
+      "updatedAt": "2025-08-27T20:58:23Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "36a7e95c82c7d1b7b3db22ad2b97e55f5bb4d71f",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-next-send-time",
+      "headRefOid": "03a8fe6784cc6033c3987a00d8970d2c161830c0",
+      "closedAt": "2025-08-27T20:58:23Z",
+      "mergedAt": "2025-08-27T20:58:23Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "685f68567aa4b7d8de6253a558b8def14845ac22"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM68dATj",
+          "commit": {
+            "abbreviatedOid": "03a8fe6"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-27T20:55:16Z",
+          "updatedAt": "2025-08-27T20:55:16Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM68dDj3",
+          "commit": {
+            "abbreviatedOid": "03a8fe6"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-27T20:57:36Z",
+          "updatedAt": "2025-08-27T20:57:36Z",
           "comments": []
         }
       ]
