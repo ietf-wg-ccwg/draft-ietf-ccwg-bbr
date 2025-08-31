@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-28T01:36:20.387802+00:00",
+  "timestamp": "2025-08-31T01:40:57.593590+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -775,7 +775,7 @@
       "labels": [],
       "body": "`BBRUpdateOnACK` utilizes information about the packets that were acknowledged. I suspect the draft would become easier to implement if it was spelled out explicitly what information is needed, by adding the required function parameters.\n\nOn a related note, `GenerateRateSample` would probably be easier if it returned (instead of updated) the rate sample.",
       "createdAt": "2025-07-12T21:15:55Z",
-      "updatedAt": "2025-08-20T18:37:01Z",
+      "updatedAt": "2025-08-28T04:19:03Z",
       "closedAt": null,
       "comments": [
         {
@@ -784,6 +784,13 @@
           "body": "It would also be very helpful to spell out if `BBRUpdateOnACK` could be implemented such that it deals with one packet at a time (and would then be called multiple times if the ACK acknowledges multiple packets), or if `BBRUpdateOnACK` necessarily needs to operate on a batch of packets.",
           "createdAt": "2025-07-13T02:27:56Z",
           "updatedAt": "2025-07-13T02:27:56Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@marten-seemann : I have attempted to clarify these issues in the following PR:\n\n\"clarify implicit C, BBR, RS parameters and relationship of RS and P in stretch ACKs\"\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/83\n\nPlease take a look and see what you think. Thanks!\n\ncc: @ianswett @jbeshay \n\n",
+          "createdAt": "2025-08-28T04:18:06Z",
+          "updatedAt": "2025-08-28T04:19:03Z"
         }
       ]
     },
@@ -1012,9 +1019,17 @@
       "labels": [],
       "body": "Section 4.1.3.1 says:\n> If a transport sender implementation uses an offload mechanism (such as TSO, GSO, etc.) to combine multiple C.SMSS of data into a single packet \"aggregate\" for the purposes of scheduling transmissions, then it is RECOMMENDED that the per-packet state be tracked for each packet \"aggregate\" rather than each SMSS. For simplicity this document refers to such state as \"per-packet\", whether it is per \"aggregate\" or per C.SMSS.\n\nIf I understand correctly, I only need to track 3 variables per packet (section 2.2):\n* the departure time\n* the number of delivered bytes at the time the packet was sent\n* the number of bytes in flight at the time the packet was sent\n\nThe first one is easy: obviously, the departure time for packets sent in a batch is the same.\n\nDoes this mean that when I send a GSO batch, one should set the number of delivered bytes and the number of bytes in flight for each packet sent in that batch to the value _before sending the entire batch_?",
       "createdAt": "2025-07-12T22:57:32Z",
-      "updatedAt": "2025-08-20T18:36:58Z",
+      "updatedAt": "2025-08-28T02:40:29Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Does this mean that when I send a GSO batch, one should set the number of delivered bytes and the number of bytes in flight for each packet sent in that batch to the value before sending the entire batch?\n\nI have tried to clarify this in the following PR:\n\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/81\n\nThe answer is that after transmitting the packet the P.foo fields should be filled in, including setting P.tx_in_flight to the value of C.inflight after the P is sent.\n\nAnd the P can be either a single C.SMSS or an offload batch/burst/aggregate of multiple C.SMSS packets.\n\nPlease take a look at https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/81 and let us know what you think.\n\nThanks!\n\ncc: @ianswett @jbeshay \n",
+          "createdAt": "2025-08-28T02:40:29Z",
+          "updatedAt": "2025-08-28T02:40:29Z"
+        }
+      ]
     },
     {
       "number": 67,
@@ -4689,6 +4704,138 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 81,
+      "id": "PR_kwDOL3MllM6ltVQk",
+      "title": "clarify relationship between per-packet state and offload mechanisms",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/81",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Have the \"per-packet state\" section and \"offload\" section\r\ncross-reference each other, and have both spots clarify\r\nthat it's recommended to track state per offload aggregate.\r\n\r\nMake a key clarification about P.tx_in_flight reflecting the\r\ninflight data after the transmission of P:\r\n\r\n-P.tx_in_flight: C.inflight at the time of the packet transmission.\r\n\r\n+P.tx_in_flight: C.inflight immediately after the transmission of packet P.\r\n\r\nFixes #66\r\n",
+      "createdAt": "2025-08-28T01:40:35Z",
+      "updatedAt": "2025-08-28T03:52:49Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "685f68567aa4b7d8de6253a558b8def14845ac22",
+      "headRepository": "nealcardwell/draft-ietf-ccwg-bbr",
+      "headRefName": "draft-ietf-ccwg-bbr-per-packet-state-with-offloads",
+      "headRefOid": "e20d7a1ace2d92378982fc1e438ca334007decfc",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM68iC3N",
+          "commit": {
+            "abbreviatedOid": "e20d7a1"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Thanks for the PR, some suggestions and questions",
+          "createdAt": "2025-08-28T03:48:43Z",
+          "updatedAt": "2025-08-28T03:52:49Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "```suggestion\r\noffload mechanism then it is RECOMMENDED that the packet state be tracked\r\nfor each packet \"aggregate\" rather than each individual packet.  For simplicity this\r\n```",
+              "createdAt": "2025-08-28T03:48:43Z",
+              "updatedAt": "2025-08-28T03:52:49Z"
+            },
+            {
+              "originalPosition": 12,
+              "body": "```suggestion\r\nper packet.\r\n```",
+              "createdAt": "2025-08-28T03:49:25Z",
+              "updatedAt": "2025-08-28T03:52:49Z"
+            },
+            {
+              "originalPosition": 45,
+              "body": "I'm not sure if IP packet is the correct term, but using C.SMSS here seems a bit off?\r\n\r\n```suggestion\r\nper-packet state described in Section [Per-packet (P) state](#per-packet-p-state) be\r\ntracked for each packet \"aggregate\" rather than each IP packet.\r\n```",
+              "createdAt": "2025-08-28T03:52:28Z",
+              "updatedAt": "2025-08-28T03:52:49Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 82,
+      "id": "PR_kwDOL3MllM6lt0sM",
+      "title": "fix outdated summary of \"most recently sent packet\"",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/82",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Also fix some mentions of rs that should now be RS.",
+      "createdAt": "2025-08-28T03:09:18Z",
+      "updatedAt": "2025-08-28T03:46:22Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "685f68567aa4b7d8de6253a558b8def14845ac22",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-bbr-most-recently-sent",
+      "headRefOid": "038c97c636405e19c8564bd4fc693c29d35cd381",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM68iBbJ",
+          "commit": {
+            "abbreviatedOid": "038c97c"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-28T03:46:01Z",
+          "updatedAt": "2025-08-28T03:46:22Z",
+          "comments": [
+            {
+              "originalPosition": 34,
+              "body": "nit: This function name is difficult to parse",
+              "createdAt": "2025-08-28T03:46:01Z",
+              "updatedAt": "2025-08-28T10:32:21Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 83,
+      "id": "PR_kwDOL3MllM6luSh_",
+      "title": "clarify implicit C, BBR, RS parameters and relationship of RS and P in stretch ACKs",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/83",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Clarify that all pseudocode functions have access to implicit (C) and\n(BBR) parameters (e.g., via a Transmission Control Block or TCB in\nTCP, or a \"this\" pointer in a C++ implementation of QUIC or other\nuser-space transports), and ACK-related functions also have access to\nan implicit (RS) parameter.\n\nClarify the relationship of (RS) and (P) in handling for ACKs, which\ncan mark 0, 1, or many packets as acknowledged:\n\n+ first call InitRateSample() once per ACK\n+ then call UpdateRateSample() once per packet P acknowledged by the current ACK\n+ finally call GenerateRateSample() after those steps\n\nFixes #58\n",
+      "createdAt": "2025-08-28T04:17:14Z",
+      "updatedAt": "2025-08-28T04:17:15Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "685f68567aa4b7d8de6253a558b8def14845ac22",
+      "headRepository": "nealcardwell/draft-ietf-ccwg-bbr",
+      "headRefName": "draft-ietf-ccwg-bbr-clarify-BBRUpdateOnACK",
+      "headRefOid": "5b3755a9fc5489b41e75f89fdb1cd2dd40516276",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
