@@ -1098,7 +1098,7 @@ has been transmitted but has not been acknowledged. As noted in the
 offload mechanism then it is RECOMMENDED that the packet state be tracked
 for each packet "aggregate" rather than each individual packet.  For simplicity this
 document refers to such state as "per-packet", whether it is per "aggregate" or
-per packet.
+per IP packet.
 
 P.delivered: C.delivered when the packet was sent from transport connection
 C.
