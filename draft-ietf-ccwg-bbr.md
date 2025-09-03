@@ -1095,8 +1095,8 @@ C.min_rtt: The minimum observed RTT over the lifetime of the connection.
 This algorithm requires the following new state variables for each packet that
 has been transmitted but has not been acknowledged. As noted in the
 [Offload Mechanisms](#offload-mechanisms) section, if a connection uses an
-offload mechanism then it is RECOMMENDED that the per-packet state be tracked
-for each packet "aggregate" rather than each C.SMSS.  For simplicity this
+offload mechanism then it is RECOMMENDED that the packet state be tracked
+for each packet "aggregate" rather than each individual packet.  For simplicity this
 document refers to such state as "per-packet", whether it is per "aggregate" or
 per C.SMSS.
 
