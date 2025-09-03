@@ -1291,9 +1291,8 @@ application-limited:
 If a transport sender implementation uses an offload mechanism (such as TSO,
 GSO, etc.) to combine multiple C.SMSS of data into a single packet "aggregate"
 for the purposes of scheduling transmissions, then it is RECOMMENDED that the
-per-packet state described in Section [Per-packet (P)
-state](#per-packet-p-state) be tracked for each packet "aggregate" rather than
-each C.SMSS.
+per-packet state described in Section [Per-packet (P) state](#per-packet-p-state) be
+tracked for each packet "aggregate" rather than each IP packet.
 
 
 #### Impact of ACK losses {#impact-of-ack-losses}
