@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-31T01:40:57.593590+00:00",
+  "timestamp": "2025-09-04T01:24:12.808566+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -4717,18 +4717,26 @@
       "labels": [],
       "body": "Have the \"per-packet state\" section and \"offload\" section\r\ncross-reference each other, and have both spots clarify\r\nthat it's recommended to track state per offload aggregate.\r\n\r\nMake a key clarification about P.tx_in_flight reflecting the\r\ninflight data after the transmission of P:\r\n\r\n-P.tx_in_flight: C.inflight at the time of the packet transmission.\r\n\r\n+P.tx_in_flight: C.inflight immediately after the transmission of packet P.\r\n\r\nFixes #66\r\n",
       "createdAt": "2025-08-28T01:40:35Z",
-      "updatedAt": "2025-08-28T03:52:49Z",
+      "updatedAt": "2025-09-03T20:52:39Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "685f68567aa4b7d8de6253a558b8def14845ac22",
       "headRepository": "nealcardwell/draft-ietf-ccwg-bbr",
       "headRefName": "draft-ietf-ccwg-bbr-per-packet-state-with-offloads",
-      "headRefOid": "e20d7a1ace2d92378982fc1e438ca334007decfc",
+      "headRefOid": "a6178b546c714801a3a69ceba4c7dd1e45feb3dc",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks, Ian! I've incorporated your suggestions. PTAL at this next revision of the PR. Thanks!\r\n@ianswett @jbeshay \r\n",
+          "createdAt": "2025-09-03T20:52:39Z",
+          "updatedAt": "2025-09-03T20:52:39Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM68iC3N",
@@ -4769,24 +4777,26 @@
       "id": "PR_kwDOL3MllM6lt0sM",
       "title": "fix outdated summary of \"most recently sent packet\"",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/82",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Also fix some mentions of rs that should now be RS.",
       "createdAt": "2025-08-28T03:09:18Z",
-      "updatedAt": "2025-08-28T03:46:22Z",
+      "updatedAt": "2025-09-03T20:43:30Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "685f68567aa4b7d8de6253a558b8def14845ac22",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-patch-bbr-most-recently-sent",
       "headRefOid": "038c97c636405e19c8564bd4fc693c29d35cd381",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-09-03T20:43:22Z",
+      "mergedAt": "2025-09-03T20:43:22Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "5f06df48bd9806aac52e851567b59b4a6d8b18c2"
+      },
       "comments": [],
       "reviews": [
         {
@@ -4806,6 +4816,26 @@
               "body": "nit: This function name is difficult to parse",
               "createdAt": "2025-08-28T03:46:01Z",
               "updatedAt": "2025-08-28T10:32:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM69r4Di",
+          "commit": {
+            "abbreviatedOid": "038c97c"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-03T20:43:01Z",
+          "updatedAt": "2025-09-03T20:43:01Z",
+          "comments": [
+            {
+              "originalPosition": 34,
+              "body": "> nit: This function name is difficult to parse\r\n\r\nAgreed. :-) I will send a follow-on PR to propose something simpler to parse. Thanks!\r\n",
+              "createdAt": "2025-09-03T20:43:01Z",
+              "updatedAt": "2025-09-03T20:43:01Z"
             }
           ]
         }
