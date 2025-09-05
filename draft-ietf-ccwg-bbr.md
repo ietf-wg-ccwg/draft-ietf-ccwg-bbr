@@ -1195,7 +1195,7 @@ stretched ACK acknowledges multiple data packets. The connection uses the
 information from the most recently sent packet to update the rate sample:
 
 ~~~~
-  /* Update rs when a packet is acknowledged. */
+  /* Update RS when a packet is acknowledged. */
   UpdateRateSample(Packet P):
     if (P.delivered_time == 0)
       return /* P already acknowledged */
