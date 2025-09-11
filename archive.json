@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-07T01:39:12.852524+00:00",
+  "timestamp": "2025-09-11T01:27:19.942780+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -279,11 +279,13 @@
       "state": "OPEN",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "jbeshay"
+      ],
       "labels": [],
       "body": "\nIncreasing ProbeRTT interval to 10s in internet facing connections improves application performance in initial experiments, most probably due to reducing the cwnd dips for connections with long transfers. \n\nI haven't measured its impact on the speed of convergence to a fair of the bandwidth but the 10s value is already used in some of the implementations as well.",
       "createdAt": "2025-02-21T18:15:30Z",
-      "updatedAt": "2025-07-21T13:23:40Z",
+      "updatedAt": "2025-09-10T19:32:46Z",
       "closedAt": null,
       "comments": [
         {
@@ -1010,7 +1012,7 @@
       "id": "I_kwDOL3MllM7ARydg",
       "title": "What does tracking state per aggregate mean?",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/66",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
@@ -1019,8 +1021,8 @@
       "labels": [],
       "body": "Section 4.1.3.1 says:\n> If a transport sender implementation uses an offload mechanism (such as TSO, GSO, etc.) to combine multiple C.SMSS of data into a single packet \"aggregate\" for the purposes of scheduling transmissions, then it is RECOMMENDED that the per-packet state be tracked for each packet \"aggregate\" rather than each SMSS. For simplicity this document refers to such state as \"per-packet\", whether it is per \"aggregate\" or per C.SMSS.\n\nIf I understand correctly, I only need to track 3 variables per packet (section 2.2):\n* the departure time\n* the number of delivered bytes at the time the packet was sent\n* the number of bytes in flight at the time the packet was sent\n\nThe first one is easy: obviously, the departure time for packets sent in a batch is the same.\n\nDoes this mean that when I send a GSO batch, one should set the number of delivered bytes and the number of bytes in flight for each packet sent in that batch to the value _before sending the entire batch_?",
       "createdAt": "2025-07-12T22:57:32Z",
-      "updatedAt": "2025-08-28T02:40:29Z",
-      "closedAt": null,
+      "updatedAt": "2025-09-10T20:50:56Z",
+      "closedAt": "2025-09-10T20:50:56Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -4718,24 +4720,26 @@
       "id": "PR_kwDOL3MllM6ltVQk",
       "title": "clarify relationship between per-packet state and offload mechanisms",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/81",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Have the \"per-packet state\" section and \"offload\" section\r\ncross-reference each other, and have both spots clarify\r\nthat it's recommended to track state per offload aggregate.\r\n\r\nMake a key clarification about P.tx_in_flight reflecting the\r\ninflight data after the transmission of P:\r\n\r\n-P.tx_in_flight: C.inflight at the time of the packet transmission.\r\n\r\n+P.tx_in_flight: C.inflight immediately after the transmission of packet P.\r\n\r\nFixes #66\r\n",
       "createdAt": "2025-08-28T01:40:35Z",
-      "updatedAt": "2025-09-05T21:21:15Z",
+      "updatedAt": "2025-09-10T20:50:55Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "685f68567aa4b7d8de6253a558b8def14845ac22",
       "headRepository": "nealcardwell/draft-ietf-ccwg-bbr",
       "headRefName": "draft-ietf-ccwg-bbr-per-packet-state-with-offloads",
       "headRefOid": "a6178b546c714801a3a69ceba4c7dd1e45feb3dc",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-09-10T20:50:55Z",
+      "mergedAt": "2025-09-10T20:50:55Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "081126456bc418455d977bc12ec0295d864267ef"
+      },
       "comments": [
         {
           "author": "nealcardwell",
