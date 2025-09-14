@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-11T01:27:19.942780+00:00",
+  "timestamp": "2025-09-14T01:38:38.459316+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1126,7 +1126,7 @@
       "labels": [],
       "body": "Today in CCWG there was interest in example test cases of some form for BBR, so implementers could ensure they implemented it correctly.\n\nQLog was mentioned as a common logging framework for QUIC that could be used for congestion control debugging and might allow implementations to compare traces.",
       "createdAt": "2025-07-21T15:22:28Z",
-      "updatedAt": "2025-09-04T19:38:32Z",
+      "updatedAt": "2025-09-11T21:13:37Z",
       "closedAt": null,
       "comments": [
         {
@@ -1135,6 +1135,13 @@
           "body": "Hello \ud83d\udc4b . I am working at Cloudflare and using a `tc` based simulator to test our implementation. I had some thoughts and wanted to see if there was interest and if folks agree.\n\n**Short term**\nWhat I would find very useful right now would a graph (rtt, bytes in flight, throughput, cwnd) in the baseline case (some delay + some rate limiting). A common format such as qlog might be preferred but that depending on your qlog support.\n\nAlso should we expect different behavior at low RTTs vs high RTTs and test these separately? So far my test has been with an RTT of 100ms and a rate of 20mbit.\n\n**Long term**\nI think what we might want is the following 3 things:\n- A common simulated setup (this is important) +\n- Workload description (e.g. download 20MB) +\n- Results (qlog seems like a very good candidate for a common format)\n\nEventually we could include more \"interesting\"/\"real world\" scenarios (loss, jitter, multiple flows, packet reordering, etc.) so that implementations can validate how the algorithm performs in the edge cases.",
           "createdAt": "2025-09-04T19:38:32Z",
           "updatedAt": "2025-09-04T19:38:32Z"
+        },
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think it's worth having some tests at low (ie: 1 or 5ms) RTTs, because some implementers have seen issues at low RTTs in the past.\n\nFor the same test case, I expect there to be subtle differences between different implementations and particularly between QUIC and TCP, but if you're saying it'd be useful to have qlog or some equivalent data for some standard scenarios from different implementations, then I think that should be doable?  That being said, the Google QUICHE BBR implementation doesn't support qlog today.",
+          "createdAt": "2025-09-11T21:13:37Z",
+          "updatedAt": "2025-09-11T21:13:37Z"
         }
       ]
     },
@@ -4938,7 +4945,7 @@
       "labels": [],
       "body": "@ianswett noted that \"BBRInflightLongtermFromLostPacket\" is long and hard to parse. Let's switch to something shorter, and make it consistent with the name of the variable that the function is returning.",
       "createdAt": "2025-09-04T18:42:37Z",
-      "updatedAt": "2025-09-04T18:42:46Z",
+      "updatedAt": "2025-09-11T22:39:08Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "5f06df48bd9806aac52e851567b59b4a6d8b18c2",
@@ -4958,7 +4965,21 @@
           "updatedAt": "2025-09-04T18:42:46Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM6_jyZl",
+          "commit": {
+            "abbreviatedOid": "904c67a"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Thanks for the rename, this is much easier to read.",
+          "createdAt": "2025-09-11T22:39:08Z",
+          "updatedAt": "2025-09-11T22:39:08Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
