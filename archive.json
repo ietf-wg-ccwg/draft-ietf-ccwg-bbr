@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-14T01:38:38.459316+00:00",
+  "timestamp": "2025-09-16T01:24:35.221703+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -4898,7 +4898,7 @@
       "labels": [],
       "body": "Clarify that all pseudocode functions have access to implicit (C) and\n(BBR) parameters (e.g., via a Transmission Control Block or TCB in\nTCP, or a \"this\" pointer in a C++ implementation of QUIC or other\nuser-space transports), and ACK-related functions also have access to\nan implicit (RS) parameter.\n\nClarify the relationship of (RS) and (P) in handling for ACKs, which\ncan mark 0, 1, or many packets as acknowledged:\n\n+ first call InitRateSample() once per ACK\n+ then call UpdateRateSample() once per packet P acknowledged by the current ACK\n+ finally call GenerateRateSample() after those steps\n\nFixes #58\n",
       "createdAt": "2025-08-28T04:17:14Z",
-      "updatedAt": "2025-09-05T22:21:28Z",
+      "updatedAt": "2025-09-14T20:42:16Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "685f68567aa4b7d8de6253a558b8def14845ac22",
@@ -4928,6 +4928,44 @@
               "body": "```suggestion\r\n  /* Update RS when a packet is acknowledged. */\r\n```",
               "createdAt": "2025-09-05T21:11:57Z",
               "updatedAt": "2025-09-05T21:19:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7AEk9q",
+          "commit": {
+            "abbreviatedOid": "1e9b696"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Thanks for the nice PR, I left some small suggestions.",
+          "createdAt": "2025-09-14T20:36:29Z",
+          "updatedAt": "2025-09-14T20:42:16Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "```suggestion\r\naccess to the the (RS) for for the rate sample populated processing that ACK.\r\n```",
+              "createdAt": "2025-09-14T20:36:29Z",
+              "updatedAt": "2025-09-14T20:42:16Z"
+            },
+            {
+              "originalPosition": 68,
+              "body": "```suggestion\r\nNext, for each newly acknowledged packet, the connection calls\r\n```",
+              "createdAt": "2025-09-14T20:37:14Z",
+              "updatedAt": "2025-09-14T20:42:16Z"
+            },
+            {
+              "originalPosition": 70,
+              "body": "Last transmitted is a bit odd for non-TCP transports, since in QUIC a packet is only transmitted once.  Can we just drop 'last' and leave it as an implementation detail?\r\n\r\n```suggestion\r\nconnection delivery information from the time at which the packet was\r\n```",
+              "createdAt": "2025-09-14T20:39:18Z",
+              "updatedAt": "2025-09-14T20:42:16Z"
+            },
+            {
+              "originalPosition": 94,
+              "body": "```suggestion\r\nFinally, after the connection has processed all newly acknowledged packets for this\r\n```",
+              "createdAt": "2025-09-14T20:40:50Z",
+              "updatedAt": "2025-09-14T20:42:16Z"
             }
           ]
         }
