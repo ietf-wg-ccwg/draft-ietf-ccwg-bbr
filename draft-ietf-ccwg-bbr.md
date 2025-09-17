@@ -298,8 +298,7 @@ Variables that are not defined below are defined in
 In the pseudocode in this document, all functions have implicit access to the
 (C) connection state and (BBR) congestion control algorithm state for that
 connection. All functions involved in ACK processing additionally have implicit
-access to the the (RS) for per-ack rate sample state for the rate sample
-populated during that ACK processing episode.
+access to the the (RS) for for the rate sample populated processing that ACK.
 
 In this document, "acknowledged" or "delivered" data means any transmitted
 data that the remote transport endpoint has confirmed that it has received,
