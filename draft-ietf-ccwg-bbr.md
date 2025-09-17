@@ -2865,11 +2865,11 @@ In pseudocode:
     RS.lost = C.lost - P.lost /* data lost since transmit */
     RS.is_app_limited = P.is_app_limited;
     if (IsInflightTooHigh())
-      RS.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
+      RS.tx_in_flight = BBRInflightAtLoss(rs, packet)
       BBRHandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
-  BBRInflightLongtermFromLostPacket(RS, packet):
+  BBRInflightAtLoss(RS, packet):
     size = packet.size
     /* What was in flight before this packet? */
     inflight_prev = RS.tx_in_flight - size
