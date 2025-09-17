@@ -879,7 +879,7 @@ A delivery rate sample records the estimated rate at which the network delivered
 packets for a single flow, calculated over the time interval between the
 transmission of a data packet and the acknowledgment of that packet. Since
 the rate samples only include packets actually cumulatively and/or selectively
-acknowledged, the sender knows the exact bytes that were delivered to the
+acknowledged, the sender knows the amount of data that was delivered to the
 receiver (not lost), and the sender can compute an estimate of a bottleneck
 delivery rate over that time interval.
 
