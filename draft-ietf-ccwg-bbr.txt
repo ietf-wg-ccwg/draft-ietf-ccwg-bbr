@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 14 March 2026                                    J. Beshay, Ed.
+Expires: 21 March 2026                                    J. Beshay, Ed.
                                                                     Meta
-                                                       10 September 2025
+                                                       17 September 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 March 2026.
+   This Internet-Draft will expire on 21 March 2026.
 
 Copyright Notice
 
@@ -2785,11 +2785,11 @@ Table of Contents
        RS.lost = C.lost - P.lost /* data lost since transmit */
        RS.is_app_limited = P.is_app_limited;
        if (IsInflightTooHigh())
-         RS.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
+         RS.tx_in_flight = BBRInflightAtLoss(rs, packet)
          BBRHandleInflightTooHigh()
 
      /* At what prefix of packet did losses exceed BBR.LossThresh? */
-     BBRInflightLongtermFromLostPacket(RS, packet):
+     BBRInflightAtLoss(RS, packet):
        size = packet.size
        /* What was in flight before this packet? */
        inflight_prev = RS.tx_in_flight - size
