@@ -1188,7 +1188,7 @@ the per-ACK RateSample RS:
 
 Next, for each newly acknowledged packet, the connection calls
 UpdateRateSample() to update the per-ACK rate sample based on a snapshot of
-connection delivery information from the time at which the packet was last
+connection delivery information from the time at which the packet was
 transmitted. The connection invokes UpdateRateSample() multiple times when a
 stretched ACK acknowledges multiple data packets. The connection uses the
 information from the most recently sent packet to update the rate sample:
