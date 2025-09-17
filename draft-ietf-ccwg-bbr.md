@@ -336,7 +336,7 @@ link-layer headers.
 C.InitialCwnd: The initial congestion window set by the transport protocol
 implementation for the connection at initialization time.
 
-C.delivered: The total amount of data (in bytes)
+C.delivered: The total amount of data
 delivered so far over the lifetime of the transport connection C.
 This MUST NOT include pure ACK packets. It SHOULD include spurious
 retransmissions that have been acknowledged as delivered.
