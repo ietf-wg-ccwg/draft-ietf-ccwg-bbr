@@ -1224,7 +1224,7 @@ information from the most recently sent packet to update the rate sample:
              after(P.end_seq, RS.last_end_seq))
 ~~~~
 
-Finally, after the connection has processed all packets acknowledged by this
+Finally, after the connection has processed all newly acknowledged packets for this
 ACK by calling UpdateRateSample() for each packet, the connection invokes
 GenerateRateSample() to finish populating the rate sample, RS:
 
