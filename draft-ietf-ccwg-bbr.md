@@ -342,8 +342,8 @@ This MUST NOT include pure ACK packets.
 C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
 point in the last packet-timed round trip.
 
-C.next_send_time: The earliest pacing departure time for the next
-packet scheduled for transmission.
+C.next_send_time: The earliest pacing departure time another packet can be
+sent.
 
 ## Per-ACK Rate Sample State {#per-ack-rate-sample-state}
 
@@ -1097,8 +1097,13 @@ C.min_rtt: The minimum observed RTT over the lifetime of the connection.
 
 ##### Per-packet (P) state {#per-packet-p-state}
 
-This algorithm requires the following new state variables for each packet
-that has been transmitted but has not been acknowledged:
+This algorithm requires the following new state variables for each packet that
+has been transmitted but has not been acknowledged. As noted in the
+[Offload Mechanisms](#offload-mechanisms) section, if a connection uses an
+offload mechanism then it is RECOMMENDED that the packet state be tracked
+for each packet "aggregate" rather than each individual packet.  For simplicity this
+document refers to such state as "per-packet", whether it is per "aggregate" or
+per IP packet.
 
 P.delivered: C.delivered when the packet was sent from transport connection
 C.
@@ -1107,13 +1112,13 @@ P.delivered_time: C.delivered_time when the packet was sent.
 
 P.first_send_time: C.first_send_time when the packet was sent.
 
-P.is_app_limited: true if C.app_limited was non-zero when the packet was
-sent, else false.
-
 P.send_time: The pacing departure time selected when the packet was scheduled
 to be sent.
 
-P.tx_in_flight: C.inflight at the time of the packet transmission.
+P.is_app_limited: true if C.app_limited was non-zero when the packet was
+sent, else false.
+
+P.tx_in_flight: C.inflight immediately after the transmission of packet P.
 
 ##### Rate Sample (rs) Output {#rate-sample-rs-output}
 
@@ -1203,7 +1208,7 @@ information from the most recently sent packet to update the rate sample:
     C.delivered_time = Now()
 
     /* Update info using the newest packet: */
-    if (!RS.has_data or IsNewestPacket(P, rs))
+    if (!RS.has_data or IsNewestPacket(P, RS))
       RS.has_data         = true
       RS.prior_delivered  = P.delivered
       RS.prior_time       = P.delivered_time
@@ -1304,10 +1309,9 @@ application-limited:
 
 If a transport sender implementation uses an offload mechanism (such as TSO,
 GSO, etc.) to combine multiple C.SMSS of data into a single packet "aggregate"
-for the purposes of scheduling transmissions, then it is RECOMMENDED that
-the per-packet state be tracked for each packet "aggregate" rather than each
-SMSS. For simplicity this document refers to such state as "per-packet",
-whether it is per "aggregate" or per C.SMSS.
+for the purposes of scheduling transmissions, then it is RECOMMENDED that the
+per-packet state described in Section [Per-packet (P) state](#per-packet-p-state) be
+tracked for each packet "aggregate" rather than each IP packet.
 
 
 #### Impact of ACK losses {#impact-of-ack-losses}
@@ -2881,11 +2885,11 @@ In pseudocode:
     RS.lost = C.lost - P.lost /* data lost since transmit */
     RS.is_app_limited = P.is_app_limited;
     if (IsInflightTooHigh())
-      RS.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
+      RS.tx_in_flight = BBRInflightAtLoss(rs, packet)
       BBRHandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
-  BBRInflightLongtermFromLostPacket(rs, packet):
+  BBRInflightAtLoss(RS, packet):
     size = packet.size
     /* What was in flight before this packet? */
     inflight_prev = RS.tx_in_flight - size
