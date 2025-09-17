@@ -281,10 +281,10 @@ Table of Contents
    C.InitialCwnd: The initial congestion window set by the transport
    protocol implementation for the connection at initialization time.
 
-   C.delivered: The total amount of data (in bytes) delivered so far
-   over the lifetime of the transport connection C.  This MUST NOT
-   include pure ACK packets.  It SHOULD include spurious retransmissions
-   that have been acknowledged as delivered.
+   C.delivered: The total amount of data delivered so far over the
+   lifetime of the transport connection C.  This MUST NOT include pure
+   ACK packets.  It SHOULD include spurious retransmissions that have
+   been acknowledged as delivered.
 
    C.inflight: The connection's best estimate of the number of bytes
    outstanding in the network.  This includes the number of bytes that
