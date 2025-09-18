@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-16T01:24:35.221703+00:00",
+  "timestamp": "2025-09-18T01:24:44.808727+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -415,11 +415,13 @@
       "state": "OPEN",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "nealcardwell"
+      ],
       "labels": [],
       "body": "When trying to add consistency by fixing #14 I realized that the text refers to packets in flight.  The Google quiche QUIC implementation of BBR uses bytes, not packets.  I believe the Linux TCP implementation uses packets, and the BSD implementation uses bytes?  I'm unsure what mvfst uses?\n\nPossibly we can define a term at the beginning of the document, ie: \"Inflight\" and define it to be in bytes or packets depending upon the implementation?\n\nI'm a bit worried we'll have unit issues, since bytes and packets are not the same, but I haven't attempted this PR yet.",
       "createdAt": "2025-03-18T10:25:58Z",
-      "updatedAt": "2025-05-29T17:27:36Z",
+      "updatedAt": "2025-09-17T21:15:14Z",
       "closedAt": null,
       "comments": [
         {
@@ -768,7 +770,7 @@
       "id": "I_kwDOL3MllM7ARYrQ",
       "title": "clarify function parameters of `BBRUpdateOnACK`",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/58",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
@@ -777,8 +779,8 @@
       "labels": [],
       "body": "`BBRUpdateOnACK` utilizes information about the packets that were acknowledged. I suspect the draft would become easier to implement if it was spelled out explicitly what information is needed, by adding the required function parameters.\n\nOn a related note, `GenerateRateSample` would probably be easier if it returned (instead of updated) the rate sample.",
       "createdAt": "2025-07-12T21:15:55Z",
-      "updatedAt": "2025-08-28T04:19:03Z",
-      "closedAt": null,
+      "updatedAt": "2025-09-17T20:46:49Z",
+      "closedAt": "2025-09-17T20:46:49Z",
       "comments": [
         {
           "author": "marten-seemann",
@@ -804,11 +806,13 @@
       "state": "OPEN",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "jbeshay"
+      ],
       "labels": [],
       "body": "The `BBR` struct holds connection-scoped variable, as does the the `C` struct. I might be missing something, but it is not clear to me why these are split into two different structs.",
       "createdAt": "2025-07-12T21:58:22Z",
-      "updatedAt": "2025-08-13T18:39:52Z",
+      "updatedAt": "2025-09-17T20:55:15Z",
       "closedAt": null,
       "comments": [
         {
@@ -884,15 +888,15 @@
       "id": "I_kwDOL3MllM7ARm5M",
       "title": "Should `delivered` be called `bytes_delivered`?",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/61",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "At first glance, I assumed `delivered` was a boolean, but it\u2019s actually the total number of acknowledged bytes. A more descriptive variable name might make this clearer.",
       "createdAt": "2025-07-12T22:16:03Z",
-      "updatedAt": "2025-07-30T21:13:28Z",
-      "closedAt": null,
+      "updatedAt": "2025-09-17T21:01:30Z",
+      "closedAt": "2025-09-17T21:01:30Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -900,6 +904,13 @@
           "body": "We discussed this among the co-editors, and our consensus was that it will be better for readability if we don't have the units explicitly mentioned in the many variables that refer to quantities of data, or data rates. So we would prefer to stick with \"delivered\" rather than \"bytes_delivered\",  \"cwnd\" rather than \"cwnd_bytes\", \"inflight\" rather than \"inflight_bytes\", etc.\n\nInstead, our plan is to clarify the canonical units for each quantity in the prose definition of each quantity.\n\nThis should hopefully make the draft a little easier/quicker to read, and provide less cognitive dissonance for implementations that want to use other units for tracking data (e.g., bits or packets instead of bytes).\n\nThis is tracked separately in issue: \"Should BBR inflight be described in bytes, packets or compatible with both?\" issue#27:  https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/27\n",
           "createdAt": "2025-07-30T21:13:28Z",
           "updatedAt": "2025-07-30T21:13:28Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closing for now. Thanks!\n",
+          "createdAt": "2025-09-17T21:01:30Z",
+          "updatedAt": "2025-09-17T21:01:30Z"
         }
       ]
     },
@@ -1126,7 +1137,7 @@
       "labels": [],
       "body": "Today in CCWG there was interest in example test cases of some form for BBR, so implementers could ensure they implemented it correctly.\n\nQLog was mentioned as a common logging framework for QUIC that could be used for congestion control debugging and might allow implementations to compare traces.",
       "createdAt": "2025-07-21T15:22:28Z",
-      "updatedAt": "2025-09-11T21:13:37Z",
+      "updatedAt": "2025-09-17T17:55:03Z",
       "closedAt": null,
       "comments": [
         {
@@ -1142,6 +1153,13 @@
           "body": "I think it's worth having some tests at low (ie: 1 or 5ms) RTTs, because some implementers have seen issues at low RTTs in the past.\n\nFor the same test case, I expect there to be subtle differences between different implementations and particularly between QUIC and TCP, but if you're saying it'd be useful to have qlog or some equivalent data for some standard scenarios from different implementations, then I think that should be doable?  That being said, the Google QUICHE BBR implementation doesn't support qlog today.",
           "createdAt": "2025-09-11T21:13:37Z",
           "updatedAt": "2025-09-11T21:13:37Z"
+        },
+        {
+          "author": "toidiu",
+          "authorAssociation": "NONE",
+          "body": "> I think it's worth having some tests at low (ie: 1 or 5ms) RTTs, because some implementers have seen issues at low RTTs in the past.\n\nThanks for this tip.\n\n> That being said, the Google QUICHE BBR implementation doesn't support qlog today.\n\nSupporting qlog seems like a heavy lift, something we should be able to make progress without. Raw data on RTT, minRtt, bandwidth_estimate, cwnd etc. at some regular time interval might be a lower barrier that would still be useful.",
+          "createdAt": "2025-09-17T17:55:03Z",
+          "updatedAt": "2025-09-17T17:55:03Z"
         }
       ]
     },
@@ -4891,24 +4909,26 @@
       "id": "PR_kwDOL3MllM6luSh_",
       "title": "clarify implicit C, BBR, RS parameters and relationship of RS and P in stretch ACKs",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/83",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Clarify that all pseudocode functions have access to implicit (C) and\n(BBR) parameters (e.g., via a Transmission Control Block or TCB in\nTCP, or a \"this\" pointer in a C++ implementation of QUIC or other\nuser-space transports), and ACK-related functions also have access to\nan implicit (RS) parameter.\n\nClarify the relationship of (RS) and (P) in handling for ACKs, which\ncan mark 0, 1, or many packets as acknowledged:\n\n+ first call InitRateSample() once per ACK\n+ then call UpdateRateSample() once per packet P acknowledged by the current ACK\n+ finally call GenerateRateSample() after those steps\n\nFixes #58\n",
       "createdAt": "2025-08-28T04:17:14Z",
-      "updatedAt": "2025-09-14T20:42:16Z",
+      "updatedAt": "2025-09-17T20:46:48Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
-      "baseRefOid": "685f68567aa4b7d8de6253a558b8def14845ac22",
+      "baseRefOid": "21aa79aefcb4e115ad14b480042129fdc8e76cbc",
       "headRepository": "nealcardwell/draft-ietf-ccwg-bbr",
       "headRefName": "draft-ietf-ccwg-bbr-clarify-BBRUpdateOnACK",
-      "headRefOid": "1e9b696a4fee8cfd764ca66752935628dfb07946",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "57b76b747bb506260283c83f56a11ac6e2434d24",
+      "closedAt": "2025-09-17T20:46:48Z",
+      "mergedAt": "2025-09-17T20:46:48Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "97dd27aba733defc3dd5080418169d15e40b0b25"
+      },
       "comments": [],
       "reviews": [
         {
@@ -4968,6 +4988,19 @@
               "updatedAt": "2025-09-14T20:42:16Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7A5J9c",
+          "commit": {
+            "abbreviatedOid": "5159d1e"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-17T20:41:54Z",
+          "updatedAt": "2025-09-17T20:41:54Z",
+          "comments": []
         }
       ]
     },
@@ -4976,24 +5009,26 @@
       "id": "PR_kwDOL3MllM6m667D",
       "title": "s/BBRInflightLongtermFromLostPacket/BBRInflightAtLoss/",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/84",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "@ianswett noted that \"BBRInflightLongtermFromLostPacket\" is long and hard to parse. Let's switch to something shorter, and make it consistent with the name of the variable that the function is returning.",
       "createdAt": "2025-09-04T18:42:37Z",
-      "updatedAt": "2025-09-11T22:39:08Z",
+      "updatedAt": "2025-09-17T20:36:34Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "5f06df48bd9806aac52e851567b59b4a6d8b18c2",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-bbr-inflight-at-loss-function-rename",
       "headRefOid": "904c67a67f05162b23b09537161157d87236592f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-09-17T20:36:34Z",
+      "mergedAt": "2025-09-17T20:36:34Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "21aa79aefcb4e115ad14b480042129fdc8e76cbc"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -5016,6 +5051,74 @@
           "createdAt": "2025-09-11T22:39:08Z",
           "updatedAt": "2025-09-11T22:39:08Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7A5E_v",
+          "commit": {
+            "abbreviatedOid": "904c67a"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-17T20:36:16Z",
+          "updatedAt": "2025-09-17T20:36:16Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 85,
+      "id": "PR_kwDOL3MllM6pKQYM",
+      "title": "clarify that BBR doc uses units of bytes, sec, and bytes/sec",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/85",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Clarify near the start of the \"Terminology\" section that this document uses units of bytes, sec, and bytes/sec.\r\n\r\nClarify that implementations may use other units, with appropriate conversions (since Linux TCP uses packets).\r\n\r\nBut note that it is RECOMMENDED to use bytes rather than packets, since packet sizes can vary.\r\n\r\nTry to remove mentions of units in the main sections of the document. Where it's more clear to use units, make sure the text is consistent with the bytes, sec, and bytes/sec units.\r\n\r\nTo keep the doc more succinct and readable, and avoid churn, and avoid cognitive dissonance with respect to\r\nimplementations using other units (like Linux TCP), we still avoid putting units in the names of variables in this doc.\r\n\r\nFixes #27",
+      "createdAt": "2025-09-17T21:43:50Z",
+      "updatedAt": "2025-09-17T22:06:01Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "97dd27aba733defc3dd5080418169d15e40b0b25",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-specify-units",
+      "headRefOid": "ed66df95c8b9969ca321b163c96b58974d8575e7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc: @ianswett @jbeshay \r\n",
+          "createdAt": "2025-09-17T21:44:53Z",
+          "updatedAt": "2025-09-17T21:44:53Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7A51-0",
+          "commit": {
+            "abbreviatedOid": "a77cf42"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-17T21:55:14Z",
+          "updatedAt": "2025-09-17T21:55:23Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "```suggestion\r\nC.delivered: The total amount of data\r\n```",
+              "createdAt": "2025-09-17T21:55:14Z",
+              "updatedAt": "2025-09-17T21:55:23Z"
+            }
+          ]
         }
       ]
     }
