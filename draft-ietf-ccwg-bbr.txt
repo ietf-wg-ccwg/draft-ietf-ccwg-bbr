@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 21 March 2026                                    J. Beshay, Ed.
+Expires: 23 March 2026                                    J. Beshay, Ed.
                                                                     Meta
-                                                       17 September 2025
+                                                       19 September 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 March 2026.
+   This Internet-Draft will expire on 23 March 2026.
 
 Copyright Notice
 
@@ -243,6 +243,16 @@ Table of Contents
    processing additionally have implicit access to the the (RS) for for
    the rate sample populated processing that ACK.
 
+   In this document, the unit of all volumes of data is bytes, the unit
+   of all times is seconds, and the unit of all data rates is bytes per
+   second.  Implementations MAY use other units, such as bits and bits
+   per second, or packets and packets per second, as long as the
+   implementation applies conversions as appropriate.  However, since
+   packet sizes can vary due to changes in MTU or application message
+   sizes, data rates computed in packets per second can be inaccurate,
+   and thus it is RECOMMENDED that BBR implementations use bytes and
+   bytes per second.
+
    In this document, "acknowledged" or "delivered" data means any
    transmitted data that the remote transport endpoint has confirmed
    that it has received, e.g., via a QUIC ACK Range [RFC9000], TCP
@@ -271,11 +281,10 @@ Table of Contents
    C.InitialCwnd: The initial congestion window set by the transport
    protocol implementation for the connection at initialization time.
 
-   C.delivered: The total amount of data (tracked in octets or in
-   packets) delivered so far over the lifetime of the transport
-   connection C.  This MUST NOT include pure ACK packets.  It SHOULD
-   include spurious retransmissions that have been acknowledged as
-   delivered.
+   C.delivered: The total amount of data delivered so far over the
+   lifetime of the transport connection C.  This MUST NOT include pure
+   ACK packets.  It SHOULD include spurious retransmissions that have
+   been acknowledged as delivered.
 
    C.inflight: The connection's best estimate of the number of bytes
    outstanding in the network.  This includes the number of bytes that
@@ -821,14 +830,9 @@ Table of Contents
    interval between the transmission of a data packet and the
    acknowledgment of that packet.  Since the rate samples only include
    packets actually cumulatively and/or selectively acknowledged, the
-   sender knows the exact octets that were delivered to the receiver
+   sender knows the amount of data that was delivered to the receiver
    (not lost), and the sender can compute an estimate of a bottleneck
    delivery rate over that time interval.
-
-   The amount of data delivered MAY be tracked in units of either octets
-   or packets.  Tracking data in units of octets is more accurate, since
-   packet sizes can vary.  But for some purposes, including congestion
-   control, tracking data in units of packets may suffice.
 
 4.1.1.2.1.  ACK Rate
 
@@ -1028,11 +1032,11 @@ Table of Contents
    on the sending host at layers lower than the transport layer (i.e.
    network layer, traffic shaping layer, network device layer).
 
-   C.lost_out: The number of packets in the current outstanding window
-   that are marked as lost.
+   C.lost_out: The amount of data in the current outstanding window that
+   is marked as lost.
 
-   C.retrans_out: The number of packets in the current outstanding
-   window that are being retransmitted.
+   C.retrans_out: The amount of data in the current outstanding window
+   that are being retransmitted.
 
    C.min_rtt: The minimum observed RTT over the lifetime of the
    connection.
@@ -1222,8 +1226,8 @@ Table of Contents
       transmitted.
 
    *  At the beginning of ACK processing, before updating the estimated
-      number of packets in flight, and before congestion control
-      modifies C.cwnd or C.pacing_rate.
+      amount of data in flight, and before congestion control modifies
+      C.cwnd or C.pacing_rate.
 
    *  At the beginning of connection timer processing, for all timers
       that might result in the transmission of one or more data packets.
@@ -3251,16 +3255,16 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    There are several considerations embodied in the logic above.  If BBR
    has measured enough samples to achieve confidence that it has filled
    the pipe (see the description of BBR.full_bw_reached in the "Startup"
-   section below), then it increases C.cwnd based on the number of
-   packets delivered, while bounding C.cwnd to be no larger than the
-   BBR.max_inflight adapted to the estimated BDP.  Otherwise, if C.cwnd
-   is below the BBR.max_inflight, or the sender has marked so little
-   data delivered (less than C.InitialCwnd) that it does not yet judge
-   its BBR.max_bw estimate and BBR.max_inflight as useful, then it
-   increases C.cwnd without bounding it to be below BBR.max_inflight.
-   Finally, BBR imposes a floor of BBR.MinPipeCwnd in order to allow
-   pipelining even with small BDPs (see the "Minimum cwnd for
-   Pipelining" section, above).
+   section below), then it increases C.cwnd based on the data delivered,
+   while bounding C.cwnd to be no larger than the BBR.max_inflight
+   adapted to the estimated BDP.  Otherwise, if C.cwnd is below the
+   BBR.max_inflight, or the sender has marked so little data delivered
+   (less than C.InitialCwnd) that it does not yet judge its BBR.max_bw
+   estimate and BBR.max_inflight as useful, then it increases C.cwnd
+   without bounding it to be below BBR.max_inflight.  Finally, BBR
+   imposes a floor of BBR.MinPipeCwnd in order to allow pipelining even
+   with small BDPs (see the "Minimum cwnd for Pipelining" section,
+   above).
 
 5.6.4.7.  Bounding cwnd Based on Recent Congestion
 
