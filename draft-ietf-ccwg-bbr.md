@@ -300,6 +300,15 @@ In the pseudocode in this document, all functions have implicit access to the
 connection. All functions involved in ACK processing additionally have implicit
 access to the the (RS) for for the rate sample populated processing that ACK.
 
+In this document, the unit of all volumes of data is bytes, the unit of
+all times is seconds, and the unit of all data rates is bytes per second.
+Implementations MAY use other units, such as bits and bits per second,
+or packets and packets per second, as long as the implementation applies
+conversions as appropriate. However, since packet sizes can vary
+due to changes in MTU or application message sizes, data rates
+computed in packets per second can be inaccurate, and thus it is
+RECOMMENDED that BBR implementations use bytes and bytes per second.
+
 In this document, "acknowledged" or "delivered" data means any transmitted
 data that the remote transport endpoint has confirmed that it has received,
 e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
@@ -327,7 +336,7 @@ link-layer headers.
 C.InitialCwnd: The initial congestion window set by the transport protocol
 implementation for the connection at initialization time.
 
-C.delivered: The total amount of data (tracked in octets or in packets)
+C.delivered: The total amount of data
 delivered so far over the lifetime of the transport connection C.
 This MUST NOT include pure ACK packets. It SHOULD include spurious
 retransmissions that have been acknowledged as delivered.
@@ -870,14 +879,9 @@ A delivery rate sample records the estimated rate at which the network delivered
 packets for a single flow, calculated over the time interval between the
 transmission of a data packet and the acknowledgment of that packet. Since
 the rate samples only include packets actually cumulatively and/or selectively
-acknowledged, the sender knows the exact octets that were delivered to the
+acknowledged, the sender knows the amount of data that was delivered to the
 receiver (not lost), and the sender can compute an estimate of a bottleneck
 delivery rate over that time interval.
-
-The amount of data delivered MAY be tracked in units of either octets or
-packets. Tracking data in units of octets is more accurate, since packet
-sizes can vary. But for some purposes, including congestion control, tracking
-data in units of packets may suffice.
 
 ##### ACK Rate {#ack-rate}
 
@@ -1087,10 +1091,10 @@ C.pending_transmissions: The number of bytes queued for transmission on the
 sending host at layers lower than the transport layer (i.e. network layer,
 traffic shaping layer, network device layer).
 
-C.lost_out: The number of packets in the current outstanding window that
-are marked as lost.
+C.lost_out: The amount of data in the current outstanding window that
+is marked as lost.
 
-C.retrans_out: The number of packets in the current outstanding window that
+C.retrans_out: The amount of data in the current outstanding window that
 are being retransmitted.
 
 C.min_rtt: The minimum observed RTT over the lifetime of the connection.
@@ -1280,8 +1284,8 @@ the following situations:
   upon each write from the application, before new application data is enqueued
   in the transport send buffer or transmitted.
 
-* At the beginning of ACK processing, before updating the estimated number
-  of packets in flight, and before congestion control modifies C.cwnd or
+* At the beginning of ACK processing, before updating the estimated
+  amount of data in flight, and before congestion control modifies C.cwnd or
   C.pacing_rate.
 
 * At the beginning of connection timer processing, for all timers that might
@@ -3351,7 +3355,7 @@ acknowledged, BBR runs the following BBRSetCwnd() steps to update C.cwnd:
 There are several considerations embodied in the logic above. If BBR has
 measured enough samples to achieve confidence that it has filled the pipe
 (see the description of BBR.full_bw_reached in the "Startup" section below), then
-it increases C.cwnd based on the number of packets delivered, while bounding
+it increases C.cwnd based on the data delivered, while bounding
 C.cwnd to be no larger than the BBR.max_inflight adapted to the estimated
 BDP. Otherwise, if C.cwnd is below the BBR.max_inflight, or the sender
 has marked so little data delivered (less than C.InitialCwnd) that it does not
