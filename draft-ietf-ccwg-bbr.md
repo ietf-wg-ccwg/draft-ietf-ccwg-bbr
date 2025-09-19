@@ -302,7 +302,7 @@ access to the the (RS) for for the rate sample populated processing that ACK.
 
 In this document, the unit of all volumes of data is bytes, the unit of
 all times is seconds, and the unit of all data rates is bytes per second.
-Implementations MAY use other units, such as bits and bits persecond,
+Implementations MAY use other units, such as bits and bits per second,
 or packets and packets per second, as long as the implementation applies
 conversions as appropriate. However, since packet sizes can vary
 due to changes in MTU or application message sizes, data rates
