@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 21 March 2026                                    J. Beshay, Ed.
+Expires: 23 March 2026                                    J. Beshay, Ed.
                                                                     Meta
-                                                       17 September 2025
+                                                       19 September 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 March 2026.
+   This Internet-Draft will expire on 23 March 2026.
 
 Copyright Notice
 
@@ -246,7 +246,7 @@ Table of Contents
    In this document, the unit of all volumes of data is bytes, the unit
    of all times is seconds, and the unit of all data rates is bytes per
    second.  Implementations MAY use other units, such as bits and bits
-   persecond, or packets and packets per second, as long as the
+   per second, or packets and packets per second, as long as the
    implementation applies conversions as appropriate.  However, since
    packet sizes can vary due to changes in MTU or application message
    sizes, data rates computed in packets per second can be inaccurate,
