@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-18T01:24:44.808727+00:00",
+  "timestamp": "2025-09-21T01:41:21.253307+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -412,7 +412,7 @@
       "id": "I_kwDOL3MllM6uhQpu",
       "title": "Should BBR inflight be described in bytes, packets or compatible with both?",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/27",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -421,8 +421,8 @@
       "labels": [],
       "body": "When trying to add consistency by fixing #14 I realized that the text refers to packets in flight.  The Google quiche QUIC implementation of BBR uses bytes, not packets.  I believe the Linux TCP implementation uses packets, and the BSD implementation uses bytes?  I'm unsure what mvfst uses?\n\nPossibly we can define a term at the beginning of the document, ie: \"Inflight\" and define it to be in bytes or packets depending upon the implementation?\n\nI'm a bit worried we'll have unit issues, since bytes and packets are not the same, but I haven't attempted this PR yet.",
       "createdAt": "2025-03-18T10:25:58Z",
-      "updatedAt": "2025-09-17T21:15:14Z",
-      "closedAt": null,
+      "updatedAt": "2025-09-19T18:21:41Z",
+      "closedAt": "2025-09-19T18:21:41Z",
       "comments": [
         {
           "author": "ianswett",
@@ -5072,24 +5072,26 @@
       "id": "PR_kwDOL3MllM6pKQYM",
       "title": "clarify that BBR doc uses units of bytes, sec, and bytes/sec",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/85",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Clarify near the start of the \"Terminology\" section that this document uses units of bytes, sec, and bytes/sec.\r\n\r\nClarify that implementations may use other units, with appropriate conversions (since Linux TCP uses packets).\r\n\r\nBut note that it is RECOMMENDED to use bytes rather than packets, since packet sizes can vary.\r\n\r\nTry to remove mentions of units in the main sections of the document. Where it's more clear to use units, make sure the text is consistent with the bytes, sec, and bytes/sec units.\r\n\r\nTo keep the doc more succinct and readable, and avoid churn, and avoid cognitive dissonance with respect to\r\nimplementations using other units (like Linux TCP), we still avoid putting units in the names of variables in this doc.\r\n\r\nFixes #27",
       "createdAt": "2025-09-17T21:43:50Z",
-      "updatedAt": "2025-09-17T22:06:01Z",
+      "updatedAt": "2025-09-19T18:21:48Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "97dd27aba733defc3dd5080418169d15e40b0b25",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-patch-specify-units",
-      "headRefOid": "ed66df95c8b9969ca321b163c96b58974d8575e7",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "3fced405ac2f377d57e3d0b0bbbfd2f62b148d29",
+      "closedAt": "2025-09-19T18:21:40Z",
+      "mergedAt": "2025-09-19T18:21:40Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "827d5beb9016c5063a3d72c34ec217b23e495bb2"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -5117,6 +5119,26 @@
               "body": "```suggestion\r\nC.delivered: The total amount of data\r\n```",
               "createdAt": "2025-09-17T21:55:14Z",
               "updatedAt": "2025-09-17T21:55:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7Bc83t",
+          "commit": {
+            "abbreviatedOid": "ed66df9"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-19T15:52:20Z",
+          "updatedAt": "2025-09-19T15:52:59Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "```suggestion\r\nImplementations MAY use other units, such as bits and bits per second,\r\n```",
+              "createdAt": "2025-09-19T15:52:21Z",
+              "updatedAt": "2025-09-19T15:52:59Z"
             }
           ]
         }
