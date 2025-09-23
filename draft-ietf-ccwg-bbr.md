@@ -816,6 +816,12 @@ As noted above in {{ecn}}, BBR as described in this draft does not
 specify a specific response to ECN, and instead leaves it as an area for
 future work.
 
+The design of ProbeRTT in {{probertt-design-rationale}} specifies a ProbeRTT
+interval that sacrifices no more than roughly 2% of a flow's available
+bandwidth. The impact of using a different interval or making adjustments
+for triggering ProbeRTT on specific link types is a subject of
+further experimentation.
+
 The delivery rate sampling algorithm in {{delivery-rate-samples}}
 has an ability to over-estimate delivery rate, as described in
 {{compression-and-aggregation}}. When combined with BBR's windowed
@@ -2306,6 +2312,16 @@ As an optimization, when restarting from idle and finding that the
 BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the idleness
 is deemed a sufficient attempt to coordinate to drain the queue.
 
+The frequency of triggering ProbeRTT involves a tradeoff between the speed of
+convergence and the throughput penalty. It is a subject of further
+experimentation. A longer duration for ProbeRTT would reduce the throughput
+penalty for bulk flows or flows on lower BDP links that are less likely to have
+silences or low-rate periods, at the cost of slower convergence.
+Furthermore, some types of links can switch between paths of significantly
+different base RTT (e.g. LEO satellite or cellular handoff). If these path
+changes can be predicted or detected, initiatine a ProbeRTT immediately can
+speed up the convergence to an accurate BBR.min_rtt, especially when it has
+increased.
 
 #### ProbeRTT Logic {#probertt-logic}
 
