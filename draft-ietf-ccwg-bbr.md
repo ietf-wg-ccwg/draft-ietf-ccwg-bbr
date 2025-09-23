@@ -2251,7 +2251,7 @@ the flow will "remember" the BBR.min_rtt value it measured during the previous
 ProbeRTT episode, providing a robust BDP estimate for the C.cwnd = 0.5\*BDP
 calculation, increasing the likelihood of fully draining the bottleneck
 queue. Second, this allows the flow's BBR.min_rtt filter window to generally
-include RTT samples from two ProbeTT episodes, providing a more robust
+include RTT samples from two ProbeRTT episodes, providing a more robust
 estimate.
 
 The algorithm for ProbeRTT is as follows:
