@@ -1099,6 +1099,9 @@ are being retransmitted.
 
 C.min_rtt: The minimum observed RTT over the lifetime of the connection.
 
+C.srtt: The smoothed RTT, an exponentially weighted moving average of the
+observed RTT of the connection.
+
 ##### Per-packet (P) state {#per-packet-p-state}
 
 This algorithm requires the following new state variables for each packet that
@@ -1520,7 +1523,7 @@ steps:
 ~~~~
   BBROnInit():
     InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
-    BBR.min_rtt = SRTT ? SRTT : Infinity
+    BBR.min_rtt = C.srtt ? C.srtt : Infinity
     BBR.min_rtt_stamp = Now()
     BBR.probe_rtt_done_stamp = 0
     BBR.probe_rtt_round_done = false
@@ -2667,7 +2670,7 @@ The only divergence from RTT estimation for retransmission timeouts is in the
 case where a given acknowledgment ACKs more than one data packet. In order to
 be conservative and schedule long timeouts to avoid spurious retransmissions,
 the maximum among such potential RTT samples is typically used for computing
-retransmission timeouts; i.e., SRTT is typically calculated using the data
+retransmission timeouts; i.e., C.srtt is typically calculated using the data
 packet with the earliest transmission time. By contrast, in order for BBR to
 try to reach the minimum amount of data in flight to fill the pipe, BBR uses
 the minimum among such potential RTT samples; i.e., BBR calculates the RTT
@@ -3087,12 +3090,11 @@ called pacing_gain.
 When a BBR flow starts it has no bw estimate (bw is 0). So in this case it
 sets an initial pacing rate based on the transport sender implementation's
 initial congestion window ("C.InitialCwnd", e.g. from {{RFC6928}}), the
-initial SRTT (smoothed round-trip time) after the first non-zero RTT
-sample, and the initial pacing_gain:
+initial C.srtt after the first non-zero RTT sample, and the initial pacing_gain:
 
 ~~~~
   BBRInitPacingRate():
-    nominal_bandwidth = C.InitialCwnd / (SRTT ? SRTT : 1ms)
+    nominal_bandwidth = C.InitialCwnd / (C.srtt ? C.srtt : 1ms)
     C.pacing_rate =  BBR.StartupPacingGain * nominal_bandwidth
 ~~~~
 
