@@ -2314,14 +2314,14 @@ is deemed a sufficient attempt to coordinate to drain the queue.
 
 The frequency of triggering ProbeRTT involves a tradeoff between the speed of
 convergence and the throughput penalty. It is a subject of further
-experimentation. A longer duration for ProbeRTT would reduce the throughput
+experimentation. A longer duration between ProbeRTT would reduce the throughput
 penalty for bulk flows or flows on lower BDP links that are less likely to have
 silences or low-rate periods, at the cost of slower convergence.
 Furthermore, some types of links can switch between paths of significantly
 different base RTT (e.g. LEO satellite or cellular handoff). If these path
-changes can be predicted or detected, initiatine a ProbeRTT immediately can
-speed up the convergence to an accurate BBR.min_rtt, especially when it has
-increased.
+changes can be predicted or detected, initiating a ProbeRTT immediately could
+concievably speed up the convergence to an accurate BBR.min_rtt, especially
+when it has increased.
 
 #### ProbeRTT Logic {#probertt-logic}
 
