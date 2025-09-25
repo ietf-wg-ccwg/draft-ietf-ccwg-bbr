@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-21T01:41:21.253307+00:00",
+  "timestamp": "2025-09-25T01:26:54.966524+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1070,13 +1070,15 @@
       "state": "OPEN",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "nealcardwell"
+      ],
       "labels": [
         "Editorial"
       ],
       "body": "Section 2.1 and section 4.1.2.1.1 define connection state. Similarly, per-packet state is defined in both section 2.2 and section 4.1.2.1.2.\n\nI assume this split exists to highlight that the some variables are only used by the Delivery Rate Sampling Algorithm, but I think it would be helpful to see all the state in one place. If the intention is to keep these separate, I'd argue that section 2.1 should link to 4.1.2.1.1 and say something like:\n> More per-connection variables used for the Delivery Rate Sampling Algorithm are defined in section 4.1.2.1.1.",
       "createdAt": "2025-07-13T02:52:07Z",
-      "updatedAt": "2025-07-17T21:46:56Z",
+      "updatedAt": "2025-09-24T20:59:11Z",
       "closedAt": null,
       "comments": []
     },
@@ -1171,11 +1173,13 @@
       "state": "OPEN",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "jbeshay"
+      ],
       "labels": [],
       "body": "There are circumstances it's known a path change has occurred.  Starlink apparently can change paths at 15 second intervals and a cell phone might know when it's changed network types/etc.\n\nIn this case, if the RTT decreased, that should be observed quickly, but if it increased, it might be necessary to measure a new min_rtt, otherwise the CWND could be far too small.",
       "createdAt": "2025-08-07T21:55:57Z",
-      "updatedAt": "2025-08-07T21:55:57Z",
+      "updatedAt": "2025-09-24T20:52:58Z",
       "closedAt": null,
       "comments": []
     },
@@ -5141,6 +5145,202 @@
               "updatedAt": "2025-09-19T15:52:59Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 86,
+      "id": "PR_kwDOL3MllM6qH_Wl",
+      "title": "Experimental considerations for ProbeRTT",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/86",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Add experimental considerations for ProbeRTT covering:\r\n- The tradeoff involved in selecting ProbeRTTInterval\r\n- External triggers for initiating ProbeRTT on known link change events\r\n\r\nCloses #17 \r\nCloses #73 ",
+      "createdAt": "2025-09-23T18:33:37Z",
+      "updatedAt": "2025-09-25T00:02:59Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "827d5beb9016c5063a3d72c34ec217b23e495bb2",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_probertt",
+      "headRefOid": "a25e02ab4ff03c261f4b43994392f53537d92a8f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7Cl16x",
+          "commit": {
+            "abbreviatedOid": "f04ad20"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-24T20:51:28Z",
+          "updatedAt": "2025-09-24T20:51:35Z",
+          "comments": [
+            {
+              "originalPosition": 33,
+              "body": "Looks like a typo; suggest s/initiatine/ initiating/.\r\n\r\nAlso, IMHO \"can\" might be a bit strong since it's not clear an alternate design would work out, as we just discussed in the meeting. Perhaps: \"initiating a ProbeRTT immediately could conceivably\"?\r\n",
+              "createdAt": "2025-09-24T20:51:28Z",
+              "updatedAt": "2025-09-24T20:51:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7CmvAv",
+          "commit": {
+            "abbreviatedOid": "f04ad20"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Thanks, this is looking good, some small suggestions.",
+          "createdAt": "2025-09-24T22:35:51Z",
+          "updatedAt": "2025-09-24T22:38:17Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "```suggestion\r\nconvergence and the throughput penalty of underestimating the RTT and\r\ntherefore calculating an overly small CWND. It is a subject of further\r\n```",
+              "createdAt": "2025-09-24T22:35:51Z",
+              "updatedAt": "2025-09-24T22:38:17Z"
+            },
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\nexperimentation. A longer duration between ProbeRTT would reduce the throughput\r\n```\r\nOr something similar?",
+              "createdAt": "2025-09-24T22:36:47Z",
+              "updatedAt": "2025-09-24T22:38:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7CmxNQ",
+          "commit": {
+            "abbreviatedOid": "f04ad20"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-24T22:41:19Z",
+          "updatedAt": "2025-09-24T22:41:20Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "Good point. Perhaps we can use the terminology from the draft, e.g.: \"convergence and the throughput penalty of underestimating the BBR.min_rtt and therefore calculating an overly small C.cwnd. It is a subject of further\"",
+              "createdAt": "2025-09-24T22:41:20Z",
+              "updatedAt": "2025-09-24T22:41:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7Cmxbw",
+          "commit": {
+            "abbreviatedOid": "f04ad20"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-24T22:42:00Z",
+          "updatedAt": "2025-09-24T22:42:00Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "+1 Good idea.\r\n",
+              "createdAt": "2025-09-24T22:42:00Z",
+              "updatedAt": "2025-09-24T22:42:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7Cm5oE",
+          "commit": {
+            "abbreviatedOid": "f04ad20"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-24T23:05:18Z",
+          "updatedAt": "2025-09-24T23:05:18Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "I think there are different throughput penalties we're referring to here:\r\n\r\nThe throughput penalty I was referring to is the impact of the 200ms of capping inflight to 0.5 BDP during ProbeRTT. \r\n\r\n> the throughput penalty of underestimating the BBR.min_rtt and therefore calculating an overly small C.cwnd\r\n\r\nThis is another one. The impact on C.cwnd is primarily a function of the MinRTTFilterLen not just ProbeRTTInterval. Increasing the ProbeRTTInterval (as long as it's still less than MinRTTFilterLen) shouldn't decrease the BBR.min_rtt estimate used for C.cwnd calculation. So this throughput penalty is actually on the same side of the trade-off as speed of convergence. I.e. a smaller ProbeRTTInterval leads to faster convergence and the potential for min_rtt underestimation causing smaller cwnd. While a larger ProbeRTTInterval leads to slower convergence and is less likely to have underestimated min_rtt. ",
+              "createdAt": "2025-09-24T23:05:18Z",
+              "updatedAt": "2025-09-24T23:05:49Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 87,
+      "id": "PR_kwDOL3MllM6qH_zu",
+      "title": "Make srtt a connection variable",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/87",
+      "state": "MERGED",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "As title.",
+      "createdAt": "2025-09-23T18:34:31Z",
+      "updatedAt": "2025-09-24T22:30:56Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "827d5beb9016c5063a3d72c34ec217b23e495bb2",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_srtt",
+      "headRefOid": "d77e6cea4d178d8cc263d604138a803e890cbef2",
+      "closedAt": "2025-09-24T22:30:56Z",
+      "mergedAt": "2025-09-24T22:30:56Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "bc852c7deca710d616cb3cf597cb4ebe0d517c55"
+      },
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "LGTM. Thanks! @ianswett  do you have cycles to review?\r\n",
+          "createdAt": "2025-09-24T20:44:37Z",
+          "updatedAt": "2025-09-24T20:44:37Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7Clw3S",
+          "commit": {
+            "abbreviatedOid": "d77e6ce"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-24T20:43:47Z",
+          "updatedAt": "2025-09-24T20:43:47Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7CmtOD",
+          "commit": {
+            "abbreviatedOid": "d77e6ce"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-24T22:30:49Z",
+          "updatedAt": "2025-09-24T22:30:49Z",
+          "comments": []
         }
       ]
     }
