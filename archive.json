@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-28T01:41:57.632685+00:00",
+  "timestamp": "2025-09-30T01:26:13.207726+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1634,7 +1634,7 @@
       "labels": [],
       "body": "The drain gain value is inconsistent. The derivation doc linked (https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf) suggests using 0.5 and that's the value referenced in the table under (Summary of Control Behavior in the State Machine).  0.35 (~ 1 / StartupPacingGain) is used in a couple of other places.\r\n\r\nThis PR changes it to 0.5 everywhere. \r\n\r\nExisting implementations are using 0.35 ([Linux TCP](https://github.com/google/bbr/blob/v3/net/ipv4/tcp_bbr.c#L221C46-L221C51), [Quiche](https://github.com/google/quiche/blob/73107195dfbe8f0a531d3e2f052c9f2e15ec0e3c/quiche/quic/core/congestion_control/bbr2_misc.h#L111), [Mvfst](https://github.com/facebook/mvfst/blob/main/quic/congestion_control/Bbr2.cpp#L27)). The 0.5 value can be regarded as an upper bound. \r\n\r\nThis PR will keep the value consistent in the draft while we test the impact of the changing it to 0.5.",
       "createdAt": "2024-10-21T17:24:45Z",
-      "updatedAt": "2025-09-27T00:21:01Z",
+      "updatedAt": "2025-09-28T17:48:04Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "bbc5137f505b65c4063296e52f13d930ccfa3eb8",
@@ -1694,6 +1694,13 @@
           "body": "> > (2) the traces, where we see clearly that in STARTUP typically there is a large standing queue for several round trips, whose magnitude is controlled by startup_cwnd_gain:\r\n> > https://www.ietf.org/proceedings/97/slides/slides-97-iccrg-bbr-congestion-control-02.pdf#page=16\r\n> \r\n> The trace shows that inflight inflates to 3x BDP and caused RTT to 3x (40 -> 120).\r\n> \r\n> > Once the pipe is full, a queue typically forms, but the cwnd_gain bounds any queue to (cwnd_gain - 1) * estimated_BDP, which is approximately (2 - 1) * estimated_BDP = estimated_BDP\r\n> \r\n> However, my interpretation of this [section](https://datatracker.ietf.org/doc/html/draft-ietf-ccwg-bbr-00#section-4.3.1.1-5) was that we expect 1 BDP worth of queuing at the end of Startup. Shouldn't this mean that inflight should be clamped to 2x BDP and and RTT should only inflate to 2x minRTT?\r\n\r\nYes, with the current version of the BBR algorithm in the draft (BBRv3), we expect RTT to inflate only to roughly 2x, as you note.\r\n\r\n+ (a) But note that the graph you are pointing to, this was of the Linux TCP BBRv1 behavior, which used a cwnd gain of 2.885 rather than 2 in Startup.\r\n+ (b) And in addition to the cwnd provisioned based on cwnd gain (of 2 in BBRv3), there's the BBR.offload_budget, which at small BDPs can be quite large relative to the BDP.\r\n\r\nHope that helps clear it up! :-)\r\n",
           "createdAt": "2025-09-27T00:21:01Z",
           "updatedAt": "2025-09-27T00:21:01Z"
+        },
+        {
+          "author": "toidiu",
+          "authorAssociation": "NONE",
+          "body": "> (b) And in addition to the cwnd provisioned based on cwnd gain (of 2 in BBRv3), there's the BBR.offload_budget, which at small BDPs can be quite large relative to the BDP.\r\n\r\nTy for the prompt reply and pointing out the influence of the `offload_budget` in the calculation.",
+          "createdAt": "2025-09-28T17:48:04Z",
+          "updatedAt": "2025-09-28T17:48:04Z"
         }
       ],
       "reviews": [
