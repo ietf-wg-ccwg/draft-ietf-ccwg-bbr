@@ -816,6 +816,12 @@ As noted above in {{ecn}}, BBR as described in this draft does not
 specify a specific response to ECN, and instead leaves it as an area for
 future work.
 
+The design of ProbeRTT in {{probertt-design-rationale}} specifies a ProbeRTT
+interval that sacrifices no more than roughly 2% of a flow's available
+bandwidth. The impact of using a different interval or making adjustments
+for triggering ProbeRTT on specific link types is a subject of
+further experimentation.
+
 The delivery rate sampling algorithm in {{delivery-rate-samples}}
 has an ability to over-estimate delivery rate, as described in
 {{compression-and-aggregation}}. When combined with BBR's windowed
@@ -2254,7 +2260,7 @@ the flow will "remember" the BBR.min_rtt value it measured during the previous
 ProbeRTT episode, providing a robust BDP estimate for the C.cwnd = 0.5\*BDP
 calculation, increasing the likelihood of fully draining the bottleneck
 queue. Second, this allows the flow's BBR.min_rtt filter window to generally
-include RTT samples from two ProbeTT episodes, providing a more robust
+include RTT samples from two ProbeRTT episodes, providing a more robust
 estimate.
 
 The algorithm for ProbeRTT is as follows:
@@ -2309,6 +2315,17 @@ As an optimization, when restarting from idle and finding that the
 BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the idleness
 is deemed a sufficient attempt to coordinate to drain the queue.
 
+The frequency of triggering ProbeRTT involves a tradeoff between the speed of
+convergence and the throughput penalty of applying a cwnd cap during ProbeRTT.
+The interval between ProbeRTTs is a subject of further experimentation.
+A longer duration between ProbeRTT would reduce the throughput penalty for bulk
+flows or flows on lower BDP links that are less likely to have silences or
+low-rate periods, at the cost of slower convergence. Furthermore, some types
+of links can switch between paths of significantly different base
+RTT (e.g. LEO satellite or cellular handoff). If these path changes can be
+predicted or detected, initiating a ProbeRTT immediately could concievably
+speed up the convergence to an accurate BBR.min_rtt, especially when it
+has increased.
 
 #### ProbeRTT Logic {#probertt-logic}
 
