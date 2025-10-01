@@ -1059,11 +1059,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">September 2025</td>
+<td class="right">October 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 28 March 2026</td>
+<td class="center">Expires 4 April 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1076,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-09-24" class="published">24 September 2025</time>
+<time datetime="2025-10-01" class="published">1 October 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-03-28">28 March 2026</time></dd>
+<dd class="expires"><time datetime="2026-04-04">4 April 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1150,7 +1150,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 28 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 4 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2116,20 +2116,25 @@ algorithm improvements, as described below.<a href="#section-3.8-1" class="pilcr
 <p id="section-3.8-2">As noted above in <a href="#ecn" class="auto internal xref">Section 3.7</a>, BBR as described in this draft does not
 specify a specific response to ECN, and instead leaves it as an area for
 future work.<a href="#section-3.8-2" class="pilcrow">¶</a></p>
-<p id="section-3.8-3">The delivery rate sampling algorithm in <a href="#delivery-rate-samples" class="auto internal xref">Section 4.1</a>
+<p id="section-3.8-3">The design of ProbeRTT in <a href="#probertt-design-rationale" class="auto internal xref">Section 5.3.4.2</a> specifies a ProbeRTT
+interval that sacrifices no more than roughly 2% of a flow's available
+bandwidth. The impact of using a different interval or making adjustments
+for triggering ProbeRTT on specific link types is a subject of
+further experimentation.<a href="#section-3.8-3" class="pilcrow">¶</a></p>
+<p id="section-3.8-4">The delivery rate sampling algorithm in <a href="#delivery-rate-samples" class="auto internal xref">Section 4.1</a>
 has an ability to over-estimate delivery rate, as described in
 <a href="#compression-and-aggregation" class="auto internal xref">Section 4.1.1.2.2</a>. When combined with BBR's windowed
 maximum bandwidth filter, this can cause BBR to send too quickly.
 BBR mitigates this by limiting any bandwidth sample by the sending rate,
 but that still might be higher than the available bandwidth,
-particularly in STARTUP.<a href="#section-3.8-3" class="pilcrow">¶</a></p>
-<p id="section-3.8-4">BBR does not deal well with persistently application limited traffic
+particularly in STARTUP.<a href="#section-3.8-4" class="pilcrow">¶</a></p>
+<p id="section-3.8-5">BBR does not deal well with persistently application limited traffic
 <a href="#detecting-application-limited-phases" class="auto internal xref">Section 4.1.2.4</a> , such as low latency audio or
 video flows.  When unable to fill the pipe for a full round trip,
 BBR will not be able to measure the full link bandwidth, and will mark
 a bandwidth sample as app-limited. In cases where an application enters
 a phase where all bandwidth samples are app-limited, BBR will not
-discard old max bandwidth samples that were not app-limited.<a href="#section-3.8-4" class="pilcrow">¶</a></p>
+discard old max bandwidth samples that were not app-limited.<a href="#section-3.8-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3767,7 +3772,7 @@ the flow will "remember" the BBR.min_rtt value it measured during the previous
 ProbeRTT episode, providing a robust BDP estimate for the C.cwnd = 0.5*BDP
 calculation, increasing the likelihood of fully draining the bottleneck
 queue. Second, this allows the flow's BBR.min_rtt filter window to generally
-include RTT samples from two ProbeTT episodes, providing a more robust
+include RTT samples from two ProbeRTT episodes, providing a more robust
 estimate.<a href="#section-5.3.4.1-4" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-5">The algorithm for ProbeRTT is as follows:<a href="#section-5.3.4.1-5" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-6">Entry conditions: In any state other than ProbeRTT itself, if the
@@ -3818,6 +3823,17 @@ BBR.ProbeRTTInterval window.<a href="#section-5.3.4.2-5" class="pilcrow">¶</a><
 <p id="section-5.3.4.2-6">As an optimization, when restarting from idle and finding that the
 BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the idleness
 is deemed a sufficient attempt to coordinate to drain the queue.<a href="#section-5.3.4.2-6" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.2-7">The frequency of triggering ProbeRTT involves a tradeoff between the speed of
+convergence and the throughput penalty of applying a cwnd cap during ProbeRTT.
+The interval between ProbeRTTs is a subject of further experimentation.
+A longer duration between ProbeRTT would reduce the throughput penalty for bulk
+flows or flows on lower BDP links that are less likely to have silences or
+low-rate periods, at the cost of slower convergence. Furthermore, some types
+of links can switch between paths of significantly different base
+RTT (e.g. LEO satellite or cellular handoff). If these path changes can be
+predicted or detected, initiating a ProbeRTT immediately could concievably
+speed up the convergence to an accurate BBR.min_rtt, especially when it
+has increased.<a href="#section-5.3.4.2-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probertt-logic">
