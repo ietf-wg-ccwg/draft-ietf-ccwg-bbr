@@ -2313,14 +2313,14 @@ BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the idleness
 is deemed a sufficient attempt to coordinate to drain the queue.
 
 The frequency of triggering ProbeRTT involves a tradeoff between the speed of
-convergence and the throughput penalty. It is a subject of further
-experimentation. A longer duration between ProbeRTT would reduce the throughput
-penalty for bulk flows or flows on lower BDP links that are less likely to have
-silences or low-rate periods, at the cost of slower convergence.
-Furthermore, some types of links can switch between paths of significantly
-different base RTT (e.g. LEO satellite or cellular handoff). If these path
-changes can be predicted or detected, initiating a ProbeRTT immediately could
-concievably speed up the convergence to an accurate BBR.min_rtt, especially
+convergence and the throughput penalty of applying a cwnd cap during ProbeRTT.
+It is a subject of further experimentation. A longer duration between ProbeRTT
+would reduce the throughput penalty for bulk flows or flows on lower BDP links
+that are less likely to have silences or low-rate periods, at the cost of slower
+convergence. Furthermore, some types of links can switch between paths of
+significantlydifferent base RTT (e.g. LEO satellite or cellular handoff). If
+these path changes can be predicted or detected, initiating a ProbeRTT immediately
+could concievably speed up the convergence to an accurate BBR.min_rtt, especially
 when it has increased.
 
 #### ProbeRTT Logic {#probertt-logic}
