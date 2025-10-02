@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-30T01:26:13.207726+00:00",
+  "timestamp": "2025-10-02T01:24:51.708418+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -276,7 +276,7 @@
       "id": "I_kwDOL3MllM6rDFYL",
       "title": "Impact of increasing ProbeRTT interval to 10s?",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/17",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -285,8 +285,8 @@
       "labels": [],
       "body": "\nIncreasing ProbeRTT interval to 10s in internet facing connections improves application performance in initial experiments, most probably due to reducing the cwnd dips for connections with long transfers. \n\nI haven't measured its impact on the speed of convergence to a fair of the bandwidth but the 10s value is already used in some of the implementations as well.",
       "createdAt": "2025-02-21T18:15:30Z",
-      "updatedAt": "2025-09-10T19:32:46Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-01T20:53:33Z",
+      "closedAt": "2025-10-01T20:53:33Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -1170,7 +1170,7 @@
       "id": "I_kwDOL3MllM7E0G12",
       "title": "Mention the possibility of triggering PROBE_RTT on a known path change",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/73",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -1179,8 +1179,8 @@
       "labels": [],
       "body": "There are circumstances it's known a path change has occurred.  Starlink apparently can change paths at 15 second intervals and a cell phone might know when it's changed network types/etc.\n\nIn this case, if the RTT decreased, that should be observed quickly, but if it increased, it might be necessary to measure a new min_rtt, otherwise the CWND could be far too small.",
       "createdAt": "2025-08-07T21:55:57Z",
-      "updatedAt": "2025-09-24T20:52:58Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-01T20:53:33Z",
+      "closedAt": "2025-10-01T20:53:33Z",
       "comments": []
     },
     {
@@ -5174,24 +5174,26 @@
       "id": "PR_kwDOL3MllM6qH_Wl",
       "title": "Experimental considerations for ProbeRTT",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/86",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Add experimental considerations for ProbeRTT covering:\r\n- The tradeoff involved in selecting ProbeRTTInterval\r\n- External triggers for initiating ProbeRTT on known link change events\r\n\r\nCloses #17 \r\nCloses #73 ",
       "createdAt": "2025-09-23T18:33:37Z",
-      "updatedAt": "2025-09-25T00:02:59Z",
+      "updatedAt": "2025-10-01T22:23:42Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "827d5beb9016c5063a3d72c34ec217b23e495bb2",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_probertt",
-      "headRefOid": "a25e02ab4ff03c261f4b43994392f53537d92a8f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "eab78da5a947468f7a4c4d915097b619aad0dff3",
+      "closedAt": "2025-10-01T20:53:32Z",
+      "mergedAt": "2025-10-01T20:53:32Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "108e239b7f1fe2a8d64b9ca69e6c0f4003e50a2c"
+      },
       "comments": [],
       "reviews": [
         {
@@ -5299,6 +5301,65 @@
               "updatedAt": "2025-09-24T23:05:49Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7D8RGM",
+          "commit": {
+            "abbreviatedOid": "a25e02a"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-10-01T02:14:16Z",
+          "updatedAt": "2025-10-01T02:14:16Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7EKd0c",
+          "commit": {
+            "abbreviatedOid": "923ce3e"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-01T20:50:28Z",
+          "updatedAt": "2025-10-01T20:50:28Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\nThe interval between ProbeRTTs is a subject of further experimentation. A longer duration between ProbeRTT\r\n```",
+              "createdAt": "2025-10-01T20:50:28Z",
+              "updatedAt": "2025-10-01T20:50:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7EKeDr",
+          "commit": {
+            "abbreviatedOid": "923ce3e"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-10-01T20:50:52Z",
+          "updatedAt": "2025-10-01T20:50:52Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7ELbTz",
+          "commit": {
+            "abbreviatedOid": "eab78da"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "LGTM, Thanks!\r\n",
+          "createdAt": "2025-10-01T22:23:42Z",
+          "updatedAt": "2025-10-01T22:23:42Z",
+          "comments": []
         }
       ]
     },
