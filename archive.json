@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-02T01:24:51.708418+00:00",
+  "timestamp": "2025-10-05T01:41:22.450714+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1139,7 +1139,7 @@
       "labels": [],
       "body": "Today in CCWG there was interest in example test cases of some form for BBR, so implementers could ensure they implemented it correctly.\n\nQLog was mentioned as a common logging framework for QUIC that could be used for congestion control debugging and might allow implementations to compare traces.",
       "createdAt": "2025-07-21T15:22:28Z",
-      "updatedAt": "2025-09-17T17:55:03Z",
+      "updatedAt": "2025-10-03T22:09:18Z",
       "closedAt": null,
       "comments": [
         {
@@ -1162,6 +1162,13 @@
           "body": "> I think it's worth having some tests at low (ie: 1 or 5ms) RTTs, because some implementers have seen issues at low RTTs in the past.\n\nThanks for this tip.\n\n> That being said, the Google QUICHE BBR implementation doesn't support qlog today.\n\nSupporting qlog seems like a heavy lift, something we should be able to make progress without. Raw data on RTT, minRtt, bandwidth_estimate, cwnd etc. at some regular time interval might be a lower barrier that would still be useful.",
           "createdAt": "2025-09-17T17:55:03Z",
           "updatedAt": "2025-09-17T17:55:03Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Mohit Tahiliani et al. presented a couple of tools for testing congestion control at IETF 122 (https://datatracker.ietf.org/meeting/122/materials/slides-122-ccwg-new-tools-for-cc-and-aqm-testing-00). One used ns-3 and another wrapped Linux tc. IIRC there was some work on these tools in IETF 123 hackathon as well and there was a discussion about having support for running quic implementations on top of it.\n\nIf one of these tools is maturing and getting more traction at IETF, we could use that as the common platform to define the scenarios and the expected results.",
+          "createdAt": "2025-10-03T22:09:18Z",
+          "updatedAt": "2025-10-03T22:09:18Z"
         }
       ]
     },
