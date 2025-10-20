@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 23 March 2026                                    J. Beshay, Ed.
+Expires: 23 April 2026                                    J. Beshay, Ed.
                                                                     Meta
-                                                       19 September 2025
+                                                         20 October 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 March 2026.
+   This Internet-Draft will expire on 23 April 2026.
 
 Copyright Notice
 
@@ -765,6 +765,12 @@ Table of Contents
    not specify a specific response to ECN, and instead leaves it as an
    area for future work.
 
+   The design of ProbeRTT in Section 5.3.4.2 specifies a ProbeRTT
+   interval that sacrifices no more than roughly 2% of a flow's
+   available bandwidth.  The impact of using a different interval or
+   making adjustments for triggering ProbeRTT on specific link types is
+   a subject of further experimentation.
+
    The delivery rate sampling algorithm in Section 4.1 has an ability to
    over-estimate delivery rate, as described in Section 4.1.1.2.2.  When
    combined with BBR's windowed maximum bandwidth filter, this can cause
@@ -1040,6 +1046,9 @@ Table of Contents
 
    C.min_rtt: The minimum observed RTT over the lifetime of the
    connection.
+
+   C.srtt: The smoothed RTT, an exponentially weighted moving average of
+   the observed RTT of the connection.
 
 4.1.2.1.2.  Per-packet (P) state
 
@@ -1463,7 +1472,7 @@ Table of Contents
 
      BBROnInit():
        InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
-       BBR.min_rtt = SRTT ? SRTT : Infinity
+       BBR.min_rtt = C.srtt ? C.srtt : Infinity
        BBR.min_rtt_stamp = Now()
        BBR.probe_rtt_done_stamp = 0
        BBR.probe_rtt_round_done = false
@@ -2183,7 +2192,7 @@ Table of Contents
    estimate for the C.cwnd = 0.5*BDP calculation, increasing the
    likelihood of fully draining the bottleneck queue.  Second, this
    allows the flow's BBR.min_rtt filter window to generally include RTT
-   samples from two ProbeTT episodes, providing a more robust estimate.
+   samples from two ProbeRTT episodes, providing a more robust estimate.
 
    The algorithm for ProbeRTT is as follows:
 
@@ -2239,6 +2248,19 @@ Table of Contents
    BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the
    idleness is deemed a sufficient attempt to coordinate to drain the
    queue.
+
+   The frequency of triggering ProbeRTT involves a tradeoff between the
+   speed of convergence and the throughput penalty of applying a cwnd
+   cap during ProbeRTT.  The interval between ProbeRTTs is a subject of
+   further experimentation.  A longer duration between ProbeRTT would
+   reduce the throughput penalty for bulk flows or flows on lower BDP
+   links that are less likely to have silences or low-rate periods, at
+   the cost of slower convergence.  Furthermore, some types of links can
+   switch between paths of significantly different base RTT (e.g. LEO
+   satellite or cellular handoff).  If these path changes can be
+   predicted or detected, initiating a ProbeRTT immediately could
+   concievably speed up the convergence to an accurate BBR.min_rtt,
+   especially when it has increased.
 
 5.3.4.3.  ProbeRTT Logic
 
@@ -2588,7 +2610,7 @@ Table of Contents
    packet.  In order to be conservative and schedule long timeouts to
    avoid spurious retransmissions, the maximum among such potential RTT
    samples is typically used for computing retransmission timeouts;
-   i.e., SRTT is typically calculated using the data packet with the
+   i.e., C.srtt is typically calculated using the data packet with the
    earliest transmission time.  By contrast, in order for BBR to try to
    reach the minimum amount of data in flight to fill the pipe, BBR uses
    the minimum among such potential RTT samples; i.e., BBR calculates
@@ -2999,11 +3021,11 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    When a BBR flow starts it has no bw estimate (bw is 0).  So in this
    case it sets an initial pacing rate based on the transport sender
    implementation's initial congestion window ("C.InitialCwnd", e.g.
-   from [RFC6928]), the initial SRTT (smoothed round-trip time) after
-   the first non-zero RTT sample, and the initial pacing_gain:
+   from [RFC6928]), the initial C.srtt after the first non-zero RTT
+   sample, and the initial pacing_gain:
 
      BBRInitPacingRate():
-       nominal_bandwidth = C.InitialCwnd / (SRTT ? SRTT : 1ms)
+       nominal_bandwidth = C.InitialCwnd / (C.srtt ? C.srtt : 1ms)
        C.pacing_rate =  BBR.StartupPacingGain * nominal_bandwidth
 
    After initialization, on each data ACK BBR updates its pacing rate to
