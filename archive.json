@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-05T01:41:22.450714+00:00",
+  "timestamp": "2025-10-21T01:38:00.040044+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -5432,6 +5432,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 88,
+      "id": "PR_kwDOL3MllM6ut9I0",
+      "title": "Generalize Offload Budget for QUIC",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/88",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #67",
+      "createdAt": "2025-10-20T21:46:11Z",
+      "updatedAt": "2025-10-20T21:46:12Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "108e239b7f1fe2a8d64b9ca69e6c0f4003e50a2c",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-quic-offload-budget",
+      "headRefOid": "41d6a4eb9fe793480ccb62edd99596c1afa10a87",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
