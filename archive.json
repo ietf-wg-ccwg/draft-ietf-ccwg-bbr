@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-21T01:38:00.040044+00:00",
+  "timestamp": "2025-10-23T01:37:15.100424+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -803,7 +803,7 @@
       "id": "I_kwDOL3MllM7ARjPt",
       "title": "What's the difference between the `C` and the `BBR` struct?",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/59",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
@@ -812,8 +812,8 @@
       "labels": [],
       "body": "The `BBR` struct holds connection-scoped variable, as does the the `C` struct. I might be missing something, but it is not clear to me why these are split into two different structs.",
       "createdAt": "2025-07-12T21:58:22Z",
-      "updatedAt": "2025-09-17T20:55:15Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-22T17:41:46Z",
+      "closedAt": "2025-10-22T17:41:46Z",
       "comments": [
         {
           "author": "jbeshay",
@@ -849,6 +849,13 @@
           "body": "Maintaining these variables per-path is orthogonal, I'd argue these `C` variables would be `Path` variables in this case rather than `BBR`. \n\nThe idea is that `C` variables are ones that we expect to already exist in the Connection state for use by other parts of the transport or other congestion controllers. For example, the rate estimation algorithm described in the draft can be used independently of BBR. It references only `C` variables.",
           "createdAt": "2025-08-13T18:39:52Z",
           "updatedAt": "2025-08-13T18:39:52Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think the distinction is clearer now. Feel free to re-open if this is still an issue.",
+          "createdAt": "2025-10-22T17:41:46Z",
+          "updatedAt": "2025-10-22T17:41:46Z"
         }
       ]
     },
@@ -945,7 +952,7 @@
       "id": "I_kwDOL3MllM7ARqpa",
       "title": "notation for constants and member variables",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/63",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
@@ -954,8 +961,8 @@
       "labels": [],
       "body": "The `BBR` struct, as described in the draft, has both member variables (e.g. `BBR.state`) and constants (e.g. `BBR.Beta`). When implementing the algorithm, these are dealt with very differently. I'd suggest using a different notation for constants (maybe just upper-case them without any prefix, e.g. `BETA`)?",
       "createdAt": "2025-07-12T22:27:38Z",
-      "updatedAt": "2025-08-20T20:49:36Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-22T17:38:43Z",
+      "closedAt": "2025-10-22T17:38:43Z",
       "comments": [
         {
           "author": "jbeshay",
@@ -977,6 +984,13 @@
           "body": "Yeah, there are no constants for `RS`. For `C`, there is `C.InitialCwnd` and `C.SMSS`. ",
           "createdAt": "2025-07-17T23:06:21Z",
           "updatedAt": "2025-07-17T23:06:21Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Closing this issue since the notation is described in the draft and should be consistent throughout. Please re-open if this is still an issue.",
+          "createdAt": "2025-10-22T17:38:43Z",
+          "updatedAt": "2025-10-22T17:38:43Z"
         }
       ]
     },
