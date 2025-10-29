@@ -1221,7 +1221,7 @@ information from the most recently sent packet to update the rate sample:
     C.delivered_time = Now()
 
     /* Update info using the newest packet: */
-    if (!RS.has_data or IsNewestPacket(P, RS))
+    if (!RS.has_data or IsNewestPacket(P))
       RS.has_data         = true
       RS.prior_delivered  = P.delivered
       RS.prior_time       = P.delivered_time
@@ -1236,9 +1236,9 @@ information from the most recently sent packet to update the rate sample:
 
   /* Is the given Packet the most recently sent packet
    * that has been delivered? */
-  IsNewestPacket(Packet P, RateSample RS):
-    return (P.send_time > RS.first_send_time or
-            (P.send_time == RS.first_send_time and
+  IsNewestPacket(Packet P):
+    return (P.send_time > C.first_send_time or
+            (P.send_time == C.first_send_time and
              P.end_seq > RS.last_end_seq)
 ~~~~
 
