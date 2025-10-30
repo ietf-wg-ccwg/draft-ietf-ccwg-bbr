@@ -12,7 +12,7 @@ abbrev: BBR
 area: IETF
 wg: CCWG
 kw: Congestion Control
-date: 2024-10-16
+
 author:
 - role: editor
   name: Neal Cardwell
@@ -188,6 +188,15 @@ informative:
     date: false
     seriesinfo:
       Proceedings of the International Conference on Communications: '1979'
+  KN_FILTER:
+    target: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/lib/win_minmax.c?id=a4f1f9ac8153e22869b6408832b5a9bb9c762bf6
+    title: Linux implementation of Kathleen Nichols' windowed min/max algorithm
+    author:
+    - name: Kathleen Nichols
+    - name: Neal Cardwell
+    - name: Van Jacobson
+    date: false
+
 
 --- abstract
 
@@ -281,10 +290,24 @@ This document defines state variables and constants used by the BBR algorithm.
 Constant values have CamelCase names and are used by BBR throughout
 its operation for a given connection. Variables have snake_case names.
 All names are prefixed with the context they
-belong to: (C) for connection state, (P) for per-packet state, (rs) for
+belong to: (C) for connection state, (P) for per-packet state, (RS) for
 per-ack rate sample, or (BBR) for the algorithm's internal state.
 Variables that are not defined below are defined in
 {{delivery-rate-samples}}, "Delivery Rate Samples".
+
+In the pseudocode in this document, all functions have implicit access to the
+(C) connection state and (BBR) congestion control algorithm state for that
+connection. All functions involved in ACK processing additionally have implicit
+access to the the (RS) for for the rate sample populated processing that ACK.
+
+In this document, the unit of all volumes of data is bytes, the unit of
+all times is seconds, and the unit of all data rates is bytes per second.
+Implementations MAY use other units, such as bits and bits per second,
+or packets and packets per second, as long as the implementation applies
+conversions as appropriate. However, since packet sizes can vary
+due to changes in MTU or application message sizes, data rates
+computed in packets per second can be inaccurate, and thus it is
+RECOMMENDED that BBR implementations use bytes and bytes per second.
 
 In this document, "acknowledged" or "delivered" data means any transmitted
 data that the remote transport endpoint has confirmed that it has received,
@@ -293,56 +316,70 @@ e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
 
 ## Transport Connection State {#transport-connection-state}
 
-C.SMSS: The Sender Maximum Segment Size.
+C.SMSS: The Sender Maximum Send Size in bytes. The maximum
+size of a single transmission, including the portion
+of the packet that the transport protocol implementation tracks for
+congestion control purposes. C.SMSS MUST include transport protocol
+payload data. C.SMSS MAY include only the transport protocol payload
+data; for example, for TCP BBR implementations the C.SMSS SHOULD be
+the Eff.snd.MSS defined in {{RFC9293, Section 3.7.1}}, which includes
+only the TCP transport protocol payload data, but not TCP or IP headers.
+C.SMSS MAY include the transport protocol payload data plus the
+transport protocol headers; for example, for QUIC BBR implementations
+the C.SMSS SHOULD be the QUIC "maximum datagram size"
+{{RFC9000, Section 14}}, which includes the QUIC payload data plus
+the QUIC headers, but not UDP or IP headers. In addition to including
+transport protocol payload and headers, implementations MAY include
+in C.SMSS the size of other headers, such as network-layer or
+link-layer headers.
 
 C.InitialCwnd: The initial congestion window set by the transport protocol
 implementation for the connection at initialization time.
 
-C.delivered: The total amount of data (tracked in octets or in packets)
+C.delivered: The total amount of data
 delivered so far over the lifetime of the transport connection C.
+This MUST NOT include pure ACK packets. It SHOULD include spurious
+retransmissions that have been acknowledged as delivered.
 
 C.inflight: The connection's best estimate of the number of bytes
 outstanding in the network. This includes the number of bytes that
-have been sent but have not been acknowledged or marked as lost.
+have been sent and have not been acknowledged or
+marked as lost since their last transmission
+(e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
+This MUST NOT include pure ACK packets.
 
 C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
 point in the last packet-timed round trip.
 
-## Per-Packet State {#per-packet-state}
-
-P.delivered: C.delivered when the given packet was sent by transport
-connection C.
-
-P.departure_time: The earliest pacing departure time for the given packet.
-
-P.tx_in_flight: C.inflight at the time of the packet transmission.
+C.next_send_time: The earliest pacing departure time another packet can be
+sent.
 
 ## Per-ACK Rate Sample State {#per-ack-rate-sample-state}
 
-rs.delivered: The volume of data delivered between the transmission of the
+RS.delivered: The volume of data delivered between the transmission of the
 packet that has just been ACKed and the current time.
 
-rs.delivery_rate: The delivery rate (aka bandwidth) sample obtained from
+RS.delivery_rate: The delivery rate (aka bandwidth) sample obtained from
 the packet that has just been ACKed.
 
-rs.rtt: The RTT sample calculated based on the most recently-sent segment
-of the segments that have just been ACKed.
+RS.rtt: The RTT sample calculated based on the most recently-sent packet
+of the packets that have just been ACKed.
 
-rs.newly_acked: The volume of data cumulatively or selectively acknowledged
+RS.newly_acked: The volume of data cumulatively or selectively acknowledged
 upon the ACK that was just received. (This quantity is referred to as
 "DeliveredData" in {{RFC6937}}.)
 
-rs.newly_lost: The volume of data newly marked lost upon the ACK that was
+RS.newly_lost: The volume of data newly marked lost upon the ACK that was
 just received.
 
-rs.tx_in_flight: C.inflight at
+RS.tx_in_flight: C.inflight at
 the time of the transmission of the packet that has just been ACKed (the
-most recently sent segment among segments ACKed by the ACK that was just
+most recently sent packet among packets ACKed by the ACK that was just
 received).
 
-rs.lost: The volume of data that was declared lost between the transmission
-and acknowledgement of the packet that has just been ACKed (the most recently
-sent segment among segments ACKed by the ACK that was just received).
+RS.lost: The volume of data that was declared lost between the transmission
+and acknowledgment of the packet that has just been ACKed (the most recently
+sent packet among packets ACKed by the ACK that was just received).
 
 
 ## Output Control Parameters {#output-control-parameters}
@@ -353,17 +390,14 @@ the sending connection ensures that C.inflight does not exceed C.cwnd.
 C.pacing_rate: The current pacing rate for a BBR flow, which controls
 inter-packet spacing.
 
-BBR.send_quantum: The maximum size of a data aggregate scheduled and transmitted
-together.
+C.send_quantum: The maximum size of a data aggregate scheduled and transmitted
+together as a unit, e.g., to amortize per-packet transmission overheads.
 
 
 ## Pacing State and Parameters {#pacing-state-and-parameters}
 
 BBR.pacing_gain: The dynamic gain factor used to scale BBR.bw to produce
 C.pacing_rate.
-
-BBR.next_departure_time: The earliest pacing departure time for the next
-packet BBR schedules for transmission.
 
 BBR.StartupPacingGain: A constant specifying the minimum gain value for
 calculating the pacing rate that will allow the sending rate to double each
@@ -499,16 +533,18 @@ inflight_longterm. (Part of the short-term model.)
 
 ## State for Responding to Congestion {#state-for-responding-to-congestion}
 
-BBR.bw_latest: a 1-round-trip max of delivered bandwidth (rs.delivery_rate).
+RS: The rate sample calculated from the most recent acknowledgment.
+
+BBR.bw_latest: a 1-round-trip max of delivered bandwidth (RS.delivery_rate).
 
 BBR.inflight_latest: a 1-round-trip max of delivered volume of data
-(rs.delivered).
+(RS.delivered).
 
 
 ## Estimating BBR.max_bw {#estimating-bbrmaxbw}
 
-BBR.max_bw_filter: The filter for tracking the maximum recent rs.delivery_rate
-sample, for estimating BBR.max_bw.
+BBR.max_bw_filter: A windowed max filter for RS.delivery_rate
+samples, for estimating BBR.max_bw.
 
 BBR.MaxBwFilterLen: A constant specifying the filter window length for
 BBR.max_bw_filter = 2 (representing
@@ -516,24 +552,24 @@ up to 2 ProbeBW cycles, the current cycle and the previous full cycle).
 
 BBR.cycle_count: The virtual time used by the BBR.max_bw filter window. Note
 that BBR.cycle_count only needs to be tracked with a single bit, since the
-BBR.MaxBwFilter only needs to track samples from two time slots: the previous
+BBR.max_bw_filter only needs to track samples from two time slots: the previous
 ProbeBW cycle and the current ProbeBW cycle.
 
 
 ## Estimating BBR.extra_acked {#estimating-bbrextraacked}
 
-BBR.extra_acked_interval_start: the start of the time interval for estimating
+BBR.extra_acked_interval_start: The start of the time interval for estimating
 the excess amount of data acknowledged due to aggregation effects.
 
-BBR.extra_acked_delivered: the volume of data marked as delivered since
+BBR.extra_acked_delivered: The volume of data marked as delivered since
 BBR.extra_acked_interval_start.
 
-BBR.extra_acked_filter: the max filter tracking the recent maximum degree of
+BBR.extra_acked_filter: A windowed max filter for tracking the degree of
 aggregation in the path.
 
-BBR.ExtraAckedFilterLen = A constant specifying the window length of
+BBR.ExtraAckedFilterLen: A constant specifying the window length of
 the BBR.extra_acked_filter max
-filter window in steady-state: 10 (in units of packet-timed round trips).
+filter window in steady-state = 10 (in units of packet-timed round trips).
 
 
 ## Startup Parameters and State {#startup-parameters-and-state}
@@ -744,15 +780,8 @@ abated and more capacity is available.
 BBR uses its model to control the connection's sending behavior. Rather than
 using a single control parameter, like the C.cwnd parameter that limits
 C.inflight in the Reno and CUBIC congestion control algorithms,
-BBR uses three distinct control parameters:
-
-1. C.pacing_rate: the maximum rate at which BBR sends data.
-
-2. BBR.send_quantum: the maximum size of any aggregate that the transport sender
-  implementation may need to transmit as a unit to amortize per-packet
-  transmission overheads.
-
-3. C.cwnd: the maximum C.inflight BBR allows.
+BBR uses three distinct control parameters: C.pacing_race, C.send_quantum,
+and C.cwnd, defined in ({{output-control-parameters}}):
 
 ## Environment and Usage {#environment-and-usage}
 
@@ -764,7 +793,7 @@ protocols, and these implementations have been used in production
 for a large volume of Internet traffic. An open source implementation of
 BBR is also available for DCCP {{RFC4340}}  {{draft-romo-iccrg-ccid5}}.
 
-## ECN
+## ECN {#ecn}
 
 This experimental version of BBR does not specify a specific response to
 Classic {{RFC3168}}, Alternative Backoff with ECN (ABE) {{RFC8511}} or
@@ -776,6 +805,594 @@ the congestion controller response MUST treat any CE marks as congestion.
 congestion response to CE marks be identical to packet loss.
 The congestion response requirements of L4S are detailed in
 {{RFC9330, Section 4.3}}.
+
+## Experimental Status
+
+This draft is experimental because there are some known aspects of BBR
+for which the community is encouraged to conduct experiments and develop
+algorithm improvements, as described below.
+
+As noted above in {{ecn}}, BBR as described in this draft does not
+specify a specific response to ECN, and instead leaves it as an area for
+future work.
+
+The design of ProbeRTT in {{probertt-design-rationale}} specifies a ProbeRTT
+interval that sacrifices no more than roughly 2% of a flow's available
+bandwidth. The impact of using a different interval or making adjustments
+for triggering ProbeRTT on specific link types is a subject of
+further experimentation.
+
+The delivery rate sampling algorithm in {{delivery-rate-samples}}
+has an ability to over-estimate delivery rate, as described in
+{{compression-and-aggregation}}. When combined with BBR's windowed
+maximum bandwidth filter, this can cause BBR to send too quickly.
+BBR mitigates this by limiting any bandwidth sample by the sending rate,
+but that still might be higher than the available bandwidth,
+particularly in STARTUP.
+
+BBR does not deal well with persistently application limited traffic
+{{detecting-application-limited-phases}} , such as low latency audio or
+video flows.  When unable to fill the pipe for a full round trip,
+BBR will not be able to measure the full link bandwidth, and will mark
+a bandwidth sample as app-limited. In cases where an application enters
+a phase where all bandwidth samples are app-limited, BBR will not
+discard old max bandwidth samples that were not app-limited.
+
+# Input Signals
+
+BBR uses estimated delivery rate and RTT as two critical inputs.
+
+## Delivery Rate Samples {#delivery-rate-samples}
+
+This section describes a generic algorithm for a transport protocol sender to
+estimate the current delivery rate of its data on the fly. This technique is
+used by BBR to get fresh, reliable, and inexpensive delivery rate information.
+
+At a high level, the algorithm estimates the rate at which the network
+delivered the most recent flight of outbound data packets for a single flow. In
+addition, it tracks whether the rate sample was application-limited, meaning
+the transmission rate was limited by the sending application rather than the
+congestion control algorithm.
+
+Each acknowledgment that cumulatively or selectively acknowledges that the
+network has delivered new data produces a rate sample which records the amount
+of data delivered over the time interval between the transmission of a data
+packet and the acknowledgment of that packet. The samples reflect the recent
+goodput through some bottleneck, which may reside either in the network or
+on the end hosts (sender or receiver).
+
+
+### Delivery Rate Sampling Algorithm Overview {#delivery-rate-sampling-algorithm-overview}
+
+#### Requirements {#requirements}
+
+This algorithm can be implemented in any transport protocol that supports
+packet-delivery acknowledgment (so far, implementations are available for TCP
+{{RFC9293}} and QUIC {{RFC9000}}). This algorithm requires a small amount of
+added logic on the sender, and requires that the sender maintain a small amount
+of additional per-packet state for packets sent but not yet delivered. In the
+most general case it requires high-precision (microsecond-granularity or
+better) timestamps on the sender (though millisecond-granularity may suffice
+for lower bandwidths).  It does not require any receiver or network
+changes. While selective acknowledgments for out-of-order data (e.g.,
+{{RFC2018}}) are not required, such a mechanism is highly recommended for
+accurate estimation during reordering and loss recovery phases.
+
+
+#### Estimating Delivery Rate {#estimating-delivery-rate}
+
+A delivery rate sample records the estimated rate at which the network delivered
+packets for a single flow, calculated over the time interval between the
+transmission of a data packet and the acknowledgment of that packet. Since
+the rate samples only include packets actually cumulatively and/or selectively
+acknowledged, the sender knows the amount of data that was delivered to the
+receiver (not lost), and the sender can compute an estimate of a bottleneck
+delivery rate over that time interval.
+
+##### ACK Rate {#ack-rate}
+
+First, consider the rate at which data is acknowledged by the receiver. In
+this algorithm, the computation of the ACK rate models the average slope
+of a hypothetical "delivered" curve that tracks the cumulative quantity of
+data delivered so far on the Y axis, and time elapsed on the X axis. Since
+ACKs arrive in discrete events, this "delivered" curve forms a step function,
+where each ACK causes a discrete increase in the "delivered" count that causes
+a vertical upward step up in the curve. This "ack_rate" computation is the
+average slope of the "delivered" step function, as measured from the "knee"
+of the step (ACK) preceding the transmit to the "knee" of the step (ACK)
+for packet P.
+
+Given this model, the ack rate sample "slope" is computed as the ratio between
+the amount of data marked as delivered over this time interval, and the time
+over which it is marked as delivered:
+
+~~~~
+  ack_rate = data_acked / ack_elapsed
+~~~~
+
+To calculate the amount of data ACKed over the interval, the sender records in
+per-packet state "P.delivered", the amount of data that had been marked
+delivered before transmitting packet P, and then records how much data had been
+marked delivered by the time the ACK for the packet arrives (in "C.delivered"),
+and computes the difference:
+
+~~~~
+  data_acked = C.delivered - P.delivered
+~~~~
+
+To compute the time interval, "ack_elapsed", one might imagine that it would
+be feasible to use the round-trip time (RTT) of the packet. But it is not
+safe to simply calculate a bandwidth estimate by using the time between the
+transmit of a packet and the acknowledgment of that packet. Transmits and
+ACKs can happen out of phase with each other, clocked in separate processes.
+In general, transmissions often happen at some point later than the most
+recent ACK, due to processing or pacing delays. Because of this effect, drastic
+over-estimates can happen if a sender were to attempt to estimate bandwidth
+by using the round-trip time.
+
+The following approach computes "ack_elapsed". The starting time is
+"P.delivered_time", the time of the delivery curve "knee" from the ACK
+preceding the transmit.  The ending time is "C.delivered_time", the time of the
+delivery curve "knee" from the ACK for P. Then we compute "ack_elapsed" as:
+
+~~~~
+  ack_elapsed = C.delivered_time - P.delivered_time
+~~~~
+
+This yields our equation for computing the ACK rate, as the "slope" from
+the "knee" preceding the transmit to the "knee" at ACK:
+
+~~~~
+  ack_rate = data_acked / ack_elapsed
+  ack_rate = (C.delivered - P.delivered) /
+             (C.delivered_time - P.delivered_time)
+~~~~
+
+
+##### Compression and Aggregation {#compression-and-aggregation}
+
+For computing the delivery_rate, the sender prefers ack_rate, the rate at which
+packets were acknowledged, since this usually the most reliable metric.
+However, this approach of directly using "ack_rate" faces a challenge when used
+with paths featuring aggregation, compression, or ACK decimation, which are
+prevalent {{A15}}.  In such cases, ACK arrivals can temporarily make it appear
+as if data packets were delivered much faster than the bottleneck rate. To
+filter out such implausible ack_rate samples, we consider the send rate for
+each flight of data, as follows.
+
+
+##### Send Rate {#send-rate}
+
+The sender calculates the send rate, "send_rate", for a flight of data as
+follows. Define "P.first_send_time" as the time of the first send in a flight
+of data, and "P.send_time" as the time the final send in that flight of data
+(the send that transmits packet "P"). The elapsed time for sending the flight
+is:
+
+~~~~
+  send_elapsed = (P.send_time - P.first_send_time)
+~~~~
+
+Then we calculate the send_rate as:
+
+~~~~
+  send_rate = data_acked / send_elapsed
+~~~~
+
+Using our "delivery" curve model above, the send_rate can be viewed as the
+average slope of a "send" curve that traces the amount of data sent on the Y
+axis, and the time elapsed on the X axis: the average slope of the transmission
+of this flight of data.
+
+
+##### Delivery Rate {#delivery-rate}
+
+Since it is physically impossible to have data delivered faster than it is
+sent in a sustained fashion, when the estimator notices that the ack_rate
+for a flight is faster than the send rate for the flight, it filters out
+the implausible ack_rate by capping the delivery rate sample to be no higher
+than the send rate.
+
+More precisely, over the interval between each transmission and corresponding
+ACK, the sender calculates a delivery rate sample, "delivery_rate", using
+the minimum of the rate at which packets were acknowledged or the rate at
+which they were sent:
+
+~~~~
+  delivery_rate = min(send_rate, ack_rate)
+~~~~
+
+Since ack_rate and send_rate both have data_acked as a numerator, this can
+be computed more efficiently with a single division (instead of two), as
+follows:
+
+~~~~
+  delivery_elapsed = max(ack_elapsed, send_elapsed)
+  delivery_rate = data_acked / delivery_elapsed
+~~~~
+
+
+#### Tracking application-limited phases {#tracking-application-limited-phases}
+
+In application-limited phases the transmission rate is limited by the
+sending application rather than the congestion control algorithm. Modern
+transport protocol connections are often application-limited, either due
+to request/response workloads (e.g., Web traffic, RPC traffic) or because the
+sender transmits data in chunks (e.g., adaptive streaming video).
+
+Knowing whether a delivery rate sample was application-limited is crucial
+for congestion control algorithms and applications to use the estimated delivery
+rate samples properly. For example, congestion control algorithms likely
+do not want to react to a delivery rate that is lower simply because the
+sender is application-limited; for congestion control the key metric is the
+rate at which the network path can deliver data, and not simply the rate
+at which the application happens to be transmitting data at any moment.
+
+To track this, the estimator marks a bandwidth sample as application-limited
+if there was some moment during the sampled time when congestion control
+would have allowed data packets to be sent, and yet there was no data to send.
+
+More specifically, the algorithm detects that an application-limited phase has
+started when the sending application requests to send new data,
+or the connection's retransmission mechanisms decide to retransmit data,
+and the connection meets the following conditions: the congestion window and
+pacing rate would have allowed the connection to send data, and yet the
+connection is not currently sending data and has no data to send (i.e., no
+unsent data or retransmissions of previously sent data). The precise determination of this
+condition depends on how the connection uses mechanisms to implement
+pacing, batching, GSO/TSO/offload, etc.
+
+If these conditions are met, then the sender has run out of data to feed the
+network. This would effectively create a "bubble" of idle time in the data
+pipeline. This idle time means that any delivery rate sample obtained from this
+data packet, and any rate sample from a packet that follows it in the next
+round trip, is going to be an application-limited sample that potentially
+underestimates the true available bandwidth. Thus, when the algorithm marks a
+transport flow as application-limited, it marks all bandwidth samples for the
+next round trip as application-limited (at which point, the "bubble" can be
+said to have exited the data pipeline).
+
+##### Considerations Related to Receiver Flow Control Limits {#considerations-related-to-receiver-flow-control-limits}
+
+In some cases receiver flow control limits (such as the TCP {{RFC9293}}
+advertised receive window, RCV.WND) are the factor limiting the
+delivery rate. This algorithm treats cases where the delivery rate was constrained
+by such conditions the same as it treats cases where the delivery rate is
+constrained by in-network bottlenecks. That is, it treats receiver bottlenecks
+the same as network bottlenecks. This has a conceptual symmetry and has worked
+well in practice for congestion control and telemetry purposes.
+
+
+### Detailed Delivery Rate Sampling Algorithm {#detailed-delivery-rate-sampling-algorithm}
+
+#### Variables {#variables}
+
+##### Per-connection (C) state {#per-connection-c-state}
+
+This algorithm requires the following new state variables for each transport
+connection:
+
+C.delivered_time: The wall clock time when C.delivered was last updated.
+
+C.first_send_time: If packets are in flight, then this holds the send time of
+the packet that was most recently marked as delivered. Else, if the connection
+was recently idle, then this holds the send time of most recently sent packet.
+
+C.app_limited: The index of the last transmitted packet marked as
+application-limited, or 0 if the connection is not currently
+application-limited.
+
+We also assume that the transport protocol sender implementation tracks the
+following state per connection. If the following state variables are not
+tracked by an existing implementation, all the following parameters MUST
+be tracked to implement this algorithm:
+
+C.pending_transmissions: The number of bytes queued for transmission on the
+sending host at layers lower than the transport layer (i.e. network layer,
+traffic shaping layer, network device layer).
+
+C.lost_out: The amount of data in the current outstanding window that
+is marked as lost.
+
+C.retrans_out: The amount of data in the current outstanding window that
+are being retransmitted.
+
+C.min_rtt: The minimum observed RTT over the lifetime of the connection.
+
+C.srtt: The smoothed RTT, an exponentially weighted moving average of the
+observed RTT of the connection.
+
+##### Per-packet (P) state {#per-packet-p-state}
+
+This algorithm requires the following new state variables for each packet that
+has been transmitted but has not been acknowledged. As noted in the
+[Offload Mechanisms](#offload-mechanisms) section, if a connection uses an
+offload mechanism then it is RECOMMENDED that the packet state be tracked
+for each packet "aggregate" rather than each individual packet.  For simplicity this
+document refers to such state as "per-packet", whether it is per "aggregate" or
+per IP packet.
+
+P.delivered: C.delivered when the packet was sent from transport connection
+C.
+
+P.delivered_time: C.delivered_time when the packet was sent.
+
+P.first_send_time: C.first_send_time when the packet was sent.
+
+P.send_time: The pacing departure time selected when the packet was scheduled
+to be sent.
+
+P.is_app_limited: true if C.app_limited was non-zero when the packet was
+sent, else false.
+
+P.tx_in_flight: C.inflight immediately after the transmission of packet P.
+
+##### Rate Sample (rs) Output {#rate-sample-rs-output}
+
+This algorithm provides its output in a RateSample structure rs, containing
+the following fields:
+
+RS.delivery_rate: The delivery rate sample (in most cases RS.delivered /
+RS.interval).
+
+RS.is_app_limited: The P.is_app_limited from the most recent packet delivered;
+indicates whether the rate sample is application-limited.
+
+RS.interval: The length of the sampling interval.
+
+RS.delivered: The amount of data marked as delivered over the sampling interval.
+
+RS.prior_delivered: The P.delivered count from the most recent packet delivered.
+
+RS.prior_time: The P.delivered_time from the most recent packet delivered.
+
+RS.send_elapsed: Send time interval calculated from the most recent packet
+delivered (see the "Send Rate" section above).
+
+RS.ack_elapsed: ACK time interval calculated from the most recent packet
+delivered (see the "ACK Rate" section above).
+
+
+#### Transmitting a data packet {#transmitting-a-data-packet}
+
+Upon transmitting a data packet, the sender snapshots the current delivery
+information in per-packet state. This will allow the sender
+to generate a rate sample later, in the UpdateRateSample() step, when the
+packet is (S)ACKed.
+
+If there are packets already in flight, then we need to start delivery rate
+samples from the time we received the most recent ACK, to try to ensure that
+we include the full time the network needs to deliver all in-flight data.
+If there is no data in flight yet, then we can start the delivery rate
+interval at the current time, since we know that any ACKs after now indicate
+that the network was able to deliver that data completely in the sampling
+interval between now and the next ACK.
+
+After each packet transmission, the sender executes the following steps:
+
+~~~~
+  OnPacketSent(Packet P):
+    if (C.inflight == 0)
+      C.first_send_time  = C.delivered_time = P.send_time
+
+    P.first_send_time = C.first_send_time
+    P.delivered_time  = C.delivered_time
+    P.delivered       = C.delivered
+    P.is_app_limited  = (C.app_limited != 0)
+    P.tx_in_flight    = C.inflight    /* includes data in P */
+~~~~
+
+
+#### Upon receiving an ACK {#upon-receiving-an-ack}
+
+When an ACK arrives, the connection first calls InitRateSample() to initialize
+the per-ACK RateSample RS:
+
+~~~~
+  /* Initialize the rate sample generated using the ACK being processed. */
+  InitRateSample():
+    RS.rtt           = -1
+    RS.has_data      = false
+    RS.prior_time    = 0
+    RS.interval      = 0
+    RS.delivery_rate = 0
+~~~~
+
+Next, for each newly acknowledged packet, the connection calls
+UpdateRateSample() to update the per-ACK rate sample based on a snapshot of
+connection delivery information from the time at which the packet was
+transmitted. The connection invokes UpdateRateSample() multiple times when a
+stretched ACK acknowledges multiple data packets. The connection uses the
+information from the most recently sent packet to update the rate sample:
+
+~~~~
+  /* Update RS when a packet is acknowledged. */
+  UpdateRateSample(Packet P):
+    if (P.delivered_time == 0)
+      return /* P already acknowledged */
+
+    C.delivered += P.data_length
+    C.delivered_time = Now()
+
+    /* Update info using the newest packet: */
+    if (!RS.has_data or IsNewestPacket(P))
+      RS.has_data         = true
+      RS.prior_delivered  = P.delivered
+      RS.prior_time       = P.delivered_time
+      RS.is_app_limited   = P.is_app_limited
+      RS.send_elapsed     = P.send_time - P.first_send_time
+      RS.ack_elapsed      = C.delivered_time - P.delivered_time
+      RS.last_end_seq     = P.end_seq
+      C.first_send_time   = P.send_time
+
+    /* Mark the packet as delivered once it's acknowleged. */
+    P.delivered_time = 0
+
+  /* Is the given Packet the most recently sent packet
+   * that has been delivered? */
+  IsNewestPacket(Packet P):
+    return (P.send_time > C.first_send_time or
+            (P.send_time == C.first_send_time and
+             P.end_seq > RS.last_end_seq)
+~~~~
+
+Finally, after the connection has processed all newly acknowledged packets for this
+ACK by calling UpdateRateSample() for each packet, the connection invokes
+GenerateRateSample() to finish populating the rate sample, RS:
+
+~~~~
+  /* Upon receiving ACK, fill in delivery rate sample RS. */
+  GenerateRateSample():
+    /* Clear app-limited field if bubble is ACKed and gone. */
+    if (C.app_limited and C.delivered > C.app_limited)
+      C.app_limited = 0
+
+    if (RS.prior_time == 0)
+      return /* nothing delivered on this ACK */
+
+    /* Use the longer of the send_elapsed and ack_elapsed */
+    RS.interval = max(RS.send_elapsed, RS.ack_elapsed)
+
+    RS.delivered = C.delivered - RS.prior_delivered
+
+    /* Normally we expect interval >= MinRTT.
+     * Note that rate may still be overestimated when a spuriously
+     * retransmitted skb was first (s)acked because "interval"
+     * is under-estimated (up to an RTT). However, continuously
+     * measuring the delivery rate during loss recovery is crucial
+     * for connections that suffer heavy or prolonged losses.
+     */
+    if (RS.interval <  C.min_rtt)
+      return  /* no reliable rate sample */
+
+    if (RS.interval != 0)
+      RS.delivery_rate = RS.delivered / RS.interval
+
+    return    /* filled in RS with a rate sample */
+~~~~
+
+
+#### Detecting application-limited phases {#detecting-application-limited-phases}
+
+An application-limited phase starts when the connection decides to send more
+data, at a point in time when the connection had previously run out of data.
+Some decisions to send more data are triggered by the application writing
+more data to the connection, and some are triggered by loss detection (during
+ACK processing or upon the triggering of a timer) estimating that some sequence
+ranges need to be retransmitted. To detect all such cases, the algorithm
+calls CheckIfApplicationLimited() to check for application-limited behavior in
+the following situations:
+
+* The sending application asks the transport layer to send more data; i.e.,
+  upon each write from the application, before new application data is enqueued
+  in the transport send buffer or transmitted.
+
+* At the beginning of ACK processing, before updating the estimated
+  amount of data in flight, and before congestion control modifies C.cwnd or
+  C.pacing_rate.
+
+* At the beginning of connection timer processing, for all timers that might
+  result in the transmission of one or more data packets. For example: RTO
+  timers, TLP timers, RACK reordering timers, or Zero Window Probe timers.
+
+When checking for application-limited behavior, the connection checks all the
+conditions previously described in the "Tracking application-limited phases"
+section, and if all are met then it marks the connection as
+application-limited:
+
+~~~~
+  CheckIfApplicationLimited():
+    if (NoUnsentData() and
+        C.pending_transmissions == 0 and
+        C.inflight < C.cwnd and
+        C.lost_out <= C.retrans_out)
+      C.app_limited = (C.delivered + C.inflight) ? : 1
+~~~~
+
+
+### Delivery Rate Sampling Discussion {#delivery-rate-sampling-discussion}
+
+#### Offload Mechanisms {#offload-mechanisms}
+
+If a transport sender implementation uses an offload mechanism (such as TSO,
+GSO, etc.) to combine multiple C.SMSS of data into a single packet "aggregate"
+for the purposes of scheduling transmissions, then it is RECOMMENDED that the
+per-packet state described in Section [Per-packet (P) state](#per-packet-p-state) be
+tracked for each packet "aggregate" rather than each IP packet.
+
+
+#### Impact of ACK losses {#impact-of-ack-losses}
+
+Delivery rate samples are generated upon receiving each ACK; ACKs may contain
+both cumulative and selective acknowledgment information. Losing an ACK results
+in losing the delivery rate sample corresponding to that ACK, and generating a
+delivery rate sample at later a time (upon the arrival of the next ACK). This
+can underestimate the delivery rate due the artificially inflated
+"RS.interval". The impact of this effect is mitigated using the BBR.max_bw
+filter.
+
+
+#### Impact of packet reordering {#impact-of-packet-reordering}
+
+This algorithm is robust to packet reordering; it makes no assumptions about
+the order in which packets are delivered or ACKed. In particular, for a
+particular packet P, it does not matter which packets are delivered between the
+transmission of P and the ACK of packet P, since C.delivered will be
+incremented appropriately in any case.
+
+
+#### Impact of packet loss and retransmissions {#impact-of-packet-loss-and-retransmissions}
+
+There are several possible approaches for handling cases where a delivery
+rate sample is based on a retransmitted packet.
+
+If the transport protocol supports unambiguous ACKs for retransmitted data
+(as in QUIC {{RFC9000}}) then the algorithm is perfectly robust to retransmissions,
+because the starting packet, P, for the sample can be unambiguously retrieved.
+
+If the transport protocol, like TCP {{RFC9293}}, has ambiguous ACKs for
+retransmitted sequence ranges, then the following approaches MAY be used:
+
+1. The sender MAY choose to filter out implausible delivery rate samples, as
+  described in the GenerateRateSample() step in the "Upon receiving an ACK"
+  section, by discarding samples whose RS.interval is lower than the minimum
+  RTT seen on the connection.
+
+2. The sender MAY choose to skip the generation of a delivery rate sample for
+  a retransmitted sequence range.
+
+
+##### TCP Connections without SACK {#connections-without-sack}
+
+Whenever possibile, TCP connections using BBR as a congestion controller SHOULD
+use both SACK and timestamps. Failure to do so will cause BBR's RTT and
+bandwidth measurements to be much less accurate.
+
+When using TCP without SACK (i.e., either or both ends of the connections do
+not accept SACK), this algorithm can be extended to estimate approximate
+delivery rates using duplicate ACKs (much like Reno and {{RFC5681}} estimates
+that each duplicate ACK indicates that a data packet has been delivered).
+
+
+## RTT Samples {#rtt-samples}
+
+Upon transmitting each packet, BBR or the associated transport protocol
+stores in per-packet data the wall-clock scheduled transmission time of the
+packet in P.send_time (see "Pacing Rate: C.pacing_rate" in
+{{pacing-rate-bbrpacingrate}} for how this is calculated).
+
+For every ACK that newly acknowledges data, the sender's BBR implementation
+or the associated transport protocol implementation attempts to calculate an
+RTT sample. The sender MUST consider any potential retransmission ambiguities
+that can arise in some transport protocols. If some of the acknowledged data
+was not retransmitted, or some of the data was retransmitted but the sender
+can still unambiguously determine the RTT of the data (e.g. QUIC or TCP with
+timestamps {{RFC7323}}), then the sender calculates an RTT sample, RS.rtt,
+as follows:
+
+~~~~
+  RS.rtt = Now() - P.send_time
+~~~~
 
 
 # Detailed Algorithm {#detailed-algorithm}
@@ -905,8 +1522,8 @@ steps:
 
 ~~~~
   BBROnInit():
-    InitWindowedMaxFilter(filter=BBR.MaxBwFilter, value=0, time=0)
-    BBR.min_rtt = SRTT ? SRTT : Infinity
+    InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
+    BBR.min_rtt = C.srtt ? C.srtt : Infinity
     BBR.min_rtt_stamp = Now()
     BBR.probe_rtt_done_stamp = 0
     BBR.probe_rtt_round_done = false
@@ -926,7 +1543,7 @@ steps:
 
 ### Per-Transmit Steps {#per-transmit-steps}
 
-When transmitting, BBR merely needs to check for the case where the flow
+Before transmitting, BBR merely needs to check for the case where the flow
 is restarting from idle:
 
 ~~~~
@@ -943,6 +1560,7 @@ adjust its control parameters to adapt to the updated model:
 
 ~~~~
   BBRUpdateOnACK():
+    GenerateRateSample()
     BBRUpdateModelAndState()
     BBRUpdateControlParameters()
 
@@ -1032,7 +1650,7 @@ In phases where BBR is accelerating to probe the available bandwidth -
 Startup and ProbeBW_UP - BBR runs a state machine to estimate whether an
 accelerating sending rate has saturated the available per-flow bandwidth
 ("filled the pipe") by looking for a plateau in the measured
-rs.delivery_rate.
+RS.delivery_rate.
 
 BBR tracks the status of the current full-pipe estimation process in the
 boolean BBR.full_bw_now, and uses BBR.full_bw_now to exit ProbeBW_UP. BBR
@@ -1063,11 +1681,11 @@ new data, and when the delivery rate sample is not application-limited
 
 ~~~~
   BBRCheckFullBWReached():
-    if (BBR.full_bw_now or !BBR.round_start or rs.is_app_limited)
+    if (BBR.full_bw_now or !BBR.round_start or RS.is_app_limited)
       return  /* no need to check for a full pipe now */
-    if (rs.delivery_rate >= BBR.full_bw * 1.25)
+    if (RS.delivery_rate >= BBR.full_bw * 1.25)
       BBRResetFullBW()       /* bw is still growing, so reset */
-      BBR.full_bw = rs.delivery_rate  /* record new baseline bw */
+      BBR.full_bw = RS.delivery_rate  /* record new baseline bw */
       return
     BBR.full_bw_count++   /* another round w/o much growth */
     BBR.full_bw_now = (BBR.full_bw_count >= 3)
@@ -1100,7 +1718,7 @@ If these criteria are all met, then BBRCheckStartupHighLoss() takes the
 following steps. First, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
-BBR.inflight_latest is the max delivered volume of data (rs.delivered) over
+BBR.inflight_latest is the max delivered volume of data (RS.delivered) over
 the last round trip. Finally, it exits Startup and enters Drain.
 
 The algorithm waits until all three criteria are met to filter out noise
@@ -1131,7 +1749,7 @@ this, upon every ACK BBR executes:
 
 ~~~~
   BBRCheckDrainDone():
-    if (BBR.state == Drain and C.pipe <= BBRInflight(1.0))
+    if (BBR.state == Drain and C.inflight <= BBRInflight(1.0))
       BBREnterProbeBW()  /* BBR estimates the queue was drained */
 ~~~~
 
@@ -1278,7 +1896,7 @@ of the following conditions are met:
   estimator (see {{exiting-acceleration-based-on-bandwidth-plateau}}) to
   estimate whether the flow has saturated the available per-flow bandwidth
   ("filled the pipe"), by looking for a plateau in the measured
-  rs.delivery_rate. If, during this process, C.inflight is constrained
+  RS.delivery_rate. If, during this process, C.inflight is constrained
   by BBR.inflight_longterm (the flow becomes cwnd-limited while cwnd is limited by
   BBR.inflight_longterm), then the flow cannot fully explore the available bandwidth,
   and so it resets the "full pipe" estimator by calling BBRResetFullBW().
@@ -1483,7 +2101,7 @@ The core logic for entering each state:
     BBR.ack_phase = ACKS_PROBE_STARTING
     BBRStartRound()
     BBRResetFullBW()
-    BBR.full_bw = rs.delivery_rate
+    BBR.full_bw = RS.delivery_rate
     BBR.state = ProbeBW_UP
     BBRRaiseInflightLongtermSlope()
 ~~~~
@@ -1544,7 +2162,7 @@ The ancillary logic to implement the ProbeBW state machine:
   BBRIsTimeToGoDown():
     if (C.is_cwnd_limited and C.cwnd >= BBR.inflight_longterm)
       BBRResetFullBW()   /* bw is limited by BBR.inflight_longterm */
-      BBR.full_bw = rs.delivery_rate
+      BBR.full_bw = RS.delivery_rate
     else if (BBR.full_bw_now)
       return true  /* we estimate we've fully used path bw */
     return false
@@ -1578,7 +2196,7 @@ The ancillary logic to implement the ProbeBW state machine:
   BBRProbeInflightLongtermUpward():
     if (!C.is_cwnd_limited or C.cwnd < BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
-   BBR.bw_probe_up_acks += rs.newly_acked
+   BBR.bw_probe_up_acks += RS.newly_acked
    if (BBR.bw_probe_up_acks >= BBR.probe_up_cnt)
      delta = BBR.bw_probe_up_acks / BBR.probe_up_cnt
      BBR.bw_probe_up_acks -= delta * BBR.bw_probe_up_cnt
@@ -1594,15 +2212,15 @@ The ancillary logic to implement the ProbeBW state machine:
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
     if (BBR.ack_phase == ACKS_PROBE_STOPPING and BBR.round_start)
       /* end of samples from bw probing phase */
-      if (IsInAProbeBWState() and !rs.is_app_limited)
+      if (IsInAProbeBWState() and !RS.is_app_limited)
         BBRAdvanceMaxBwFilter()
 
     if (!IsInflightTooHigh())
       /* Loss rate is safe. Adjust upper bounds upward. */
       if (BBR.inflight_longterm == Infinity)
         return /* no upper bounds to raise */
-      if (rs.tx_in_flight > BBR.inflight_longterm)
-        BBR.inflight_longterm = rs.tx_in_flight
+      if (RS.tx_in_flight > BBR.inflight_longterm)
+        BBR.inflight_longterm = RS.tx_in_flight
       if (BBR.state == ProbeBW_UP)
         BBRProbeInflightLongtermUpward()
 ~~~~
@@ -1636,7 +2254,7 @@ the flow will "remember" the BBR.min_rtt value it measured during the previous
 ProbeRTT episode, providing a robust BDP estimate for the C.cwnd = 0.5\*BDP
 calculation, increasing the likelihood of fully draining the bottleneck
 queue. Second, this allows the flow's BBR.min_rtt filter window to generally
-include RTT samples from two ProbeTT episodes, providing a more robust
+include RTT samples from two ProbeRTT episodes, providing a more robust
 estimate.
 
 The algorithm for ProbeRTT is as follows:
@@ -1691,26 +2309,17 @@ As an optimization, when restarting from idle and finding that the
 BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the idleness
 is deemed a sufficient attempt to coordinate to drain the queue.
 
-
-#### Calculating the rs.rtt RTT Sample {#calculating-the-rsrtt-rtt-sample}
-
-Upon transmitting each packet, BBR or the associated transport protocol
-stores in per-packet data the wall-clock scheduled transmission time of the
-packet in P.departure_time (see "Pacing Rate: C.pacing_rate" in
-{{pacing-rate-bbrpacingrate}} for how this is calculated).
-
-For every ACK that newly acknowledges data, the sender's BBR implementation
-or the associated transport protocol implementation attempts to calculate an
-RTT sample. The sender MUST consider any potential retransmission ambiguities
-that can arise in some transport protocols. If some of the acknowledged data
-was not retransmitted, or some of the data was retransmitted but the sender
-can still unambiguously determine the RTT of the data (e.g. QUIC or TCP with
-timestamps {{RFC7323}}), then the sender calculates an RTT sample, rs.rtt,
-as follows:
-
-~~~~
-  rs.rtt = Now() - P.departure_time
-~~~~
+The frequency of triggering ProbeRTT involves a tradeoff between the speed of
+convergence and the throughput penalty of applying a cwnd cap during ProbeRTT.
+The interval between ProbeRTTs is a subject of further experimentation.
+A longer duration between ProbeRTT would reduce the throughput penalty for bulk
+flows or flows on lower BDP links that are less likely to have silences or
+low-rate periods, at the cost of slower convergence. Furthermore, some types
+of links can switch between paths of significantly different base
+RTT (e.g. LEO satellite or cellular handoff). If these path changes can be
+predicted or detected, initiating a ProbeRTT immediately could concievably
+speed up the convergence to an accurate BBR.min_rtt, especially when it
+has increased.
 
 #### ProbeRTT Logic {#probertt-logic}
 
@@ -1722,10 +2331,10 @@ estimate:
   BBRUpdateMinRTT()
     BBR.probe_rtt_expired =
       Now() > BBR.probe_rtt_min_stamp + ProbeRTTInterval
-    if (rs.rtt >= 0 and
-        (rs.rtt < BBR.probe_rtt_min_delay or
+    if (RS.rtt >= 0 and
+        (RS.rtt < BBR.probe_rtt_min_delay or
          BBR.probe_rtt_expired))
-       BBR.probe_rtt_min_delay = rs.rtt
+       BBR.probe_rtt_min_delay = RS.rtt
        BBR.probe_rtt_min_stamp = Now()
 
     min_rtt_expired =
@@ -1755,7 +2364,7 @@ to the ProbeRTT state as follows:
       BBRStartRound()
     if (BBR.state == ProbeRTT)
       BBRHandleProbeRTT()
-    if (rs.delivered > 0)
+    if (RS.delivered > 0)
       BBR.idle_restart = false
 
   BBREnterProbeRTT():
@@ -1767,7 +2376,7 @@ to the ProbeRTT state as follows:
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
     if (BBR.probe_rtt_done_stamp == 0 and
-        C.pipe <= BBRProbeRTTCwnd())
+        C.inflight <= BBRProbeRTTCwnd())
       /* Wait for at least ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
         Now() + ProbeRTTDuration
@@ -1790,7 +2399,7 @@ to the ProbeRTT state as follows:
 
   MarkConnectionAppLimited():
     C.app_limited =
-      (C.delivered + C.pipe) ? : 1
+      (C.delivered + C.inflight) ? : 1
 ~~~~
 
 
@@ -1845,7 +2454,7 @@ BBRHandleRestartFromIdle() before sending a packet for a flow:
 
 ~~~~
   BBRHandleRestartFromIdle():
-    if (C.pipe == 0 and C.app_limited)
+    if (C.inflight == 0 and C.app_limited)
       BBR.idle_restart = true
       BBR.extra_acked_interval_start = Now()
       if (IsInAProbeBWState())
@@ -1886,8 +2495,8 @@ calculates and uses its value. We can group the parameter into three groups:
 ### BBR.round_count: Tracking Packet-Timed Round Trips {#bbrroundcount-tracking-packet-timed-round-trips}
 
 Several aspects of BBR depend on counting the progress of "packet-timed"
-round trips, which start at the transmission of some segment, and then end
-at the acknowledgement of that segment. BBR.round_count is a count of the number
+round trips, which start at the transmission of some packet, and then end
+at the acknowledgment of that packet. BBR.round_count is a count of the number
 of these "packet-timed" round trips elapsed so far. BBR uses this virtual
 BBR.round_count because it is more robust than using wall clock time. In
 particular, arbitrary intervals of wall clock time can elapse due to
@@ -1954,530 +2563,6 @@ rate to help seek "rate balance", where the flow's packet arrival rate at the
 bottleneck equals the departure rate. The bottleneck rate varies over the life
 of a connection, so BBR continually estimates BBR.max_bw using recent signals.
 
-#### Delivery Rate Samples {#delivery-rate-samples}
-
-This section describes a generic algorithm for a transport protocol sender to
-estimate the current delivery rate of its data on the fly. This technique is
-used by BBR to get fresh, reliable, and inexpensive delivery rate information.
-
-At a high level, the algorithm estimates the rate at which the network
-delivered the most recent flight of outbound data packets for a single flow. In
-addition, it tracks whether the rate sample was application-limited, meaning
-the transmission rate was limited by the sending application rather than the
-congestion control algorithm.
-
-Each acknowledgment that cumulatively or selectively acknowledges that the
-network has delivered new data produces a rate sample which records the amount
-of data delivered over the time interval between the transmission of a data
-packet and the acknowledgment of that packet. The samples reflect the recent
-goodput through some bottleneck, which may reside either in the network or
-on the end hosts (sender or receiver).
-
-
-#### Delivery Rate Sampling Algorithm Overview {#delivery-rate-sampling-algorithm-overview}
-
-##### Requirements {#requirements}
-
-This algorithm can be implemented in any transport protocol that supports
-packet-delivery acknowledgment (so far, implementations are available for TCP
-{{RFC9293}} and QUIC {{RFC9000}}). This algorithm requires a small amount of
-added logic on the sender, and requires that the sender maintain a small amount
-of additional per-packet state for packets sent but not yet delivered. In the
-most general case it requires high-precision (microsecond-granularity or
-better) timestamps on the sender (though millisecond-granularity may suffice
-for lower bandwidths).  It does not require any receiver or network
-changes. While selective acknowledgments for out-of-order data (e.g.,
-{{RFC2018}}) are not required, such a mechanism is highly recommended for
-accurate estimation during reordering and loss recovery phases.
-
-
-##### Estimating Delivery Rate {#estimating-delivery-rate}
-
-A delivery rate sample records the estimated rate at which the network delivered
-packets for a single flow, calculated over the time interval between the
-transmission of a data packet and the acknowledgment of that packet. Since
-the rate samples only include packets actually cumulatively and/or selectively
-acknowledged, the sender knows the exact octets that were delivered to the
-receiver (not lost), and the sender can compute an estimate of a bottleneck
-delivery rate over that time interval.
-
-The amount of data delivered MAY be tracked in units of either octets or
-packets. Tracking data in units of octets is more accurate, since packet
-sizes can vary. But for some purposes, including congestion control, tracking
-data in units of packets may suffice.
-
-###### ACK Rate {#ack-rate}
-
-First, consider the rate at which data is acknowledged by the receiver. In
-this algorithm, the computation of the ACK rate models the average slope
-of a hypothetical "delivered" curve that tracks the cumulative quantity of
-data delivered so far on the Y axis, and time elapsed on the X axis. Since
-ACKs arrive in discrete events, this "delivered" curve forms a step function,
-where each ACK causes a discrete increase in the "delivered" count that causes
-a vertical upward step up in the curve. This "ack_rate" computation is the
-average slope of the "delivered" step function, as measured from the "knee"
-of the step (ACK) preceding the transmit to the "knee" of the step (ACK)
-for packet P.
-
-Given this model, the ack rate sample "slope" is computed as the ratio between
-the amount of data marked as delivered over this time interval, and the time
-over which it is marked as delivered:
-
-~~~~
-  ack_rate = data_acked / ack_elapsed
-~~~~
-
-To calculate the amount of data ACKed over the interval, the sender records in
-per-packet state "P.delivered", the amount of data that had been marked
-delivered before transmitting packet P, and then records how much data had been
-marked delivered by the time the ACK for the packet arrives (in "C.delivered"),
-and computes the difference:
-
-~~~~
-  data_acked = C.delivered - P.delivered
-~~~~
-
-To compute the time interval, "ack_elapsed", one might imagine that it would
-be feasible to use the round-trip time (RTT) of the packet. But it is not
-safe to simply calculate a bandwidth estimate by using the time between the
-transmit of a packet and the acknowledgment of that packet. Transmits and
-ACKs can happen out of phase with each other, clocked in separate processes.
-In general, transmissions often happen at some point later than the most
-recent ACK, due to processing or pacing delays. Because of this effect, drastic
-over-estimates can happen if a sender were to attempt to estimate bandwidth
-by using the round-trip time.
-
-The following approach computes "ack_elapsed". The starting time is
-"P.delivered_time", the time of the delivery curve "knee" from the ACK
-preceding the transmit.  The ending time is "C.delivered_time", the time of the
-delivery curve "knee" from the ACK for P. Then we compute "ack_elapsed" as:
-
-~~~~
-  ack_elapsed = C.delivered_time - P.delivered_time
-~~~~
-
-This yields our equation for computing the ACK rate, as the "slope" from
-the "knee" preceding the transmit to the "knee" at ACK:
-
-~~~~
-  ack_rate = data_acked / ack_elapsed
-  ack_rate = (C.delivered - P.delivered) /
-             (C.delivered_time - P.delivered_time)
-~~~~
-
-
-###### Compression and Aggregation {#compression-and-aggregation}
-
-For computing the delivery_rate, the sender prefers ack_rate, the rate at which
-packets were acknowledged, since this usually the most reliable metric.
-However, this approach of directly using "ack_rate" faces a challenge when used
-with paths featuring aggregation, compression, or ACK decimation, which are
-prevalent {{A15}}.  In such cases, ACK arrivals can temporarily make it appear
-as if data packets were delivered much faster than the bottleneck rate. To
-filter out such implausible ack_rate samples, we consider the send rate for
-each flight of data, as follows.
-
-
-###### Send Rate {#send-rate}
-
-The sender calculates the send rate, "send_rate", for a flight of data as
-follows. Define "P.first_sent_time" as the time of the first send in a flight
-of data, and "P.sent_time" as the time the final send in that flight of data
-(the send that transmits packet "P"). The elapsed time for sending the flight
-is:
-
-~~~~
-  send_elapsed = (P.sent_time - P.first_sent_time)
-~~~~
-
-Then we calculate the send_rate as:
-
-~~~~
-  send_rate = data_acked / send_elapsed
-~~~~
-
-Using our "delivery" curve model above, the send_rate can be viewed as the
-average slope of a "send" curve that traces the amount of data sent on the Y
-axis, and the time elapsed on the X axis: the average slope of the transmission
-of this flight of data.
-
-
-###### Delivery Rate {#delivery-rate}
-
-Since it is physically impossible to have data delivered faster than it is
-sent in a sustained fashion, when the estimator notices that the ack_rate
-for a flight is faster than the send rate for the flight, it filters out
-the implausible ack_rate by capping the delivery rate sample to be no higher
-than the send rate.
-
-More precisely, over the interval between each transmission and corresponding
-ACK, the sender calculates a delivery rate sample, "delivery_rate", using
-the minimum of the rate at which packets were acknowledged or the rate at
-which they were sent:
-
-~~~~
-  delivery_rate = min(send_rate, ack_rate)
-~~~~
-
-Since ack_rate and send_rate both have data_acked as a numerator, this can
-be computed more efficiently with a single division (instead of two), as
-follows:
-
-~~~~
-  delivery_elapsed = max(ack_elapsed, send_elapsed)
-  delivery_rate = data_acked / delivery_elapsed
-~~~~
-
-
-##### Tracking application-limited phases {#tracking-application-limited-phases}
-
-In application-limited phases the transmission rate is limited by the
-sending application rather than the congestion control algorithm. Modern
-transport protocol connections are often application-limited, either due
-to request/response workloads (e.g., Web traffic, RPC traffic) or because the
-sender transmits data in chunks (e.g., adaptive streaming video).
-
-Knowing whether a delivery rate sample was application-limited is crucial
-for congestion control algorithms and applications to use the estimated delivery
-rate samples properly. For example, congestion control algorithms likely
-do not want to react to a delivery rate that is lower simply because the
-sender is application-limited; for congestion control the key metric is the
-rate at which the network path can deliver data, and not simply the rate
-at which the application happens to be transmitting data at any moment.
-
-To track this, the estimator marks a bandwidth sample as application-limited
-if there was some moment during the sampled time when congestion control
-would have allowed data packets to be sent, and yet there was no data to send.
-
-More specifically, the algorithm detects that an application-limited phase has
-started when the sending application requests to send new data,
-or the connection's retransmission mechanisms decide to retransmit data,
-and the connection meets the following conditions: the congestion window and
-pacing rate would have allowed the connection to send data, and yet the
-connection is not currently sending data and has no data to send (i.e., no
-unsent data or retransmissions of previously sent data). The precise determination of this
-condition depends on how the connection uses mechanisms to implement
-pacing, batching, GSO/TSO/offload, etc.
-
-If these conditions are met, then the sender has run out of data to feed the
-network. This would effectively create a "bubble" of idle time in the data
-pipeline. This idle time means that any delivery rate sample obtained from this
-data packet, and any rate sample from a packet that follows it in the next
-round trip, is going to be an application-limited sample that potentially
-underestimates the true available bandwidth. Thus, when the algorithm marks a
-transport flow as application-limited, it marks all bandwidth samples for the
-next round trip as application-limited (at which point, the "bubble" can be
-said to have exited the data pipeline).
-
-###### Considerations Related to Receiver Flow Control Limits {#considerations-related-to-receiver-flow-control-limits}
-
-In some cases receiver flow control limits (such as the TCP {{RFC9293}}
-advertised receive window, RCV.WND) are the factor limiting the
-delivery rate. This algorithm treats cases where the delivery rate was constrained
-by such conditions the same as it treats cases where the delivery rate is
-constrained by in-network bottlenecks. That is, it treats receiver bottlenecks
-the same as network bottlenecks. This has a conceptual symmetry and has worked
-well in practice for congestion control and telemetry purposes.
-
-
-#### Detailed Delivery Rate Sampling Algorithm {#detailed-delivery-rate-sampling-algorithm}
-
-##### Variables {#variables}
-
-###### Per-connection (C) state {#per-connection-c-state}
-
-This algorithm requires the following new state variables for each transport
-connection:
-
-C.delivered: The total amount of data (measured in octets or in packets)
-delivered so far over the lifetime of the transport connection. This MUST
-NOT include pure ACK packets. It SHOULD include spurious retransmissions
-that have been acknowledged as delivered.
-
-C.delivered_time: The wall clock time when C.delivered was last updated.
-
-C.first_sent_time: If packets are in flight, then this holds the send time of
-the packet that was most recently marked as delivered. Else, if the connection
-was recently idle, then this holds the send time of most recently sent packet.
-
-C.app_limited: The index of the last transmitted packet marked as
-application-limited, or 0 if the connection is not currently
-application-limited.
-
-We also assume that the transport protocol sender implementation tracks the
-following state per connection. If the following state variables are not
-tracked by an existing implementation, all the following parameters MUST
-be tracked to implement this algorithm:
-
-C.write_seq: The data sequence number one higher than that of the last octet
-queued for transmission in the transport layer write buffer.
-
-C.pending_transmissions: The number of bytes queued for transmission on the
-sending host at layers lower than the transport layer (i.e. network layer,
-traffic shaping layer, network device layer).
-
-C.lost_out: The number of packets in the current outstanding window that
-are marked as lost.
-
-C.retrans_out: The number of packets in the current outstanding window that
-are being retransmitted.
-
-C.pipe: The sender's estimate of the amount of data outstanding in the network
-(measured in octets or packets). This includes data packets in the current
-outstanding window that are in flight and have not been acknowledged or marked lost
-(e.g. "pipe" from {{RFC6675}} or "bytes_in_flight" from {{RFC9002}}).
-This MUST NOT include pure ACK packets.
-
-
-###### Per-packet (P) state {#per-packet-p-state}
-
-This algorithm requires the following new state variables for each packet
-that has been transmitted but has not been acknowledged:
-
-P.delivered: C.delivered when the packet was sent from transport connection
-C.
-
-P.delivered_time: C.delivered_time when the packet was sent.
-
-P.first_sent_time: C.first_sent_time when the packet was sent.
-
-P.is_app_limited: true if C.app_limited was non-zero when the packet was
-sent, else false.
-
-P.sent_time: The time when the packet was sent.
-
-###### Rate Sample (rs) Output {#rate-sample-rs-output}
-
-This algorithm provides its output in a RateSample structure rs, containing
-the following fields:
-
-rs.delivery_rate: The delivery rate sample (in most cases rs.delivered /
-rs.interval).
-
-rs.is_app_limited: The P.is_app_limited from the most recent packet delivered;
-indicates whether the rate sample is application-limited.
-
-rs.interval: The length of the sampling interval.
-
-rs.delivered: The amount of data marked as delivered over the sampling interval.
-
-rs.prior_delivered: The P.delivered count from the most recent packet delivered.
-
-rs.prior_time: The P.delivered_time from the most recent packet delivered.
-
-rs.send_elapsed: Send time interval calculated from the most recent packet
-delivered (see the "Send Rate" section above).
-
-rs.ack_elapsed: ACK time interval calculated from the most recent packet
-delivered (see the "ACK Rate" section above).
-
-
-##### Transmitting a data packet {#transmitting-a-data-packet}
-
-Upon transmitting a data packet, the sender snapshots the current delivery
-information in per-packet state. This will allow the sender
-to generate a rate sample later, in the UpdateRateSample() step, when the
-packet is (S)ACKed.
-
-If there are packets already in flight, then we need to start delivery rate
-samples from the time we received the most recent ACK, to try to ensure that
-we include the full time the network needs to deliver all in-flight data.
-If there is no data in flight yet, then we can start the delivery rate
-interval at the current time, since we know that any ACKs after now indicate
-that the network was able to deliver that data completely in the sampling
-interval between now and the next ACK.
-
-After each packet transmission, the sender executes the following steps:
-
-~~~~
-  SendPacket(Packet P):
-    if (SND.NXT == SND.UNA)  /* no packets in flight yet? */
-      C.first_sent_time  = C.delivered_time = P.sent_time
-
-    P.first_sent_time = C.first_sent_time
-    P.delivered_time  = C.delivered_time
-    P.delivered       = C.delivered
-    P.is_app_limited  = (C.app_limited != 0)
-~~~~
-
-
-##### Upon receiving an ACK {#upon-receiving-an-ack}
-
-When an ACK arrives, the sender invokes GenerateRateSample() to fill in a
-rate sample. For each  packet that was newly acknowledged, UpdateRateSample()
-updates the rate sample based on a snapshot of connection delivery information
-from the time at which the packet was last transmitted. UpdateRateSample()
-is invoked multiple times when a stretched ACK acknowledges multiple data
-packets. In this case we use the information from the most recently sent
-packet, i.e., the packet with the highest "P.delivered" value.
-
-~~~~
-  /* Upon receiving ACK, fill in delivery rate sample rs. */
-  GenerateRateSample(RateSample rs):
-    for each newly acknowledged packet P
-      UpdateRateSample(P, rs)
-
-    /* Clear app-limited field if bubble is ACKed and gone. */
-    if (C.app_limited and C.delivered > C.app_limited)
-      C.app_limited = 0
-
-    if (rs.prior_time == 0)
-      return false  /* nothing delivered on this ACK */
-
-    /* Use the longer of the send_elapsed and ack_elapsed */
-    rs.interval = max(rs.send_elapsed, rs.ack_elapsed)
-
-    rs.delivered = C.delivered - rs.prior_delivered
-
-    /* Normally we expect interval >= MinRTT.
-     * Note that rate may still be overestimated when a spuriously
-     * retransmitted skb was first (s)acked because "interval"
-     * is under-estimated (up to an RTT). However, continuously
-     * measuring the delivery rate during loss recovery is crucial
-     * for connections that suffer heavy or prolonged losses.
-     */
-    if (rs.interval <  MinRTT(tp))
-      rs.interval = -1
-      return false  /* no reliable sample */
-
-    if (rs.interval != 0)
-      rs.delivery_rate = rs.delivered / rs.interval
-
-    return true;  /* we filled in rs with a rate sample */
-
-  /* Update rs when a packet is acknowledged. */
-  UpdateRateSample(Packet P, RateSample rs):
-    if (P.delivered_time == 0)
-      return /* P already acknowledged */
-
-    C.delivered += P.data_length
-    C.delivered_time = Now()
-
-    /* Update info using the newest packet: */
-    if (!rs.has_data or IsNewestPacket(P, rs))
-      rs.has_data         = true
-      rs.prior_delivered  = P.delivered
-      rs.prior_time       = P.delivered_time
-      rs.is_app_limited   = P.is_app_limited
-      rs.send_elapsed     = P.sent_time - P.first_sent_time
-      rs.ack_elapsed      = C.delivered_time - P.delivered_time
-      rs.last_end_seq     = P.end_seq
-      C.first_sent_time   = P.sent_time
-
-    /* Mark the packet as delivered once it's acknowleged. */
-    P.delivered_time = 0
-
-  /* Is the given Packet the most recently sent packet
-   * that has been delivered? */
-  IsNewestPacket(Packet P, RateSample rs):
-    return (P.sent_time > C.first_sent_time or
-            (P.sent_time == C.first_sent_time and
-             after(P.end_seq, rs.last_end_seq))
-~~~~
-
-
-##### Detecting application-limited phases {#detecting-application-limited-phases}
-
-An application-limited phase starts when the connection decides to send more
-data, at a point in time when the connection had previously run out of data.
-Some decisions to send more data are triggered by the application writing
-more data to the connection, and some are triggered by loss detection (during
-ACK processing or upon the triggering of a timer) estimating that some sequence
-ranges need to be retransmitted. To detect all such cases, the algorithm
-calls CheckIfApplicationLimited() to check for application-limited behavior in
-the following situations:
-
-* The sending application asks the transport layer to send more data; i.e.,
-  upon each write from the application, before new application data is enqueued
-  in the transport send buffer or transmitted.
-
-* At the beginning of ACK processing, before updating the estimated number
-  of packets in flight, and before congestion control modifies C.cwnd or
-  C.pacing_rate.
-
-* At the beginning of connection timer processing, for all timers that might
-  result in the transmission of one or more data segments. For example: RTO
-  timers, TLP timers, RACK reordering timers, or Zero Window Probe timers.
-
-When checking for application-limited behavior, the connection checks all the
-conditions previously described in the "Tracking application-limited phases"
-section, and if all are met then it marks the connection as
-application-limited:
-
-~~~~
-  CheckIfApplicationLimited():
-    if (C.write_seq - SND.NXT < SND.MSS and
-        C.pending_transmissions == 0 and
-        C.pipe < C.cwnd and
-        C.lost_out <= C.retrans_out)
-      C.app_limited = (C.delivered + C.pipe) ? : 1
-~~~~
-
-
-#### Delivery Rate Sampling Discussion {#delivery-rate-sampling-discussion}
-
-##### Offload Mechanisms {#offload-mechanisms}
-
-If a transport sender implementation uses an offload mechanism (such as TSO,
-GSO, etc.) to combine multiple C.SMSS of data into a single packet "aggregate"
-for the purposes of scheduling transmissions, then it is RECOMMENDED that
-the per-packet state be tracked for each packet "aggregate" rather than each
-SMSS. For simplicity this document refers to such state as "per-packet",
-whether it is per "aggregate" or per C.SMSS.
-
-
-##### Impact of ACK losses {#impact-of-ack-losses}
-
-Delivery rate samples are generated upon receiving each ACK; ACKs may contain
-both cumulative and selective acknowledgment information. Losing an ACK results
-in losing the delivery rate sample corresponding to that ACK, and generating a
-delivery rate sample at later a time (upon the arrival of the next ACK). This
-can underestimate the delivery rate due the artificially inflated
-"rs.interval". The impact of this effect is mitigated using the BBR.max_bw
-filter.
-
-
-##### Impact of packet reordering {#impact-of-packet-reordering}
-
-This algorithm is robust to packet reordering; it makes no assumptions about
-the order in which packets are delivered or ACKed. In particular, for a
-particular packet P, it does not matter which packets are delivered between the
-transmission of P and the ACK of packet P, since C.delivered will be
-incremented appropriately in any case.
-
-
-##### Impact of packet loss and retransmissions {#impact-of-packet-loss-and-retransmissions}
-
-There are several possible approaches for handling cases where a delivery
-rate sample is based on a retransmitted packet.
-
-If the transport protocol supports unambiguous ACKs for retransmitted data
-(as in QUIC {{RFC9000}}) then the algorithm is perfectly robust to retransmissions,
-because the starting packet, P, for the sample can be unambiguously retrieved.
-
-If the transport protocol, like TCP {{RFC9293}}, has ambiguous ACKs for
-retransmitted sequence ranges, then the following approaches MAY be used:
-
-1. The sender MAY choose to filter out implausible delivery rate samples, as
-  described in the GenerateRateSample() step in the "Upon receiving an ACK"
-  section, by discarding samples whose rs.interval is lower than the minimum
-  RTT seen on the connection.
-
-2. The sender MAY choose to skip the generation of a delivery rate sample for
-  a retransmitted sequence range.
-
-
-###### TCP Connections without SACK {#connections-without-sack}
-
-Whenever possibile, TCP connections using BBR as a congestion controller SHOULD
-use both SACK and timestamps. Failure to do so will cause BBR's RTT and
-bandwidth measurements to be much less accurate.
-
-When using TCP without SACK (i.e., either or both ends of the connections do
-not accept SACK), this algorithm can be extended to estimate approximate
-delivery rates using duplicate ACKs (much like Reno and {{RFC5681}} estimates
-that each duplicate ACK indicates that a data packet has been delivered).
-
 ### BBR.max_bw Max Filter {#bbrmaxbw-max-filter}
 
 Delivery rate samples are often below the typical bottleneck bandwidth
@@ -2537,20 +2622,24 @@ estimate, since this indicates the current BBR.Max_bw estimate is too low.
 ### Updating the BBR.max_bw Max Filter {#updating-the-bbrmaxbw-max-filter}
 
 For every ACK that acknowledges some data packets as delivered, BBR invokes
-BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows (here
-rs.delivery_rate is the delivery rate sample obtained from the ACK that is
-being processed, as specified in {{delivery-rate-samples}}):
+BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows:
 
 ~~~~
   BBRUpdateMaxBw()
     BBRUpdateRound()
-    if (rs.delivery_rate >= BBR.max_bw || !rs.is_app_limited)
+    if (RS.delivery_rate > 0 &&
+        (RS.delivery_rate >= BBR.max_bw || !RS.is_app_limited))
         BBR.max_bw = UpdateWindowedMaxFilter(
-                      filter=BBR.MaxBwFilter,
-                      value=rs.delivery_rate,
+                      filter=BBR.max_bw_filter,
+                      value=RS.delivery_rate,
                       time=BBR.cycle_count,
                       window_length=MaxBwFilterLen)
 ~~~~
+
+UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols' algorithm
+for tracking the minimum/maximum value of a data stream over some measurement
+window. The description of the algorithm and a sample implementation are
+available in Linux {{KN_FILTER}}.
 
 
 ### Tracking Time for the BBR.max_bw Max Filter {#tracking-time-for-the-bbrmaxbw-max-filter}
@@ -2592,7 +2681,7 @@ The only divergence from RTT estimation for retransmission timeouts is in the
 case where a given acknowledgment ACKs more than one data packet. In order to
 be conservative and schedule long timeouts to avoid spurious retransmissions,
 the maximum among such potential RTT samples is typically used for computing
-retransmission timeouts; i.e., SRTT is typically calculated using the data
+retransmission timeouts; i.e., C.srtt is typically calculated using the data
 packet with the earliest transmission time. By contrast, in order for BBR to
 try to reach the minimum amount of data in flight to fill the pipe, BBR uses
 the minimum among such potential RTT samples; i.e., BBR calculates the RTT
@@ -2655,7 +2744,7 @@ For TCP, offload_budget can be computed as follows:
 
 ~~~~
     BBRUpdateOffloadBudget():
-      BBR.offload_budget = 3 * BBR.send_quantum
+      BBR.offload_budget = 3 * C.send_quantum
 ~~~~
 
 The factor of 3 is chosen to allow maintaining at least:
@@ -2701,7 +2790,7 @@ More precisely, this is computed as:
         BBR.extra_acked_delivered = 0
         BBR.extra_acked_interval_start = Now()
         expected_delivered = 0
-    BBR.extra_acked_delivered += rs.newly_acked
+    BBR.extra_acked_delivered += RS.newly_acked
     extra = BBR.extra_acked_delivered - expected_delivered
     extra = min(extra, C.cwnd)
     if (BBR.full_bw_reached)
@@ -2710,7 +2799,7 @@ More precisely, this is computed as:
       filter_len = 1  /* in Startup, just remember 1 round */
     BBR.extra_acked =
       UpdateWindowedMaxFilter(
-        filter=BBR.ExtraACKedFilter,
+        filter=BBR.extra_acked_filter,
         value=extra,
         time=BBR.round_count,
         window_length=filter_len)
@@ -2746,18 +2835,18 @@ reduces BBR.inflight_longterm:
 ~~~~
   /* Do loss signals suggest C.inflight is too high? */
   IsInflightTooHigh():
-    return (rs.lost > rs.tx_in_flight * BBR.LossThresh)
+    return (RS.lost > RS.tx_in_flight * BBR.LossThresh)
 
   BBRHandleInflightTooHigh():
     BBR.bw_probe_samples = 0;  /* only react once per bw probe */
-    if (!rs.is_app_limited)
-      BBR.inflight_longterm = max(rs.tx_in_flight,
+    if (!RS.is_app_limited)
+      BBR.inflight_longterm = max(RS.tx_in_flight,
                             BBRTargetInflight() * BBR.Beta))
     If (BBR.state == ProbeBW_UP)
       BBRStartProbeBW_DOWN()
 ~~~~
 
-Here rs.tx_in_flight is the amount of data that was estimated to be in flight
+Here RS.tx_in_flight is the C.inflight value
 when the most recently ACKed packet was sent. And the BBR.Beta (0.7x) bound
 is to try to ensure that BBR does not react more dramatically than CUBIC's
 0.7x multiplicative decrease factor.
@@ -2810,20 +2899,20 @@ In pseudocode:
     BBRNoteLoss()
     if (!BBR.bw_probe_samples)
       return /* not a packet sent while probing bandwidth */
-    rs.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
-    rs.lost = C.lost - P.lost /* data lost since transmit */
-    rs.is_app_limited = P.is_app_limited;
+    RS.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
+    RS.lost = C.lost - P.lost /* data lost since transmit */
+    RS.is_app_limited = P.is_app_limited;
     if (IsInflightTooHigh())
-      rs.tx_in_flight = BBRInflightLongtermFromLostPacket(rs, packet)
+      RS.tx_in_flight = BBRInflightAtLoss(rs, packet)
       BBRHandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
-  BBRInflightLongtermFromLostPacket(rs, packet):
+  BBRInflightAtLoss(RS, packet):
     size = packet.size
     /* What was in flight before this packet? */
-    inflight_prev = rs.tx_in_flight - size
+    inflight_prev = RS.tx_in_flight - size
     /* What was lost before this packet? */
-    lost_prev = rs.lost - size
+    lost_prev = RS.lost - size
     lost_prefix = (BBR.LossThresh * inflight_prev - lost_prev) /
                   (1 - BB.RLossThresh)
     /* At what C.inflight value did losses cross BBR.LossThresh? */
@@ -2851,10 +2940,10 @@ recovery, TLP recovery; whether application-limited or not.
 There are two key parameters the algorithm tracks, to measure the current
 delivery process:
 
-BBR.bw_latest: a 1-round-trip max of delivered bandwidth (rs.delivery_rate).
+BBR.bw_latest: a 1-round-trip max of delivered bandwidth (RS.delivery_rate).
 
 BBR.inflight_latest: a 1-round-trip max of delivered volume of data
-(rs.delivered).
+(RS.delivered).
 
 Upon the ACK at the end of each round that encountered a newly-marked loss,
 the flow updates its model (BBR.bw_shortterm and BBR.inflight_shortterm) as follows:
@@ -2870,17 +2959,17 @@ This logic can be represented as follows:
   /* Near start of ACK processing: */
   BBRUpdateLatestDeliverySignals():
     BBR.loss_round_start = 0
-    BBR.bw_latest       = max(BBR.bw_latest,       rs.delivery_rate)
-    BBR.inflight_latest = max(BBR.inflight_latest, rs.delivered)
-    if (rs.prior_delivered >= BBR.loss_round_delivered)
+    BBR.bw_latest       = max(BBR.bw_latest,       RS.delivery_rate)
+    BBR.inflight_latest = max(BBR.inflight_latest, RS.delivered)
+    if (RS.prior_delivered >= BBR.loss_round_delivered)
       BBR.loss_round_delivered = C.delivered
       BBR.loss_round_start = 1
 
   /* Near end of ACK processing: */
   BBRAdvanceLatestDeliverySignals():
     if (BBR.loss_round_start)
-      BBR.bw_latest       = rs.delivery_rate
-      BBR.inflight_latest = rs.delivered
+      BBR.bw_latest       = RS.delivery_rate
+      BBR.inflight_latest = RS.delivered
 
   BBRResetCongestionSignals():
     BBR.loss_in_round = 0
@@ -2995,14 +3084,14 @@ BBR schedules quanta of packets for transmission.
 
 The sending host implements pacing by maintaining inter-quantum spacing at
 the time each packet is scheduled for departure, calculating the next departure
-time for a packet for a given flow (BBR.next_departure_time) as a function
+time for a packet for a given flow (C.next_send_time) as a function
 of the most recent packet size and the current pacing rate, as follows:
 
 ~~~~
-  BBR.next_departure_time = max(Now(), BBR.next_departure_time)
-  P.departure_time = BBR.next_departure_time
+  C.next_send_time = max(Now(), C.next_send_time)
+  P.send_time = C.next_send_time
   pacing_delay = packet.size / C.pacing_rate
-  BBR.next_departure_time = BBR.next_departure_time + pacing_delay
+  C.next_send_time = C.next_send_time + pacing_delay
 ~~~~
 
 To adapt to the bottleneck, in general BBR sets the pacing rate to be
@@ -3012,12 +3101,11 @@ called pacing_gain.
 When a BBR flow starts it has no bw estimate (bw is 0). So in this case it
 sets an initial pacing rate based on the transport sender implementation's
 initial congestion window ("C.InitialCwnd", e.g. from {{RFC6928}}), the
-initial SRTT (smoothed round-trip time) after the first non-zero RTT
-sample, and the initial pacing_gain:
+initial C.srtt after the first non-zero RTT sample, and the initial pacing_gain:
 
 ~~~~
   BBRInitPacingRate():
-    nominal_bandwidth = C.InitialCwnd / (SRTT ? SRTT : 1ms)
+    nominal_bandwidth = C.InitialCwnd / (C.srtt ? C.srtt : 1ms)
     C.pacing_rate =  BBR.StartupPacingGain * nominal_bandwidth
 ~~~~
 
@@ -3046,7 +3134,7 @@ high utilization, the BBR.PacingMarginPercent constant of 1 aims to cause
 BBR to pace at 1% below the bw, on average.
 
 
-### Send Quantum: BBR.send_quantum {#send-quantum-bbrsendquantum}
+### Send Quantum: C.send_quantum {#send-quantum-bbrsendquantum}
 
 In order to amortize per-packet overheads involved in the sending process (host
 CPU, NIC processing, and interrupt processing delays), high-performance
@@ -3065,17 +3153,17 @@ aggregates. This decision is based on a trade-off:
   in lower CPU overheads at the sending and receiving hosts, who can ship larger
   amounts of data with a single trip through the networking stack.
 
-On each ACK, BBR runs BBRSetSendQuantum() to update BBR.send_quantum  as
+On each ACK, BBR runs BBRSetSendQuantum() to update C.send_quantum  as
 follows:
 
 ~~~~
   BBRSetSendQuantum():
-    BBR.send_quantum = C.pacing_rate * 1ms
-    BBR.send_quantum = min(BBR.send_quantum, 64 KBytes)
-    BBR.send_quantum = max(BBR.send_quantum, 2 * C.SMSS)
+    C.send_quantum = C.pacing_rate * 1ms
+    C.send_quantum = min(C.send_quantum, 64 KBytes)
+    C.send_quantum = max(C.send_quantum, 2 * C.SMSS)
 ~~~~
 
-A BBR implementation MAY use alternate approaches to select a BBR.send_quantum,
+A BBR implementation MAY use alternate approaches to select a C.send_quantum,
 as appropriate for the CPU overheads anticipated for senders and receivers,
 and buffering considerations anticipated in the network path. However, for
 the sake of the network and other users, a BBR implementation SHOULD attempt
@@ -3193,7 +3281,7 @@ Upon retransmission timeout (RTO):
 ~~~~
   BBROnEnterRTO():
     BBRSaveCwnd()
-    C.cwnd = C.pipe + 1
+    C.cwnd = C.inflight + 1
 ~~~~
 
 Upon entering Fast Recovery:
@@ -3262,16 +3350,16 @@ to the BBR.max_inflight. When C.cwnd is below BBR.max_inflight, BBR raises
 C.cwnd gradually and cautiously, increasing C.cwnd by no more than the amount of
 data acknowledged (cumulatively or selectively) upon each ACK.
 
-Specifically, on each ACK that acknowledges "rs.newly_acked" packets as newly
+Specifically, on each ACK that acknowledges "RS.newly_acked" packets as newly
 acknowledged, BBR runs the following BBRSetCwnd() steps to update C.cwnd:
 
 ~~~~
   BBRSetCwnd():
     BBRUpdateMaxInflight()
     if (BBR.full_bw_reached)
-      C.cwnd = min(C.cwnd + rs.newly_acked, BBR.max_inflight)
+      C.cwnd = min(C.cwnd + RS.newly_acked, BBR.max_inflight)
     else if (C.cwnd < BBR.max_inflight || C.delivered < C.InitialCwnd)
-      C.cwnd = C.cwnd + rs.newly_acked
+      C.cwnd = C.cwnd + RS.newly_acked
     C.cwnd = max(C.cwnd, BBR.MinPipeCwnd)
     BBRBoundCwndForProbeRTT()
     BBRBoundCwndForModel()
@@ -3280,7 +3368,7 @@ acknowledged, BBR runs the following BBRSetCwnd() steps to update C.cwnd:
 There are several considerations embodied in the logic above. If BBR has
 measured enough samples to achieve confidence that it has filled the pipe
 (see the description of BBR.full_bw_reached in the "Startup" section below), then
-it increases C.cwnd based on the number of packets delivered, while bounding
+it increases C.cwnd based on the data delivered, while bounding
 C.cwnd to be no larger than the BBR.max_inflight adapted to the estimated
 BDP. Otherwise, if C.cwnd is below the BBR.max_inflight, or the sender
 has marked so little data delivered (less than C.InitialCwnd) that it does not
