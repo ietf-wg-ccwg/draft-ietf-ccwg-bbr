@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 23 April 2026                                    J. Beshay, Ed.
+Expires: 3 May 2026                                       J. Beshay, Ed.
                                                                     Meta
-                                                         20 October 2025
+                                                         30 October 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 April 2026.
+   This Internet-Draft will expire on 3 May 2026.
 
 Copyright Notice
 
@@ -453,8 +453,8 @@ Table of Contents
    degree of aggregation in the network path.
 
    BBR.offload_budget: The estimate of the minimum volume of data
-   necessary to achieve full throughput when using sender (ie: TSO/GSO)
-   and receiver (ie: LRO, GRO) host offload mechanisms.
+   necessary to achieve full throughput when using sender (i.e., TSO/
+   GSO) and receiver (ie: LRO, GRO) host offload mechanisms.
 
    BBR.max_inflight: The estimate of C.inflight required to fully
    utilize the bottleneck bandwidth available to the flow, based on the
