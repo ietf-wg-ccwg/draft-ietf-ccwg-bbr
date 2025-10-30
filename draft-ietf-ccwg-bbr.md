@@ -2146,9 +2146,8 @@ rate at which the network path can deliver data, and not simply the rate
 at which the application happens to be transmitting data at any moment.
 
 To track this, the estimator marks a bandwidth sample as application-limited
-if there was some moment during the sampled flight of data packets when
-congestion control would have allowed a send, and yet there was no data ready
-to send.
+if there was some moment during the sampled time when congestion control
+would have allowed data packets to be sent, and yet there was nothing to send.
 
 More specifically, the algorithm detects that an application-limited phase has
 started when the sending application requests to send new data,
