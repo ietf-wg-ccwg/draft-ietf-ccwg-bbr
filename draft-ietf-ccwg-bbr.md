@@ -1221,7 +1221,7 @@ information from the most recently sent packet to update the rate sample:
     C.delivered_time = Now()
 
     /* Update info using the newest packet: */
-    if (!RS.has_data or IsNewestPacket(P, RS))
+    if (!RS.has_data or IsNewestPacket(P))
       RS.has_data         = true
       RS.prior_delivered  = P.delivered
       RS.prior_time       = P.delivered_time
@@ -1239,7 +1239,7 @@ information from the most recently sent packet to update the rate sample:
   IsNewestPacket(Packet P):
     return (P.send_time > C.first_send_time or
             (P.send_time == C.first_send_time and
-             after(P.end_seq, RS.last_end_seq))
+             P.end_seq > RS.last_end_seq)
 ~~~~
 
 Finally, after the connection has processed all newly acknowledged packets for this
