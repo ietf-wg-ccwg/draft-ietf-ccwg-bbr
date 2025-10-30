@@ -508,7 +508,7 @@ BBR.extra_acked: A volume of data that is the estimate of the recent degree
 of aggregation in the network path.
 
 BBR.offload_budget: The estimate of the minimum volume of data necessary
-to achieve full throughput when using sender (ie: TSO/GSO) and
+to achieve full throughput when using sender (i.e., TSO/GSO) and
 receiver (ie: LRO, GRO) host offload mechanisms.
 
 BBR.max_inflight: The estimate of C.inflight required to
