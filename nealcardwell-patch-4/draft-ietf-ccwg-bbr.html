@@ -3644,7 +3644,7 @@ unsent/new data, no retransmit data, and no other data, such as encoded data
 blocks for forward error correction). The precise determination of this
 condition depends on how the connection uses mechanisms to implement
 pacing, batching, GSO/TSO/offload, etc.<a href="#section-4.5.2.2.3-4" class="pilcrow">¶</a></p>
-<p id="section-4.5.2.2.3-5">If these conditions are met then the sender has run out of data to feed the
+<p id="section-4.5.2.2.3-5">If these conditions are met, then the sender has run out of data to feed the
 network. This would effectively create a "bubble" of idle time in the data
 pipeline. This idle time means that any delivery rate sample obtained from this
 data packet, and any rate sample from a packet that follows it in the next
