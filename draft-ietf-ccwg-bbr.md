@@ -1037,10 +1037,11 @@ started when the sending application requests to send new data,
 or the connection's retransmission mechanisms decide to retransmit data,
 and the connection meets the following conditions: the congestion window and
 pacing rate would have allowed the connection to send data, and yet the
-connection is not currently sending data and has no data to send (i.e., no
-unsent data or retransmissions of previously sent data). The precise determination of this
-condition depends on how the connection uses mechanisms to implement
-pacing, batching, GSO/TSO/offload, etc.
+connection is not currently sending data and has no data to send
+(i.e., no unsent data or retransmissions of previously sent data).
+The precise determination of this condition depends on how the
+connection uses mechanisms to implement pacing, batching, GSO/TSO/offload,
+etc.
 
 If these conditions are met, then the sender has run out of data to feed the
 network. This would effectively create a "bubble" of idle time in the data
