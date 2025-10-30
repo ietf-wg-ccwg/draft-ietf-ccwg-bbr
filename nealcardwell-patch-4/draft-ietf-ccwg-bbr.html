@@ -3632,9 +3632,8 @@ sender is application-limited; for congestion control the key metric is the
 rate at which the network path can deliver data, and not simply the rate
 at which the application happens to be transmitting data at any moment.<a href="#section-4.5.2.2.3-2" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.2.3-3">To track this, the estimator marks a bandwidth sample as application-limited
-if there was some moment during the sampled flight of data packets when
-congestion control would have allowed a send, and yet there was no data ready
-to send.<a href="#section-4.5.2.2.3-3" class="pilcrow">¶</a></p>
+if there was some moment during the sampled time when congestion control
+would have allowed data packets to be sent, and yet there was nothing to send.<a href="#section-4.5.2.2.3-3" class="pilcrow">¶</a></p>
 <p id="section-4.5.2.2.3-4">More specifically, the algorithm detects that an application-limited phase has
 started when the sending application requests to send new data,
 or the connection's retransmission mechanisms decide to retransmit data,
