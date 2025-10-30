@@ -1029,26 +1029,21 @@ rate at which the network path can deliver data, and not simply the rate
 at which the application happens to be transmitting data at any moment.
 
 To track this, the estimator marks a bandwidth sample as application-limited
-if there was some moment during the sampled flight of data packets when there
-was no data ready to send.
+if there was some moment during the sampled time when congestion control
+would have allowed data packets to be sent, and yet there was no data to send.
 
-The algorithm detects that an application-limited phase has started when
-the sending application requests to send new data, or the connection's
-retransmission mechanisms decide to retransmit data, and the connection meets
-all of the following conditions:
+More specifically, the algorithm detects that an application-limited phase has
+started when the sending application requests to send new data,
+or the connection's retransmission mechanisms decide to retransmit data,
+and the connection meets the following conditions: the congestion window and
+pacing rate would have allowed the connection to send data, and yet the
+connection is not currently sending data and has no data to send
+(i.e., no unsent data or retransmissions of previously sent data).
+The precise determination of this condition depends on how the
+connection uses mechanisms to implement pacing, batching, GSO/TSO/offload,
+etc.
 
-1. The transport send buffer has less than one C.SMSS of unsent data available
-  to send.
-
-2. The sending flow is not currently in the process of transmitting a packet.
-
-3. The amount of data considered in flight is less than the congestion window
-  (C.cwnd).
-
-4. All the packets considered lost have been retransmitted.
-
-
-If these conditions are all met then the sender has run out of data to feed the
+If these conditions are met, then the sender has run out of data to feed the
 network. This would effectively create a "bubble" of idle time in the data
 pipeline. This idle time means that any delivery rate sample obtained from this
 data packet, and any rate sample from a packet that follows it in the next
