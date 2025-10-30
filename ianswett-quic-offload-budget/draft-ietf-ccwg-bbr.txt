@@ -454,7 +454,7 @@ Table of Contents
 
    BBR.offload_budget: The estimate of the minimum volume of data
    necessary to achieve full throughput when using sender (i.e., TSO/
-   GSO) and receiver (ie: LRO, GRO) host offload mechanisms.
+   GSO) and receiver (i.e., LRO, GRO) host offload mechanisms.
 
    BBR.max_inflight: The estimate of C.inflight required to fully
    utilize the bottleneck bandwidth available to the flow, based on the
