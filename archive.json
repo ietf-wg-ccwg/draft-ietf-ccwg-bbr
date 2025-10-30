@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-26T01:42:29.703824+00:00",
+  "timestamp": "2025-10-30T01:42:12.203103+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -382,13 +382,15 @@
       "state": "OPEN",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "ianswett"
+      ],
       "labels": [
         "Editorial"
       ],
       "body": "I believe the draft is fairly transport agnostic, but the bandwidth estimation section still has some references to end_seq and similar names that don't cleanly translate to QUIC.\n\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/draft-ietf-ccwg-bbr-02/draft-ietf-ccwg-bbr.md#bbrmax_bw-estimated-maximum-bandwidth-bbrmaxbw-estimated-maximum-bandwidth",
       "createdAt": "2025-03-16T00:39:46Z",
-      "updatedAt": "2025-07-14T14:52:40Z",
+      "updatedAt": "2025-10-29T21:44:34Z",
       "closedAt": null,
       "comments": [
         {
@@ -1104,11 +1106,13 @@
       "state": "OPEN",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "ianswett"
+      ],
       "labels": [],
       "body": "> The BBR.extra_acked thus reflects the recently-measured magnitude of data and ACK aggregation effects such as batching and slotting at shared-medium L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms (TSO, GSO, LRO, GRO), and end host or middlebox ACK decimation/thinning.\n\nMiddlebox ACK decimation is not possible when using QUIC. Instead, RFC 9002 requires that at least every other ack-eliciting packet elicits a fresh ACK frame.\n\nIt would be very useful if this section could give some guidance on how to use the [QUIC ACK-FREQUENCY](https://datatracker.ietf.org/doc/draft-ietf-quic-ack-frequency/) extension, which allows the sender to control how frequently the receiver sends an ACK frame.",
       "createdAt": "2025-07-13T02:57:07Z",
-      "updatedAt": "2025-08-18T04:01:57Z",
+      "updatedAt": "2025-10-29T21:26:54Z",
       "closedAt": null,
       "comments": [
         {
@@ -1238,6 +1242,22 @@
       "createdAt": "2025-08-20T20:08:45Z",
       "updatedAt": "2025-08-27T20:37:31Z",
       "closedAt": "2025-08-27T20:37:31Z",
+      "comments": []
+    },
+    {
+      "number": 90,
+      "id": "I_kwDOL3MllM7UrAHo",
+      "title": "BBR connections could get stuck in DRAIN if estimated bandwidth is sufficiently overestimated",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/90",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "There is a bug where with BBR, DRAIN could last forever (or until the first PROBE_RTT) if the estimated bandwidth is too high.\n\nThis is because: if the estimated bandwidth overestimated enough, then drain_pacing_rate  = drain_pacing_gain*estimated_bw may be above the current delivery rate of the flow, and thus pacing at that rate may increase inflight (until inflight reaches cwnd) instead of reducing inflight. So inflight may never fall to match the estimated BDP, so the connection may never reach the exit condition for DRAIN (inflight <= estimated_BDP), the connection we may stay in DRAIN forever, or until the first PROBE_RTT forces inflight <= estimated_BDP by setting the cwnd to estimated_BDP.\n\nOne appealing solution to this would be to get rid of the DRAIN state, and instead use the PROBE_BW_DOWN state. The PROBE_BW_DOWN state already has logic that ensures that the connection will exit from that state if it's time to probe for bandwidth again. This would make the code simpler, overall.\n\nA potential downside of this solution would be that the current PROBE_BW_DOWN state uses a pacing gain of 0.90, which would take considerably longer than the DRAIN pacing gain of (0.35 or 0.5, depending on the version of the draft or implementation) to drain any queue that accumulated in STARTUP. It's not clear which is bigger: the potential cost of the additional time to drain the queue, or the potential benefit of the higher pacing gain of 0.9 perhaps avoiding some underutilization (and rebuffers, for video). If 0.9 is too slow to drain the queue then we could consider something like using 0.5 for the first PROBE_BW_DOWN and 0.9 for all later PROBE_BW_DOWN states.\n\nIf we go this route, then instead of PR #6  we would want a PR to describe this new approach.\n\nThis is a significant change, so we'd want some deployment experience and probably an A/B test to verify that any proposed fix works well.\n\ncc: @ianswett @jbeshay \n",
+      "createdAt": "2025-10-29T21:53:27Z",
+      "updatedAt": "2025-10-29T21:53:27Z",
+      "closedAt": null,
       "comments": []
     }
   ],
@@ -3146,13 +3166,13 @@
       "labels": [],
       "body": "Fix the pacing specification in \"Tracking application-limited phases\" section.\r\n\r\nThe previous text, \"The sending flow is not currently in the process of transmitting a packet,\" was an imprecise description of the condition that was checked in the Linux TCP stack to handle tracking of application-limited traffic for fq-based pacing. But this text was not precise, and does not correctly capture the checks needed for other pacing implementations.\r\n\r\nFixes #42",
       "createdAt": "2025-05-29T00:01:59Z",
-      "updatedAt": "2025-07-21T02:21:35Z",
+      "updatedAt": "2025-10-29T22:12:18Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b61a33f73bb464e1ef9663d29407f9763a57b62f",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-patch-4",
-      "headRefOid": "61155b438b0767721c4908514e739691522be26a",
+      "headRefOid": "bd65c6f5b166435074de7d0bf73906e6c837431a",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -3185,6 +3205,13 @@
           "body": "I agree that the second case is overly sensitive in that if one is application limited for 1ms of every 100ms RTT, you'd have no 'good' samples, but in reality they're likely all quite good. One can make the logic a bit more flexible to these transitory issues, but you still end up with a non-linearity.\r\n\r\nBut yes, let's discuss that on a separate issue.  I am not sure there's an 'easy' fix for that general problem.",
           "createdAt": "2025-07-21T02:21:35Z",
           "updatedAt": "2025-07-21T02:21:35Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I have attempted to update the PR to reflect our discussions so far. @huitema, @ianswett, @jbeshay and any other interested folks, please take a look. Thanks!\r\n",
+          "createdAt": "2025-10-29T22:12:17Z",
+          "updatedAt": "2025-10-29T22:12:17Z"
         }
       ],
       "reviews": [
@@ -5459,7 +5486,7 @@
       "labels": [],
       "body": "Fixes #67",
       "createdAt": "2025-10-20T21:46:11Z",
-      "updatedAt": "2025-10-20T21:46:12Z",
+      "updatedAt": "2025-10-28T16:43:16Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "108e239b7f1fe2a8d64b9ca69e6c0f4003e50a2c",
@@ -5471,7 +5498,46 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7KC5IW",
+          "commit": {
+            "abbreviatedOid": "41d6a4e"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Thanks, Ian! Overall, looks great. A few thoughts...\r\n",
+          "createdAt": "2025-10-28T16:35:29Z",
+          "updatedAt": "2025-10-28T16:43:16Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "nit: s/ie:/i.e.,/ ... AFAIK the preferred formatting in IETF docs is \"i.e.,\" (e.g., in https://datatracker.ietf.org/doc/html/rfc9293 )\r\n",
+              "createdAt": "2025-10-28T16:35:29Z",
+              "updatedAt": "2025-10-28T16:43:16Z"
+            },
+            {
+              "originalPosition": 7,
+              "body": "nit: s/ie:/i.e.,/\r\n",
+              "createdAt": "2025-10-28T16:35:43Z",
+              "updatedAt": "2025-10-28T16:43:16Z"
+            },
+            {
+              "originalPosition": 35,
+              "body": "I found the order of presentation in this section a little confusing. Starting with the \"For QUIC, senders might have pacing offload available\" paragraph made it sound as if perhaps an offload budget was only needed for QUIC if pacing offload was available, which AFAIK is not the case.\r\n\r\nI would suggest presenting the paragraphs in an order something like:\r\n\r\n```\r\nFor QUIC, in the simplest case, offload_budget is equal to the send quantum:\r\n\r\n~~~~\r\n    BBRUpdateOffloadBudget():\r\n      BBR.offload_budget = C.send_quantum\r\n~~~~\r\n\r\nIn addition, for QUIC, senders might have pacing offload available, allowing them to\r\nschedule packets for transmission in the future. In this case, the offload budget SHOULD\r\nbe increased to include the amount of data that can be scheduled for future transmissions\r\nby the pacing offload mechanism.\r\n\r\nFurthermore, QUIC receivers might acknowledge packets less often...\r\n\r\n```\r\n",
+              "createdAt": "2025-10-28T16:41:42Z",
+              "updatedAt": "2025-10-28T16:43:16Z"
+            },
+            {
+              "originalPosition": 42,
+              "body": "Probably good to cite the draft-ietf-quic-ack-frequency draft?\r\n\r\n",
+              "createdAt": "2025-10-28T16:42:09Z",
+              "updatedAt": "2025-10-28T16:43:16Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 89,
@@ -5485,19 +5551,73 @@
       "labels": [],
       "body": "We pass in both a Packet and a RateSample, but the method currently only has one argument.\r\n\r\nI also changed the method to check RS, not C, but it's possible that's not correct?",
       "createdAt": "2025-10-24T15:42:31Z",
-      "updatedAt": "2025-10-24T15:42:32Z",
+      "updatedAt": "2025-10-29T21:56:50Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "108e239b7f1fe2a8d64b9ca69e6c0f4003e50a2c",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-isnewestpacket",
-      "headRefOid": "164289bc9240c66652a7c1396f586754ab17a400",
+      "headRefOid": "f1076367c4b74805c6b4469db9079f59f8c44a2f",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7KCV2O",
+          "commit": {
+            "abbreviatedOid": "164289b"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-28T16:05:52Z",
+          "updatedAt": "2025-10-28T16:07:32Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "I would suggest keep the C.first_send_time expressions as C.first_send_time.\r\n\r\nBoth in the draft and in the Linux TCP rate sampling code, there is no RS.first_send_time; there's only a C.first_send_time.\r\n\r\nFor the record, in the Linux TCP rate sampling code the role of C.first_send_time is implemented with a field called tp->first_tx_mstamp, and the comparison is with respect to tp->first_tx_mstamp.\r\n  https://elixir.bootlin.com/linux/v6.12/source/net/ipv4/tcp_rate.c#L72\r\n\r\nSince we say in the draft that \"All functions involved in ACK processing additionally have implicit access to the the (RS) for for the rate sample populated processing that ACK\", and the UpdateRateSample(Packet P) function definition does not take an RS input, I would suggest resolving the inconsistencies in the draft with something like the following, to remove the RS from the argument list in the call to IsNewestPacket(P):\r\n\r\n```\r\n-    if (!RS.has_data or IsNewestPacket(P, RS))\r\n+    if (!RS.has_data or IsNewestPacket(P))\r\n```\r\n\r\nThe change to use (P.end_seq > RS.last_end_seq) LGTM, if that's how QUIC talks about sequence number comparisons (handling wraps).\r\n\r\n\r\n",
+              "createdAt": "2025-10-28T16:05:52Z",
+              "updatedAt": "2025-10-28T16:07:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7KcWtI",
+          "commit": {
+            "abbreviatedOid": "164289b"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-29T21:44:18Z",
+          "updatedAt": "2025-10-29T21:44:18Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Thanks Neal, I updated the PR a bit, but I probably just need to try to write the larger PR to fix #26 ",
+              "createdAt": "2025-10-29T21:44:18Z",
+              "updatedAt": "2025-10-29T21:44:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7KckfM",
+          "commit": {
+            "abbreviatedOid": "f107636"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "LGTM, thanks!\r\n",
+          "createdAt": "2025-10-29T21:56:50Z",
+          "updatedAt": "2025-10-29T21:56:50Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
