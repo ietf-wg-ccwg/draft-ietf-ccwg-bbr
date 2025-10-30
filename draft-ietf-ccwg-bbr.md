@@ -2155,8 +2155,7 @@ or the connection's retransmission mechanisms decide to retransmit data,
 and the connection meets the following conditions: the congestion window and
 pacing rate would have allowed the connection to send data, and yet the
 connection is not currently sending data and has no data to send (i.e., no
-unsent/new data, no retransmit data, and no other data, such as encoded data
-blocks for forward error correction). The precise determination of this
+unsent data or retransmissions of previously sent data). The precise determination of this
 condition depends on how the connection uses mechanisms to implement
 pacing, batching, GSO/TSO/offload, etc.
 
