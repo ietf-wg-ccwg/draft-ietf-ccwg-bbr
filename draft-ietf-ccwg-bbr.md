@@ -2160,7 +2160,7 @@ blocks for forward error correction). The precise determination of this
 condition depends on how the connection uses mechanisms to implement
 pacing, batching, GSO/TSO/offload, etc.
 
-If these conditions are met then the sender has run out of data to feed the
+If these conditions are met, then the sender has run out of data to feed the
 network. This would effectively create a "bubble" of idle time in the data
 pipeline. This idle time means that any delivery rate sample obtained from this
 data packet, and any rate sample from a packet that follows it in the next
