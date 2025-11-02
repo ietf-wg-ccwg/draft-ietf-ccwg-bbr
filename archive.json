@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-30T01:42:12.203103+00:00",
+  "timestamp": "2025-11-02T01:44:46.828083+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -708,15 +708,15 @@
       "id": "I_kwDOL3MllM64JZ9h",
       "title": "Application-limited detection depends on implementation of pacing",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/42",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "huitema",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "The tracking of \"application-limited\" status is defined in [4.5.2.2.3. ](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/draft-ietf-ccwg-bbr.html#section-4.5.2.2.3)[Tracking application-limited phases](https://ietf-wg-ccwg.github.io/draft-ietf-ccwg-bbr/draft-ietf-ccwg-bbr.html#name-tracking-application-limite). The text suggests detecting a \"bubble\" during which the application fails to send data.\n\nPacing is going to interfere with this detection. If pacing is implemented via some kind of \"leaky bucket\" algorithm, the first effect of the \"bubble\" is to increase the number of tokens available, up to the \"quantum\" value. As long as the available tokens do not exceed the quantum, the transport does not really know whether the opportunity to send is lost, or whether the application is going to send a batch of data that catches up with pacing. In the later case, the transport is not really \"application-limited\".",
       "createdAt": "2025-05-25T18:05:49Z",
-      "updatedAt": "2025-05-29T00:31:41Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-30T12:55:49Z",
+      "closedAt": "2025-10-30T12:55:49Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -3159,24 +3159,26 @@
       "id": "PR_kwDOL3MllM6YCsDR",
       "title": "Fix pacing spec in \"application-limited\" section",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/47",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Fix the pacing specification in \"Tracking application-limited phases\" section.\r\n\r\nThe previous text, \"The sending flow is not currently in the process of transmitting a packet,\" was an imprecise description of the condition that was checked in the Linux TCP stack to handle tracking of application-limited traffic for fq-based pacing. But this text was not precise, and does not correctly capture the checks needed for other pacing implementations.\r\n\r\nFixes #42",
       "createdAt": "2025-05-29T00:01:59Z",
-      "updatedAt": "2025-10-29T22:12:18Z",
+      "updatedAt": "2025-10-30T12:55:48Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
-      "baseRefOid": "b61a33f73bb464e1ef9663d29407f9763a57b62f",
+      "baseRefOid": "90b859c3d7cd5022a3d898f7898aef668983aae9",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "nealcardwell-patch-4",
-      "headRefOid": "bd65c6f5b166435074de7d0bf73906e6c837431a",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "9c84e9adfb36cf6f5531d7d58d75faf0fd9c1400",
+      "closedAt": "2025-10-30T12:55:48Z",
+      "mergedAt": "2025-10-30T12:55:48Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "c70b677ddd17550c7793a5e7713634614e7f7f2b"
+      },
       "comments": [
         {
           "author": "ianswett",
@@ -3212,6 +3214,13 @@
           "body": "I have attempted to update the PR to reflect our discussions so far. @huitema, @ianswett, @jbeshay and any other interested folks, please take a look. Thanks!\r\n",
           "createdAt": "2025-10-29T22:12:17Z",
           "updatedAt": "2025-10-29T22:12:17Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks for the reviews! Incorporated Ian's suggestions. Merging.\r\n",
+          "createdAt": "2025-10-30T12:55:19Z",
+          "updatedAt": "2025-10-30T12:55:19Z"
         }
       ],
       "reviews": [
@@ -3387,6 +3396,51 @@
               "updatedAt": "2025-07-07T19:45:35Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7KfBKN",
+          "commit": {
+            "abbreviatedOid": "bd65c6f"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Looks good overall, though I had a few suggestions.",
+          "createdAt": "2025-10-30T01:45:15Z",
+          "updatedAt": "2025-10-30T01:51:01Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "```suggestion\r\nif there was some moment during the sampled time when congestion control\r\nwould have allowed data packets to be sent, and yet there was nothing to send.\r\n```",
+              "createdAt": "2025-10-30T01:45:16Z",
+              "updatedAt": "2025-10-30T01:51:01Z"
+            },
+            {
+              "originalPosition": 39,
+              "body": "```suggestion\r\nIf these conditions are met, then the sender has run out of data to feed the\r\n```",
+              "createdAt": "2025-10-30T01:46:26Z",
+              "updatedAt": "2025-10-30T01:51:01Z"
+            },
+            {
+              "originalPosition": 35,
+              "body": "There are a lot of reasons one might want to send a packet that counts towards inflight, I'd prefer to focus on the two most common.\r\n\r\n```suggestion\r\nunsent data or retransmissions of previously sent data). The precise determination of this\r\n```",
+              "createdAt": "2025-10-30T01:50:37Z",
+              "updatedAt": "2025-10-30T01:51:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7KgeMj",
+          "commit": {
+            "abbreviatedOid": "bd65c6f"
+          },
+          "author": "huitema",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "I think the proposed change is a nice improvement on the current text. Time to check that in, and maybe open an issue for the \"detection of reduced bandwidth vs. app limited.\"",
+          "createdAt": "2025-10-30T05:35:38Z",
+          "updatedAt": "2025-10-30T05:35:38Z",
+          "comments": []
         }
       ]
     },
@@ -5486,13 +5540,13 @@
       "labels": [],
       "body": "Fixes #67",
       "createdAt": "2025-10-20T21:46:11Z",
-      "updatedAt": "2025-10-28T16:43:16Z",
+      "updatedAt": "2025-10-30T18:58:03Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "108e239b7f1fe2a8d64b9ca69e6c0f4003e50a2c",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-quic-offload-budget",
-      "headRefOid": "41d6a4eb9fe793480ccb62edd99596c1afa10a87",
+      "headRefOid": "0ec20ec1d16530048eeda3fb4fcc9c8268c16044",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -5536,6 +5590,59 @@
               "updatedAt": "2025-10-28T16:43:16Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7KpsQS",
+          "commit": {
+            "abbreviatedOid": "41d6a4e"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-30T14:25:57Z",
+          "updatedAt": "2025-10-30T14:25:58Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "```suggestion\r\nto achieve full throughput when using sender (i.e., TSO/GSO) and\r\n```",
+              "createdAt": "2025-10-30T14:25:58Z",
+              "updatedAt": "2025-10-30T14:25:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7Kps2D",
+          "commit": {
+            "abbreviatedOid": "8238c86"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-30T14:26:25Z",
+          "updatedAt": "2025-10-30T14:26:25Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "```suggestion\r\nreceiver (i.e., LRO, GRO) host offload mechanisms.\r\n```",
+              "createdAt": "2025-10-30T14:26:25Z",
+              "updatedAt": "2025-10-30T14:26:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7Kuftx",
+          "commit": {
+            "abbreviatedOid": "0ec20ec"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "So far it seems like this incorporates my first 2 suggestions but not the 3rd and 4th? :-)\n",
+          "createdAt": "2025-10-30T18:58:03Z",
+          "updatedAt": "2025-10-30T18:58:03Z",
+          "comments": []
         }
       ]
     },
@@ -5544,24 +5651,26 @@
       "id": "PR_kwDOL3MllM6vjCvd",
       "title": "Fix arguments to IsNewestPacket()",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/89",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "We pass in both a Packet and a RateSample, but the method currently only has one argument.\r\n\r\nI also changed the method to check RS, not C, but it's possible that's not correct?",
       "createdAt": "2025-10-24T15:42:31Z",
-      "updatedAt": "2025-10-29T21:56:50Z",
+      "updatedAt": "2025-10-30T01:54:14Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "108e239b7f1fe2a8d64b9ca69e6c0f4003e50a2c",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-isnewestpacket",
       "headRefOid": "f1076367c4b74805c6b4469db9079f59f8c44a2f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-10-30T01:54:14Z",
+      "mergedAt": "2025-10-30T01:54:14Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "90b859c3d7cd5022a3d898f7898aef668983aae9"
+      },
       "comments": [],
       "reviews": [
         {
