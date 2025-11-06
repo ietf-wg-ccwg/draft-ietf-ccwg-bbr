@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-04T01:40:48.170672+00:00",
+  "timestamp": "2025-11-06T01:41:15.500649+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1263,9 +1263,24 @@
       "labels": [],
       "body": "There is a bug where with BBR, DRAIN could last forever (or until the first PROBE_RTT) if the estimated bandwidth is too high.\n\nThis is because: if the estimated bandwidth overestimated enough, then drain_pacing_rate  = drain_pacing_gain*estimated_bw may be above the current delivery rate of the flow, and thus pacing at that rate may increase inflight (until inflight reaches cwnd) instead of reducing inflight. So inflight may never fall to match the estimated BDP, so the connection may never reach the exit condition for DRAIN (inflight <= estimated_BDP), the connection we may stay in DRAIN forever, or until the first PROBE_RTT forces inflight <= estimated_BDP by setting the cwnd to estimated_BDP.\n\nOne appealing solution to this would be to get rid of the DRAIN state, and instead use the PROBE_BW_DOWN state. The PROBE_BW_DOWN state already has logic that ensures that the connection will exit from that state if it's time to probe for bandwidth again. This would make the code simpler, overall.\n\nA potential downside of this solution would be that the current PROBE_BW_DOWN state uses a pacing gain of 0.90, which would take considerably longer than the DRAIN pacing gain of (0.35 or 0.5, depending on the version of the draft or implementation) to drain any queue that accumulated in STARTUP. It's not clear which is bigger: the potential cost of the additional time to drain the queue, or the potential benefit of the higher pacing gain of 0.9 perhaps avoiding some underutilization (and rebuffers, for video). If 0.9 is too slow to drain the queue then we could consider something like using 0.5 for the first PROBE_BW_DOWN and 0.9 for all later PROBE_BW_DOWN states.\n\nIf we go this route, then instead of PR #6  we would want a PR to describe this new approach.\n\nThis is a significant change, so we'd want some deployment experience and probably an A/B test to verify that any proposed fix works well.\n\ncc: @ianswett @jbeshay \n",
       "createdAt": "2025-10-29T21:53:27Z",
-      "updatedAt": "2025-10-29T21:53:27Z",
+      "updatedAt": "2025-11-04T16:01:35Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "antoniovicente",
+          "authorAssociation": "NONE",
+          "body": "Is PROBE_BW_DOWN with pacing gain of 0.5 worth considering after startup or in general worthy of consideration?\n\nIn cases where PROBE_BW_UP manages to use the full CWND, it will take a long time for PROBE_BW_DOWN to reduce inflight from 2.25*BDP to 1.0 * BDP.  2.25*BDP is more than the 2.0*BDP expected at the time of startup exit.",
+          "createdAt": "2025-11-04T13:47:00Z",
+          "updatedAt": "2025-11-04T13:47:00Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Is PROBE_BW_DOWN with pacing gain of 0.5 worth considering after startup or in general worthy of consideration?\n\nYes, that's exactly what I meant by my proposal: \" If 0.9 is too slow to drain the queue then we could consider something like using 0.5 for the first PROBE_BW_DOWN and 0.9 for all later PROBE_BW_DOWN states.\" :-)\n",
+          "createdAt": "2025-11-04T16:01:35Z",
+          "updatedAt": "2025-11-04T16:01:35Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -1656,7 +1671,7 @@
       "labels": [],
       "body": "We don't need to explicitly track the ack_phase in order to advance MaxBWFilter. Instead, we can advance it when entering ProbeBW_Down.\r\n\r\nThis logic is currently used in Mvfst. ",
       "createdAt": "2024-10-21T17:14:29Z",
-      "updatedAt": "2025-08-06T20:48:37Z",
+      "updatedAt": "2025-11-05T15:13:57Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "871539f6c9e8561fc77578c37f6f33e890797c8f",
@@ -1667,7 +1682,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "renghardt",
+          "authorAssociation": "NONE",
+          "body": "Discussed at IETF 124. The authors want to hear about others' implementation experience to validate that this change is fine.",
+          "createdAt": "2025-11-05T15:13:57Z",
+          "updatedAt": "2025-11-05T15:13:57Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -1682,7 +1705,7 @@
       "labels": [],
       "body": "The drain gain value is inconsistent. The derivation doc linked (https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf) suggests using 0.5 and that's the value referenced in the table under (Summary of Control Behavior in the State Machine).  0.35 (~ 1 / StartupPacingGain) is used in a couple of other places.\r\n\r\nThis PR changes it to 0.5 everywhere. \r\n\r\nExisting implementations are using 0.35 ([Linux TCP](https://github.com/google/bbr/blob/v3/net/ipv4/tcp_bbr.c#L221C46-L221C51), [Quiche](https://github.com/google/quiche/blob/73107195dfbe8f0a531d3e2f052c9f2e15ec0e3c/quiche/quic/core/congestion_control/bbr2_misc.h#L111), [Mvfst](https://github.com/facebook/mvfst/blob/main/quic/congestion_control/Bbr2.cpp#L27)). The 0.5 value can be regarded as an upper bound. \r\n\r\nThis PR will keep the value consistent in the draft while we test the impact of the changing it to 0.5.",
       "createdAt": "2024-10-21T17:24:45Z",
-      "updatedAt": "2025-09-28T17:48:04Z",
+      "updatedAt": "2025-11-05T15:13:41Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "bbc5137f505b65c4063296e52f13d930ccfa3eb8",
@@ -1749,6 +1772,13 @@
           "body": "> (b) And in addition to the cwnd provisioned based on cwnd gain (of 2 in BBRv3), there's the BBR.offload_budget, which at small BDPs can be quite large relative to the BDP.\r\n\r\nTy for the prompt reply and pointing out the influence of the `offload_budget` in the calculation.",
           "createdAt": "2025-09-28T17:48:04Z",
           "updatedAt": "2025-09-28T17:48:04Z"
+        },
+        {
+          "author": "renghardt",
+          "authorAssociation": "NONE",
+          "body": "Discussed at IETF 124. The authors still want more data on this, and are looking for other contributors to run experiments.",
+          "createdAt": "2025-11-05T15:13:41Z",
+          "updatedAt": "2025-11-05T15:13:41Z"
         }
       ],
       "reviews": [
@@ -5731,6 +5761,46 @@
           "body": "LGTM, thanks!\r\n",
           "createdAt": "2025-10-29T21:56:50Z",
           "updatedAt": "2025-10-29T21:56:50Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 91,
+      "id": "PR_kwDOL3MllM6xjwFj",
+      "title": "Replace uses of \"?:\" operator with then clause omitted with the equivalent \"max()\" expression",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/91",
+      "state": "OPEN",
+      "author": "antoniovicente",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Replace uses of \"?:\" operator with then clause omitted with the equivalent \"max()\" expression\r\n\r\nThe ?: elvis operator with is a compiler extension (like in GCC) and not part of the standard C or C++ specifications.  Use of this operator seems relatively obscure outside the C and linux kernel dev communities.",
+      "createdAt": "2025-11-05T04:48:38Z",
+      "updatedAt": "2025-11-05T19:49:46Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "c70b677ddd17550c7793a5e7713634614e7f7f2b",
+      "headRepository": "antoniovicente/draft-ietf-ccwg-bbr",
+      "headRefName": "antonio/elvis",
+      "headRefOid": "a98b2cd823acbf7957846946829069ea76a8d984",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7MFplC",
+          "commit": {
+            "abbreviatedOid": "a98b2cd"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-11-05T19:49:46Z",
+          "updatedAt": "2025-11-05T19:49:46Z",
           "comments": []
         }
       ]
