@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 3 May 2026                                       J. Beshay, Ed.
+Expires: 13 May 2026                                      J. Beshay, Ed.
                                                                     Meta
-                                                         30 October 2025
+                                                         9 November 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 May 2026.
+   This Internet-Draft will expire on 13 May 2026.
 
 Copyright Notice
 
@@ -1249,7 +1249,7 @@ Table of Contents
            C.pending_transmissions == 0 and
            C.inflight < C.cwnd and
            C.lost_out <= C.retrans_out)
-         C.app_limited = (C.delivered + C.inflight) ? : 1
+         C.app_limited = max(C.delivered + C.inflight, 1)
 
 4.1.3.  Delivery Rate Sampling Discussion
 
@@ -2333,8 +2333,7 @@ Table of Contents
          BBRExitProbeRTT()
 
      MarkConnectionAppLimited():
-       C.app_limited =
-         (C.delivered + C.inflight) ? : 1
+       C.app_limited = max(C.delivered + C.inflight, 1)
 
 5.3.4.4.  Exiting ProbeRTT
 
