@@ -1307,7 +1307,10 @@ application-limited:
         C.pending_transmissions == 0 and
         C.inflight < C.cwnd and
         C.lost_out <= C.retrans_out)
-      C.app_limited = max(C.delivered + C.inflight, 1)
+      MarkConnectionAppLimited()
+
+  MarkConnectionAppLimited():
+    C.app_limited = max(C.delivered + C.inflight, 1)
 ~~~~
 
 
@@ -2397,9 +2400,6 @@ to the ProbeRTT state as follows:
       BBR.probe_rtt_min_stamp = Now()
       BBRRestoreCwnd()
       BBRExitProbeRTT()
-
-  MarkConnectionAppLimited():
-    C.app_limited = max(C.delivered + C.inflight, 1)
 ~~~~
 
 
