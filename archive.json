@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-09T01:44:01.401426+00:00",
+  "timestamp": "2025-11-11T01:42:03.410648+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -5786,24 +5786,26 @@
       "id": "PR_kwDOL3MllM6xjwFj",
       "title": "Replace uses of \"?:\" operator with then clause omitted with the equivalent \"max()\" expression",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/91",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "antoniovicente",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Replace uses of \"?:\" operator with then clause omitted with the equivalent \"max()\" expression\r\n\r\nThe ?: elvis operator with is a compiler extension (like in GCC) and not part of the standard C or C++ specifications.  Use of this operator seems relatively obscure outside the C and linux kernel dev communities.",
       "createdAt": "2025-11-05T04:48:38Z",
-      "updatedAt": "2025-11-05T19:49:46Z",
+      "updatedAt": "2025-11-09T13:28:07Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "c70b677ddd17550c7793a5e7713634614e7f7f2b",
       "headRepository": "antoniovicente/draft-ietf-ccwg-bbr",
       "headRefName": "antonio/elvis",
       "headRefOid": "a98b2cd823acbf7957846946829069ea76a8d984",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-11-09T13:28:07Z",
+      "mergedAt": "2025-11-09T13:28:07Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "7c83b11b10629157d0b2b188af28d786b453494b"
+      },
       "comments": [],
       "reviews": [
         {
@@ -5817,6 +5819,74 @@
           "body": "",
           "createdAt": "2025-11-05T19:49:46Z",
           "updatedAt": "2025-11-05T19:49:46Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7NCe7n",
+          "commit": {
+            "abbreviatedOid": "a98b2cd"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thanks for this PR!\n",
+          "createdAt": "2025-11-09T13:25:31Z",
+          "updatedAt": "2025-11-09T13:25:31Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 93,
+      "id": "PR_kwDOL3MllM6yYJfs",
+      "title": "Use MarkConnectionAppLimited() function to remove a duplicate statement",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/93",
+      "state": "MERGED",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "In CheckIfApplicationLimited(), call the MarkConnectionAppLimited() function\r\ninstead of open-coding the logic to update C.app_limited. This approach is\r\nmore clear and reduces duplicate logic.\r\n",
+      "createdAt": "2025-11-09T13:36:12Z",
+      "updatedAt": "2025-11-10T19:59:49Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "7c83b11b10629157d0b2b188af28d786b453494b",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "nealcardwell-patch-6",
+      "headRefOid": "2bde3fef9eaa0dc8204caa6377df539bab9b7802",
+      "closedAt": "2025-11-10T19:59:49Z",
+      "mergedAt": "2025-11-10T19:59:49Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "1893139c0a101a6140b3ceb794f0ab40b95c03d1"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7NT12r",
+          "commit": {
+            "abbreviatedOid": "2bde3fe"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "lgtm!",
+          "createdAt": "2025-11-10T18:08:55Z",
+          "updatedAt": "2025-11-10T18:08:55Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7NVYBK",
+          "commit": {
+            "abbreviatedOid": "2bde3fe"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-11-10T19:59:43Z",
+          "updatedAt": "2025-11-10T19:59:43Z",
           "comments": []
         }
       ]
