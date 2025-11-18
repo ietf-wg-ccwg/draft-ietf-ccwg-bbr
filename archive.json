@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-13T01:42:30.334770+00:00",
+  "timestamp": "2025-11-18T01:41:05.010545+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1315,6 +1315,22 @@
       "body": "Typically the congestion controller is not changed when SACK is not available (at least for Linux), so we should have some description about how to deal with that.",
       "createdAt": "2025-11-12T21:53:26Z",
       "updatedAt": "2025-11-12T21:58:05Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 95,
+      "id": "I_kwDOL3MllM7YbF17",
+      "title": "add section to describe undo of spurious loss recovery",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/95",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We need to add a section describing what to do handle undo of a spurious loss recovery episode.\n\nFor example, the Linux TCP BBRv3 code for this is here:\n\n+ saving information at the start of loss recovery in case there is a later undo event:\nhttps://github.com/google/bbr/blob/90210de4b779d40496dee0b89081780eeddf2a60/net/ipv4/tcp_bbr.c#L2241\n\n+ handling the undo event:\nhttps://github.com/google/bbr/blob/90210de4b779d40496dee0b89081780eeddf2a60/net/ipv4/tcp_bbr.c#L2225\n",
+      "createdAt": "2025-11-16T18:50:21Z",
+      "updatedAt": "2025-11-16T18:50:21Z",
       "closedAt": null,
       "comments": []
     }
