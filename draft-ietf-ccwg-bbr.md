@@ -1468,7 +1468,7 @@ This state machine has several goals:
 In the BBR framework, at any given time the sender can choose one of the
 following tactics:
 
-* Acceleration: Send faster then the network is delivering data: to probe the
+* Acceleration: Send faster than the network is delivering data: to probe the
   maximum bandwidth available to the flow
 
 * Deceleration: Send slower than the network is delivering data: to reduce
