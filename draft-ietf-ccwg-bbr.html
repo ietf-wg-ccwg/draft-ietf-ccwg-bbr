@@ -1738,8 +1738,8 @@ computed as: BBR.bdp = BBR.bw * BBR.min_rtt.<a href="#section-2.8.2-3" class="pi
 <p id="section-2.8.2-4">BBR.extra_acked: A volume of data that is the estimate of the recent degree
 of aggregation in the network path.<a href="#section-2.8.2-4" class="pilcrow">¶</a></p>
 <p id="section-2.8.2-5">BBR.offload_budget: The estimate of the minimum volume of data necessary
-to achieve full throughput when using sender (TSO/GSO)  and receiver (LRO,
-GRO) host offload mechanisms.<a href="#section-2.8.2-5" class="pilcrow">¶</a></p>
+to achieve full throughput when using sender (i.e., TSO/GSO) and
+receiver (i.e., LRO, GRO) host offload mechanisms.<a href="#section-2.8.2-5" class="pilcrow">¶</a></p>
 <p id="section-2.8.2-6">BBR.max_inflight: The estimate of C.inflight required to
 fully utilize the bottleneck bandwidth available to the flow, based on the
 BDP estimate (BBR.bdp), the aggregation estimate (BBR.extra_acked), the offload
@@ -4298,35 +4298,65 @@ machine, so this document discusses that approach in the ProbeRTT section.<a hre
 </div>
 </section>
 </div>
-<div id="bbroffloadbudget">
+<div id="bbr-offload-budget">
 <section id="section-5.5.8">
           <h4 id="name-bbroffload_budget">
 <a href="#section-5.5.8" class="section-number selfRef">5.5.8. </a><a href="#name-bbroffload_budget" class="section-name selfRef">BBR.offload_budget</a>
           </h4>
 <p id="section-5.5.8-1">BBR.offload_budget is the estimate of the minimum volume of data necessary
-to achieve full throughput using sender (TSO/GSO) and receiver (LRO, GRO)
-host offload mechanisms.  This varies based on the transport protocol and
-operating environment.<a href="#section-5.5.8-1" class="pilcrow">¶</a></p>
-<p id="section-5.5.8-2">For TCP, offload_budget can be computed as follows:<a href="#section-5.5.8-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.5.8-3">
+to achieve full throughput when send and/or receive offload is in use.
+This varies based on the transport protocol and operating environment.<a href="#section-5.5.8-1" class="pilcrow">¶</a></p>
+<div id="tcp-offload-budget">
+<section id="section-5.5.8.1">
+            <h5 id="name-tcp-offload-budget">
+<a href="#section-5.5.8.1" class="section-number selfRef">5.5.8.1. </a><a href="#name-tcp-offload-budget" class="section-name selfRef">TCP Offload Budget</a>
+            </h5>
+<p id="section-5.5.8.1-1">For TCP, senders commonly use TSO or GSO and receivers use LRO or GRO.<a href="#section-5.5.8.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.5.8.1-2">For TCP, offload_budget can be computed as follows:<a href="#section-5.5.8.1-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.5.8.1-3">
 <pre>
     BBRUpdateOffloadBudget():
       BBR.offload_budget = 3 * C.send_quantum
-</pre><a href="#section-5.5.8-3" class="pilcrow">¶</a>
+</pre><a href="#section-5.5.8.1-3" class="pilcrow">¶</a>
 </div>
-<p id="section-5.5.8-4">The factor of 3 is chosen to allow maintaining at least:<a href="#section-5.5.8-4" class="pilcrow">¶</a></p>
+<p id="section-5.5.8.1-4">The factor of 3 is chosen to allow maintaining at least:<a href="#section-5.5.8.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.5.8-5.1">
-              <p id="section-5.5.8-5.1.1">1 quantum in the sending host's queuing discipline layer<a href="#section-5.5.8-5.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.5.8.1-5.1">
+                <p id="section-5.5.8.1-5.1.1">1 quantum in the sending host's queuing discipline layer<a href="#section-5.5.8.1-5.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-5.5.8-5.2">
-              <p id="section-5.5.8-5.2.1">1 quantum being segmented in the sending host TSO/GSO engine<a href="#section-5.5.8-5.2.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="section-5.5.8.1-5.2">
+                <p id="section-5.5.8.1-5.2.1">1 quantum being segmented in the sending host TSO/GSO engine<a href="#section-5.5.8.1-5.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-5.5.8-5.3">
-              <p id="section-5.5.8-5.3.1">1 quantum being reassembled or otherwise remaining unacknowledged due to
-the receiver host's LRO/GRO/delayed-ACK engine<a href="#section-5.5.8-5.3.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="section-5.5.8.1-5.3">
+                <p id="section-5.5.8.1-5.3.1">1 quantum being reassembled or otherwise remaining unacknowledged due to
+the receiver host's LRO/GRO/delayed-ACK engine<a href="#section-5.5.8.1-5.3.1" class="pilcrow">¶</a></p>
 </li>
-          </ul>
+            </ul>
+</section>
+</div>
+<div id="quic-offload-budget">
+<section id="section-5.5.8.2">
+            <h5 id="name-quic-offload-budget">
+<a href="#section-5.5.8.2" class="section-number selfRef">5.5.8.2. </a><a href="#name-quic-offload-budget" class="section-name selfRef">QUIC Offload Budget</a>
+            </h5>
+<p id="section-5.5.8.2-1">For QUIC, in the simplest case, offload_budget is equal to the send quantum:<a href="#section-5.5.8.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.5.8.2-2">
+<pre>
+    BBRUpdateOffloadBudget():
+      BBR.offload_budget = C.send_quantum
+</pre><a href="#section-5.5.8.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-5.5.8.2-3">In addition, QUIC senders might have pacing offload available, allowing them to
+schedule packets for transmission in the future. In this case, the offload
+budget SHOULD be increased to include the amount of data that can be scheduled
+for future transmissions by the pacing offload mechanism.<a href="#section-5.5.8.2-3" class="pilcrow">¶</a></p>
+<p id="section-5.5.8.2-4">Furthermore, QUIC receivers might acknowledge packets less often than
+<span>[<a href="#RFC9000" class="cite xref">RFC9000</a>], <a href="https://rfc-editor.org/rfc/rfc9000#section-13.2" class="relref">Section 13.2</a></span>, such as when using the ACK-FREQUENCY
+(<span>[<a href="#I-D.draft-ietf-quic-ack-frequency" class="cite xref">I-D.draft-ietf-quic-ack-frequency</a>]</span>) extension. The offload budget can be
+increased by min(Ack-Eliciting Threshold, Requested Max Ack Delay * BBR.max_bw)
+to account for delayed acknowledgements.<a href="#section-5.5.8.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="bbrextraacked">
@@ -5372,6 +5402,10 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dt id="HRX08">[HRX08]</dt>
         <dd>
 <span class="refAuthor">Ha, S.</span>, <span class="refAuthor">Rhee, I.</span>, and <span class="refAuthor">L. Xu</span>, <span class="refTitle">"CUBIC: A New TCP-Friendly High-Speed TCP Variant"</span>, <span class="seriesInfo">ACM SIGOPS Operating System Review </span>, <time datetime="2008" class="refDate">2008</time>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.draft-ietf-quic-ack-frequency">[I-D.draft-ietf-quic-ack-frequency]</dt>
+        <dd>
+<span class="refAuthor">Iyengar, J.</span>, <span class="refAuthor">Swett, I.</span>, and <span class="refAuthor">M. Kühlewind</span>, <span class="refTitle">"QUIC Acknowledgment Frequency"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-ack-frequency-13</span>, <time datetime="2025-11-06" class="refDate">6 November 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-ack-frequency-13">https://datatracker.ietf.org/doc/html/draft-ietf-quic-ack-frequency-13</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="Jac88">[Jac88]</dt>
         <dd>

@@ -453,8 +453,8 @@ Table of Contents
    degree of aggregation in the network path.
 
    BBR.offload_budget: The estimate of the minimum volume of data
-   necessary to achieve full throughput when using sender (TSO/GSO) and
-   receiver (LRO, GRO) host offload mechanisms.
+   necessary to achieve full throughput when using sender (i.e., TSO/
+   GSO) and receiver (i.e., LRO, GRO) host offload mechanisms.
 
    BBR.max_inflight: The estimate of C.inflight required to fully
    utilize the bottleneck bandwidth available to the flow, based on the
@@ -2669,9 +2669,14 @@ Table of Contents
 5.5.8.  BBR.offload_budget
 
    BBR.offload_budget is the estimate of the minimum volume of data
-   necessary to achieve full throughput using sender (TSO/GSO) and
-   receiver (LRO, GRO) host offload mechanisms.  This varies based on
-   the transport protocol and operating environment.
+   necessary to achieve full throughput when send and/or receive offload
+   is in use.  This varies based on the transport protocol and operating
+   environment.
+
+5.5.8.1.  TCP Offload Budget
+
+   For TCP, senders commonly use TSO or GSO and receivers use LRO or
+   GRO.
 
    For TCP, offload_budget can be computed as follows:
 
@@ -2686,6 +2691,26 @@ Table of Contents
 
    *  1 quantum being reassembled or otherwise remaining unacknowledged
       due to the receiver host's LRO/GRO/delayed-ACK engine
+
+5.5.8.2.  QUIC Offload Budget
+
+   For QUIC, in the simplest case, offload_budget is equal to the send
+   quantum:
+
+       BBRUpdateOffloadBudget():
+         BBR.offload_budget = C.send_quantum
+
+   In addition, QUIC senders might have pacing offload available,
+   allowing them to schedule packets for transmission in the future.  In
+   this case, the offload budget SHOULD be increased to include the
+   amount of data that can be scheduled for future transmissions by the
+   pacing offload mechanism.
+
+   Furthermore, QUIC receivers might acknowledge packets less often than
+   [RFC9000], Section 13.2, such as when using the ACK-FREQUENCY
+   ([I-D.draft-ietf-quic-ack-frequency]) extension.  The offload budget
+   can be increased by min(Ack-Eliciting Threshold, Requested Max Ack
+   Delay * BBR.max_bw) to account for delayed acknowledgements.
 
 5.5.9.  BBR.extra_acked
 
@@ -3610,6 +3635,13 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    [HRX08]    Ha, S., Rhee, I., and L. Xu, "CUBIC: A New TCP-Friendly
               High-Speed TCP Variant", ACM SIGOPS Operating System
               Review , 2008.
+
+   [I-D.draft-ietf-quic-ack-frequency]
+              Iyengar, J., Swett, I., and M. Kühlewind, "QUIC
+              Acknowledgment Frequency", Work in Progress, Internet-
+              Draft, draft-ietf-quic-ack-frequency-13, 6 November 2025,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-quic-
+              ack-frequency-13>.
 
    [Jac88]    Jacobson, V., "Congestion Avoidance and Control", SIGCOMM
               1988, Computer Communication Review, vol. 18, no. 4, pp.
