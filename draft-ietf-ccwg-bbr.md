@@ -2780,7 +2780,7 @@ budget SHOULD be increased to include the amount of data that can be scheduled
 for future transmissions by the pacing offload mechanism.
 
 Furthermore, QUIC receivers might acknowledge packets less often than
-{{RFC9000, Section 13.2}}, such as when using the ACK-FREQUENCY 
+{{RFC9000, Section 13.2}}, such as when using the ACK-FREQUENCY
 ({{?I-D.draft-ietf-quic-ack-frequency}}) extension. The offload budget can be
 increased by min(Ack-Eliciting Threshold, Requested Max Ack Delay * BBR.max_bw)
 to account for delayed acknowledgements.
