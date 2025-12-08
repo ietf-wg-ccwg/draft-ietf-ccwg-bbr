@@ -2767,22 +2767,23 @@ The factor of 3 is chosen to allow maintaining at least:
 
 #### QUIC Offload Budget
 
-For QUIC, senders might have pacing offload available, allowing them to
-schedule packets for transmission in the future. The offload budget can
-be increased to include the amount of data that can be scheduled.
-
-QUIC receivers might acknowledge packets less often than
-{{RFC9000, Section 13.2}}, such as when using the ACK-FREQUENCY extension.
-The offload budget can be increased by
-min(Ack-Eliciting Threshold, Requested Max Ack Delay * BBR.max_bw)
-to account for delayed acknowledgements.
-
-For standard QUIC, offload_budget is commonly equal to the send quantum:
+For QUIC, in the simplest case, offload_budget is equal to the send quantum:
 
 ~~~~
     BBRUpdateOffloadBudget():
       BBR.offload_budget = C.send_quantum
 ~~~~
+
+In addition, QUIC senders might have pacing offload available, allowing them to
+schedule packets for transmission in the future. In this case, the offload
+budget SHOULD be increased to include the amount of data that can be scheduled
+for future transmissions by the pacing offload mechanism.
+
+Furthermore, QUIC receivers might acknowledge packets less often than
+{{RFC9000, Section 13.2}}, such as when using the ACK-FREQUENCY 
+({{?I-D.draft-ietf-quic-ack-frequency}}) extension. The offload budget can be
+increased by min(Ack-Eliciting Threshold, Requested Max Ack Delay * BBR.max_bw)
+to account for delayed acknowledgements.
 
 
 ### BBR.extra_acked {#bbrextraacked}
