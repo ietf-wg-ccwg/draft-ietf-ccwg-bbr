@@ -1829,8 +1829,8 @@ utilize the network bottleneck without creating any significant queue pressure.
 To do this, BBR first resets the short-term model parameters BBR.bw_shortterm and
 BBR.inflight_shortterm, setting both to "Infinity". This is the key moment in the BBR
 time scale strategy (see "Time Scale Strategy", {{time-scale-strategy}})
-where the flow pivots, discarding its conservative short-term BBR.bw_shortterm and
-BBR.inflight_shortterm parameters and beginning to robustly probe the bottleneck's
+where the flow pivots, discarding its short-term model that incorporates packet
+losses caused by cross-traffic and beginning to robustly probe the bottleneck's
 long-term available bandwidth. During this time the estimated bandwidth and
 BBR.inflight_longterm, if set, constrain the connection.
 
