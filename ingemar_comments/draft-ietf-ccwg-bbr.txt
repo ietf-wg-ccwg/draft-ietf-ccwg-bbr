@@ -1135,13 +1135,14 @@ Table of Contents
    When an ACK arrives, the connection first calls InitRateSample() to
    initialize the per-ACK RateSample RS:
 
-  /* Initialize the rate sample generated using the ACK being processed. */
-  InitRateSample():
-    RS.rtt           = -1
-    RS.has_data      = false
-    RS.prior_time    = 0
-    RS.interval      = 0
-    RS.delivery_rate = 0
+     /* Initialize the rate sample
+      * generated using the ACK being processed. */
+     InitRateSample():
+       RS.rtt           = -1
+       RS.has_data      = false
+       RS.prior_time    = 0
+       RS.interval      = 0
+       RS.delivery_rate = 0
 
    Next, for each newly acknowledged packet, the connection calls
    UpdateRateSample() to update the per-ACK rate sample based on a
@@ -1764,10 +1765,10 @@ Table of Contents
    BBR.bw_shortterm and BBR.inflight_shortterm, setting both to
    "Infinity".  This is the key moment in the BBR time scale strategy
    (see "Time Scale Strategy", Section 3.4.2.3) where the flow pivots,
-   discarding its short-term model that incorporate packet losses caused
-   by cross-traffic and beginning to robustly probe the bottleneck's
-   long-term available bandwidth.  During this time the estimated
-   bandwidth and BBR.inflight_longterm, if set, constrain the
+   discarding its short-term model that incorporates packet losses
+   caused by cross-traffic and beginning to robustly probe the
+   bottleneck's long-term available bandwidth.  During this time the
+   estimated bandwidth and BBR.inflight_longterm, if set, constrain the
    connection.
 
    During ProbeBW_REFILL BBR uses a BBR.pacing_gain of 1.0, to send at a
