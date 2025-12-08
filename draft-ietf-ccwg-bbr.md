@@ -1191,7 +1191,8 @@ When an ACK arrives, the connection first calls InitRateSample() to initialize
 the per-ACK RateSample RS:
 
 ~~~~
-  /* Initialize the rate sample generated using the ACK being processed. */
+  /* Initialize the rate sample
+   * generated using the ACK being processed. */
   InitRateSample():
     RS.rtt           = -1
     RS.has_data      = false
