@@ -508,8 +508,8 @@ BBR.extra_acked: A volume of data that is the estimate of the recent degree
 of aggregation in the network path.
 
 BBR.offload_budget: The estimate of the minimum volume of data necessary
-to achieve full throughput when using sender (TSO/GSO)  and receiver (LRO,
-GRO) host offload mechanisms.
+to achieve full throughput when using sender (i.e., TSO/GSO) and
+receiver (i.e., LRO, GRO) host offload mechanisms.
 
 BBR.max_inflight: The estimate of C.inflight required to
 fully utilize the bottleneck bandwidth available to the flow, based on the
@@ -2735,12 +2735,15 @@ be achieved by integrating the BBR.min_rtt estimation into the ProbeRTT state
 machine, so this document discusses that approach in the ProbeRTT section.
 
 
-### BBR.offload_budget {#bbroffloadbudget}
+### BBR.offload_budget {#bbr-offload-budget}
 
 BBR.offload_budget is the estimate of the minimum volume of data necessary
-to achieve full throughput using sender (TSO/GSO) and receiver (LRO, GRO)
-host offload mechanisms.  This varies based on the transport protocol and
-operating environment.
+to achieve full throughput when send and/or receive offload is in use.
+This varies based on the transport protocol and operating environment.
+
+#### TCP Offload Budget
+
+For TCP, senders commonly use TSO or GSO and receivers use LRO or GRO.
 
 For TCP, offload_budget can be computed as follows:
 
@@ -2757,6 +2760,26 @@ The factor of 3 is chosen to allow maintaining at least:
 
 * 1 quantum being reassembled or otherwise remaining unacknowledged due to
   the receiver host's LRO/GRO/delayed-ACK engine
+
+#### QUIC Offload Budget
+
+For QUIC, in the simplest case, offload_budget is equal to the send quantum:
+
+~~~~
+    BBRUpdateOffloadBudget():
+      BBR.offload_budget = C.send_quantum
+~~~~
+
+In addition, QUIC senders might have pacing offload available, allowing them to
+schedule packets for transmission in the future. In this case, the offload
+budget SHOULD be increased to include the amount of data that can be scheduled
+for future transmissions by the pacing offload mechanism.
+
+Furthermore, QUIC receivers might acknowledge packets less often than
+{{RFC9000, Section 13.2}}, such as when using the ACK-FREQUENCY
+({{?I-D.draft-ietf-quic-ack-frequency}}) extension. The offload budget can be
+increased by min(Ack-Eliciting Threshold, Requested Max Ack Delay * BBR.max_bw)
+to account for delayed acknowledgements.
 
 
 ### BBR.extra_acked {#bbrextraacked}
