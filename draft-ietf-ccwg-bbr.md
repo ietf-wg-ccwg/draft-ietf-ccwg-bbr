@@ -1044,14 +1044,15 @@ connection uses mechanisms to implement pacing, batching, GSO/TSO/offload,
 etc.
 
 If these conditions are met, then the sender has run out of data to feed the
-network. This would effectively create a "bubble" of idle time in the data
-pipeline. This idle time means that any delivery rate sample obtained from this
-data packet, and any rate sample from a packet that follows it in the next
-round trip, is going to be an application-limited sample that potentially
-underestimates the true available bandwidth. Thus, when the algorithm marks a
-transport flow as application-limited, it marks all bandwidth samples for the
-next round trip as application-limited (at which point, the "bubble" can be
-said to have exited the data pipeline).
+network. This effectively creates a gap, a “bubble” of idle time, within the data
+pipeline, analogous to an empty segment in a pipe carrying liquid. This idle
+time means that any delivery rate sample obtained from this data packet, and
+any rate sample from a packet that follows it in the next round trip, is an
+application‑limited sample that potentially underestimates the true available
+bandwidth. Thus, when the algorithm marks a transport flow as
+application‑limited, it marks all bandwidth samples for the next round trip as
+application‑limited (at which point, the bubble, the idle gap, can be said to
+have exited the data pipeline).
 
 ##### Considerations Related to Receiver Flow Control Limits {#considerations-related-to-receiver-flow-control-limits}
 
