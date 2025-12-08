@@ -1044,14 +1044,15 @@ connection uses mechanisms to implement pacing, batching, GSO/TSO/offload,
 etc.
 
 If these conditions are met, then the sender has run out of data to feed the
-network. This would effectively create a "bubble" of idle time in the data
-pipeline. This idle time means that any delivery rate sample obtained from this
-data packet, and any rate sample from a packet that follows it in the next
-round trip, is going to be an application-limited sample that potentially
-underestimates the true available bandwidth. Thus, when the algorithm marks a
-transport flow as application-limited, it marks all bandwidth samples for the
-next round trip as application-limited (at which point, the "bubble" can be
-said to have exited the data pipeline).
+network. This effectively creates a gap, a “bubble” of idle time, within the data
+pipeline, analogous to an empty segment in a pipe carrying liquid. This idle
+time means that any delivery rate sample obtained from this data packet, and
+any rate sample from a packet that follows it in the next round trip, is an
+application‑limited sample that potentially underestimates the true available
+bandwidth. Thus, when the algorithm marks a transport flow as
+application‑limited, it marks all bandwidth samples for the next round trip as
+application‑limited (at which point, the bubble, the idle gap, can be said to
+have exited the data pipeline).
 
 ##### Considerations Related to Receiver Flow Control Limits {#considerations-related-to-receiver-flow-control-limits}
 
@@ -1190,7 +1191,8 @@ When an ACK arrives, the connection first calls InitRateSample() to initialize
 the per-ACK RateSample RS:
 
 ~~~~
-  /* Initialize the rate sample generated using the ACK being processed. */
+  /* Initialize the rate sample
+   * generated using the ACK being processed. */
   InitRateSample():
     RS.rtt           = -1
     RS.has_data      = false
@@ -1468,7 +1470,7 @@ This state machine has several goals:
 In the BBR framework, at any given time the sender can choose one of the
 following tactics:
 
-* Acceleration: Send faster then the network is delivering data: to probe the
+* Acceleration: Send faster than the network is delivering data: to probe the
   maximum bandwidth available to the flow
 
 * Deceleration: Send slower than the network is delivering data: to reduce
@@ -1828,8 +1830,8 @@ utilize the network bottleneck without creating any significant queue pressure.
 To do this, BBR first resets the short-term model parameters BBR.bw_shortterm and
 BBR.inflight_shortterm, setting both to "Infinity". This is the key moment in the BBR
 time scale strategy (see "Time Scale Strategy", {{time-scale-strategy}})
-where the flow pivots, discarding its conservative short-term BBR.bw_shortterm and
-BBR.inflight_shortterm parameters and beginning to robustly probe the bottleneck's
+where the flow pivots, discarding its short-term model that incorporates packet
+losses caused by cross-traffic and beginning to robustly probe the bottleneck's
 long-term available bandwidth. During this time the estimated bandwidth and
 BBR.inflight_longterm, if set, constrain the connection.
 
