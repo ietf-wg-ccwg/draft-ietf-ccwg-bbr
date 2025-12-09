@@ -333,6 +333,13 @@ transport protocol payload and headers, implementations MAY include
 in C.SMSS the size of other headers, such as network-layer or
 link-layer headers.
 
+C.has_selective_acks: True if the connection has the capability to receive
+selective acknowledgments and thus is able to detect more than one
+packet loss per round trip in fast recovery. For example, this is true
+for all QUIC connections by virtue of the QUIC ACK Range {{RFC9000}}
+mechanism, and is true for TCP connections that have negotiated support
+for the TCP SACK ("Selective Acknowledgment") {{RFC2018}} mechanism.
+
 C.InitialCwnd: The initial congestion window set by the transport protocol
 implementation for the connection at initialization time.
 
@@ -1708,8 +1715,12 @@ receive window.
 #### Exiting Startup Based on Packet Loss {#exiting-startup-based-on-packet-loss}
 
 A second method BBR uses for estimating the bottleneck is full in Startup
-is by looking at packet losses. Specifically, BBRCheckStartupHighLoss() checks
-whether all of the following criteria are all met:
+is by looking at packet losses.
+
+For connections that can detect more than one packet loss per round trip
+(i.e., a connection where C.has_selective_acks is true),
+BBRCheckStartupHighLoss() exits Startup based on packet loss if the following
+criteria are all met:
 
 * The connection has been in fast recovery for at least one full packet-timed
   round trip.
@@ -1720,7 +1731,12 @@ whether all of the following criteria are all met:
 * There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges
   lost in that round trip.
 
-If these criteria are all met, then BBRCheckStartupHighLoss() takes the
+For connections for which C.has_selective_acks is false and thus the connection
+can only detect one packet loss per round trip, BBRCheckStartupHighLoss() exits
+Startup based on packet loss if any packet loss is detected during fast
+recovery.
+
+If BBRCheckStartupHighLoss() exits Startup based on packet loss, it takes the
 following steps. First, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
@@ -2858,9 +2874,10 @@ in flight exceeded what matches the current delivery process on the path, and
 reduces BBR.inflight_longterm:
 
 ~~~~
-  /* Do loss signals suggest C.inflight is too high? */
+  /* Do loss signals suggest C.inflight was too high? */
   IsInflightTooHigh():
-    return (RS.lost > RS.tx_in_flight * BBR.LossThresh)
+    return ((RS.lost > RS.tx_in_flight * BBR.LossThresh) ||
+            (RS.lost > 0 && !C.has_selective_acks))
 
   BBRHandleInflightTooHigh():
     BBR.bw_probe_samples = 0;  /* only react once per bw probe */
