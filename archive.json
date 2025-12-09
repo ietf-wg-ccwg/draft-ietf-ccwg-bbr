@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-18T01:41:05.010545+00:00",
+  "timestamp": "2025-12-09T01:44:34.946908+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1065,7 +1065,7 @@
       "id": "I_kwDOL3MllM7ASSkD",
       "title": "What is `BBR.offload_budget` for QUIC?",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/67",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
@@ -1074,8 +1074,8 @@
       "labels": [],
       "body": "Section 5.5.8 defines the `BBR.offload_budget` for TCP. What would one use for QUIC?",
       "createdAt": "2025-07-13T02:08:39Z",
-      "updatedAt": "2025-07-17T21:38:57Z",
-      "closedAt": null,
+      "updatedAt": "2025-12-08T22:04:20Z",
+      "closedAt": "2025-12-08T22:04:20Z",
       "comments": []
     },
     {
@@ -1296,9 +1296,17 @@
       "labels": [],
       "body": "\u201cbubble\u201d, I was first confused by the term. In some sense it can be confusing talking about a bubble of nothing, not sure about any better term for the case with app limitation , \u201cvoid\u201d perhaps ?\n\n4.1.2.3 : Wrong indentation in \u2018/* Initialize the rate sample...\u2019  code.\n \n5.1.3: s/\u201d faster then the network\u201d/\u201d faster than the network\u201d\n\n5.3.1.3 \u201cThere are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges lost in that round trip\u201d. It is unclear to me what this means. Does it mean 6 unSACKed holes, or ?\n\n5.3.3.3 ProbeBW_REFILL, I try and read this section over and over again, but somehow I don\u2019t really get it. If I understand it right BBR in this state ignores possible short term reductions in transmit rate caused by packet loss ?",
       "createdAt": "2025-11-07T17:13:49Z",
-      "updatedAt": "2025-11-12T21:53:57Z",
+      "updatedAt": "2025-12-08T19:59:53Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> 4.1.2.3 : Wrong indentation in \u2018/* Initialize the rate sample...\u2019 code.\n\nIndentation looks fine in md and in the html view. Will check what can be done for the plaintext view.\n\n> 5.3.1.3 \u201cThere are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges lost in that round trip\u201d. It is unclear to me what this means. Does it mean 6 unSACKed holes, or ?\n\nThis depends on what we write for https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/94. \n\n\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/96 should address the rest.",
+          "createdAt": "2025-12-08T19:59:53Z",
+          "updatedAt": "2025-12-08T19:59:53Z"
+        }
+      ]
     },
     {
       "number": 94,
@@ -5622,24 +5630,26 @@
       "id": "PR_kwDOL3MllM6ut9I0",
       "title": "Generalize Offload Budget for QUIC",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/88",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #67",
       "createdAt": "2025-10-20T21:46:11Z",
-      "updatedAt": "2025-10-30T18:58:03Z",
+      "updatedAt": "2025-12-08T22:04:19Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "108e239b7f1fe2a8d64b9ca69e6c0f4003e50a2c",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-quic-offload-budget",
-      "headRefOid": "0ec20ec1d16530048eeda3fb4fcc9c8268c16044",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "3fe3abdae30a09a60b3865faac02812215c5315b",
+      "closedAt": "2025-12-08T22:04:19Z",
+      "mergedAt": "2025-12-08T22:04:19Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "5c7bea7213600acc9c5fb0a3465545d297dd2452"
+      },
       "comments": [],
       "reviews": [
         {
@@ -5731,6 +5741,32 @@
           "body": "So far it seems like this incorporates my first 2 suggestions but not the 3rd and 4th? :-)\n",
           "createdAt": "2025-10-30T18:58:03Z",
           "updatedAt": "2025-10-30T18:58:03Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7T2QN2",
+          "commit": {
+            "abbreviatedOid": "5157b9e"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-08T21:51:37Z",
+          "updatedAt": "2025-12-08T21:51:37Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7IXUAj",
+          "commit": {
+            "abbreviatedOid": "3fe3abd"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-10-21T16:04:00Z",
+          "updatedAt": "2025-12-08T21:53:32Z",
           "comments": []
         }
       ]
@@ -5926,6 +5962,128 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 96,
+      "id": "PR_kwDOL3MllM63wXJu",
+      "title": "Fix typo, clarify \"bubble\" and dropping short-term model in ProbeBw_REFILL",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/96",
+      "state": "MERGED",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Addresses #92 \r\n\r\n",
+      "createdAt": "2025-12-08T19:56:51Z",
+      "updatedAt": "2025-12-08T21:57:24Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "1893139c0a101a6140b3ceb794f0ab40b95c03d1",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ingemar_comments",
+      "headRefOid": "15a0dbd3ed10ec4bf2a410fddc99297dbaf138f4",
+      "closedAt": "2025-12-08T21:57:02Z",
+      "mergedAt": "2025-12-08T21:57:02Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "92b4405afa4ab7ad70d18f3a89867a9fe05906fa"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7T2FHb",
+          "commit": {
+            "abbreviatedOid": "a06d398"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-08T21:39:25Z",
+          "updatedAt": "2025-12-08T21:39:25Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7T2HFE",
+          "commit": {
+            "abbreviatedOid": "a06d398"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-08T21:41:17Z",
+          "updatedAt": "2025-12-08T21:41:43Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "```suggestion\nwhere the flow pivots, discarding its short-term model that incorporates packet\n```",
+              "createdAt": "2025-12-08T21:41:17Z",
+              "updatedAt": "2025-12-08T21:41:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7T2TQj",
+          "commit": {
+            "abbreviatedOid": "15a0dbd"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-08T21:56:26Z",
+          "updatedAt": "2025-12-08T21:56:26Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7T2TXa",
+          "commit": {
+            "abbreviatedOid": "15a0dbd"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-08T21:56:36Z",
+          "updatedAt": "2025-12-08T21:56:36Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 97,
+      "id": "PR_kwDOL3MllM63yml5",
+      "title": "clarify what to do when looking at packet loss if SACK is not available",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/97",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Short answer: for connections without the equivalent of TCP SACK\nblocks, any packet loss in fast recovery should be considered \"too\nmuch\" packet loss, when considering whether to exit Statup in\nBBRCheckStartupHighLoss() or to exit bandwidth probing in\nIsInflightTooHigh().\n\nCloses #94\n",
+      "createdAt": "2025-12-08T23:40:13Z",
+      "updatedAt": "2025-12-08T23:41:03Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "5c7bea7213600acc9c5fb0a3465545d297dd2452",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "draft-ietf-ccwg-bbr-clarify-non-sack",
+      "headRefOid": "eda3aedb308580d51660d9be0b2179f402fa70c8",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@ianswett @jbeshay \r\n",
+          "createdAt": "2025-12-08T23:41:03Z",
+          "updatedAt": "2025-12-08T23:41:03Z"
+        }
+      ],
+      "reviews": []
     }
   ]
 }
