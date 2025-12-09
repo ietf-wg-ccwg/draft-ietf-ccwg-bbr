@@ -334,9 +334,11 @@ in C.SMSS the size of other headers, such as network-layer or
 link-layer headers.
 
 C.has_selective_acks: True if the connection has the capability to receive
-selective acknowledgments, e.g., via a QUIC ACK Range {{RFC9000}} or
-TCP SACK ("Selective Acknowledgment") block {{RFC2018}}, and thus is able
-to detect more than one packet loss per round trip in fast recovery.
+selective acknowledgments and thus is able to detect more than one
+packet loss per round trip in fast recovery. For example, this is true
+for all QUIC connections by virtue of the QUIC ACK Range {{RFC9000}}
+mechanism, and is true for TCP connections that have negotiated support
+for the TCP SACK ("Selective Acknowledgment") {{RFC2018}} mechanism.
 
 C.InitialCwnd: The initial congestion window set by the transport protocol
 implementation for the connection at initialization time.
