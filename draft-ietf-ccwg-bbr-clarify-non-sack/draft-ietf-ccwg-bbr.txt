@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 11 June 2026                                     J. Beshay, Ed.
+Expires: 12 June 2026                                     J. Beshay, Ed.
                                                                     Meta
-                                                         8 December 2025
+                                                         9 December 2025
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 June 2026.
+   This Internet-Draft will expire on 12 June 2026.
 
 Copyright Notice
 
@@ -279,10 +279,12 @@ Table of Contents
    layer headers.
 
    C.has_selective_acks: True if the connection has the capability to
-   receive selective acknowledgments, e.g., via a QUIC ACK Range
-   [RFC9000] or TCP SACK ("Selective Acknowledgment") block [RFC2018],
-   and thus is able to detect more than one packet loss per round trip
-   in fast recovery.
+   receive selective acknowledgments and thus is able to detect more
+   than one packet loss per round trip in fast recovery.  For example,
+   this is true for all QUIC connections by virtue of the QUIC ACK Range
+   [RFC9000] mechanism, and is true for TCP connections that have
+   negotiated support for the TCP SACK ("Selective Acknowledgment")
+   [RFC2018] mechanism.
 
    C.InitialCwnd: The initial congestion window set by the transport
    protocol implementation for the connection at initialization time.
