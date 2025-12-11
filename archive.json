@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-09T01:44:34.946908+00:00",
+  "timestamp": "2025-12-11T01:47:58.227955+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -6063,13 +6063,13 @@
       "labels": [],
       "body": "Short answer: for connections without the equivalent of TCP SACK\nblocks, any packet loss in fast recovery should be considered \"too\nmuch\" packet loss, when considering whether to exit Statup in\nBBRCheckStartupHighLoss() or to exit bandwidth probing in\nIsInflightTooHigh().\n\nCloses #94\n",
       "createdAt": "2025-12-08T23:40:13Z",
-      "updatedAt": "2025-12-08T23:41:03Z",
+      "updatedAt": "2025-12-09T16:20:50Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "5c7bea7213600acc9c5fb0a3465545d297dd2452",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "draft-ietf-ccwg-bbr-clarify-non-sack",
-      "headRefOid": "eda3aedb308580d51660d9be0b2179f402fa70c8",
+      "headRefOid": "ff9463df3409aa451f60230e1f719504e550b847",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -6083,7 +6083,101 @@
           "updatedAt": "2025-12-08T23:41:03Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7T6dqX",
+          "commit": {
+            "abbreviatedOid": "eda3aed"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Thanks Neal, this looks good.",
+          "createdAt": "2025-12-09T04:10:10Z",
+          "updatedAt": "2025-12-09T04:12:17Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "selective acknowledgements seems a bit odd for QUIC, but I am struggling to find a better term.  discontiguous acknowledgements is correct, but maybe not any better?",
+              "createdAt": "2025-12-09T04:10:10Z",
+              "updatedAt": "2025-12-09T04:12:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7UA-hj",
+          "commit": {
+            "abbreviatedOid": "eda3aed"
+          },
+          "author": "gorryfair",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-09T11:55:32Z",
+          "updatedAt": "2025-12-09T11:55:32Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "selective_ack is a common term - so I quite like that personally: Could we just explicitly note that QUIC always supports this using the QUIC ACK Range?",
+              "createdAt": "2025-12-09T11:55:32Z",
+              "updatedAt": "2025-12-09T11:55:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7UDVih",
+          "commit": {
+            "abbreviatedOid": "eda3aed"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-09T14:06:23Z",
+          "updatedAt": "2025-12-09T14:06:24Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "> selective_ack is a common term - so I quite like that personally: Could we just explicitly note that QUIC always supports this using the QUIC ACK Range?\r\n\r\nThanks, Gorry. I have updated the PR along those lines: \"For example, this is true for all QUIC connections by virtue of the QUIC ACK Range {{RFC9000}} mechanism\".\r\n\r\n> selective acknowledgements seems a bit odd for QUIC, but I am struggling to find a better term. discontiguous acknowledgements is correct, but maybe not any better?\r\n\r\nThanks, Ian. I agree it's not ideal to use \"selective acknowledgments\" since it\r\nprivileges TCP over QUIC. If we can come up with a more generic phrase\r\nthat encompasses both \"selective acknowledgment\" and \"ack range\",\r\nthat's great.\r\n\r\nBut FWIW if we use some phrase that is more generic, IMHO we will need\r\na bigger surgery, since in the draft we already use \"selective\r\nacknowledgments\" or \"selectively acknowledge\" 5 times:\r\n\r\n+ While selective acknowledgments for out-of-order data (e.g., [RFC2018]) are not required, such a mechanism is highly recommended\r\n\r\n+ ACKs may contain both cumulative and selective acknowledgment information\r\n\r\n+ RS.newly_acked: The volume of data cumulatively or selectively acknowledged upon the ACK that was just received.\r\n\r\n+ Each acknowledgment that cumulatively or selectively acknowledges that the network has delivered new data\r\n\r\n+ rate samples only include packets actually cumulatively and/or selectively acknowledged\r\n",
+              "createdAt": "2025-12-09T14:06:24Z",
+              "updatedAt": "2025-12-09T14:06:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7UGGXQ",
+          "commit": {
+            "abbreviatedOid": "eda3aed"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-09T16:20:38Z",
+          "updatedAt": "2025-12-09T16:20:39Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Thanks Neal, good point.",
+              "createdAt": "2025-12-09T16:20:38Z",
+              "updatedAt": "2025-12-09T16:20:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7UGGmw",
+          "commit": {
+            "abbreviatedOid": "ff9463d"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-09T16:20:50Z",
+          "updatedAt": "2025-12-09T16:20:50Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
