@@ -1062,7 +1062,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 11 June 2026</td>
+<td class="center">Expires 18 June 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1075,12 +1075,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-12-08" class="published">8 December 2025</time>
+<time datetime="2025-12-15" class="published">15 December 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-06-11">11 June 2026</time></dd>
+<dd class="expires"><time datetime="2026-06-18">18 June 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1149,7 +1149,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 11 June 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 18 June 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1565,22 +1565,28 @@ the QUIC headers, but not UDP or IP headers. In addition to including
 transport protocol payload and headers, implementations MAY include
 in C.SMSS the size of other headers, such as network-layer or
 link-layer headers.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.1-2">C.InitialCwnd: The initial congestion window set by the transport protocol
-implementation for the connection at initialization time.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
-<p id="section-2.1-3">C.delivered: The total amount of data
+<p id="section-2.1-2">C.has_selective_acks: True if the connection has the capability to receive
+selective acknowledgments and thus is able to detect more than one
+packet loss per round trip in fast recovery. For example, this is true
+for all QUIC connections by virtue of the QUIC ACK Range <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>
+mechanism, and is true for TCP connections that have negotiated support
+for the TCP SACK ("Selective Acknowledgment") <span>[<a href="#RFC2018" class="cite xref">RFC2018</a>]</span> mechanism.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3">C.InitialCwnd: The initial congestion window set by the transport protocol
+implementation for the connection at initialization time.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.1-4">C.delivered: The total amount of data
 delivered so far over the lifetime of the transport connection C.
 This MUST NOT include pure ACK packets. It SHOULD include spurious
-retransmissions that have been acknowledged as delivered.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
-<p id="section-2.1-4">C.inflight: The connection's best estimate of the number of bytes
+retransmissions that have been acknowledged as delivered.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<p id="section-2.1-5">C.inflight: The connection's best estimate of the number of bytes
 outstanding in the network. This includes the number of bytes that
 have been sent and have not been acknowledged or
 marked as lost since their last transmission
 (e.g. "pipe" from <span>[<a href="#RFC6675" class="cite xref">RFC6675</a>]</span> or "bytes_in_flight" from <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>).
-This MUST NOT include pure ACK packets.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
-<p id="section-2.1-5">C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
-point in the last packet-timed round trip.<a href="#section-2.1-5" class="pilcrow">¶</a></p>
-<p id="section-2.1-6">C.next_send_time: The earliest pacing departure time another packet can be
-sent.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
+This MUST NOT include pure ACK packets.<a href="#section-2.1-5" class="pilcrow">¶</a></p>
+<p id="section-2.1-6">C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
+point in the last packet-timed round trip.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
+<p id="section-2.1-7">C.next_send_time: The earliest pacing departure time another packet can be
+sent.<a href="#section-2.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="per-ack-rate-sample-state">
@@ -3137,32 +3143,39 @@ receive window.<a href="#section-5.3.1.2-8" class="pilcrow">¶</a></p>
 <a href="#section-5.3.1.3" class="section-number selfRef">5.3.1.3. </a><a href="#name-exiting-startup-based-on-pa" class="section-name selfRef">Exiting Startup Based on Packet Loss</a>
             </h5>
 <p id="section-5.3.1.3-1">A second method BBR uses for estimating the bottleneck is full in Startup
-is by looking at packet losses. Specifically, BBRCheckStartupHighLoss() checks
-whether all of the following criteria are all met:<a href="#section-5.3.1.3-1" class="pilcrow">¶</a></p>
+is by looking at packet losses.<a href="#section-5.3.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.1.3-2">For connections that can detect more than one packet loss per round trip
+(i.e., a connection where C.has_selective_acks is true),
+BBRCheckStartupHighLoss() exits Startup based on packet loss if the following
+criteria are all met:<a href="#section-5.3.1.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.1.3-2.1">
-                <p id="section-5.3.1.3-2.1.1">The connection has been in fast recovery for at least one full packet-timed
-round trip.<a href="#section-5.3.1.3-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3.1.3-3.1">
+                <p id="section-5.3.1.3-3.1.1">The connection has been in fast recovery for at least one full packet-timed
+round trip.<a href="#section-5.3.1.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li class="normal" id="section-5.3.1.3-2.2">
-                <p id="section-5.3.1.3-2.2.1">The loss rate over the time scale of a single full round trip exceeds
-BBR.LossThresh (2%).<a href="#section-5.3.1.3-2.2.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="section-5.3.1.3-3.2">
+                <p id="section-5.3.1.3-3.2.1">The loss rate over the time scale of a single full round trip exceeds
+BBR.LossThresh (2%).<a href="#section-5.3.1.3-3.2.1" class="pilcrow">¶</a></p>
 </li>
-              <li class="normal" id="section-5.3.1.3-2.3">
-                <p id="section-5.3.1.3-2.3.1">There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges
-lost in that round trip.<a href="#section-5.3.1.3-2.3.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="section-5.3.1.3-3.3">
+                <p id="section-5.3.1.3-3.3.1">There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges
+lost in that round trip.<a href="#section-5.3.1.3-3.3.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-<p id="section-5.3.1.3-3">If these criteria are all met, then BBRCheckStartupHighLoss() takes the
+<p id="section-5.3.1.3-4">For connections for which C.has_selective_acks is false and thus the connection
+can only detect one packet loss per round trip, BBRCheckStartupHighLoss() exits
+Startup based on packet loss if any packet loss is detected during fast
+recovery.<a href="#section-5.3.1.3-4" class="pilcrow">¶</a></p>
+<p id="section-5.3.1.3-5">If BBRCheckStartupHighLoss() exits Startup based on packet loss, it takes the
 following steps. First, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
 BBR.inflight_latest is the max delivered volume of data (RS.delivered) over
-the last round trip. Finally, it exits Startup and enters Drain.<a href="#section-5.3.1.3-3" class="pilcrow">¶</a></p>
-<p id="section-5.3.1.3-4">The algorithm waits until all three criteria are met to filter out noise
+the last round trip. Finally, it exits Startup and enters Drain.<a href="#section-5.3.1.3-5" class="pilcrow">¶</a></p>
+<p id="section-5.3.1.3-6">The algorithm waits until all three criteria are met to filter out noise
 from burst losses, and to try to ensure the bottleneck is fully utilized
 on a sustained basis, and the full bottleneck bandwidth has been measured,
-before attempting to drain the level of in-flight data to the estimated BDP.<a href="#section-5.3.1.3-4" class="pilcrow">¶</a></p>
+before attempting to drain the level of in-flight data to the estimated BDP.<a href="#section-5.3.1.3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -4444,9 +4457,10 @@ in flight exceeded what matches the current delivery process on the path, and
 reduces BBR.inflight_longterm:<a href="#section-5.5.10.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.10.2-2">
 <pre>
-  /* Do loss signals suggest C.inflight is too high? */
+  /* Do loss signals suggest C.inflight was too high? */
   IsInflightTooHigh():
-    return (RS.lost &gt; RS.tx_in_flight * BBR.LossThresh)
+    return ((RS.lost &gt; RS.tx_in_flight * BBR.LossThresh) ||
+            (RS.lost &gt; 0 &amp;&amp; !C.has_selective_acks))
 
   BBRHandleInflightTooHigh():
     BBR.bw_probe_samples = 0;  /* only react once per bw probe */
