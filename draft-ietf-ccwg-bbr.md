@@ -3087,7 +3087,7 @@ state as follows:
     BBR.undo_inflight_hi = BBR.inflight_hi
 ~~~~
 
-#### Handling a Spurious Loss Recovery {#saving-state-on-loss-recovery}
+#### Handling a Spurious Loss Recovery {#handling-spurious-loss-recovery}
 
 If a loss recovery episode is declared spurious, BBR restores aspects of its
 state to their previously saved values as follows:
