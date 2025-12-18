@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-16T01:48:22.933851+00:00",
+  "timestamp": "2025-12-18T01:44:16.300736+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -6207,6 +6207,147 @@
           "createdAt": "2025-12-15T16:36:58Z",
           "updatedAt": "2025-12-15T16:36:58Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 98,
+      "id": "PR_kwDOL3MllM65Ri1D",
+      "title": "Specify behavior to handle spurious loss recovery episodes",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/98",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #95\n",
+      "createdAt": "2025-12-17T02:19:24Z",
+      "updatedAt": "2025-12-17T22:33:29Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "c4093dea446b02e5628320631e3b7a049800fa68",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "draft-ietf-ccwg-bbr-undo-spurious-loss",
+      "headRefOid": "77f6b195e4c6320ca2825c8640f1757a9a093284",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@ianswett @jbeshay \r\n",
+          "createdAt": "2025-12-17T02:20:13Z",
+          "updatedAt": "2025-12-17T02:20:13Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7Vu5ZW",
+          "commit": {
+            "abbreviatedOid": "d1b8d4d"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Thanks Neal, this looks good.  Do we need to reference anything about spuriously detecting loss in TCP and QUIC?",
+          "createdAt": "2025-12-17T03:20:58Z",
+          "updatedAt": "2025-12-17T03:23:02Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "I think it's implied, but it's important that all the lost packets were later deemed not lost, correct?",
+              "createdAt": "2025-12-17T03:20:58Z",
+              "updatedAt": "2025-12-17T03:23:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7V85Z0",
+          "commit": {
+            "abbreviatedOid": "d1b8d4d"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-17T20:25:32Z",
+          "updatedAt": "2025-12-17T20:25:32Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "Yes, agreed. Is there a specific change you had in mind to make this more clear? Are you suggesting changing \"later concludes that those packets were not lost\" to \"later deems that those packets were not lost\"? Or something else? :-) \r\n",
+              "createdAt": "2025-12-17T20:25:32Z",
+              "updatedAt": "2025-12-17T20:25:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7V-eHN",
+          "commit": {
+            "abbreviatedOid": "77f6b19"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-17T22:23:13Z",
+          "updatedAt": "2025-12-17T22:28:42Z",
+          "comments": [
+            {
+              "originalPosition": 62,
+              "body": "```suggestion\r\n    BBR.undo_bw_shortterm       = BBR.bw_shortterm\r\n    BBR.undo_inflight_shortterm = BBR.inflight_shortterm\r\n    BBR.undo_inflight_shortterm = BBR.inflight_longterm\r\n~~~~\r\n```",
+              "createdAt": "2025-12-17T22:23:13Z",
+              "updatedAt": "2025-12-17T22:28:43Z"
+            },
+            {
+              "originalPosition": 76,
+              "body": "```suggestion\r\n    BBR.bw_lo       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)\r\n    BBR.inflight_lo = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)\r\n    BBR.inflight_hi = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)\r\n```",
+              "createdAt": "2025-12-17T22:25:21Z",
+              "updatedAt": "2025-12-17T22:28:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7V-hQR",
+          "commit": {
+            "abbreviatedOid": "77f6b19"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-17T22:29:31Z",
+          "updatedAt": "2025-12-17T22:29:32Z",
+          "comments": [
+            {
+              "originalPosition": 62,
+              "body": "Should we also define the undo_ state variables?",
+              "createdAt": "2025-12-17T22:29:32Z",
+              "updatedAt": "2025-12-17T22:29:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7V-jNN",
+          "commit": {
+            "abbreviatedOid": "d1b8d4d"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-17T22:33:29Z",
+          "updatedAt": "2025-12-17T22:33:29Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "I think the implication might be sufficient to avoid adding unnecessary complexity. If we go down that path, we should also consider the case where some of the losses were spurious but not all.",
+              "createdAt": "2025-12-17T22:33:29Z",
+              "updatedAt": "2025-12-17T22:33:29Z"
+            }
+          ]
         }
       ]
     }
