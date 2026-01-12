@@ -1136,6 +1136,10 @@ sent, else false.
 
 P.tx_in_flight: C.inflight immediately after the transmission of packet P.
 
+P.packet_id: A monotonically increasing unique identifier for the payload
+of packet P. This is protocol specific. E.g., this is the ending sequence
+number of the packet for TCP, and the packet number for QUIC.
+
 ##### Rate Sample (rs) Output {#rate-sample-rs-output}
 
 This algorithm provides its output in a RateSample structure rs, containing
@@ -1160,6 +1164,8 @@ delivered (see the "Send Rate" section above).
 
 RS.ack_elapsed: ACK time interval calculated from the most recent packet
 delivered (see the "ACK Rate" section above).
+
+RS.last_acked_packet_id: The packet identifier of the the most recent packet delivered.
 
 
 #### Transmitting a data packet {#transmitting-a-data-packet}
@@ -1232,7 +1238,7 @@ information from the most recently sent packet to update the rate sample:
       RS.is_app_limited   = P.is_app_limited
       RS.send_elapsed     = P.send_time - P.first_send_time
       RS.ack_elapsed      = C.delivered_time - P.delivered_time
-      RS.last_end_seq     = P.end_seq
+      RS.last_acked_packet_id = P.packet_id
       C.first_send_time   = P.send_time
 
     /* Mark the packet as delivered once it's acknowleged. */
@@ -1243,7 +1249,7 @@ information from the most recently sent packet to update the rate sample:
   IsNewestPacket(Packet P):
     return (P.send_time > C.first_send_time or
             (P.send_time == C.first_send_time and
-             P.end_seq > RS.last_end_seq)
+             P.packet_id > RS.last_packet_id_d)))
 ~~~~
 
 Finally, after the connection has processed all newly acknowledged packets for this
