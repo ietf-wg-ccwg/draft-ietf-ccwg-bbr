@@ -1148,16 +1148,16 @@ the following fields:
 RS.delivery_rate: The delivery rate sample (in most cases RS.delivered /
 RS.interval).
 
-RS.is_app_limited: The P.is_app_limited from the most recent packet delivered;
+RS.is_app_limited: The P.is_app_limited from the most recently delivered packet;
 indicates whether the rate sample is application-limited.
 
 RS.interval: The length of the sampling interval.
 
 RS.delivered: The amount of data marked as delivered over the sampling interval.
 
-RS.prior_delivered: The P.delivered count from the most recent packet delivered.
+RS.prior_delivered: The P.delivered count from the most recently delivered packet.
 
-RS.prior_time: The P.delivered_time from the most recent packet delivered.
+RS.prior_time: The P.delivered_time from the most recently delivered packet.
 
 RS.send_elapsed: Send time interval calculated from the most recent packet
 delivered (see the "Send Rate" section above).
@@ -1165,7 +1165,7 @@ delivered (see the "Send Rate" section above).
 RS.ack_elapsed: ACK time interval calculated from the most recent packet
 delivered (see the "ACK Rate" section above).
 
-RS.last_acked_packet_id: The packet identifier of the the most recent packet delivered.
+RS.last_acked_packet_id: The packet identifier of the most recently delivered packet.
 
 
 #### Transmitting a data packet {#transmitting-a-data-packet}
