@@ -1081,10 +1081,9 @@ Table of Contents
    P.tx_in_flight: C.inflight immediately after the transmission of
    packet P.
 
-   P.packet_id: A monotonically increasing unique identifier for the
-   payload of packet P.  This is protocol specific.  E.g., this is the
-   ending sequence number of the packet for TCP, and the packet number
-   for QUIC.
+   P.packet_id: A monotonically increasing unique identifier of packet
+   P.  This is protocol specific.  E.g., for TCP this is the ending
+   sequence number of the packet, and for QUIC it is the packet number.
 
 4.1.2.1.3.  Rate Sample (rs) Output
 
