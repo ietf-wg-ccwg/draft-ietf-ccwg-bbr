@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 16 July 2026                                     J. Beshay, Ed.
+Expires: 17 July 2026                                     J. Beshay, Ed.
                                                                     Meta
-                                                         12 January 2026
+                                                         13 January 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 July 2026.
+   This Internet-Draft will expire on 17 July 2026.
 
 Copyright Notice
 
@@ -1195,7 +1195,7 @@ Table of Contents
      IsNewestPacket(Packet P):
        return (P.send_time > C.first_send_time or
                (P.send_time == C.first_send_time and
-                P.packet_id > RS.last_packet_id_d)))
+                P.packet_id > RS.last_packet_id)))
 
    Finally, after the connection has processed all newly acknowledged
    packets for this ACK by calling UpdateRateSample() for each packet,
