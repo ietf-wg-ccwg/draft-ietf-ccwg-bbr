@@ -1249,7 +1249,7 @@ information from the most recently sent packet to update the rate sample:
   IsNewestPacket(Packet P):
     return (P.send_time > C.first_send_time or
             (P.send_time == C.first_send_time and
-             P.packet_id > RS.last_packet_id)))
+             P.packet_id > RS.last_packet_id))
 ~~~~
 
 Finally, after the connection has processed all newly acknowledged packets for this
