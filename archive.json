@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-18T01:44:16.300736+00:00",
+  "timestamp": "2026-01-13T01:48:17.577942+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -6348,6 +6348,46 @@
               "updatedAt": "2025-12-17T22:33:29Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 99,
+      "id": "PR_kwDOL3MllM68ybUA",
+      "title": "Remove reference to TCP-specific _seq variables",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/99",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Replaces usage of TCP sequence numbers in the bandwidth estimation section with a packet_id. The packet_id is defined as a protocol-specific field mapping to end_seq for TCP and packet number for QUIC.\r\n\r\nAlso replaces \"most recent packet delivered\" with \"most recently delivered packet\" in the related definitions, to make it sound better grammatically.\r\n\r\nCloses #26 ",
+      "createdAt": "2026-01-12T21:10:49Z",
+      "updatedAt": "2026-01-12T21:38:08Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "c4093dea446b02e5628320631e3b7a049800fa68",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_remove_seq",
+      "headRefOid": "0e60342d18cfcb052d4fafc6517b6f6d3d6e955e",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7ZudpM",
+          "commit": {
+            "abbreviatedOid": "0e60342"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-01-12T21:38:08Z",
+          "updatedAt": "2026-01-12T21:38:08Z",
+          "comments": []
         }
       ]
     }
