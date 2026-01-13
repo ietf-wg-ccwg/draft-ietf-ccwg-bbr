@@ -2574,7 +2574,7 @@ information from the most recently sent packet to update the rate sample:<a href
   IsNewestPacket(Packet P):
     return (P.send_time &gt; C.first_send_time or
             (P.send_time == C.first_send_time and
-             P.packet_id &gt; RS.last_packet_id)))
+             P.packet_id &gt; RS.last_packet_id))
 </pre><a href="#section-4.1.2.3-4" class="pilcrow">¶</a>
 </div>
 <p id="section-4.1.2.3-5">Finally, after the connection has processed all newly acknowledged packets for this
