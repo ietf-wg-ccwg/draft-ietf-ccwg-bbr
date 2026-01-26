@@ -3082,9 +3082,9 @@ state as follows:
   /* Save state in case a loss episode is later declared spurious */
   BBRSaveStateUponLoss():
     BBR.undo_state       = BBR.state
-    BBR.undo_bw_lo       = BBR.bw_lo
-    BBR.undo_inflight_lo = BBR.inflight_lo
-    BBR.undo_inflight_hi = BBR.inflight_hi
+    BBR.undo_bw_shortterm       = BBR.bw_shortterm
+    BBR.undo_inflight_shortterm = BBR.inflight_shortterm
+    BBR.undo_inflight_shortterm = BBR.inflight_longterm
 ~~~~
 
 #### Handling a Spurious Loss Recovery {#handling-spurious-loss-recovery}
