@@ -1136,6 +1136,10 @@ sent, else false.
 
 P.tx_in_flight: C.inflight immediately after the transmission of packet P.
 
+P.packet_id: A monotonically increasing unique identifier of packet P.
+This is protocol specific. E.g., for TCP this is the ending sequence
+number of the packet, and for QUIC it is the packet number.
+
 ##### Rate Sample (rs) Output {#rate-sample-rs-output}
 
 This algorithm provides its output in a RateSample structure rs, containing
@@ -1144,22 +1148,24 @@ the following fields:
 RS.delivery_rate: The delivery rate sample (in most cases RS.delivered /
 RS.interval).
 
-RS.is_app_limited: The P.is_app_limited from the most recent packet delivered;
+RS.is_app_limited: The P.is_app_limited from the most recently delivered packet;
 indicates whether the rate sample is application-limited.
 
 RS.interval: The length of the sampling interval.
 
 RS.delivered: The amount of data marked as delivered over the sampling interval.
 
-RS.prior_delivered: The P.delivered count from the most recent packet delivered.
+RS.prior_delivered: The P.delivered count from the most recently delivered packet.
 
-RS.prior_time: The P.delivered_time from the most recent packet delivered.
+RS.prior_time: The P.delivered_time from the most recently delivered packet.
 
 RS.send_elapsed: Send time interval calculated from the most recent packet
 delivered (see the "Send Rate" section above).
 
 RS.ack_elapsed: ACK time interval calculated from the most recent packet
 delivered (see the "ACK Rate" section above).
+
+RS.last_acked_packet_id: The packet identifier of the most recently delivered packet.
 
 
 #### Transmitting a data packet {#transmitting-a-data-packet}
@@ -1232,7 +1238,7 @@ information from the most recently sent packet to update the rate sample:
       RS.is_app_limited   = P.is_app_limited
       RS.send_elapsed     = P.send_time - P.first_send_time
       RS.ack_elapsed      = C.delivered_time - P.delivered_time
-      RS.last_end_seq     = P.end_seq
+      RS.last_acked_packet_id = P.packet_id
       C.first_send_time   = P.send_time
 
     /* Mark the packet as delivered once it's acknowleged. */
@@ -1243,7 +1249,7 @@ information from the most recently sent packet to update the rate sample:
   IsNewestPacket(Packet P):
     return (P.send_time > C.first_send_time or
             (P.send_time == C.first_send_time and
-             P.end_seq > RS.last_end_seq)
+             P.packet_id > RS.last_packet_id))
 ~~~~
 
 Finally, after the connection has processed all newly acknowledged packets for this
