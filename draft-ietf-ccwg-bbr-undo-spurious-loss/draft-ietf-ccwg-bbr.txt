@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 20 June 2026                                     J. Beshay, Ed.
+Expires: 30 July 2026                                     J. Beshay, Ed.
                                                                     Meta
-                                                        17 December 2025
+                                                         26 January 2026
 
 
                          BBR Congestion Control
@@ -57,11 +57,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 June 2026.
+   This Internet-Draft will expire on 30 July 2026.
 
 Copyright Notice
 
-   Copyright (c) 2025 IETF Trust and the persons identified as the
+   Copyright (c) 2026 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -3007,9 +3007,9 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
      /* Save state in case a loss episode is later declared spurious */
      BBRSaveStateUponLoss():
        BBR.undo_state       = BBR.state
-       BBR.undo_bw_lo       = BBR.bw_lo
-       BBR.undo_inflight_lo = BBR.inflight_lo
-       BBR.undo_inflight_hi = BBR.inflight_hi
+       BBR.undo_bw_shortterm       = BBR.bw_shortterm
+       BBR.undo_inflight_shortterm = BBR.inflight_shortterm
+       BBR.undo_inflight_shortterm = BBR.inflight_longterm
 
 5.5.11.2.  Handling a Spurious Loss Recovery
 
