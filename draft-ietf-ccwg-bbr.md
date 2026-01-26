@@ -3553,3 +3553,51 @@ for feedback, suggestions, and edits on earlier versions of this document.
 
 
 --- back
+
+# Test Case Examples
+
+This section describes some test cases to ensure BBR implementations perform as
+expected. When they are important to the testcase, variables from the
+pseudocode are referenced. Most test cases focus on state transitions, since
+those are critical to BBR's overall behavior.
+
+## Exiting STARTUP on Bandwidth Plateau
+
+
+## Exiting STARTUP on Loss when app-limited
+
+
+## Exit DRAIN based on inflight
+
+
+## Exit DRAIN based on time
+
+
+## Exit PROBE_UP on Bandwidth Plateau
+
+
+## Exit PROBE_UP on Loss when app-limited
+
+
+## Exit PROBE_DOWN on inflight
+
+
+## Exit PROBE_DOWN after max time
+
+
+## PROBE_RTT and exit
+
+
+## Skip PROBE_RTT due to app-limited sending
+
+
+## Achieve expected STARTUP bandwidth on a link with aggregation
+
+
+## Achieve expected Cruise bandwidth on a link with aggregation
+
+
+## Correctly manage sub-packet BDPs
+
+
+## 
