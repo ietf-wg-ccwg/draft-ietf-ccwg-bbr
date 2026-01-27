@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-15T01:50:49.562903+00:00",
+  "timestamp": "2026-01-27T01:58:12.569565+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -379,7 +379,7 @@
       "id": "I_kwDOL3MllM6uNGx4",
       "title": "Bandwidth estimation still uses _seq names, which are TCP-centric",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/26",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -390,8 +390,8 @@
       ],
       "body": "I believe the draft is fairly transport agnostic, but the bandwidth estimation section still has some references to end_seq and similar names that don't cleanly translate to QUIC.\n\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/draft-ietf-ccwg-bbr-02/draft-ietf-ccwg-bbr.md#bbrmax_bw-estimated-maximum-bandwidth-bbrmaxbw-estimated-maximum-bandwidth",
       "createdAt": "2025-03-16T00:39:46Z",
-      "updatedAt": "2025-12-15T21:49:34Z",
-      "closedAt": null,
+      "updatedAt": "2026-01-26T21:41:08Z",
+      "closedAt": "2026-01-26T21:41:08Z",
       "comments": [
         {
           "author": "marten-seemann",
@@ -6222,13 +6222,13 @@
       "labels": [],
       "body": "Closes #95\n",
       "createdAt": "2025-12-17T02:19:24Z",
-      "updatedAt": "2025-12-17T22:33:29Z",
+      "updatedAt": "2026-01-26T21:44:28Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "c4093dea446b02e5628320631e3b7a049800fa68",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "draft-ietf-ccwg-bbr-undo-spurious-loss",
-      "headRefOid": "77f6b195e4c6320ca2825c8640f1757a9a093284",
+      "headRefOid": "11b14c60ae9d4eaa1a636b278aa2a34579b6b2ef",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -6356,24 +6356,26 @@
       "id": "PR_kwDOL3MllM68ybUA",
       "title": "Remove reference to TCP-specific _seq variables",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/99",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Replaces usage of TCP sequence numbers in the bandwidth estimation section with a packet_id. The packet_id is defined as a protocol-specific field mapping to end_seq for TCP and packet number for QUIC.\r\n\r\nAlso replaces \"most recent packet delivered\" with \"most recently delivered packet\" in the related definitions, to make it sound better grammatically.\r\n\r\nCloses #26 ",
       "createdAt": "2026-01-12T21:10:49Z",
-      "updatedAt": "2026-01-13T17:56:44Z",
+      "updatedAt": "2026-01-26T21:41:13Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "c4093dea446b02e5628320631e3b7a049800fa68",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_remove_seq",
       "headRefOid": "f79dafea894c9ae3fe5dccfaedd3bd5bc5897c0e",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-01-26T21:41:07Z",
+      "mergedAt": "2026-01-26T21:41:07Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "fb814bfd1365a205bc5c9995113b645417a02701"
+      },
       "comments": [],
       "reviews": [
         {
@@ -6387,6 +6389,19 @@
           "body": "",
           "createdAt": "2026-01-12T21:38:08Z",
           "updatedAt": "2026-01-12T21:38:08Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7dBc1S",
+          "commit": {
+            "abbreviatedOid": "f79dafe"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-01-26T21:40:52Z",
+          "updatedAt": "2026-01-26T21:40:52Z",
           "comments": []
         }
       ]
