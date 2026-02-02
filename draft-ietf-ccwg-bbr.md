@@ -3097,9 +3097,9 @@ state to their previously saved values as follows:
   BBRHandleSpuriousLossDetection():
     BBR.loss_in_round = 0
     BBRResetFullBW():
-    BBR.bw_lo       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
-    BBR.inflight_lo = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
-    BBR.inflight_hi = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)
+    BBR.bw_short       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
+    BBR.inflight_short = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
+    BBR.inflight_longterm = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)
     /* If flow was probing bandwidth, return to that state: */
     if (BBR.state != ProbeRTT && BBR.state != BBR.undo_state)
       if (BBR.undo_state == Startup)
