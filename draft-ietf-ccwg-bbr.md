@@ -3060,12 +3060,12 @@ This logic can be represented as follows:
 
 ### Updating the Model Upon Detecting a Spurious Loss Recovery {#updating-the-model-upon-spurious-packet-loss}
 
-In some casess a transport protocol detects that a loss recovery episode was
+In some cases a transport protocol detects that a loss recovery episode was
 spurious, i.e., the connection previously concluded that one or more packets
 were lost (using fast recovery or RTO recovery) but later concludes that
 no packets marked lost in that loss recovery episode were actually lost.
 
-In order to handle such cases, when a loss recovery episode starts BBR saves
+In order to handle such cases, when a loss recovery episode starts, BBR saves
 information about its current state. If the transport protocol later declares
 the loss recovery episode to be spurious, then BBR restores aspects of its
 state to their previously saved values. This greatly reduces the performance
