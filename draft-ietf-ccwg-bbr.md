@@ -3600,4 +3600,10 @@ those are critical to BBR's overall behavior.
 ## Correctly manage sub-packet BDPs
 
 
-## 
+## Increase Bandwidth 10x and ensure full bandwidth is reached
+
+
+## Decrease Banwdith 10x and ensure Max Bandwidth adapts down
+
+
+
