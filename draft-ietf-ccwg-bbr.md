@@ -3603,7 +3603,9 @@ those are critical to BBR's overall behavior.
 ## Increase Bandwidth 10x and ensure full bandwidth is reached
 
 
-## Decrease Banwdith 10x and ensure Max Bandwidth adapts down
+## Decrease Bandwisth 10x and ensure Max Bandwidth adapts down
 
+
+## Token Bucket Policer
 
 
