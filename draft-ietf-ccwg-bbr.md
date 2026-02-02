@@ -3554,12 +3554,15 @@ for feedback, suggestions, and edits on earlier versions of this document.
 
 --- back
 
-# Test Case Examples
+# BBR Example Test Cases
 
 This section describes some test cases to ensure BBR implementations perform as
 expected. When they are important to the testcase, variables from the
 pseudocode are referenced. Most test cases focus on state transitions, since
 those are critical to BBR's overall behavior.
+
+This assumes that the packet pacer and the Bandwidth Estimator are implemented
+correctly.
 
 ## Exiting STARTUP on Bandwidth Plateau
 
