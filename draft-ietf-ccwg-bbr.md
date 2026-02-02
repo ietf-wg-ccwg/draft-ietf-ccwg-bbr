@@ -3084,7 +3084,7 @@ state as follows:
     BBR.undo_state       = BBR.state
     BBR.undo_bw_shortterm       = BBR.bw_shortterm
     BBR.undo_inflight_shortterm = BBR.inflight_shortterm
-    BBR.undo_inflight_shortterm = BBR.inflight_longterm
+    BBR.undo_inflight_longterm = BBR.inflight_longterm
 ~~~~
 
 #### Handling a Spurious Loss Recovery {#handling-spurious-loss-recovery}
