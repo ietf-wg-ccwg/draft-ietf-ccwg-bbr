@@ -1059,11 +1059,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">January 2026</td>
+<td class="right">February 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 30 July 2026</td>
+<td class="center">Expires 8 August 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1076,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-01-26" class="published">26 January 2026</time>
+<time datetime="2026-02-04" class="published">4 February 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-07-30">30 July 2026</time></dd>
+<dd class="expires"><time datetime="2026-08-08">8 August 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1150,7 +1150,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 30 July 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 8 August 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1333,6 +1333,9 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2.2.4">
                     <p id="section-toc.1-1.5.2.2.2.4.1"><a href="#section-5.2.4" class="auto internal xref">5.2.4</a>.  <a href="#name-per-loss-steps" class="internal xref">Per-Loss Steps</a></p>
 </li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2.2.5">
+                    <p id="section-toc.1-1.5.2.2.2.5.1"><a href="#section-5.2.5" class="auto internal xref">5.2.5</a>.  <a href="#name-spurious-loss-recovery-step" class="internal xref">Spurious Loss Recovery Steps</a></p>
+</li>
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
@@ -1395,6 +1398,9 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5.2.10">
                     <p id="section-toc.1-1.5.2.5.2.10.1"><a href="#section-5.5.10" class="auto internal xref">5.5.10</a>. <a href="#name-updating-the-model-upon-pac" class="internal xref">Updating the Model Upon Packet Loss</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5.2.11">
+                    <p id="section-toc.1-1.5.2.5.2.11.1"><a href="#section-5.5.11" class="auto internal xref">5.5.11</a>. <a href="#name-updating-the-model-upon-det" class="internal xref">Updating the Model Upon Detecting a Spurious Loss Recovery</a></p>
 </li>
                 </ul>
 </li>
@@ -3018,15 +3024,19 @@ adjust its control parameters to adapt to the updated model:<a href="#section-5.
           <h4 id="name-per-loss-steps">
 <a href="#section-5.2.4" class="section-number selfRef">5.2.4. </a><a href="#name-per-loss-steps" class="section-name selfRef">Per-Loss Steps</a>
           </h4>
-<p id="section-5.2.4-1">On every packet loss event, where some sequence range "packet" is marked
-lost, the BBR algorithm executes the following BBRUpdateOnLoss() steps in
-order to update its network path model<a href="#section-5.2.4-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.2.4-2">
-<pre>
-  BBRUpdateOnLoss(packet):
-    BBRHandleLostPacket(packet)
-</pre><a href="#section-5.2.4-2" class="pilcrow">¶</a>
+<p id="section-5.2.4-1">On every packet loss event where the transport protocol marks some packet P as
+lost, the BBR algorithm calls BBRHandleLostPacket(P) to update its network path
+model (see <a href="#probing-for-bandwidth-in-probebw" class="auto internal xref">Section 5.5.10.2</a>).<a href="#section-5.2.4-1" class="pilcrow">¶</a></p>
+</section>
 </div>
+<div id="spurious-loss-steps">
+<section id="section-5.2.5">
+          <h4 id="name-spurious-loss-recovery-step">
+<a href="#section-5.2.5" class="section-number selfRef">5.2.5. </a><a href="#name-spurious-loss-recovery-step" class="section-name selfRef">Spurious Loss Recovery Steps</a>
+          </h4>
+<p id="section-5.2.5-1">If the transport protocol detects that a loss recovery episode was spurious,
+BBR calls BBRHandleSpuriousLossDetection() to update its network path model
+(see <a href="#updating-the-model-upon-spurious-packet-loss" class="auto internal xref">Section 5.5.11</a>).<a href="#section-5.2.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -4521,6 +4531,7 @@ represents the data lost among that previous in-flight data.<a href="#section-5.
   BBRNoteLoss()
     if (!BBR.loss_in_round)   /* first loss in this round trip? */
       BBR.loss_round_delivered = C.delivered
+      BBRSaveStateUponLoss()
     BBR.loss_in_round = 1
 
   BBRHandleLostPacket(packet):
@@ -4641,6 +4652,69 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
     BBR.bw = min(BBR.max_bw, BBR.bw_shortterm)
 
 </pre><a href="#section-5.5.10.3-9" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="updating-the-model-upon-spurious-packet-loss">
+<section id="section-5.5.11">
+          <h4 id="name-updating-the-model-upon-det">
+<a href="#section-5.5.11" class="section-number selfRef">5.5.11. </a><a href="#name-updating-the-model-upon-det" class="section-name selfRef">Updating the Model Upon Detecting a Spurious Loss Recovery</a>
+          </h4>
+<p id="section-5.5.11-1">In some cases a transport protocol detects that a loss recovery episode was
+spurious, i.e., the connection previously concluded that one or more packets
+were lost (using fast recovery or RTO recovery) but later concludes that
+no packets marked lost in that loss recovery episode were actually lost.<a href="#section-5.5.11-1" class="pilcrow">¶</a></p>
+<p id="section-5.5.11-2">In order to handle such cases, when a loss recovery episode starts, BBR saves
+information about its current state. If the transport protocol later declares
+the loss recovery episode to be spurious, then BBR restores aspects of its
+state to their previously saved values. This greatly reduces the performance
+impact of spurious loss recovery episodes.<a href="#section-5.5.11-2" class="pilcrow">¶</a></p>
+<div id="saving-state-on-loss-recovery">
+<section id="section-5.5.11.1">
+            <h5 id="name-saving-state-upon-loss-reco">
+<a href="#section-5.5.11.1" class="section-number selfRef">5.5.11.1. </a><a href="#name-saving-state-upon-loss-reco" class="section-name selfRef">Saving State Upon Loss Recovery</a>
+            </h5>
+<p id="section-5.5.11.1-1">If a connection's transport protocol starts a a loss recovery episode that may
+later be declared spurious (including possibly fast recovery or RTO recovery,
+depending on the transport protocol), BBR saves information about its current
+state as follows:<a href="#section-5.5.11.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.5.11.1-2">
+<pre>
+  /* Save state in case a loss episode is later declared spurious */
+  BBRSaveStateUponLoss():
+    BBR.undo_state       = BBR.state
+    BBR.undo_bw_shortterm       = BBR.bw_shortterm
+    BBR.undo_inflight_shortterm = BBR.inflight_shortterm
+    BBR.undo_inflight_longterm = BBR.inflight_longterm
+</pre><a href="#section-5.5.11.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="handling-spurious-loss-recovery">
+<section id="section-5.5.11.2">
+            <h5 id="name-handling-a-spurious-loss-re">
+<a href="#section-5.5.11.2" class="section-number selfRef">5.5.11.2. </a><a href="#name-handling-a-spurious-loss-re" class="section-name selfRef">Handling a Spurious Loss Recovery</a>
+            </h5>
+<p id="section-5.5.11.2-1">If a loss recovery episode is declared spurious, BBR restores aspects of its
+state to their previously saved values as follows:<a href="#section-5.5.11.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.5.11.2-2">
+<pre>
+  /* Handle a declaration of a spurious loss episode */
+  BBRHandleSpuriousLossDetection():
+    BBR.loss_in_round = 0
+    BBRResetFullBW():
+    BBR.bw_shortterm       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
+    BBR.inflight_shortterm = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
+    BBR.inflight_longterm = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)
+    /* If flow was probing bandwidth, return to that state: */
+    if (BBR.state != ProbeRTT &amp;&amp; BBR.state != BBR.undo_state)
+      if (BBR.undo_state == Startup)
+        BBREnterStartup()
+      else if (BBR.undo_state == ProbeBW_UP)
+        BBRStartProbeBW_UP()
+</pre><a href="#section-5.5.11.2-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -4943,6 +5017,7 @@ event was spurious.<a href="#section-5.6.4.4-4" class="pilcrow">¶</a></p>
 <pre>
   BBROnEnterRTO():
     BBRSaveCwnd()
+    BBRSaveStateUponLoss()
     C.cwnd = C.inflight + 1
 </pre><a href="#section-5.6.4.4-7" class="pilcrow">¶</a>
 </div>
@@ -4951,6 +5026,7 @@ event was spurious.<a href="#section-5.6.4.4-4" class="pilcrow">¶</a></p>
 <pre>
   BBROnEnterFastRecovery():
     BBRSaveCwnd()
+    BBRSaveStateUponLoss()
 </pre><a href="#section-5.6.4.4-9" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6.4.4-10">Upon exiting loss recovery (RTO recovery or Fast Recovery), either by repairing

@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 30 July 2026                                     J. Beshay, Ed.
+Expires: 8 August 2026                                    J. Beshay, Ed.
                                                                     Meta
-                                                         26 January 2026
+                                                         4 February 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 30 July 2026.
+   This Internet-Draft will expire on 8 August 2026.
 
 Copyright Notice
 
@@ -121,6 +121,7 @@ Table of Contents
        5.2.2.  Per-Transmit Steps
        5.2.3.  Per-ACK Steps
        5.2.4.  Per-Loss Steps
+       5.2.5.  Spurious Loss Recovery Steps
      5.3.  State Machine Operation
        5.3.1.  Startup
        5.3.2.  Drain
@@ -141,6 +142,8 @@ Table of Contents
        5.5.8.  BBR.offload_budget
        5.5.9.  BBR.extra_acked
        5.5.10. Updating the Model Upon Packet Loss
+       5.5.11. Updating the Model Upon Detecting a Spurious Loss
+               Recovery
      5.6.  Updating Control Parameters
        5.6.1.  Summary of Control Behavior in the State Machine
        5.6.2.  Pacing Rate: C.pacing_rate
@@ -1545,12 +1548,15 @@ Table of Contents
 
 5.2.4.  Per-Loss Steps
 
-   On every packet loss event, where some sequence range "packet" is
-   marked lost, the BBR algorithm executes the following
-   BBRUpdateOnLoss() steps in order to update its network path model
+   On every packet loss event where the transport protocol marks some
+   packet P as lost, the BBR algorithm calls BBRHandleLostPacket(P) to
+   update its network path model (see Section 5.5.10.2).
 
-     BBRUpdateOnLoss(packet):
-       BBRHandleLostPacket(packet)
+5.2.5.  Spurious Loss Recovery Steps
+
+   If the transport protocol detects that a loss recovery episode was
+   spurious, BBR calls BBRHandleSpuriousLossDetection() to update its
+   network path model (see Section 5.5.11).
 
 5.3.  State Machine Operation
 
@@ -2866,6 +2872,7 @@ Table of Contents
      BBRNoteLoss()
        if (!BBR.loss_in_round)   /* first loss in this round trip? */
          BBR.loss_round_delivered = C.delivered
+         BBRSaveStateUponLoss()
        BBR.loss_in_round = 1
 
      BBRHandleLostPacket(packet):
@@ -2983,6 +2990,54 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
 
      BBRBoundBWForModel():
        BBR.bw = min(BBR.max_bw, BBR.bw_shortterm)
+
+5.5.11.  Updating the Model Upon Detecting a Spurious Loss Recovery
+
+   In some cases a transport protocol detects that a loss recovery
+   episode was spurious, i.e., the connection previously concluded that
+   one or more packets were lost (using fast recovery or RTO recovery)
+   but later concludes that no packets marked lost in that loss recovery
+   episode were actually lost.
+
+   In order to handle such cases, when a loss recovery episode starts,
+   BBR saves information about its current state.  If the transport
+   protocol later declares the loss recovery episode to be spurious,
+   then BBR restores aspects of its state to their previously saved
+   values.  This greatly reduces the performance impact of spurious loss
+   recovery episodes.
+
+5.5.11.1.  Saving State Upon Loss Recovery
+
+   If a connection's transport protocol starts a a loss recovery episode
+   that may later be declared spurious (including possibly fast recovery
+   or RTO recovery, depending on the transport protocol), BBR saves
+   information about its current state as follows:
+
+     /* Save state in case a loss episode is later declared spurious */
+     BBRSaveStateUponLoss():
+       BBR.undo_state       = BBR.state
+       BBR.undo_bw_shortterm       = BBR.bw_shortterm
+       BBR.undo_inflight_shortterm = BBR.inflight_shortterm
+       BBR.undo_inflight_longterm = BBR.inflight_longterm
+
+5.5.11.2.  Handling a Spurious Loss Recovery
+
+   If a loss recovery episode is declared spurious, BBR restores aspects
+   of its state to their previously saved values as follows:
+
+  /* Handle a declaration of a spurious loss episode */
+  BBRHandleSpuriousLossDetection():
+    BBR.loss_in_round = 0
+    BBRResetFullBW():
+    BBR.bw_shortterm       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
+    BBR.inflight_shortterm = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
+    BBR.inflight_longterm = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)
+    /* If flow was probing bandwidth, return to that state: */
+    if (BBR.state != ProbeRTT && BBR.state != BBR.undo_state)
+      if (BBR.undo_state == Startup)
+        BBREnterStartup()
+      else if (BBR.undo_state == ProbeBW_UP)
+        BBRStartProbeBW_UP()
 
 5.6.  Updating Control Parameters
 
@@ -3245,12 +3300,14 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
 
      BBROnEnterRTO():
        BBRSaveCwnd()
+       BBRSaveStateUponLoss()
        C.cwnd = C.inflight + 1
 
    Upon entering Fast Recovery:
 
      BBROnEnterFastRecovery():
        BBRSaveCwnd()
+       BBRSaveStateUponLoss()
 
    Upon exiting loss recovery (RTO recovery or Fast Recovery), either by
    repairing all losses or undoing recovery, BBR restores the best-known
