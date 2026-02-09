@@ -3079,7 +3079,7 @@ impact of spurious loss recovery episodes.
 
 #### Saving State Upon Loss Recovery {#saving-state-on-loss-recovery}
 
-If a connection's transport protocol starts a a loss recovery episode that may
+If a connection's transport protocol starts a loss recovery episode that may
 later be declared spurious (including possibly fast recovery or RTO recovery,
 depending on the transport protocol), BBR saves information about its current
 state as follows:
