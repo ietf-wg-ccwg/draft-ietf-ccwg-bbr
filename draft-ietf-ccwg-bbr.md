@@ -1231,7 +1231,7 @@ information from the most recently sent packet to update the rate sample:
     C.delivered_time = Now()
 
     /* Update info using the newest packet: */
-    if (!RS.has_data or IsNewestPacket(P))
+    if (!RS.has_data || IsNewestPacket(P))
       RS.has_data         = true
       RS.prior_delivered  = P.delivered
       RS.prior_time       = P.delivered_time
@@ -1247,8 +1247,8 @@ information from the most recently sent packet to update the rate sample:
   /* Is the given Packet the most recently sent packet
    * that has been delivered? */
   IsNewestPacket(Packet P):
-    return (P.send_time > C.first_send_time or
-            (P.send_time == C.first_send_time and
+    return (P.send_time > C.first_send_time ||
+            (P.send_time == C.first_send_time &&
              P.packet_id > RS.last_packet_id))
 ~~~~
 
@@ -1260,7 +1260,7 @@ GenerateRateSample() to finish populating the rate sample, RS:
   /* Upon receiving ACK, fill in delivery rate sample RS. */
   GenerateRateSample():
     /* Clear app-limited field if bubble is ACKed and gone. */
-    if (C.app_limited and C.delivered > C.app_limited)
+    if (C.app_limited && C.delivered > C.app_limited)
       C.app_limited = 0
 
     if (RS.prior_time == 0)
@@ -1318,9 +1318,9 @@ application-limited:
 
 ~~~~
   CheckIfApplicationLimited():
-    if (NoUnsentData() and
-        C.pending_transmissions == 0 and
-        C.inflight < C.cwnd and
+    if (NoUnsentData() &&
+        C.pending_transmissions == 0 &&
+        C.inflight < C.cwnd &&
         C.lost_out <= C.retrans_out)
       MarkConnectionAppLimited()
 
@@ -1658,7 +1658,7 @@ for packet loss. The following subsections discuss these estimators.
 ~~~~
   BBRCheckStartupDone():
     BBRCheckStartupHighLoss()
-    if (BBR.state == Startup and BBR.full_bw_reached)
+    if (BBR.state == Startup && BBR.full_bw_reached)
       BBREnterDrain()
 ~~~~
 
@@ -1700,7 +1700,7 @@ new data, and when the delivery rate sample is not application-limited
 
 ~~~~
   BBRCheckFullBWReached():
-    if (BBR.full_bw_now or !BBR.round_start or RS.is_app_limited)
+    if (BBR.full_bw_now || !BBR.round_start || RS.is_app_limited)
       return  /* no need to check for a full pipe now */
     if (RS.delivery_rate >= BBR.full_bw * 1.25)
       BBRResetFullBW()       /* bw is still growing, so reset */
@@ -1777,7 +1777,7 @@ this, upon every ACK BBR executes:
 
 ~~~~
   BBRCheckDrainDone():
-    if (BBR.state == Drain and C.inflight <= BBRInflight(1.0))
+    if (BBR.state == Drain && C.inflight <= BBRInflight(1.0))
       BBREnterProbeBW()  /* BBR estimates the queue was drained */
 ~~~~
 
@@ -2188,7 +2188,7 @@ The ancillary logic to implement the ProbeBW state machine:
 
   /* Time to transition from UP to DOWN? */
   BBRIsTimeToGoDown():
-    if (C.is_cwnd_limited and C.cwnd >= BBR.inflight_longterm)
+    if (C.is_cwnd_limited && C.cwnd >= BBR.inflight_longterm)
       BBRResetFullBW()   /* bw is limited by BBR.inflight_longterm */
       BBR.full_bw = RS.delivery_rate
     else if (BBR.full_bw_now)
@@ -2222,7 +2222,7 @@ The ancillary logic to implement the ProbeBW state machine:
 
   /* Increase BBR.inflight_longterm if appropriate. */
   BBRProbeInflightLongtermUpward():
-    if (!C.is_cwnd_limited or C.cwnd < BBR.inflight_longterm)
+    if (!C.is_cwnd_limited || C.cwnd < BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
    BBR.bw_probe_up_acks += RS.newly_acked
    if (BBR.bw_probe_up_acks >= BBR.probe_up_cnt)
@@ -2235,12 +2235,12 @@ The ancillary logic to implement the ProbeBW state machine:
   /* Track ACK state and update BBR.max_bw window and
    * BBR.inflight_longterm. */
   BBRAdaptLongTermModel():
-    if (BBR.ack_phase == ACKS_PROBE_STARTING and BBR.round_start)
+    if (BBR.ack_phase == ACKS_PROBE_STARTING && BBR.round_start)
       /* starting to get bw probing samples */
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
-    if (BBR.ack_phase == ACKS_PROBE_STOPPING and BBR.round_start)
+    if (BBR.ack_phase == ACKS_PROBE_STOPPING && BBR.round_start)
       /* end of samples from bw probing phase */
-      if (IsInAProbeBWState() and !RS.is_app_limited)
+      if (IsInAProbeBWState() && !RS.is_app_limited)
         BBRAdvanceMaxBwFilter()
 
     if (!IsInflightTooHigh())
@@ -2359,15 +2359,15 @@ estimate:
   BBRUpdateMinRTT()
     BBR.probe_rtt_expired =
       Now() > BBR.probe_rtt_min_stamp + ProbeRTTInterval
-    if (RS.rtt >= 0 and
-        (RS.rtt < BBR.probe_rtt_min_delay or
+    if (RS.rtt >= 0 &&
+        (RS.rtt < BBR.probe_rtt_min_delay ||
          BBR.probe_rtt_expired))
        BBR.probe_rtt_min_delay = RS.rtt
        BBR.probe_rtt_min_stamp = Now()
 
     min_rtt_expired =
       Now() > BBR.min_rtt_stamp + MinRTTFilterLen
-    if (BBR.probe_rtt_min_delay < BBR.min_rtt or
+    if (BBR.probe_rtt_min_delay < BBR.min_rtt ||
         min_rtt_expired)
       BBR.min_rtt       = BBR.probe_rtt_min_delay
       BBR.min_rtt_stamp = BBR.probe_rtt_min_stamp
@@ -2382,9 +2382,9 @@ to the ProbeRTT state as follows:
 
 ~~~~
   BBRCheckProbeRTT():
-    if (BBR.state != ProbeRTT and
-        BBR.probe_rtt_expired and
-        not BBR.idle_restart)
+    if (BBR.state != ProbeRTT &&
+        BBR.probe_rtt_expired &&
+        !BBR.idle_restart)
       BBREnterProbeRTT()
       BBRSaveCwnd()
       BBR.probe_rtt_done_stamp = 0
@@ -2403,7 +2403,7 @@ to the ProbeRTT state as follows:
   BBRHandleProbeRTT():
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
-    if (BBR.probe_rtt_done_stamp == 0 and
+    if (BBR.probe_rtt_done_stamp == 0 &&
         C.inflight <= BBRProbeRTTCwnd())
       /* Wait for at least ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
@@ -2418,7 +2418,7 @@ to the ProbeRTT state as follows:
         BBRCheckProbeRTTDone()
 
   BBRCheckProbeRTTDone():
-    if (BBR.probe_rtt_done_stamp != 0 and
+    if (BBR.probe_rtt_done_stamp != 0 &&
         Now() > BBR.probe_rtt_done_stamp)
       /* schedule next ProbeRTT: */
       BBR.probe_rtt_min_stamp = Now()
@@ -2478,7 +2478,7 @@ BBRHandleRestartFromIdle() before sending a packet for a flow:
 
 ~~~~
   BBRHandleRestartFromIdle():
-    if (C.inflight == 0 and C.app_limited)
+    if (C.inflight == 0 && C.app_limited)
       BBR.idle_restart = true
       BBR.extra_acked_interval_start = Now()
       if (IsInAProbeBWState())
@@ -3410,7 +3410,7 @@ ProbeRTT), and is defined as follows:
 
 ~~~~
   BBRSaveCwnd():
-    if (!InLossRecovery() and BBR.state != ProbeRTT)
+    if (!InLossRecovery() && BBR.state != ProbeRTT)
       BBR.prior_cwnd = C.cwnd
     else
       BBR.prior_cwnd = max(BBR.prior_cwnd, C.cwnd)
@@ -3487,10 +3487,10 @@ State Machine" section:
 ~~~~
   BBRBoundCwndForModel():
     cap = Infinity
-    if (IsInAProbeBWState() and
+    if (IsInAProbeBWState() &&
         BBR.state != ProbeBW_CRUISE)
       cap = BBR.inflight_longterm
-    else if (BBR.state == ProbeRTT or
+    else if (BBR.state == ProbeRTT ||
              BBR.state == ProbeBW_CRUISE)
       cap = BBRInflightWithHeadroom()
 
