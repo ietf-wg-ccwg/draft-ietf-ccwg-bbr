@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-05T02:11:12.511260+00:00",
+  "timestamp": "2026-02-10T02:34:08.724688+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -6535,6 +6535,58 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 100,
+      "id": "PR_kwDOL3MllM7Cjr1E",
+      "title": "Minor editorial fixes",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/100",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "- Use && and || consistently instead of `and` and `or` in pseudo code\r\n- Fix typo",
+      "createdAt": "2026-02-09T19:41:09Z",
+      "updatedAt": "2026-02-09T21:35:25Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "cceef937cbb0545d99e55627870afc7a976f95fb",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_editorial",
+      "headRefOid": "8abad4a39921e63360c033b72bf20a7d55d861f9",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 101,
+      "id": "PR_kwDOL3MllM7Cjs7q",
+      "title": "Update Drain logic to add exiting after 3 RTTs",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/101",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Updates the drain pacing gain to 0.5 and adds a safeguard to exit drain after 3 RTTs.\r\n\r\nCloses https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/90\r\nReplaces https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/6",
+      "createdAt": "2026-02-09T19:42:50Z",
+      "updatedAt": "2026-02-09T19:45:07Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "cceef937cbb0545d99e55627870afc7a976f95fb",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_drain_timeout",
+      "headRefOid": "a10ad734434ee9d1bc7637382ae114fcc9ede5aa",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
