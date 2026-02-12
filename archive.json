@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-10T02:34:08.724688+00:00",
+  "timestamp": "2026-02-12T02:26:16.639637+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1274,7 +1274,7 @@
       "labels": [],
       "body": "There is a bug where with BBR, DRAIN could last forever (or until the first PROBE_RTT) if the estimated bandwidth is too high.\n\nThis is because: if the estimated bandwidth overestimated enough, then drain_pacing_rate  = drain_pacing_gain*estimated_bw may be above the current delivery rate of the flow, and thus pacing at that rate may increase inflight (until inflight reaches cwnd) instead of reducing inflight. So inflight may never fall to match the estimated BDP, so the connection may never reach the exit condition for DRAIN (inflight <= estimated_BDP), the connection we may stay in DRAIN forever, or until the first PROBE_RTT forces inflight <= estimated_BDP by setting the cwnd to estimated_BDP.\n\nOne appealing solution to this would be to get rid of the DRAIN state, and instead use the PROBE_BW_DOWN state. The PROBE_BW_DOWN state already has logic that ensures that the connection will exit from that state if it's time to probe for bandwidth again. This would make the code simpler, overall.\n\nA potential downside of this solution would be that the current PROBE_BW_DOWN state uses a pacing gain of 0.90, which would take considerably longer than the DRAIN pacing gain of (0.35 or 0.5, depending on the version of the draft or implementation) to drain any queue that accumulated in STARTUP. It's not clear which is bigger: the potential cost of the additional time to drain the queue, or the potential benefit of the higher pacing gain of 0.9 perhaps avoiding some underutilization (and rebuffers, for video). If 0.9 is too slow to drain the queue then we could consider something like using 0.5 for the first PROBE_BW_DOWN and 0.9 for all later PROBE_BW_DOWN states.\n\nIf we go this route, then instead of PR #6  we would want a PR to describe this new approach.\n\nThis is a significant change, so we'd want some deployment experience and probably an A/B test to verify that any proposed fix works well.\n\ncc: @ianswett @jbeshay \n",
       "createdAt": "2025-10-29T21:53:27Z",
-      "updatedAt": "2026-02-02T21:58:00Z",
+      "updatedAt": "2026-02-11T18:17:01Z",
       "closedAt": null,
       "comments": [
         {
@@ -1297,6 +1297,13 @@
           "body": "Notes from editor discussion:\n- ProbeBW_Down has a duration upper bound of 2-3 seconds. This may not be enough drain a connection with a sufficiently high RTT.\n- A simpler solution would be to add a time-based exit condition for DRAIN of 3 * RTT.",
           "createdAt": "2026-02-02T21:58:00Z",
           "updatedAt": "2026-02-02T21:58:00Z"
+        },
+        {
+          "author": "antoniovicente",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks for creating the PR.\n\nI thought that the intention was to try to get drain to be closer to ProbeBW down but with a different pacing constant.\n\nA possibly related but different issue: What is the expected buffer bloat between probe up and probe down, vs startup and drain?  Probe Up and the higher cwnd_gain of 2.25, but probe down uses a pacing gain of just 0.9 which even under ideal conditions would require 10+ RTTs to reduce inflight from 2x BDP to 1x BDP.",
+          "createdAt": "2026-02-11T18:17:00Z",
+          "updatedAt": "2026-02-11T18:17:00Z"
         }
       ]
     },
