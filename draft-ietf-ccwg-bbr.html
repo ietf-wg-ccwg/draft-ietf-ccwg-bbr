@@ -180,7 +180,7 @@ specifies version 3 of the BBR algorithm, BBRv3.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
   font-family: 'Oxygen Mono';
@@ -188,7 +188,8 @@ specifies version 3 of the BBR algorithm, BBRv3.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 }
 
 @font-face {
@@ -1063,7 +1064,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 8 August 2026</td>
+<td class="center">Expires 27 August 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1077,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-02-04" class="published">4 February 2026</time>
+<time datetime="2026-02-23" class="published">23 February 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-08-08">8 August 2026</time></dd>
+<dd class="expires"><time datetime="2026-08-27">27 August 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1150,7 +1151,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 August 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 27 August 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2563,7 +2564,7 @@ information from the most recently sent packet to update the rate sample:<a href
     C.delivered_time = Now()
 
     /* Update info using the newest packet: */
-    if (!RS.has_data or IsNewestPacket(P))
+    if (!RS.has_data || IsNewestPacket(P))
       RS.has_data         = true
       RS.prior_delivered  = P.delivered
       RS.prior_time       = P.delivered_time
@@ -2579,8 +2580,8 @@ information from the most recently sent packet to update the rate sample:<a href
   /* Is the given Packet the most recently sent packet
    * that has been delivered? */
   IsNewestPacket(Packet P):
-    return (P.send_time &gt; C.first_send_time or
-            (P.send_time == C.first_send_time and
+    return (P.send_time &gt; C.first_send_time ||
+            (P.send_time == C.first_send_time &amp;&amp;
              P.packet_id &gt; RS.last_packet_id))
 </pre><a href="#section-4.1.2.3-4" class="pilcrow">¶</a>
 </div>
@@ -2592,7 +2593,7 @@ GenerateRateSample() to finish populating the rate sample, RS:<a href="#section-
   /* Upon receiving ACK, fill in delivery rate sample RS. */
   GenerateRateSample():
     /* Clear app-limited field if bubble is ACKed and gone. */
-    if (C.app_limited and C.delivered &gt; C.app_limited)
+    if (C.app_limited &amp;&amp; C.delivered &gt; C.app_limited)
       C.app_limited = 0
 
     if (RS.prior_time == 0)
@@ -2658,9 +2659,9 @@ application-limited:<a href="#section-4.1.2.4-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1.2.4-4">
 <pre>
   CheckIfApplicationLimited():
-    if (NoUnsentData() and
-        C.pending_transmissions == 0 and
-        C.inflight &lt; C.cwnd and
+    if (NoUnsentData() &amp;&amp;
+        C.pending_transmissions == 0 &amp;&amp;
+        C.inflight &lt; C.cwnd &amp;&amp;
         C.lost_out &lt;= C.retrans_out)
       MarkConnectionAppLimited()
 
@@ -3090,7 +3091,7 @@ for packet loss. The following subsections discuss these estimators.<a href="#se
 <pre>
   BBRCheckStartupDone():
     BBRCheckStartupHighLoss()
-    if (BBR.state == Startup and BBR.full_bw_reached)
+    if (BBR.state == Startup &amp;&amp; BBR.full_bw_reached)
       BBREnterDrain()
 </pre><a href="#section-5.3.1.1-7" class="pilcrow">¶</a>
 </div>
@@ -3133,7 +3134,7 @@ new data, and when the delivery rate sample is not application-limited
 <div class="alignLeft art-text artwork" id="section-5.3.1.2-7">
 <pre>
   BBRCheckFullBWReached():
-    if (BBR.full_bw_now or !BBR.round_start or RS.is_app_limited)
+    if (BBR.full_bw_now || !BBR.round_start || RS.is_app_limited)
       return  /* no need to check for a full pipe now */
     if (RS.delivery_rate &gt;= BBR.full_bw * 1.25)
       BBRResetFullBW()       /* bw is still growing, so reset */
@@ -3221,7 +3222,7 @@ this, upon every ACK BBR executes:<a href="#section-5.3.2-3" class="pilcrow">¶<
 <div class="alignLeft art-text artwork" id="section-5.3.2-4">
 <pre>
   BBRCheckDrainDone():
-    if (BBR.state == Drain and C.inflight &lt;= BBRInflight(1.0))
+    if (BBR.state == Drain &amp;&amp; C.inflight &lt;= BBRInflight(1.0))
       BBREnterProbeBW()  /* BBR estimates the queue was drained */
 </pre><a href="#section-5.3.2-4" class="pilcrow">¶</a>
 </div>
@@ -3694,7 +3695,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
 
   /* Time to transition from UP to DOWN? */
   BBRIsTimeToGoDown():
-    if (C.is_cwnd_limited and C.cwnd &gt;= BBR.inflight_longterm)
+    if (C.is_cwnd_limited &amp;&amp; C.cwnd &gt;= BBR.inflight_longterm)
       BBRResetFullBW()   /* bw is limited by BBR.inflight_longterm */
       BBR.full_bw = RS.delivery_rate
     else if (BBR.full_bw_now)
@@ -3728,7 +3729,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
 
   /* Increase BBR.inflight_longterm if appropriate. */
   BBRProbeInflightLongtermUpward():
-    if (!C.is_cwnd_limited or C.cwnd &lt; BBR.inflight_longterm)
+    if (!C.is_cwnd_limited || C.cwnd &lt; BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
    BBR.bw_probe_up_acks += RS.newly_acked
    if (BBR.bw_probe_up_acks &gt;= BBR.probe_up_cnt)
@@ -3741,12 +3742,12 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
   /* Track ACK state and update BBR.max_bw window and
    * BBR.inflight_longterm. */
   BBRAdaptLongTermModel():
-    if (BBR.ack_phase == ACKS_PROBE_STARTING and BBR.round_start)
+    if (BBR.ack_phase == ACKS_PROBE_STARTING &amp;&amp; BBR.round_start)
       /* starting to get bw probing samples */
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
-    if (BBR.ack_phase == ACKS_PROBE_STOPPING and BBR.round_start)
+    if (BBR.ack_phase == ACKS_PROBE_STOPPING &amp;&amp; BBR.round_start)
       /* end of samples from bw probing phase */
-      if (IsInAProbeBWState() and !RS.is_app_limited)
+      if (IsInAProbeBWState() &amp;&amp; !RS.is_app_limited)
         BBRAdvanceMaxBwFilter()
 
     if (!IsInflightTooHigh())
@@ -3871,15 +3872,15 @@ estimate:<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
   BBRUpdateMinRTT()
     BBR.probe_rtt_expired =
       Now() &gt; BBR.probe_rtt_min_stamp + ProbeRTTInterval
-    if (RS.rtt &gt;= 0 and
-        (RS.rtt &lt; BBR.probe_rtt_min_delay or
+    if (RS.rtt &gt;= 0 &amp;&amp;
+        (RS.rtt &lt; BBR.probe_rtt_min_delay ||
          BBR.probe_rtt_expired))
        BBR.probe_rtt_min_delay = RS.rtt
        BBR.probe_rtt_min_stamp = Now()
 
     min_rtt_expired =
       Now() &gt; BBR.min_rtt_stamp + MinRTTFilterLen
-    if (BBR.probe_rtt_min_delay &lt; BBR.min_rtt or
+    if (BBR.probe_rtt_min_delay &lt; BBR.min_rtt ||
         min_rtt_expired)
       BBR.min_rtt       = BBR.probe_rtt_min_delay
       BBR.min_rtt_stamp = BBR.probe_rtt_min_stamp
@@ -3893,9 +3894,9 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
 <div class="alignLeft art-text artwork" id="section-5.3.4.3-5">
 <pre>
   BBRCheckProbeRTT():
-    if (BBR.state != ProbeRTT and
-        BBR.probe_rtt_expired and
-        not BBR.idle_restart)
+    if (BBR.state != ProbeRTT &amp;&amp;
+        BBR.probe_rtt_expired &amp;&amp;
+        !BBR.idle_restart)
       BBREnterProbeRTT()
       BBRSaveCwnd()
       BBR.probe_rtt_done_stamp = 0
@@ -3914,7 +3915,7 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
   BBRHandleProbeRTT():
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
-    if (BBR.probe_rtt_done_stamp == 0 and
+    if (BBR.probe_rtt_done_stamp == 0 &amp;&amp;
         C.inflight &lt;= BBRProbeRTTCwnd())
       /* Wait for at least ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
@@ -3929,7 +3930,7 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
         BBRCheckProbeRTTDone()
 
   BBRCheckProbeRTTDone():
-    if (BBR.probe_rtt_done_stamp != 0 and
+    if (BBR.probe_rtt_done_stamp != 0 &amp;&amp;
         Now() &gt; BBR.probe_rtt_done_stamp)
       /* schedule next ProbeRTT: */
       BBR.probe_rtt_min_stamp = Now()
@@ -3999,7 +4000,7 @@ BBRHandleRestartFromIdle() before sending a packet for a flow:<a href="#section-
 <div class="alignLeft art-text artwork" id="section-5.4.1-4">
 <pre>
   BBRHandleRestartFromIdle():
-    if (C.inflight == 0 and C.app_limited)
+    if (C.inflight == 0 &amp;&amp; C.app_limited)
       BBR.idle_restart = true
       BBR.extra_acked_interval_start = Now()
       if (IsInAProbeBWState())
@@ -4676,7 +4677,7 @@ impact of spurious loss recovery episodes.<a href="#section-5.5.11-2" class="pil
             <h5 id="name-saving-state-upon-loss-reco">
 <a href="#section-5.5.11.1" class="section-number selfRef">5.5.11.1. </a><a href="#name-saving-state-upon-loss-reco" class="section-name selfRef">Saving State Upon Loss Recovery</a>
             </h5>
-<p id="section-5.5.11.1-1">If a connection's transport protocol starts a a loss recovery episode that may
+<p id="section-5.5.11.1-1">If a connection's transport protocol starts a loss recovery episode that may
 later be declared spurious (including possibly fast recovery or RTO recovery,
 depending on the transport protocol), BBR saves information about its current
 state as follows:<a href="#section-5.5.11.1-1" class="pilcrow">¶</a></p>
@@ -5047,7 +5048,7 @@ ProbeRTT), and is defined as follows:<a href="#section-5.6.4.4-13" class="pilcro
 <div class="alignLeft art-text artwork" id="section-5.6.4.4-14">
 <pre>
   BBRSaveCwnd():
-    if (!InLossRecovery() and BBR.state != ProbeRTT)
+    if (!InLossRecovery() &amp;&amp; BBR.state != ProbeRTT)
       BBR.prior_cwnd = C.cwnd
     else
       BBR.prior_cwnd = max(BBR.prior_cwnd, C.cwnd)
@@ -5134,10 +5135,10 @@ State Machine" section:<a href="#section-5.6.4.7-1" class="pilcrow">¶</a></p>
 <pre>
   BBRBoundCwndForModel():
     cap = Infinity
-    if (IsInAProbeBWState() and
+    if (IsInAProbeBWState() &amp;&amp;
         BBR.state != ProbeBW_CRUISE)
       cap = BBR.inflight_longterm
-    else if (BBR.state == ProbeRTT or
+    else if (BBR.state == ProbeRTT ||
              BBR.state == ProbeBW_CRUISE)
       cap = BBRInflightWithHeadroom()
 
@@ -5500,7 +5501,7 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dd class="break"></dd>
 <dt id="I-D.draft-ietf-quic-ack-frequency">[I-D.draft-ietf-quic-ack-frequency]</dt>
         <dd>
-<span class="refAuthor">Iyengar, J.</span>, <span class="refAuthor">Swett, I.</span>, and <span class="refAuthor">M. Kühlewind</span>, <span class="refTitle">"QUIC Acknowledgment Frequency"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-ack-frequency-13</span>, <time datetime="2025-11-06" class="refDate">6 November 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-ack-frequency-13">https://datatracker.ietf.org/doc/html/draft-ietf-quic-ack-frequency-13</a>&gt;</span>. </dd>
+<span class="refAuthor">Iyengar, J.</span>, <span class="refAuthor">Swett, I.</span>, and <span class="refAuthor">M. Kühlewind</span>, <span class="refTitle">"QUIC Acknowledgment Frequency"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-ack-frequency-14</span>, <time datetime="2026-02-05" class="refDate">5 February 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-ack-frequency-14">https://datatracker.ietf.org/doc/html/draft-ietf-quic-ack-frequency-14</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="Jac88">[Jac88]</dt>
         <dd>
