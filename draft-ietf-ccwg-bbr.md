@@ -2192,8 +2192,9 @@ The ancillary logic to implement the ProbeBW state machine:
   BBRIsTimeToCruise():
     if (C.inflight > BBRInflightWithHeadroom())
       return false /* not enough headroom */
-    if (C.inflight <= BBRInflight(BBR.max_bw, 1.0))
-      return true  /* C.inflight <= estimated BDP */
+    if (C.inflight > BBRInflight(BBR.max_bw, 1.0))
+      return false /* C.inflight > estimated BDP */
+    return true
 
   /* Time to transition from UP to DOWN? */
   BBRIsTimeToGoDown():
