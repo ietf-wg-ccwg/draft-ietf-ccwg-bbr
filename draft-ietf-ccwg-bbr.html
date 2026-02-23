@@ -3698,8 +3698,9 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
   BBRIsTimeToCruise():
     if (C.inflight &gt; BBRInflightWithHeadroom())
       return false /* not enough headroom */
-    if (C.inflight &lt;= BBRInflight(BBR.max_bw, 1.0))
-      return true  /* C.inflight &lt;= estimated BDP */
+    if (C.inflight &gt; BBRInflight(BBR.max_bw, 1.0))
+      return false /* C.inflight &gt; estimated BDP */
+    return true
 
   /* Time to transition from UP to DOWN? */
   BBRIsTimeToGoDown():
