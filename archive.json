@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-12T02:26:16.639637+00:00",
+  "timestamp": "2026-02-24T02:21:12.297464+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1265,7 +1265,7 @@
       "id": "I_kwDOL3MllM7UrAHo",
       "title": "BBR connections could get stuck in DRAIN if estimated bandwidth is sufficiently overestimated",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/90",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -1274,8 +1274,8 @@
       "labels": [],
       "body": "There is a bug where with BBR, DRAIN could last forever (or until the first PROBE_RTT) if the estimated bandwidth is too high.\n\nThis is because: if the estimated bandwidth overestimated enough, then drain_pacing_rate  = drain_pacing_gain*estimated_bw may be above the current delivery rate of the flow, and thus pacing at that rate may increase inflight (until inflight reaches cwnd) instead of reducing inflight. So inflight may never fall to match the estimated BDP, so the connection may never reach the exit condition for DRAIN (inflight <= estimated_BDP), the connection we may stay in DRAIN forever, or until the first PROBE_RTT forces inflight <= estimated_BDP by setting the cwnd to estimated_BDP.\n\nOne appealing solution to this would be to get rid of the DRAIN state, and instead use the PROBE_BW_DOWN state. The PROBE_BW_DOWN state already has logic that ensures that the connection will exit from that state if it's time to probe for bandwidth again. This would make the code simpler, overall.\n\nA potential downside of this solution would be that the current PROBE_BW_DOWN state uses a pacing gain of 0.90, which would take considerably longer than the DRAIN pacing gain of (0.35 or 0.5, depending on the version of the draft or implementation) to drain any queue that accumulated in STARTUP. It's not clear which is bigger: the potential cost of the additional time to drain the queue, or the potential benefit of the higher pacing gain of 0.9 perhaps avoiding some underutilization (and rebuffers, for video). If 0.9 is too slow to drain the queue then we could consider something like using 0.5 for the first PROBE_BW_DOWN and 0.9 for all later PROBE_BW_DOWN states.\n\nIf we go this route, then instead of PR #6  we would want a PR to describe this new approach.\n\nThis is a significant change, so we'd want some deployment experience and probably an A/B test to verify that any proposed fix works well.\n\ncc: @ianswett @jbeshay \n",
       "createdAt": "2025-10-29T21:53:27Z",
-      "updatedAt": "2026-02-11T18:17:01Z",
-      "closedAt": null,
+      "updatedAt": "2026-02-23T22:12:57Z",
+      "closedAt": "2026-02-23T22:00:38Z",
       "comments": [
         {
           "author": "antoniovicente",
@@ -1304,6 +1304,20 @@
           "body": "Thanks for creating the PR.\n\nI thought that the intention was to try to get drain to be closer to ProbeBW down but with a different pacing constant.\n\nA possibly related but different issue: What is the expected buffer bloat between probe up and probe down, vs startup and drain?  Probe Up and the higher cwnd_gain of 2.25, but probe down uses a pacing gain of just 0.9 which even under ideal conditions would require 10+ RTTs to reduce inflight from 2x BDP to 1x BDP.",
           "createdAt": "2026-02-11T18:17:00Z",
           "updatedAt": "2026-02-11T18:17:00Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Re: \"What is the expected buffer bloat between probe up and probe down\", it depends on whether there's a single flow or multiple flows:\n\n+ If there's a single flow, the bandwidth estimate should be pretty good, so usually inflight should oscillate between about 1.0 x BDP to 1.75 x BDP: 3 round trips of 1.25x pacing_gain should pull inflight up from 1.0 x BDP to 1.75 x BPD; then IIRC/AFAICT about 7 to 8 round trips at a pacing gain of 0.9x to pull inflight from 1.75 x BDP to 1.0 x BDP.\n\n+ If there are multiple flows, the bandwidth estimate should overestimate, so usually inflight should hover around 2x to 2.25x the BDP. The flow should spend most of its time with a pacing_gain of 0.9x, but this will not pull inflight down much. That's intentional, in order to make fairness convergence work: for a  flow sending below its share to converge to its fair share, it must \"stand its ground\", and maintain data queued in the bottleneck to force faster flows to see a progressively reduced throughput.\n",
+          "createdAt": "2026-02-23T22:00:12Z",
+          "updatedAt": "2026-02-23T22:01:23Z"
+        },
+        {
+          "author": "antoniovicente",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@nealcardwell Thanks for clarifying.  I had been looking for an explanation like that on BBR's design rationales and issues surrounding convergence.\n",
+          "createdAt": "2026-02-23T22:12:57Z",
+          "updatedAt": "2026-02-23T22:12:57Z"
         }
       ]
     },
@@ -1790,21 +1804,21 @@
       "id": "PR_kwDOL3MllM5_WrsD",
       "title": "Use consistent value for drain pacing gain which matches derivation doc",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/6",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "The drain gain value is inconsistent. The derivation doc linked (https://github.com/google/bbr/blob/master/Documentation/startup/gain/analysis/bbr_drain_gain.pdf) suggests using 0.5 and that's the value referenced in the table under (Summary of Control Behavior in the State Machine).  0.35 (~ 1 / StartupPacingGain) is used in a couple of other places.\r\n\r\nThis PR changes it to 0.5 everywhere. \r\n\r\nExisting implementations are using 0.35 ([Linux TCP](https://github.com/google/bbr/blob/v3/net/ipv4/tcp_bbr.c#L221C46-L221C51), [Quiche](https://github.com/google/quiche/blob/73107195dfbe8f0a531d3e2f052c9f2e15ec0e3c/quiche/quic/core/congestion_control/bbr2_misc.h#L111), [Mvfst](https://github.com/facebook/mvfst/blob/main/quic/congestion_control/Bbr2.cpp#L27)). The 0.5 value can be regarded as an upper bound. \r\n\r\nThis PR will keep the value consistent in the draft while we test the impact of the changing it to 0.5.",
       "createdAt": "2024-10-21T17:24:45Z",
-      "updatedAt": "2025-11-05T15:13:41Z",
+      "updatedAt": "2026-02-23T22:01:13Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "bbc5137f505b65c4063296e52f13d930ccfa3eb8",
       "headRepository": "jbeshay/draft-ietf-ccwg-bbr",
       "headRefName": "drain_gain",
       "headRefOid": "7a56fb259117a8ccac4868cf50fc44290a7aa169",
-      "closedAt": null,
+      "closedAt": "2026-02-23T22:01:12Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -1871,6 +1885,13 @@
           "body": "Discussed at IETF 124. The authors still want more data on this, and are looking for other contributors to run experiments.",
           "createdAt": "2025-11-05T15:13:41Z",
           "updatedAt": "2025-11-05T15:13:41Z"
+        },
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Replaced by https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/101",
+          "createdAt": "2026-02-23T22:01:12Z",
+          "updatedAt": "2026-02-23T22:01:12Z"
         }
       ],
       "reviews": [
@@ -6548,52 +6569,165 @@
       "id": "PR_kwDOL3MllM7Cjr1E",
       "title": "Minor editorial fixes",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/100",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "- Use && and || consistently instead of `and` and `or` in pseudo code\r\n- Fix typo",
       "createdAt": "2026-02-09T19:41:09Z",
-      "updatedAt": "2026-02-09T21:35:25Z",
+      "updatedAt": "2026-02-23T21:42:09Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "cceef937cbb0545d99e55627870afc7a976f95fb",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_editorial",
       "headRefOid": "8abad4a39921e63360c033b72bf20a7d55d861f9",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-02-23T21:42:09Z",
+      "mergedAt": "2026-02-23T21:42:09Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "bb13d84b6397a35eb118a96ffdea3a4642263464"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7lGdyo",
+          "commit": {
+            "abbreviatedOid": "8abad4a"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-02-23T21:41:00Z",
+          "updatedAt": "2026-02-23T21:41:00Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7lGer7",
+          "commit": {
+            "abbreviatedOid": "8abad4a"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-02-23T21:42:02Z",
+          "updatedAt": "2026-02-23T21:42:02Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 101,
       "id": "PR_kwDOL3MllM7Cjs7q",
       "title": "Update Drain logic to add exiting after 3 RTTs",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/101",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Updates the drain pacing gain to 0.5 and adds a safeguard to exit drain after 3 RTTs.\r\n\r\nCloses https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/90\r\nReplaces https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/6",
       "createdAt": "2026-02-09T19:42:50Z",
-      "updatedAt": "2026-02-09T19:45:07Z",
+      "updatedAt": "2026-02-23T22:00:37Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
-      "baseRefOid": "cceef937cbb0545d99e55627870afc7a976f95fb",
+      "baseRefOid": "bb13d84b6397a35eb118a96ffdea3a4642263464",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_drain_timeout",
-      "headRefOid": "a10ad734434ee9d1bc7637382ae114fcc9ede5aa",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "0438134dba3276905732350a35cec8e6c615d671",
+      "closedAt": "2026-02-23T22:00:37Z",
+      "mergedAt": "2026-02-23T22:00:37Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "e03a14989a754386cf0abe9721b8ac935d71c626"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7lGqAq",
+          "commit": {
+            "abbreviatedOid": "0438134"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-02-23T21:54:32Z",
+          "updatedAt": "2026-02-23T21:54:32Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7lGr2J",
+          "commit": {
+            "abbreviatedOid": "0438134"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-02-23T21:56:31Z",
+          "updatedAt": "2026-02-23T21:56:31Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 102,
+      "id": "PR_kwDOL3MllM7Fwive",
+      "title": "Ensure BBRIsTimeToCruise() returns",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/102",
+      "state": "MERGED",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently it doesn't always return true or false.",
+      "createdAt": "2026-02-23T21:54:16Z",
+      "updatedAt": "2026-02-23T22:02:30Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "bb13d84b6397a35eb118a96ffdea3a4642263464",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-bbristimetocruise",
+      "headRefOid": "e0b8550fe80d08ab0d72b68711a54db0f967a2c9",
+      "closedAt": "2026-02-23T22:02:30Z",
+      "mergedAt": "2026-02-23T22:02:30Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "b0d64c8d856f52ccc4620222a00224563b390aa0"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7lGqbs",
+          "commit": {
+            "abbreviatedOid": "e0b8550"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-02-23T21:55:00Z",
+          "updatedAt": "2026-02-23T21:55:00Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7lGwmc",
+          "commit": {
+            "abbreviatedOid": "e0b8550"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-02-23T22:01:51Z",
+          "updatedAt": "2026-02-23T22:01:51Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
