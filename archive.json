@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-24T02:21:12.297464+00:00",
+  "timestamp": "2026-03-10T02:08:06.181360+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -4229,7 +4229,7 @@
       "labels": [],
       "body": "Neal noted this difference between unacknowledged and inflight in this comment: \r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/50#discussion_r2183626841",
       "createdAt": "2025-07-03T20:44:15Z",
-      "updatedAt": "2025-07-08T19:03:55Z",
+      "updatedAt": "2026-03-09T21:06:12Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "2f894a4a1abba33774ea2403404a715b1ed51768",
@@ -4371,6 +4371,26 @@
           "createdAt": "2025-07-03T22:27:22Z",
           "updatedAt": "2025-07-03T22:27:22Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7piyEK",
+          "commit": {
+            "abbreviatedOid": "5ba2408"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-03-09T21:04:00Z",
+          "updatedAt": "2026-03-09T21:06:12Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "```suggestion\nIf there is no unacknowledged data, then we can start the delivery rate\n```\nI guess for clarity (and consistency with the new pseudocode) it would be good to change the phrase (here in line 1141) \"no data in flight\" to \"no unacknowledged data\".\n",
+              "createdAt": "2026-03-09T21:05:34Z",
+              "updatedAt": "2026-03-09T21:06:12Z"
+            }
+          ]
         }
       ]
     },
