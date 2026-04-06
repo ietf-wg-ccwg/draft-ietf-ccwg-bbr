@@ -361,6 +361,8 @@ point in the last packet-timed round trip.
 C.next_send_time: The earliest pacing departure time another packet can be
 sent.
 
+More per-connection variables used for the Delivery Rate Sampling Algorithm are defined in Section [Per-connection (C) state](#per-connection-c-state).
+
 ## Per-ACK Rate Sample State {#per-ack-rate-sample-state}
 
 RS.delivered: The volume of data delivered between the transmission of the
@@ -387,6 +389,8 @@ received).
 RS.lost: The volume of data that was declared lost between the transmission
 and acknowledgment of the packet that has just been ACKed (the most recently
 sent packet among packets ACKed by the ACK that was just received).
+
+More per-packet variables used for the Delivery Rate Sampling Algorithm are defined in Section [Per-packet (P) state](#per-packet-p-state).
 
 
 ## Output Control Parameters {#output-control-parameters}
