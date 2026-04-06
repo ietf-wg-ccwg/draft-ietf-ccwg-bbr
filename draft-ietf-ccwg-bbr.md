@@ -3786,7 +3786,7 @@ and naturally gets to the specified phase.
 ## Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
 
 1. Wait until the connection transitions to PROBE_BW.
-2. Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 10 Mbps).
+2. Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 1 Mbps).
 3. Verify that `BBR.bw_shortterm` rapidly adapts downwards due to the resulting
    packet loss.
 4. Verify that after the `BBR.max_bw_filter` window expires (2 PROBE_BW cycles),
