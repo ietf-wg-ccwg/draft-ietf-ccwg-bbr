@@ -4031,7 +4031,7 @@ A.15.  Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
 
    1.  Wait until the connection transitions to PROBE_BW.
 
-   2.  Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 10
+   2.  Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 1
        Mbps).
 
    3.  Verify that BBR.bw_shortterm rapidly adapts downwards due to the
