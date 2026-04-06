@@ -3832,7 +3832,7 @@ A.2.  Exiting STARTUP on Loss when app-limited
    1.  Start a flow in the STARTUP phase.
 
    2.  Limit the application sending rate so bandwidth samples are
-       application-limited.
+       application- limited.
 
    3.  Introduce packet loss exceeding the BBR.LossThresh (2%) and
        sequence range criteria over the time scale of a single full
@@ -3895,7 +3895,7 @@ A.6.  Exit PROBE_UP on Loss when app-limited
    1.  Wait until the connection is in the PROBE_UP phase of PROBE_BW.
 
    2.  Limit the application sending rate so bandwidth samples are
-       application-limited.
+       application- limited.
 
    3.  Introduce packet loss exceeding BBR.LossThresh (2%) over the last
        round trip.
@@ -3960,7 +3960,7 @@ A.10.  Skip PROBE_RTT due to app-limited sending
        drop to 0.
 
    3.  Ensure the ProbeRTTInterval (5 seconds) expires during this idle/
-       app-limited period.
+       app- limited period.
 
    4.  Verify that upon sending new data, BBRHandleRestartFromIdle()
        sets BBR.idle_restart to true.
