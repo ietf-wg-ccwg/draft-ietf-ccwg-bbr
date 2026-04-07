@@ -5621,12 +5621,6 @@ pseudocode are referenced. Most test cases focus on state transitions, since
 those are critical to BBR's overall behavior.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <p id="appendix-A-2">The examples have checks to ensure the Bandwidth Estimator and pacer
 are meeting BBR's needs, but there are no standalone tests for either.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
-<p id="appendix-A-3">Examples are assumed to have a fixed bandwidth (ie: 10Mbps) and a large enough
-buffer that losses caused by buffer overflow will not occur, unless specified.
-To ensure internal state variables, including the Bandwidth Estimator,
-are initialized correctly, when an test case says it starts in a phase
-after STARTUP, it is best to start a flow and drive it so it exits STARTUP
-and naturally gets to the specified phase.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
 <div id="exiting-startup-on-bandwidth-plateau">
 <section id="appendix-A.1">
         <h3 id="name-exiting-startup-on-bandwidt">
@@ -5640,14 +5634,19 @@ and naturally gets to the specified phase.<a href="#appendix-A-3" class="pilcrow
             <p id="appendix-A.1-1.2.1">Ensure the sender has enough data to send and is not application-limited.<a href="#appendix-A.1-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.1-1.3">
-            <p id="appendix-A.1-1.3.1">Observe that BBR measures delivery rate samples that plateau.<a href="#appendix-A.1-1.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.1-1.3.1">After several round trips, artificially cap the bottleneck bandwidth to a
+constant rate (e.g., 10 Mbps).<a href="#appendix-A.1-1.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.1-1.4">
-            <p id="appendix-A.1-1.4.1">Verify that after 3 consecutive rounds where the delivery rate grows by less
-than 25%, <code>BBR.full_bw_now</code> and <code>BBR.full_bw_reached</code> are set to <code>true</code>.<a href="#appendix-A.1-1.4.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.1-1.4.1">Observe that BBR measures delivery rate samples that plateau, and ensure the
+measured bandwidth is close (i.e., within 2%) to the simulated bandwidth.<a href="#appendix-A.1-1.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.1-1.5">
-            <p id="appendix-A.1-1.5.1">Verify the connection transitions from STARTUP to DRAIN.<a href="#appendix-A.1-1.5.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.1-1.5.1">Verify that after 3 consecutive rounds where the delivery rate grows by less
+than 25%, <code>BBR.full_bw_now</code> and <code>BBR.full_bw_reached</code> are set to <code>true</code>.<a href="#appendix-A.1-1.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="appendix-A.1-1.6">
+            <p id="appendix-A.1-1.6.1">Verify the connection transitions from STARTUP to DRAIN.<a href="#appendix-A.1-1.6.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
@@ -5713,20 +5712,17 @@ connection exits DRAIN and transitions to PROBE_BW.<a href="#appendix-A.3-1.4.1"
             <p id="appendix-A.4-1.1.1">Start a flow and transition it from STARTUP to DRAIN.<a href="#appendix-A.4-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.4-1.2">
-            <p id="appendix-A.4-1.2.1">Decrease the available bandwidth by 10% upon entering DRAIN to simulate
-an over-estimation of the available bandwidth.<a href="#appendix-A.4-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.4-1.2.1">Configure the bottleneck such that <code>C.inflight</code> remains higher than
+<code>BBRInflight(1.0)</code> for several round trips (e.g., due to an overestimated
+bandwidth during STARTUP or interaction with competing flows).<a href="#appendix-A.4-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.4-1.3">
-            <p id="appendix-A.4-1.3.1">Ensure <code>C.inflight</code> remains higher than <code>BBRInflight(1.0)</code> for several
-round trips.<a href="#appendix-A.4-1.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.4-1.3.1">Track <code>BBR.drain_start_round</code> and current <code>BBR.round_count</code>.<a href="#appendix-A.4-1.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.4-1.4">
-            <p id="appendix-A.4-1.4.1">Track <code>BBR.drain_start_round</code> and current <code>BBR.round_count</code>.<a href="#appendix-A.4-1.4.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="appendix-A.4-1.5">
-            <p id="appendix-A.4-1.5.1">Verify that after 3 round trips in DRAIN, the connection exits DRAIN and
+            <p id="appendix-A.4-1.4.1">Verify that after 3 round trips in DRAIN, the connection exits DRAIN and
 transitions to PROBE_BW even though <code>C.inflight</code> has not reached the target
-BDP.<a href="#appendix-A.4-1.5.1" class="pilcrow">¶</a></p>
+BDP.<a href="#appendix-A.4-1.4.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
@@ -5741,18 +5737,21 @@ BDP.<a href="#appendix-A.4-1.5.1" class="pilcrow">¶</a></p>
             <p id="appendix-A.5-1.1.1">Wait until the connection is in the PROBE_UP phase of PROBE_BW.<a href="#appendix-A.5-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.5-1.2">
-            <p id="appendix-A.5-1.2.1">Ensure the connection is fully utilizing <code>BBR.inflight_longterm</code> or cwnd
-without packet loss.<a href="#appendix-A.5-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.5-1.2.1">Maintain a stable bottleneck bandwidth.<a href="#appendix-A.5-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.5-1.3">
-            <p id="appendix-A.5-1.3.1">Observe that the delivery rate plateaus.<a href="#appendix-A.5-1.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.5-1.3.1">Ensure the connection is fully utilizing <code>BBR.inflight_longterm</code> or cwnd
+without packet loss.<a href="#appendix-A.5-1.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.5-1.4">
-            <p id="appendix-A.5-1.4.1">Verify that <code>BBRIsTimeToGoDown()</code> triggers when <code>BBR.full_bw_now</code> is set to
-<code>true</code> after 3 rounds of little growth.<a href="#appendix-A.5-1.4.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.5-1.4.1">Observe that the delivery rate plateaus.<a href="#appendix-A.5-1.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.5-1.5">
-            <p id="appendix-A.5-1.5.1">Verify the connection transitions to PROBE_DOWN.<a href="#appendix-A.5-1.5.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.5-1.5.1">Verify that <code>BBRIsTimeToGoDown()</code> triggers when <code>BBR.full_bw_now</code> is set to
+<code>true</code> after 3 rounds of little growth.<a href="#appendix-A.5-1.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="appendix-A.5-1.6">
+            <p id="appendix-A.5-1.6.1">Verify the connection transitions to PROBE_DOWN.<a href="#appendix-A.5-1.6.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
@@ -5820,8 +5819,8 @@ is updated appropriately, regardless of the application-limited state.<a href="#
             <p id="appendix-A.8-1.1.1">Wait until the connection transitions to PROBE_DOWN.<a href="#appendix-A.8-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.8-1.2">
-            <p id="appendix-A.8-1.2.1">Prevent <code>C.inflight</code> from dropping below <code>BBRInflightWithHeadroom()</code> by
-decreasing the available bandwidth by 10% upon entering PROBE_DOWN.<a href="#appendix-A.8-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.8-1.2.1">Prevent <code>C.inflight</code> from dropping below <code>BBRInflightWithHeadroom()</code> (e.g.,
+by ensuring cross-traffic keeps the delay high or simulating large delays).<a href="#appendix-A.8-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.8-1.3">
             <p id="appendix-A.8-1.3.1">Verify that after <code>BBR.bw_probe_wait</code> time elapses, <code>BBRIsTimeToProbeBW()</code>
@@ -5841,7 +5840,7 @@ PROBE_CRUISE.<a href="#appendix-A.8-1.4.1" class="pilcrow">¶</a></p>
         </h3>
 <ol start="1" type="1" class="normal type-1" id="appendix-A.9-1">
 <li id="appendix-A.9-1.1">
-            <p id="appendix-A.9-1.1.1">Wait until the connection transitions to PROBE_BW.<a href="#appendix-A.9-1.1.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.9-1.1.1">Start a steady flow in PROBE_BW.<a href="#appendix-A.9-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.9-1.2">
             <p id="appendix-A.9-1.2.1">Wait for <code>ProbeRTTInterval</code> (5 seconds) without updating
@@ -5868,7 +5867,7 @@ PROBE_CRUISE.<a href="#appendix-A.8-1.4.1" class="pilcrow">¶</a></p>
         </h3>
 <ol start="1" type="1" class="normal type-1" id="appendix-A.10-1">
 <li id="appendix-A.10-1.1">
-            <p id="appendix-A.10-1.1.1">Wait until the connection transitions to PROBE_BW.<a href="#appendix-A.10-1.1.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.1.1">Start a steady flow in PROBE_BW.<a href="#appendix-A.10-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.2">
             <p id="appendix-A.10-1.2.1">Pause the application from sending data for a period, making the connection
@@ -5921,7 +5920,7 @@ doubles its sending rate to discover the full bottleneck bandwidth.<a href="#app
         </h3>
 <ol start="1" type="1" class="normal type-1" id="appendix-A.12-1">
 <li id="appendix-A.12-1.1">
-            <p id="appendix-A.12-1.1.1">Wait until the connection transitions to PROBE_CRUISE.<a href="#appendix-A.12-1.1.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.12-1.1.1">Place the connection in PROBE_CRUISE.<a href="#appendix-A.12-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.12-1.2">
             <p id="appendix-A.12-1.2.1">Simulate significant ACK aggregation on the path.<a href="#appendix-A.12-1.2.1" class="pilcrow">¶</a></p>
@@ -5948,7 +5947,7 @@ utilization.<a href="#appendix-A.12-1.4.1" class="pilcrow">¶</a></p>
             <p id="appendix-A.13-1.1.1">Configure a bottleneck with a very low BDP (e.g., &lt; 1 packet).<a href="#appendix-A.13-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.13-1.2">
-            <p id="appendix-A.13-1.2.1">Wait until the connection transitions to PROBE_BW.<a href="#appendix-A.13-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.13-1.2.1">Start a flow and let it reach PROBE_BW.<a href="#appendix-A.13-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.13-1.3">
             <p id="appendix-A.13-1.3.1">Verify that <code>BBR.MinPipeCwnd</code> (4 packets) acts as a floor for <code>C.cwnd</code>.<a href="#appendix-A.13-1.3.1" class="pilcrow">¶</a></p>
@@ -5967,7 +5966,7 @@ utilization.<a href="#appendix-A.12-1.4.1" class="pilcrow">¶</a></p>
         </h3>
 <ol start="1" type="1" class="normal type-1" id="appendix-A.14-1">
 <li id="appendix-A.14-1.1">
-            <p id="appendix-A.14-1.1.1">Wait until the connection transitions to PROBE_BW.<a href="#appendix-A.14-1.1.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.14-1.1.1">Establish a flow in PROBE_BW at a stable bandwidth (e.g., 10 Mbps).<a href="#appendix-A.14-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.14-1.2">
             <p id="appendix-A.14-1.2.1">Suddenly increase the bottleneck bandwidth by 10x (e.g., to 100 Mbps).<a href="#appendix-A.14-1.2.1" class="pilcrow">¶</a></p>
@@ -5990,10 +5989,10 @@ reasonable number of round trips (O(log(BDP))).<a href="#appendix-A.14-1.4.1" cl
         </h3>
 <ol start="1" type="1" class="normal type-1" id="appendix-A.15-1">
 <li id="appendix-A.15-1.1">
-            <p id="appendix-A.15-1.1.1">Wait until the connection transitions to PROBE_BW.<a href="#appendix-A.15-1.1.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.15-1.1.1">Establish a flow in PROBE_BW at a stable bandwidth (e.g., 100 Mbps).<a href="#appendix-A.15-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.15-1.2">
-            <p id="appendix-A.15-1.2.1">Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 1 Mbps).<a href="#appendix-A.15-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.15-1.2.1">Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 10 Mbps).<a href="#appendix-A.15-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.15-1.3">
             <p id="appendix-A.15-1.3.1">Verify that <code>BBR.bw_shortterm</code> rapidly adapts downwards due to the resulting
@@ -6015,7 +6014,7 @@ rate.<a href="#appendix-A.15-1.4.1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="appendix-A.16-1">
 <li id="appendix-A.16-1.1">
             <p id="appendix-A.16-1.1.1">Configure the path with a token bucket policer (e.g., rate limit with a
-specific initial burst size and no additional buffering beyond the bucket).<a href="#appendix-A.16-1.1.1" class="pilcrow">¶</a></p>
+specific burst size).<a href="#appendix-A.16-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.16-1.2">
             <p id="appendix-A.16-1.2.1">Start a flow and let it reach PROBE_BW.<a href="#appendix-A.16-1.2.1" class="pilcrow">¶</a></p>
