@@ -3652,8 +3652,8 @@ data it so it exits STARTUP and naturally gets to the specified phase.
 1. Start a flow in the STARTUP phase.
 2. Ensure the sender has enough data to send and is not application-limited.
 3. Verify that BBR measures delivery rate samples (RS.delivery_rate) that plateau,
-and ensure the estimated bandwidth (BBR.max_bw) is close (i.e., within 2%) to
-the simulated bandwidth.
+   and ensure the estimated bandwidth (BBR.max_bw) is close (i.e., within 2%) to
+   the simulated bandwidth.
 4. Verify that after 3 consecutive rounds where the delivery rate grows by less
    than 25%, `BBR.full_bw_now` and `BBR.full_bw_reached` are set to `true`.
 5. Verify the connection transitions from STARTUP to DRAIN.
@@ -3747,9 +3747,8 @@ the simulated bandwidth.
 
 1. Wait until the connection transitions to PROBE_BW.
 2. Pause the application from sending data for a period, making the connection
-   idle or application-limited, causing `C.inflight` to drop to 0.
-3. Ensure the `ProbeRTTInterval` (5 seconds) expires during this idle/app-
-   limited period.
+   idle and causing `C.inflight` to drop to 0.
+3. Allow the `ProbeRTTInterval` (5 seconds) to elapse during this idle period.
 4. Verify that upon sending new data, `BBRHandleRestartFromIdle()` sets
    `BBR.idle_restart` to `true`.
 5. Verify the connection skips entering PROBE_RTT because `BBR.idle_restart` is
@@ -3808,7 +3807,7 @@ the simulated bandwidth.
 1. Configure the path with a token bucket policer (e.g., rate limit with a
    specific initial burst size and no additional buffering beyond the bucket).
    See {{TrafficPolicing}} for more details.
-3. Start a flow and let it reach PROBE_BW.
+3. Wait until the connection transitions to PROBE_BW.
 4. Verify that when the burst size is exhausted and the policer drops packets,
    BBR reacts to the loss by adapting `BBR.inflight_shortterm` and
    `BBR.bw_shortterm`.
@@ -3827,7 +3826,7 @@ the simulated bandwidth.
 4. Ensure the connection seamlessly returns to its previous state (e.g.,
    PROBE_UP).
 
-## Exiting PROBE_RTT when the pipe hasn't been filled
+## Entering and Exiting PROBE_RTT during STARTUP 
 
 1. Start a flow and artificially trigger PROBE_RTT before `BBR.full_bw_reached`
    becomes `true` (e.g., by ensuring `ProbeRTTInterval` expires during an
