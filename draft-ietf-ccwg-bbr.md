@@ -196,6 +196,10 @@ informative:
     - name: Neal Cardwell
     - name: Van Jacobson
     date: false
+  TrafficPolicing:
+    target: https://dl.acm.org/doi/10.1145/2934872.2934873
+    title: An Internet-Wide Analysis of Traffic Policing
+    date: 2016
 
 
 --- abstract
@@ -3798,11 +3802,12 @@ BBR.bw_latest is within 2% of the simulated bandwidth.
 
 1. Configure the path with a token bucket policer (e.g., rate limit with a
    specific initial burst size and no additional buffering beyond the bucket).
-2. Start a flow and let it reach PROBE_BW.
-3. Verify that when the burst size is exhausted and the policer drops packets,
+   See {{TrafficPolicing}} for more details.
+3. Start a flow and let it reach PROBE_BW.
+4. Verify that when the burst size is exhausted and the policer drops packets,
    BBR reacts to the loss by adapting `BBR.inflight_shortterm` and
    `BBR.bw_shortterm`.
-4. Ensure BBR eventually reaches a stable operating point that conforms to the
+5. Ensure BBR eventually reaches a stable operating point that conforms to the
    token rate without excessive continuous packet loss.
 
 ## Handling Spurious Loss Recovery in Test Cases
