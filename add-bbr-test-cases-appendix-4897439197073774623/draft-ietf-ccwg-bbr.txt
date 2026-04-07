@@ -3795,6 +3795,10 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
               DOI 10.17487/RFC8311, January 2018,
               <https://www.rfc-editor.org/rfc/rfc8311>.
 
+   [TrafficPolicing]
+              "An Internet-Wide Analysis of Traffic Policing", 2016,
+              <https://dl.acm.org/doi/10.1145/2934872.2934873>.
+
    [WS95]     Wright, G. and W. Stevens, "TCP/IP Illustrated, Volume 2:
               The Implementation", Addison-Wesley , 1995.
 
@@ -3830,18 +3834,15 @@ A.1.  Exiting STARTUP on Bandwidth Plateau
    2.  Ensure the sender has enough data to send and is not application-
        limited.
 
-   3.  After several round trips, artificially cap the bottleneck
-       bandwidth to a constant rate (e.g., 10 Mbps).
+   3.  Verify that BBR measures delivery rate samples (RS.delivery_rate)
+       that plateau, and ensure the estimated bandwidth (BBR.max_bw) is
+       close (i.e., within 2%) to the simulated bandwidth.
 
-   4.  Observe that BBR measures delivery rate samples that plateau, and
-       ensure the measured bandwidth is close (i.e., within 2%) to the
-       simulated bandwidth.
-
-   5.  Verify that after 3 consecutive rounds where the delivery rate
+   4.  Verify that after 3 consecutive rounds where the delivery rate
        grows by less than 25%, BBR.full_bw_now and BBR.full_bw_reached
        are set to true.
 
-   6.  Verify the connection transitions from STARTUP to DRAIN.
+   5.  Verify the connection transitions from STARTUP to DRAIN.
 
 A.2.  Exiting STARTUP on Loss when app-limited
 
@@ -3879,14 +3880,15 @@ A.4.  Exit DRAIN based on time
 
    1.  Start a flow and transition it from STARTUP to DRAIN.
 
-   2.  Configure the bottleneck such that C.inflight remains higher than
-       BBRInflight(1.0) for several round trips (e.g., due to an
-       overestimated bandwidth during STARTUP or interaction with
-       competing flows).
+   2.  Decrease the available bandwidth by 10% upon entering DRAIN to
+       simulate an over-estimation of the available bandwidth.
 
-   3.  Track BBR.drain_start_round and current BBR.round_count.
+   3.  Ensure C.inflight remains higher than BBRInflight(1.0) for
+       several round trips.
 
-   4.  Verify that after 3 round trips in DRAIN, the connection exits
+   4.  Track BBR.drain_start_round and current BBR.round_count.
+
+   5.  Verify that after 3 round trips in DRAIN, the connection exits
        DRAIN and transitions to PROBE_BW even though C.inflight has not
        reached the target BDP.
 
@@ -3894,17 +3896,15 @@ A.5.  Exit PROBE_UP on Bandwidth Plateau
 
    1.  Wait until the connection is in the PROBE_UP phase of PROBE_BW.
 
-   2.  Maintain a stable bottleneck bandwidth.
-
-   3.  Ensure the connection is fully utilizing BBR.inflight_longterm or
+   2.  Ensure the connection is fully utilizing BBR.inflight_longterm or
        cwnd without packet loss.
 
-   4.  Observe that the delivery rate plateaus.
+   3.  Observe that the delivery rate plateaus.
 
-   5.  Verify that BBRIsTimeToGoDown() triggers when BBR.full_bw_now is
+   4.  Verify that BBRIsTimeToGoDown() triggers when BBR.full_bw_now is
        set to true after 3 rounds of little growth.
 
-   6.  Verify the connection transitions to PROBE_DOWN.
+   5.  Verify the connection transitions to PROBE_DOWN.
 
 A.6.  Exit PROBE_UP on Loss when app-limited
 
@@ -3941,8 +3941,8 @@ A.8.  Exit PROBE_DOWN after max time
    1.  Wait until the connection transitions to PROBE_DOWN.
 
    2.  Prevent C.inflight from dropping below BBRInflightWithHeadroom()
-       (e.g., by ensuring cross-traffic keeps the delay high or
-       simulating large delays).
+       by decreasing the available bandwidth by 10% upon entering
+       PROBE_DOWN.
 
    3.  Verify that after BBR.bw_probe_wait time elapses,
        BBRIsTimeToProbeBW() returns true.
@@ -3952,7 +3952,7 @@ A.8.  Exit PROBE_DOWN after max time
 
 A.9.  PROBE_RTT and exit
 
-   1.  Start a steady flow in PROBE_BW.
+   1.  Wait until the connection transitions to PROBE_BW.
 
    2.  Wait for ProbeRTTInterval (5 seconds) without updating
        BBR.probe_rtt_min_delay.
@@ -3969,7 +3969,7 @@ A.9.  PROBE_RTT and exit
 
 A.10.  Skip PROBE_RTT due to app-limited sending
 
-   1.  Start a steady flow in PROBE_BW.
+   1.  Wait until the connection transitions to PROBE_BW.
 
    2.  Pause the application from sending data for a period, making the
        connection idle or application-limited, causing C.inflight to
@@ -4002,7 +4002,7 @@ A.11.  Achieve expected STARTUP bandwidth on a link with aggregation
 
 A.12.  Achieve expected Cruise bandwidth on a link with aggregation
 
-   1.  Place the connection in PROBE_CRUISE.
+   1.  Wait until the connection transitions to PROBE_CRUISE.
 
    2.  Simulate significant ACK aggregation on the path.
 
@@ -4017,7 +4017,7 @@ A.13.  Correctly manage sub-packet BDPs
 
    1.  Configure a bottleneck with a very low BDP (e.g., < 1 packet).
 
-   2.  Start a flow and let it reach PROBE_BW.
+   2.  Wait until the connection transitions to PROBE_BW.
 
    3.  Verify that BBR.MinPipeCwnd (4 packets) acts as a floor for
        C.cwnd.
@@ -4028,8 +4028,7 @@ A.13.  Correctly manage sub-packet BDPs
 
 A.14.  Increase Bandwidth 10x and ensure full bandwidth is reached
 
-   1.  Establish a flow in PROBE_BW at a stable bandwidth (e.g., 10
-       Mbps).
+   1.  Wait until the connection transitions to PROBE_BW.
 
    2.  Suddenly increase the bottleneck bandwidth by 10x (e.g., to 100
        Mbps).
@@ -4042,10 +4041,9 @@ A.14.  Increase Bandwidth 10x and ensure full bandwidth is reached
 
 A.15.  Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
 
-   1.  Establish a flow in PROBE_BW at a stable bandwidth (e.g., 100
-       Mbps).
+   1.  Wait until the connection transitions to PROBE_BW.
 
-   2.  Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 10
+   2.  Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 1
        Mbps).
 
    3.  Verify that BBR.bw_shortterm rapidly adapts downwards due to the
@@ -4058,7 +4056,8 @@ A.15.  Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
 A.16.  Token Bucket Policer
 
    1.  Configure the path with a token bucket policer (e.g., rate limit
-       with a specific burst size).
+       with a specific initial burst size and no additional buffering
+       beyond the bucket).  See [TrafficPolicing] for more details.
 
    2.  Start a flow and let it reach PROBE_BW.
 
