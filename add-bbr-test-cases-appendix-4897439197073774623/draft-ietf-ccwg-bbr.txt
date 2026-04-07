@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 8 October 2026                                   J. Beshay, Ed.
+Expires: 9 October 2026                                   J. Beshay, Ed.
                                                                     Meta
-                                                            6 April 2026
+                                                            7 April 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 October 2026.
+   This Internet-Draft will expire on 9 October 2026.
 
 Copyright Notice
 
@@ -3806,8 +3806,9 @@ Appendix A.  BBR Example Test Cases
    on state transitions, since those are critical to BBR's overall
    behavior.
 
-   This assumes that the packet pacer and the Bandwidth Estimator are
-   implemented correctly.
+   The examples have checks to ensure the Bandwidth Estimator and pacer
+   are meeting BBR's needs, but there are no standalone tests for
+   either.
 
 A.1.  Exiting STARTUP on Bandwidth Plateau
 
