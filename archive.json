@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-10T02:08:06.181360+00:00",
+  "timestamp": "2026-04-07T02:34:04.434931+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1087,14 +1087,14 @@
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
-        "nealcardwell"
+        "ianswett"
       ],
       "labels": [
         "Editorial"
       ],
       "body": "Section 2.1 and section 4.1.2.1.1 define connection state. Similarly, per-packet state is defined in both section 2.2 and section 4.1.2.1.2.\n\nI assume this split exists to highlight that the some variables are only used by the Delivery Rate Sampling Algorithm, but I think it would be helpful to see all the state in one place. If the intention is to keep these separate, I'd argue that section 2.1 should link to 4.1.2.1.1 and say something like:\n> More per-connection variables used for the Delivery Rate Sampling Algorithm are defined in section 4.1.2.1.1.",
       "createdAt": "2025-07-13T02:52:07Z",
-      "updatedAt": "2025-09-24T20:59:11Z",
+      "updatedAt": "2026-04-06T20:54:47Z",
       "closedAt": null,
       "comments": []
     },
@@ -1107,12 +1107,12 @@
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
-        "ianswett"
+        "jbeshay"
       ],
       "labels": [],
       "body": "> The BBR.extra_acked thus reflects the recently-measured magnitude of data and ACK aggregation effects such as batching and slotting at shared-medium L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms (TSO, GSO, LRO, GRO), and end host or middlebox ACK decimation/thinning.\n\nMiddlebox ACK decimation is not possible when using QUIC. Instead, RFC 9002 requires that at least every other ack-eliciting packet elicits a fresh ACK frame.\n\nIt would be very useful if this section could give some guidance on how to use the [QUIC ACK-FREQUENCY](https://datatracker.ietf.org/doc/draft-ietf-quic-ack-frequency/) extension, which allows the sender to control how frequently the receiver sends an ACK frame.",
       "createdAt": "2025-07-13T02:57:07Z",
-      "updatedAt": "2025-12-15T22:00:42Z",
+      "updatedAt": "2026-04-06T20:56:12Z",
       "closedAt": null,
       "comments": [
         {
@@ -6748,6 +6748,171 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 103,
+      "id": "PR_kwDOL3MllM7QS5mz",
+      "title": "Add BBR Example Test Cases Appendix",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/103",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR fixes https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/71 by adding an Appendix section titled \"BBR Example Test Cases\". It details the 16 test cases originally discussed, along with 4 new edge cases brainstormed during planning. The cases use step-by-step logic detailing state transitions and variables without relying on QLog text.\n\n---\n*PR created automatically by Jules for task [4897439197073774623](https://jules.google.com/task/4897439197073774623) started by @ianswett*",
+      "createdAt": "2026-04-06T19:25:18Z",
+      "updatedAt": "2026-04-06T21:25:10Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "add-bbr-test-cases-appendix-4897439197073774623",
+      "headRefOid": "791b3e41f60c6cdace8ec727824aaa51c787b81e",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM7yQhBN",
+          "commit": {
+            "abbreviatedOid": "836ff9c"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-06T20:43:33Z",
+          "updatedAt": "2026-04-06T20:43:33Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "And ensure the measured bandwidth is close (ie: within 2%) to the simulated bandwidth.",
+              "createdAt": "2026-04-06T20:43:33Z",
+              "updatedAt": "2026-04-06T20:43:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yQiSJ",
+          "commit": {
+            "abbreviatedOid": "836ff9c"
+          },
+          "author": "google-labs-jules",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-06T20:44:42Z",
+          "updatedAt": "2026-04-06T20:44:42Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "I've updated the test case to explicitly check that the measured bandwidth is within 2% of the simulated bandwidth.",
+              "createdAt": "2026-04-06T20:44:42Z",
+              "updatedAt": "2026-04-06T20:44:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yQiS-",
+          "commit": {
+            "abbreviatedOid": "836ff9c"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-06T20:44:43Z",
+          "updatedAt": "2026-04-06T20:44:43Z",
+          "comments": [
+            {
+              "originalPosition": 169,
+              "body": "```suggestion\n2. Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 1 Mbps).\n```",
+              "createdAt": "2026-04-06T20:44:43Z",
+              "updatedAt": "2026-04-06T20:44:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yQlW5",
+          "commit": {
+            "abbreviatedOid": "836ff9c"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-06T20:47:24Z",
+          "updatedAt": "2026-04-06T20:47:51Z",
+          "comments": [
+            {
+              "originalPosition": 179,
+              "body": "Let's cite the 2016 sigcomm paper on policers:\n\nAn Internet-Wide Analysis of Traffic Policing\nhttps://dl.acm.org/doi/10.1145/2934872.2934873\n",
+              "createdAt": "2026-04-06T20:47:24Z",
+              "updatedAt": "2026-04-06T20:47:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yQrFE",
+          "commit": {
+            "abbreviatedOid": "791b3e4"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-06T20:52:34Z",
+          "updatedAt": "2026-04-06T21:25:10Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Maybe we can remove  this sentence: \"This assumes that the packet pacer and the Bandwidth Estimator are implemented correctly.\" \n\nAnd instead we can have the first test case check that the pacer and bw estimator are working correctly by verifying the values of RS.delivery_rate and BBR.max_bw match the expected values.\n\n",
+              "createdAt": "2026-04-06T20:52:34Z",
+              "updatedAt": "2026-04-06T21:25:10Z"
+            },
+            {
+              "originalPosition": 19,
+              "body": "Rather than phrasing this as \"After several round trips, artificially cap the bottleneck bandwidth\", I would suggest that it would be simpler to think about and implement if most cases test a fixed bandwidth for the entire test. So perhaps the text can clarify up front, before any of the test cases, something like:\n\n\"Unless otherwise mentioned, each test case is configured to create a single BBR connection traveling over a controlled path with a bottleneck bandwidth and two-way propagation delay that are fixed for the entire duration of the test. The tests can use network emulation, network simulation, or a controlled network path such as a laboratory environment.\"\n",
+              "createdAt": "2026-04-06T21:19:35Z",
+              "updatedAt": "2026-04-06T21:25:10Z"
+            },
+            {
+              "originalPosition": 21,
+              "body": "I would suggest explicitly calling for verifying the RS.delivery_rate and BBR.max_bw; something like:\n\n4. Verify that BBR measures delivery rate samples (RS.delivery_rate) that plateau, and ensure the estimated bandwidth (BBR.max_bw) is close (i.e., within 2%) to the simulated bandwidth.\n",
+              "createdAt": "2026-04-06T21:23:12Z",
+              "updatedAt": "2026-04-06T21:25:10Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 104,
+      "id": "PR_kwDOL3MllM7QUSLl",
+      "title": "Add links to Delivery Rate Sampling Algorithm state variables",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/104",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #68 by adding links from the main Transport Connection State and Per-ACK Rate Sample State sections to the corresponding state sections defined for the Delivery Rate Sampling Algorithm. This makes the full set of state variables easier to discover for readers.\r\n\r\n---\r\n*PR created automatically by Jules for task [9041173364766603063](https://jules.google.com/task/9041173364766603063) started by @ianswett*",
+      "createdAt": "2026-04-06T21:04:29Z",
+      "updatedAt": "2026-04-06T21:11:02Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "add-delivery-rate-vars-links-9041173364766603063",
+      "headRefOid": "cfba21febfedcebf7a1a4123614a4e7fa60ca71b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
