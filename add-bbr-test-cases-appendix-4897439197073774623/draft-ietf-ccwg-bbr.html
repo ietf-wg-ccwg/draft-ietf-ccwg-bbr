@@ -5619,13 +5619,17 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
       <h2 id="name-bbr-example-test-cases">
 <a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-bbr-example-test-cases" class="section-name selfRef">BBR Example Test Cases</a>
       </h2>
-<p id="appendix-A-1">This section describes some test cases to ensure BBR implementations perform as
-expected. When they are important to the test case, variables from the
+<p id="appendix-A-1">This section describes some test cases to ensure BBR implementations perform
+as expected. When they are important to the test case, variables from the
 pseudocode are referenced. Most test cases focus on state transitions, since
 those are critical to BBR's overall behavior.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <p id="appendix-A-2">The examples have checks to ensure the Bandwidth Estimator and pacer
 are meeting BBR's needs, but there are no standalone tests for either.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
-<p id="appendix-A-3">Unless otherwise mentioned, each test case is configured to create a single BBR connection traveling over a controlled path with a bottleneck bandwidth (ie: 10Mbps) and two-way propagation delay that are fixed for the entire duration of the test. The tests can use network emulation, network simulation, or a controlled network path such as a laboratory environment.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+<p id="appendix-A-3">Unless otherwise mentioned, each test case is configured to create a single
+BBR connection traveling over a controlled path with a bottleneck bandwidth
+(ie: 10Mbps) and two-way propagation delay that are fixed for the entire
+duration of the test. The tests can use network emulation, network simulation,
+or a controlled network path such as a laboratory environment.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
 <p id="appendix-A-4">To ensure internal state variables, including the Bandwidth Estimator,
 are initialized correctly, when an test case says it starts in a phase
 after STARTUP, test cases expect the connection to be driven with enough
