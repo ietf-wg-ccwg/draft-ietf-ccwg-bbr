@@ -3643,7 +3643,8 @@ and naturally gets to the specified phase.
 
 1. Start a flow in the STARTUP phase.
 2. Ensure the sender has enough data to send and is not application-limited.
-3. Observe that BBR measures delivery rate samples that plateau.
+3. Observe that BBR measures delivery rate samples that plateau and are
+BBR.bw_latest is within 2% of the simulated bandwidth.
 4. Verify that after 3 consecutive rounds where the delivery rate grows by less
    than 25%, `BBR.full_bw_now` and `BBR.full_bw_reached` are set to `true`.
 5. Verify the connection transitions from STARTUP to DRAIN.
