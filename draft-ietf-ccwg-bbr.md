@@ -3628,15 +3628,19 @@ for feedback, suggestions, and edits on earlier versions of this document.
 
 # BBR Example Test Cases {#bbr-example-test-cases}
 
-This section describes some test cases to ensure BBR implementations perform as
-expected. When they are important to the test case, variables from the
+This section describes some test cases to ensure BBR implementations perform
+as expected. When they are important to the test case, variables from the
 pseudocode are referenced. Most test cases focus on state transitions, since
 those are critical to BBR's overall behavior.
 
 The examples have checks to ensure the Bandwidth Estimator and pacer
 are meeting BBR's needs, but there are no standalone tests for either.
 
-Unless otherwise mentioned, each test case is configured to create a single BBR connection traveling over a controlled path with a bottleneck bandwidth (ie: 10Mbps) and two-way propagation delay that are fixed for the entire duration of the test. The tests can use network emulation, network simulation, or a controlled network path such as a laboratory environment.
+Unless otherwise mentioned, each test case is configured to create a single
+BBR connection traveling over a controlled path with a bottleneck bandwidth
+(ie: 10Mbps) and two-way propagation delay that are fixed for the entire
+duration of the test. The tests can use network emulation, network simulation,
+or a controlled network path such as a laboratory environment.
 
 To ensure internal state variables, including the Bandwidth Estimator,
 are initialized correctly, when an test case says it starts in a phase
