@@ -5644,8 +5644,9 @@ and naturally gets to the specified phase.<a href="#appendix-A-3" class="pilcrow
             <p id="appendix-A.1-1.2.1">Ensure the sender has enough data to send and is not application-limited.<a href="#appendix-A.1-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.1-1.3">
-            <p id="appendix-A.1-1.3.1">Observe that BBR measures delivery rate samples that plateau and are
-BBR.bw_latest is within 2% of the simulated bandwidth.<a href="#appendix-A.1-1.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.1-1.3.1">Verify that BBR measures delivery rate samples (RS.delivery_rate) that plateau,
+and ensure the estimated bandwidth (BBR.max_bw) is close (i.e., within 2%) to
+the simulated bandwidth.<a href="#appendix-A.1-1.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.1-1.4">
             <p id="appendix-A.1-1.4.1">Verify that after 3 consecutive rounds where the delivery rate grows by less
