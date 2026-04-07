@@ -5625,12 +5625,11 @@ pseudocode are referenced. Most test cases focus on state transitions, since
 those are critical to BBR's overall behavior.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <p id="appendix-A-2">The examples have checks to ensure the Bandwidth Estimator and pacer
 are meeting BBR's needs, but there are no standalone tests for either.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
-<p id="appendix-A-3">Examples are assumed to have a fixed bandwidth (ie: 10Mbps) and a large enough
-buffer that losses caused by buffer overflow will not occur, unless specified.
-To ensure internal state variables, including the Bandwidth Estimator,
+<p id="appendix-A-3">Unless otherwise mentioned, each test case is configured to create a single BBR connection traveling over a controlled path with a bottleneck bandwidth (ie: 10Mbps) and two-way propagation delay that are fixed for the entire duration of the test. The tests can use network emulation, network simulation, or a controlled network path such as a laboratory environment.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+<p id="appendix-A-4">To ensure internal state variables, including the Bandwidth Estimator,
 are initialized correctly, when an test case says it starts in a phase
-after STARTUP, it is best to start a flow and drive it so it exits STARTUP
-and naturally gets to the specified phase.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+after STARTUP, test cases expect the connection to be driven with enough
+data it so it exits STARTUP and naturally gets to the specified phase.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
 <div id="exiting-startup-on-bandwidth-plateau">
 <section id="appendix-A.1">
         <h3 id="name-exiting-startup-on-bandwidt">
