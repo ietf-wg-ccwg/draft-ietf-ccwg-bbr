@@ -3629,8 +3629,8 @@ expected. When they are important to the test case, variables from the
 pseudocode are referenced. Most test cases focus on state transitions, since
 those are critical to BBR's overall behavior.
 
-This assumes that the packet pacer and the Bandwidth Estimator are implemented
-correctly.
+The examples have checks to ensure the Bandwidth Estimator and pacer
+are meeting BBR's needs, but there are no standalone tests for either.
 
 Examples are assumed to have a fixed bandwidth (ie: 10Mbps) and a large enough
 buffer that losses caused by buffer overflow will not occur, unless specified.
