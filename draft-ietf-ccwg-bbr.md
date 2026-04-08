@@ -3826,7 +3826,7 @@ data it so it exits STARTUP and naturally gets to the specified phase.
 4. Ensure the connection seamlessly returns to its previous state (e.g.,
    PROBE_UP).
 
-## Entering and Exiting PROBE_RTT during STARTUP 
+## Entering and Exiting PROBE_RTT during STARTUP
 
 1. Start a flow and artificially trigger PROBE_RTT before `BBR.full_bw_reached`
    becomes `true` (e.g., by ensuring `ProbeRTTInterval` expires during an
