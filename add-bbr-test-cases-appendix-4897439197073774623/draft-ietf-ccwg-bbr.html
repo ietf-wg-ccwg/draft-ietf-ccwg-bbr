@@ -1064,7 +1064,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 9 October 2026</td>
+<td class="center">Expires 10 October 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1077,12 +1077,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-04-07" class="published">7 April 2026</time>
+<time datetime="2026-04-08" class="published">8 April 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-10-09">9 October 2026</time></dd>
+<dd class="expires"><time datetime="2026-10-10">10 October 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1151,7 +1151,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 9 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 10 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1502,7 +1502,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
                 <p id="section-toc.1-1.11.2.17.1"><a href="#appendix-A.17" class="auto internal xref">A.17</a>. <a href="#name-handling-spurious-loss-reco" class="internal xref">Handling Spurious Loss Recovery in Test Cases</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.18">
-                <p id="section-toc.1-1.11.2.18.1"><a href="#appendix-A.18" class="auto internal xref">A.18</a>. <a href="#name-exiting-probe_rtt-when-the-" class="internal xref">Exiting PROBE_RTT when the pipe hasn't been filled</a></p>
+                <p id="section-toc.1-1.11.2.18.1"><a href="#appendix-A.18" class="auto internal xref">A.18</a>. <a href="#name-entering-and-exiting-probe_" class="internal xref">Entering and Exiting PROBE_RTT during STARTUP</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.19">
                 <p id="section-toc.1-1.11.2.19.1"><a href="#appendix-A.19" class="auto internal xref">A.19</a>. <a href="#name-loss-during-probe_up-after-" class="internal xref">Loss during PROBE_UP after inflight_longterm is set</a></p>
@@ -5881,11 +5881,10 @@ PROBE_CRUISE.<a href="#appendix-A.8-1.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.2">
             <p id="appendix-A.10-1.2.1">Pause the application from sending data for a period, making the connection
-idle or application-limited, causing <code>C.inflight</code> to drop to 0.<a href="#appendix-A.10-1.2.1" class="pilcrow">¶</a></p>
+idle and causing <code>C.inflight</code> to drop to 0.<a href="#appendix-A.10-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.3">
-            <p id="appendix-A.10-1.3.1">Ensure the <code>ProbeRTTInterval</code> (5 seconds) expires during this idle/app-
-limited period.<a href="#appendix-A.10-1.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.3.1">Allow the <code>ProbeRTTInterval</code> (5 seconds) to elapse during this idle period.<a href="#appendix-A.10-1.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.4">
             <p id="appendix-A.10-1.4.1">Verify that upon sending new data, <code>BBRHandleRestartFromIdle()</code> sets
@@ -6028,7 +6027,7 @@ specific initial burst size and no additional buffering beyond the bucket).
 See <span>[<a href="#TrafficPolicing" class="cite xref">TrafficPolicing</a>]</span> for more details.<a href="#appendix-A.16-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.16-1.2">
-            <p id="appendix-A.16-1.2.1">Start a flow and let it reach PROBE_BW.<a href="#appendix-A.16-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.16-1.2.1">Wait until the connection transitions to PROBE_BW.<a href="#appendix-A.16-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.16-1.3">
             <p id="appendix-A.16-1.3.1">Verify that when the burst size is exhausted and the policer drops packets,
@@ -6068,10 +6067,10 @@ PROBE_UP).<a href="#appendix-A.17-1.4.1" class="pilcrow">¶</a></p>
         </ol>
 </section>
 </div>
-<div id="exiting-probertt-when-the-pipe-hasnt-been-filled">
+<div id="entering-and-exiting-probertt-during-startup">
 <section id="appendix-A.18">
-        <h3 id="name-exiting-probe_rtt-when-the-">
-<a href="#appendix-A.18" class="section-number selfRef">A.18. </a><a href="#name-exiting-probe_rtt-when-the-" class="section-name selfRef">Exiting PROBE_RTT when the pipe hasn't been filled</a>
+        <h3 id="name-entering-and-exiting-probe_">
+<a href="#appendix-A.18" class="section-number selfRef">A.18. </a><a href="#name-entering-and-exiting-probe_" class="section-name selfRef">Entering and Exiting PROBE_RTT during STARTUP</a>
         </h3>
 <ol start="1" type="1" class="normal type-1" id="appendix-A.18-1">
 <li id="appendix-A.18-1.1">
