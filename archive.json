@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-07T02:34:04.434931+00:00",
+  "timestamp": "2026-04-09T02:30:17.967917+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -6761,13 +6761,13 @@
       "labels": [],
       "body": "This PR fixes https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/71 by adding an Appendix section titled \"BBR Example Test Cases\". It details the 16 test cases originally discussed, along with 4 new edge cases brainstormed during planning. The cases use step-by-step logic detailing state transitions and variables without relying on QLog text.\n\n---\n*PR created automatically by Jules for task [4897439197073774623](https://jules.google.com/task/4897439197073774623) started by @ianswett*",
       "createdAt": "2026-04-06T19:25:18Z",
-      "updatedAt": "2026-04-06T21:25:10Z",
+      "updatedAt": "2026-04-08T19:20:17Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-bbr-test-cases-appendix-4897439197073774623",
-      "headRefOid": "791b3e41f60c6cdace8ec727824aaa51c787b81e",
+      "headRefOid": "ce341b7abb0d58676adc08fd686167ccfa45fcb2",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -6883,6 +6883,398 @@
               "body": "I would suggest explicitly calling for verifying the RS.delivery_rate and BBR.max_bw; something like:\n\n4. Verify that BBR measures delivery rate samples (RS.delivery_rate) that plateau, and ensure the estimated bandwidth (BBR.max_bw) is close (i.e., within 2%) to the simulated bandwidth.\n",
               "createdAt": "2026-04-06T21:23:12Z",
               "updatedAt": "2026-04-06T21:25:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yoQ4I",
+          "commit": {
+            "abbreviatedOid": "791b3e4"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T19:10:19Z",
+          "updatedAt": "2026-04-07T19:10:19Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "```suggestion\nThe examples have checks to ensure the Bandwidth Estimator and pacer\nare meeting BBR's needs, but there are no standalone tests for either.\n```",
+              "createdAt": "2026-04-07T19:10:19Z",
+              "updatedAt": "2026-04-07T19:10:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yoSyH",
+          "commit": {
+            "abbreviatedOid": "791b3e4"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T19:11:32Z",
+          "updatedAt": "2026-04-07T19:11:32Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "I changed it to:\r\n\"The examples have checks to ensure the Bandwidth Estimator and pacer\r\nare meeting BBR's needs, but there are no standalone tests for either.\"\r\n\r\nLet me know if that's better?",
+              "createdAt": "2026-04-07T19:11:32Z",
+              "updatedAt": "2026-04-07T19:11:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yoTOA",
+          "commit": {
+            "abbreviatedOid": "7409403"
+          },
+          "author": "google-labs-jules",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T19:11:52Z",
+          "updatedAt": "2026-04-07T19:11:52Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "I have updated the text according to your suggestion.",
+              "createdAt": "2026-04-07T19:11:52Z",
+              "updatedAt": "2026-04-07T19:11:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yo4d0",
+          "commit": {
+            "abbreviatedOid": "2df47df"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T19:37:56Z",
+          "updatedAt": "2026-04-07T19:37:57Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "```suggestion\nThe examples have checks to ensure the Bandwidth Estimator and pacer\nare meeting BBR's needs, but there are no standalone tests for either.\n```",
+              "createdAt": "2026-04-07T19:37:56Z",
+              "updatedAt": "2026-04-07T19:37:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yo7MI",
+          "commit": {
+            "abbreviatedOid": "885a328"
+          },
+          "author": "google-labs-jules",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T19:39:17Z",
+          "updatedAt": "2026-04-07T19:39:17Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "I have updated the text according to your suggestion.",
+              "createdAt": "2026-04-07T19:39:17Z",
+              "updatedAt": "2026-04-07T19:39:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yo-4b",
+          "commit": {
+            "abbreviatedOid": "885a328"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T19:41:51Z",
+          "updatedAt": "2026-04-07T19:41:51Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "```suggestion\n3. Observe that BBR measures delivery rate samples that plateau and are\nBBR.bw_latest is within 2% of the simulated bandwidth.\n```",
+              "createdAt": "2026-04-07T19:41:51Z",
+              "updatedAt": "2026-04-07T19:41:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7ypAMf",
+          "commit": {
+            "abbreviatedOid": "81d911b"
+          },
+          "author": "google-labs-jules",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T19:42:47Z",
+          "updatedAt": "2026-04-07T19:42:47Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "I have updated the text as you suggested.",
+              "createdAt": "2026-04-07T19:42:47Z",
+              "updatedAt": "2026-04-07T19:42:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7ypOfr",
+          "commit": {
+            "abbreviatedOid": "260733d"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T19:53:22Z",
+          "updatedAt": "2026-04-07T19:53:22Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "```suggestion\n3. Observe that BBR measures delivery rate samples that plateau and are\nBBR.bw_latest is within 2% of the simulated bandwidth.\n```",
+              "createdAt": "2026-04-07T19:53:22Z",
+              "updatedAt": "2026-04-07T19:53:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7ypR1X",
+          "commit": {
+            "abbreviatedOid": "2ab9c3f"
+          },
+          "author": "google-labs-jules",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T19:55:08Z",
+          "updatedAt": "2026-04-07T19:55:08Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "I have updated the text as you requested.",
+              "createdAt": "2026-04-07T19:55:08Z",
+              "updatedAt": "2026-04-07T19:55:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yqIYP",
+          "commit": {
+            "abbreviatedOid": "4340412"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T20:35:12Z",
+          "updatedAt": "2026-04-07T20:35:12Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "Neal's suggestion\n\n```suggestion\n3. Verify that BBR measures delivery rate samples (RS.delivery_rate) that plateau,\nand ensure the estimated bandwidth (BBR.max_bw) is close (i.e., within 2%) to\nthe simulated bandwidth.\n```",
+              "createdAt": "2026-04-07T20:35:12Z",
+              "updatedAt": "2026-04-07T20:35:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yqJJT",
+          "commit": {
+            "abbreviatedOid": "791b3e4"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T20:35:43Z",
+          "updatedAt": "2026-04-07T20:35:43Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "Done",
+              "createdAt": "2026-04-07T20:35:43Z",
+              "updatedAt": "2026-04-07T20:35:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yqKrd",
+          "commit": {
+            "abbreviatedOid": "619bd67"
+          },
+          "author": "google-labs-jules",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T20:36:43Z",
+          "updatedAt": "2026-04-07T20:36:44Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "Acknowledged.",
+              "createdAt": "2026-04-07T20:36:44Z",
+              "updatedAt": "2026-04-07T20:36:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yqSV9",
+          "commit": {
+            "abbreviatedOid": "619bd67"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T20:41:35Z",
+          "updatedAt": "2026-04-07T20:41:36Z",
+          "comments": [
+            {
+              "originalPosition": 31,
+              "body": "```suggestion\nUnless otherwise mentioned, each test case is configured to create a single BBR connection traveling over a controlled path with a bottleneck bandwidth (ie: 10Mbps) and two-way propagation delay that are fixed for the entire duration of the test. The tests can use network emulation, network simulation, or a controlled network path such as a laboratory environment.\n\nTo ensure internal state variables, including the Bandwidth Estimator,\nare initialized correctly, when an test case says it starts in a phase\nafter STARTUP, test cases expect the connection to be driven with enough\ndata it so it exits STARTUP and naturally gets to the specified phase.\n```",
+              "createdAt": "2026-04-07T20:41:35Z",
+              "updatedAt": "2026-04-07T20:41:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yqTzk",
+          "commit": {
+            "abbreviatedOid": "e24a9a4"
+          },
+          "author": "google-labs-jules",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T20:42:55Z",
+          "updatedAt": "2026-04-07T20:42:55Z",
+          "comments": [
+            {
+              "originalPosition": 31,
+              "body": "I have added the suggested text explaining the assumed test setup and state initialization.",
+              "createdAt": "2026-04-07T20:42:55Z",
+              "updatedAt": "2026-04-07T20:42:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yqUR2",
+          "commit": {
+            "abbreviatedOid": "791b3e4"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T20:43:17Z",
+          "updatedAt": "2026-04-07T20:43:17Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "Thanks, I worked that into the intro above all the examples",
+              "createdAt": "2026-04-07T20:43:17Z",
+              "updatedAt": "2026-04-07T20:43:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yqU2_",
+          "commit": {
+            "abbreviatedOid": "044ad7b"
+          },
+          "author": "google-labs-jules",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-07T20:43:41Z",
+          "updatedAt": "2026-04-07T20:43:41Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "Understood, that makes sense.",
+              "createdAt": "2026-04-07T20:43:41Z",
+              "updatedAt": "2026-04-07T20:43:41Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7yueVH",
+          "commit": {
+            "abbreviatedOid": "1110c0e"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-08T01:14:58Z",
+          "updatedAt": "2026-04-08T01:14:58Z",
+          "comments": [
+            {
+              "originalPosition": 216,
+              "body": "```suggestion\n## Entering and Exiting PROBE_RTT during STARTUP\n```",
+              "createdAt": "2026-04-08T01:14:58Z",
+              "updatedAt": "2026-04-08T01:14:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7zCChX",
+          "commit": {
+            "abbreviatedOid": "ce341b7"
+          },
+          "author": "antoniovicente",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Thanks for sending me a link to the list of test cases.  I did an initial read and need to go back to look at them in more detail but it seems like an excellent improvement.  It's good to have concrete cases to test again which cover the main design concepts behind BBR and operational aspects of the different phases.",
+          "createdAt": "2026-04-08T18:36:36Z",
+          "updatedAt": "2026-04-08T18:48:58Z",
+          "comments": [
+            {
+              "originalPosition": 175,
+              "body": "Would it make sense to constrain this further by targeting an increase during either probebw_down or probebw_cruise?",
+              "createdAt": "2026-04-08T18:36:36Z",
+              "updatedAt": "2026-04-08T18:48:58Z"
+            },
+            {
+              "originalPosition": 180,
+              "body": "Is a tighter bound possible like `N * log(increase) / log(pacing_gain) + C`\n\nFor this specific case of 10x increase it is expected that the new bandwidth be discovered within ~15 RTTs (for increase=10, pacing_gain=1.25, N=1.0 and C=4)?",
+              "createdAt": "2026-04-08T18:39:58Z",
+              "updatedAt": "2026-04-08T18:48:58Z"
+            },
+            {
+              "originalPosition": 48,
+              "body": "Another interesting case: `No exit from STARTUP when app-limited and there is no loss.`",
+              "createdAt": "2026-04-08T18:46:25Z",
+              "updatedAt": "2026-04-08T18:48:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7zDH-f",
+          "commit": {
+            "abbreviatedOid": "ce341b7"
+          },
+          "author": "antoniovicente",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-08T19:20:17Z",
+          "updatedAt": "2026-04-08T19:20:17Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "I really appreciate the tests taking RTT and bottleneck bandwidth as parameters.  Running the same test under small, medium and larger RTTs are likely to expose different problems.\n\nConsider adding some wording encouraging implementers to explore behavior over a range of network params, including RTT=0 and 100msec+",
+              "createdAt": "2026-04-08T19:20:17Z",
+              "updatedAt": "2026-04-08T19:20:17Z"
             }
           ]
         }
