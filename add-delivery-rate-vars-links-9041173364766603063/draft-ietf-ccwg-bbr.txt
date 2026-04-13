@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 8 October 2026                                   J. Beshay, Ed.
+Expires: 15 October 2026                                  J. Beshay, Ed.
                                                                     Meta
-                                                            6 April 2026
+                                                           13 April 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 October 2026.
+   This Internet-Draft will expire on 15 October 2026.
 
 Copyright Notice
 
