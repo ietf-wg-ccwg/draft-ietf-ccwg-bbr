@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 10 October 2026                                  J. Beshay, Ed.
+Expires: 15 October 2026                                  J. Beshay, Ed.
                                                                     Meta
-                                                            8 April 2026
+                                                           13 April 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 October 2026.
+   This Internet-Draft will expire on 15 October 2026.
 
 Copyright Notice
 
@@ -159,26 +159,28 @@ Table of Contents
    Appendix A.  BBR Example Test Cases
      A.1.  Exiting STARTUP on Bandwidth Plateau
      A.2.  Exiting STARTUP on Loss when app-limited
-     A.3.  Exit DRAIN based on inflight
-     A.4.  Exit DRAIN based on time
-     A.5.  Exit PROBE_UP on Bandwidth Plateau
-     A.6.  Exit PROBE_UP on Loss when app-limited
-     A.7.  Exit PROBE_DOWN on inflight
-     A.8.  Exit PROBE_DOWN after max time
-     A.9.  PROBE_RTT and exit
-     A.10. Skip PROBE_RTT due to app-limited sending
-     A.11. Achieve expected STARTUP bandwidth on a link with
+     A.3.  No exit from STARTUP when app-limited and there is no loss
+     A.4.  STARTUP with a CWND > 2*BDP
+     A.5.  Exit DRAIN based on inflight
+     A.6.  Exit DRAIN based on time
+     A.7.  Exit PROBE_UP on Bandwidth Plateau
+     A.8.  Exit PROBE_UP on Loss when app-limited
+     A.9.  Exit PROBE_DOWN on inflight
+     A.10. Exit PROBE_DOWN after max time
+     A.11. PROBE_RTT and exit
+     A.12. Skip PROBE_RTT due to app-limited sending
+     A.13. Achieve expected STARTUP bandwidth on a link with
             aggregation
-     A.12. Achieve expected Cruise bandwidth on a link with
+     A.14. Achieve expected Cruise bandwidth on a link with
             aggregation
-     A.13. Correctly manage sub-packet BDPs
-     A.14. Increase Bandwidth 10x and ensure full bandwidth is reached
-     A.15. Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
-     A.16. Token Bucket Policer
-     A.17. Handling Spurious Loss Recovery in Test Cases
-     A.18. Entering and Exiting PROBE_RTT during STARTUP
-     A.19. Loss during PROBE_UP after inflight_longterm is set
-     A.20. Application-limited during PROBE_REFILL
+     A.15. Correctly manage sub-packet BDPs
+     A.16. Increase Bandwidth 10x and ensure full bandwidth is reached
+     A.17. Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
+     A.18. Token Bucket Policer
+     A.19. Handling Spurious Loss Recovery in Test Cases
+     A.20. Entering and Exiting PROBE_RTT during STARTUP
+     A.21. Loss during PROBE_UP after inflight_longterm is set
+     A.22. Application-limited during PROBE_REFILL
    Authors' Addresses
 
 1.  Introduction
@@ -3863,7 +3865,11 @@ A.2.  Exiting STARTUP on Loss when app-limited
        triggers the end of STARTUP even when bandwidth samples are
        application-limited.
 
-A.3.  Exit DRAIN based on inflight
+A.3.  No exit from STARTUP when app-limited and there is no loss
+
+A.4.  STARTUP with a CWND > 2*BDP
+
+A.5.  Exit DRAIN based on inflight
 
    1.  Start a flow and transition it from STARTUP to DRAIN.
 
@@ -3876,7 +3882,7 @@ A.3.  Exit DRAIN based on inflight
        BBRInflight(1.0), the connection exits DRAIN and transitions to
        PROBE_BW.
 
-A.4.  Exit DRAIN based on time
+A.6.  Exit DRAIN based on time
 
    1.  Start a flow and transition it from STARTUP to DRAIN.
 
@@ -3892,7 +3898,7 @@ A.4.  Exit DRAIN based on time
        DRAIN and transitions to PROBE_BW even though C.inflight has not
        reached the target BDP.
 
-A.5.  Exit PROBE_UP on Bandwidth Plateau
+A.7.  Exit PROBE_UP on Bandwidth Plateau
 
    1.  Wait until the connection is in the PROBE_UP phase of PROBE_BW.
 
@@ -3906,7 +3912,7 @@ A.5.  Exit PROBE_UP on Bandwidth Plateau
 
    5.  Verify the connection transitions to PROBE_DOWN.
 
-A.6.  Exit PROBE_UP on Loss when app-limited
+A.8.  Exit PROBE_UP on Loss when app-limited
 
    1.  Wait until the connection is in the PROBE_UP phase of PROBE_BW.
 
@@ -3923,7 +3929,7 @@ A.6.  Exit PROBE_UP on Loss when app-limited
        BBR.inflight_longterm is updated appropriately, regardless of the
        application-limited state.
 
-A.7.  Exit PROBE_DOWN on inflight
+A.9.  Exit PROBE_DOWN on inflight
 
    1.  Wait until the connection transitions to PROBE_DOWN.
 
@@ -3936,7 +3942,7 @@ A.7.  Exit PROBE_DOWN on inflight
 
    5.  Verify the connection transitions to PROBE_CRUISE.
 
-A.8.  Exit PROBE_DOWN after max time
+A.10.  Exit PROBE_DOWN after max time
 
    1.  Wait until the connection transitions to PROBE_DOWN.
 
@@ -3950,7 +3956,7 @@ A.8.  Exit PROBE_DOWN after max time
    4.  Verify the connection transitions directly to PROBE_REFILL,
        bypassing PROBE_CRUISE.
 
-A.9.  PROBE_RTT and exit
+A.11.  PROBE_RTT and exit
 
    1.  Wait until the connection transitions to PROBE_BW.
 
@@ -3967,7 +3973,7 @@ A.9.  PROBE_RTT and exit
        to PROBE_BW (since BBR.full_bw_reached is true), and resumes
        sending.
 
-A.10.  Skip PROBE_RTT due to app-limited sending
+A.12.  Skip PROBE_RTT due to app-limited sending
 
    1.  Wait until the connection transitions to PROBE_BW.
 
@@ -3984,7 +3990,7 @@ A.10.  Skip PROBE_RTT due to app-limited sending
        BBR.idle_restart is true and idleness is deemed a sufficient
        attempt to drain the queue.
 
-A.11.  Achieve expected STARTUP bandwidth on a link with aggregation
+A.13.  Achieve expected STARTUP bandwidth on a link with aggregation
 
    1.  Simulate a network path with significant ACK aggregation or L2
        batching (e.g., cellular link).
@@ -3999,7 +4005,7 @@ A.11.  Achieve expected STARTUP bandwidth on a link with aggregation
        still successfully doubles its sending rate to discover the full
        bottleneck bandwidth.
 
-A.12.  Achieve expected Cruise bandwidth on a link with aggregation
+A.14.  Achieve expected Cruise bandwidth on a link with aggregation
 
    1.  Wait until the connection transitions to PROBE_CRUISE.
 
@@ -4012,7 +4018,7 @@ A.12.  Achieve expected Cruise bandwidth on a link with aggregation
        the connection from stalling during inter-ACK silences and
        maintaining full utilization.
 
-A.13.  Correctly manage sub-packet BDPs
+A.15.  Correctly manage sub-packet BDPs
 
    1.  Configure a bottleneck with a very low BDP (e.g., < 1 packet).
 
@@ -4025,7 +4031,7 @@ A.13.  Correctly manage sub-packet BDPs
        the 4-packet cwnd allows for delayed ACKs without stalling the
        pipeline.
 
-A.14.  Increase Bandwidth 10x and ensure full bandwidth is reached
+A.16.  Increase Bandwidth 10x and ensure full bandwidth is reached
 
    1.  Wait until the connection transitions to PROBE_BW.
 
@@ -4038,7 +4044,7 @@ A.14.  Increase Bandwidth 10x and ensure full bandwidth is reached
    4.  Ensure the connection discovers the full 100 Mbps bandwidth
        within a reasonable number of round trips (O(log(BDP))).
 
-A.15.  Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
+A.17.  Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
 
    1.  Wait until the connection transitions to PROBE_BW.
 
@@ -4052,7 +4058,7 @@ A.15.  Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
        PROBE_BW cycles), BBR.max_bw drops to the new 10 Mbps limit,
        matching the path's delivery rate.
 
-A.16.  Token Bucket Policer
+A.18.  Token Bucket Policer
 
    1.  Configure the path with a token bucket policer (e.g., rate limit
        with a specific initial burst size and no additional buffering
@@ -4068,7 +4074,7 @@ A.16.  Token Bucket Policer
        conforms to the token rate without excessive continuous packet
        loss.
 
-A.17.  Handling Spurious Loss Recovery in Test Cases
+A.19.  Handling Spurious Loss Recovery in Test Cases
 
    1.  Introduce packet reordering on the network path that triggers a
        spurious Fast Recovery or RTO.
@@ -4085,7 +4091,7 @@ A.17.  Handling Spurious Loss Recovery in Test Cases
    4.  Ensure the connection seamlessly returns to its previous state
        (e.g., PROBE_UP).
 
-A.18.  Entering and Exiting PROBE_RTT during STARTUP
+A.20.  Entering and Exiting PROBE_RTT during STARTUP
 
    1.  Start a flow and artificially trigger PROBE_RTT before
        BBR.full_bw_reached becomes true (e.g., by ensuring
@@ -4097,7 +4103,7 @@ A.18.  Entering and Exiting PROBE_RTT during STARTUP
        transitions back to STARTUP rather than PROBE_BW, allowing it to
        continue searching for the max bandwidth.
 
-A.19.  Loss during PROBE_UP after inflight_longterm is set
+A.21.  Loss during PROBE_UP after inflight_longterm is set
 
    1.  Ensure the connection is in PROBE_BW and has an established
        BBR.inflight_longterm.
@@ -4113,7 +4119,7 @@ A.19.  Loss during PROBE_UP after inflight_longterm is set
    5.  Verify the connection aborts PROBE_UP and immediately transitions
        to PROBE_DOWN.
 
-A.20.  Application-limited during PROBE_REFILL
+A.22.  Application-limited during PROBE_REFILL
 
    1.  Wait for the connection to transition to PROBE_REFILL.
 
