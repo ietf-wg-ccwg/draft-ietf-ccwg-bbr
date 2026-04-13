@@ -3670,6 +3670,14 @@ data it so it exits STARTUP and naturally gets to the specified phase.
    and transitions to DRAIN, demonstrating that loss triggers the end of STARTUP
    even when bandwidth samples are application-limited.
 
+## No exit from STARTUP when app-limited and there is no loss
+
+
+
+## STARTUP with a CWND > 2*BDP
+
+
+
 ## Exit DRAIN based on inflight
 
 1. Start a flow and transition it from STARTUP to DRAIN.
