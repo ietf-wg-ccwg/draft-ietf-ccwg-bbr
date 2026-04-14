@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-09T02:30:17.967917+00:00",
+  "timestamp": "2026-04-14T02:42:23.003717+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -6761,13 +6761,13 @@
       "labels": [],
       "body": "This PR fixes https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/71 by adding an Appendix section titled \"BBR Example Test Cases\". It details the 16 test cases originally discussed, along with 4 new edge cases brainstormed during planning. The cases use step-by-step logic detailing state transitions and variables without relying on QLog text.\n\n---\n*PR created automatically by Jules for task [4897439197073774623](https://jules.google.com/task/4897439197073774623) started by @ianswett*",
       "createdAt": "2026-04-06T19:25:18Z",
-      "updatedAt": "2026-04-08T19:20:17Z",
+      "updatedAt": "2026-04-13T20:34:31Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-bbr-test-cases-appendix-4897439197073774623",
-      "headRefOid": "ce341b7abb0d58676adc08fd686167ccfa45fcb2",
+      "headRefOid": "3f9c1aa0d6aef37e56940c3baa18801432fc15ea",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -7292,19 +7292,100 @@
       "labels": [],
       "body": "Fixes #68 by adding links from the main Transport Connection State and Per-ACK Rate Sample State sections to the corresponding state sections defined for the Delivery Rate Sampling Algorithm. This makes the full set of state variables easier to discover for readers.\r\n\r\n---\r\n*PR created automatically by Jules for task [9041173364766603063](https://jules.google.com/task/9041173364766603063) started by @ianswett*",
       "createdAt": "2026-04-06T21:04:29Z",
-      "updatedAt": "2026-04-06T21:11:02Z",
+      "updatedAt": "2026-04-13T21:18:26Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-delivery-rate-vars-links-9041173364766603063",
-      "headRefOid": "cfba21febfedcebf7a1a4123614a4e7fa60ca71b",
+      "headRefOid": "deed63fcb49312d96a6d7d097a22db393ed93673",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM70YYEm",
+          "commit": {
+            "abbreviatedOid": "cfba21f"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "need reflow. otherwise lgtm",
+          "createdAt": "2026-04-13T15:51:06Z",
+          "updatedAt": "2026-04-13T15:51:06Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM70f7KK",
+          "commit": {
+            "abbreviatedOid": "deed63f"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Thanks, Ian!\n",
+          "createdAt": "2026-04-13T21:17:18Z",
+          "updatedAt": "2026-04-13T21:18:26Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "Since the new text here is about \"per-packet variables\", but the section it's in is \"Per-ACK Rate Sample State\", I wonder if readers may be a little confused?\n\nWDYT about instead:\n\n(a) renaming section 4.1.2.1. \"Variables\" to be \"Delivery Rate Sampling State Variables\"\n\n(b) placing the new text in this PR in a new section preceding the \"Transport Connection State\" section, so the PR could look something like:\n\n```\n...\n\n## Delivery Rate Sampling State\n\nState used in the delivery rate sampling algorithm is defined in Section [Delivery Rate Sampling State Variables](#delivery-rate-sampling-state-variables).\n\n## Transport Connection State {#transport-connection-state}\n...\n```\n",
+              "createdAt": "2026-04-13T21:17:18Z",
+              "updatedAt": "2026-04-13T21:18:26Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 105,
+      "id": "PR_kwDOL3MllM7SGrt1",
+      "title": "Add considerations for ACK_FREQUENCY and ACK_RECEIVE_TIMESTAMPS QUIC extensions",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/105",
+      "state": "OPEN",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "[AI-assisted] This is an initial suggestion to start the discussion. We can either keep this information in the existing sections for the different BBR phases or we could consolidate them into a separate section.",
+      "createdAt": "2026-04-13T20:15:42Z",
+      "updatedAt": "2026-04-13T20:36:57Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_ackfrequency",
+      "headRefOid": "86b92a31e227e472d90122245dfc08746ca3b704",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM70e-ci",
+          "commit": {
+            "abbreviatedOid": "86b92a3"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-13T20:36:57Z",
+          "updatedAt": "2026-04-13T20:36:57Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "Maybe we should add an informational reference to TARR? https://datatracker.ietf.org/doc/draft-ietf-tcpm-ack-rate-request/",
+              "createdAt": "2026-04-13T20:36:57Z",
+              "updatedAt": "2026-04-13T20:36:57Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
