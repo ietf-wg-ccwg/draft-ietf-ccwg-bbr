@@ -1353,16 +1353,19 @@ can underestimate the delivery rate due the artificially inflated
 filter.
 
 
-#### Impact of reduced ACK frequency {#impact-of-reduced-ack-frequency}
+#### Impact of changing ACK frequency {#impact-of-changing-ack-frequency}
 
-When the receiver acknowledges packets less frequently than the default
-behavior (e.g., when using the QUIC ACK-FREQUENCY extension
-{{?I-D.draft-ietf-quic-ack-frequency}}), fewer delivery rate samples are
-generated per round trip. Similar to the case of ACK losses (see
-{{impact-of-ack-losses}}), this can produce delivery rate samples with
-artificially inflated "RS.interval" values, potentially underestimating
-the delivery rate. The BBR.max_bw windowed maximum filter mitigates this
-effect by retaining the highest recent sample.
+Some transport protocol extensions allow the sender to control how
+frequently the receiver sends acknowledgments. Examples include the QUIC
+ACK-FREQUENCY extension ({{?I-D.draft-ietf-quic-ack-frequency}}) and the
+TCP ACK Rate Request (TARR) option
+({{?I-D.draft-ietf-tcpm-ack-rate-request}}). When the receiver
+acknowledges packets less frequently than the default behavior, fewer
+delivery rate samples are generated per round trip. Similar to the case
+of ACK losses (see {{impact-of-ack-losses}}), this can produce delivery
+rate samples with artificially inflated "RS.interval" values, potentially
+underestimating the delivery rate. The BBR.max_bw windowed maximum filter
+mitigates this effect by retaining the highest recent sample.
 
 Additionally, reduced ACK frequency can affect the timeliness of
 BBR's round-trip counting (see {{bbrroundcount-tracking-packet-timed-round-trips}}).
@@ -1371,12 +1374,41 @@ may delay the detection of round-trip completions, which in turn can delay
 BBR state machine transitions that are gated on round-trip progress (e.g.,
 exiting Startup, transitioning from ProbeBW_REFILL to ProbeBW_UP).
 
-QUIC senders using the ACK-FREQUENCY extension can mitigate
-these effects by requesting higher ACK frequency during BBR phases where
-timely feedback is most valuable (Startup, ProbeBW_REFILL, ProbeBW_UP)
-and lower ACK frequency during phases where the flow is steady-state or
-decelerating (ProbeBW_DOWN, ProbeBW_CRUISE). See the per-phase
-guidance in {{startup}}, {{probebw}}, and {{probertt}}.
+When a BBR sender has the ability to control ACK frequency, it can
+mitigate these effects by adapting the requested ACK frequency to the
+current BBR phase. The following per-phase guidance applies:
+
+* Startup: The sender SHOULD request a high ACK frequency (low
+  Ack-Eliciting Threshold and short ACK delay) to ensure that delivery
+  rate samples are generated frequently enough for timely full-pipe
+  detection. In particular, the sender SHOULD request an ACK delay of no
+  more than 0.25 * smoothed_rtt to obtain multiple delivery rate samples
+  per round trip, which helps the bandwidth plateau estimator converge
+  promptly.
+
+* ProbeBW_DOWN and ProbeBW_CRUISE: The sender MAY reduce ACK frequency
+  to lower overhead, since these phases do not rely on rapid feedback for
+  probing. The sender MAY request an ACK delay of up to
+  0.5 * smoothed_rtt and an ACK threshold of up to roughly half the
+  number of maximum-sized packets that fit in the current congestion
+  window. Keeping these values moderate ensures that loss detection is
+  not excessively delayed by infrequent ACKs.
+
+* ProbeBW_REFILL and ProbeBW_UP: The sender SHOULD request higher ACK
+  frequency before or upon entering ProbeBW_REFILL, to ensure timely
+  round-trip detection and accurate delivery rate samples during the
+  subsequent ProbeBW_UP phase. The sender SHOULD request an ACK delay of
+  no more than 0.25 * smoothed_rtt, since the flow will soon be probing
+  for additional bandwidth and will benefit from frequent feedback for
+  accurate bandwidth estimation and loss detection.
+
+* ProbeRTT: Upon entering ProbeRTT, the sender SHOULD solicit a prompt
+  acknowledgment (e.g., via a QUIC IMMEDIATE_ACK frame or a TCP TARR
+  option with R=0) to obtain a timely and accurate BBR.min_rtt sample
+  while the queue is drained. Additionally, since ProbeRTT lasts only
+  BBR.ProbeRTTDuration (200 ms), the sender SHOULD request a short ACK
+  delay during ProbeRTT to maximize the number of RTT samples obtained
+  during this brief window.
 
 When available, the QUIC Receive Timestamps extension
 ({{?I-D.draft-ietf-quic-receive-ts}}) can improve the fidelity of
@@ -1755,15 +1787,6 @@ congestion or receive-window auto-tuning. This three-round threshold was
 validated by experimental data to allow the receiver the chance to grow its
 receive window.
 
-When using the QUIC ACK-FREQUENCY extension
-({{?I-D.draft-ietf-quic-ack-frequency}}), a BBR sender in Startup SHOULD
-request a high ACK frequency (low Ack-Eliciting Threshold and short
-Requested Max Ack Delay) to ensure that delivery rate samples are
-generated frequently enough for timely full-pipe detection. In particular,
-the sender SHOULD set Requested Max Ack Delay to be no more than
-0.25 * smoothed_rtt to obtain multiple delivery rate samples per round
-trip, which helps the bandwidth plateau estimator converge promptly.
-
 #### Exiting Startup Based on Packet Loss {#exiting-startup-based-on-packet-loss}
 
 A second method BBR uses for estimating the bottleneck is full in Startup
@@ -1896,17 +1919,6 @@ that it is time to probe for bandwidth (see "Time Scale for Bandwidth Probing",
 in {{time-scale-for-bandwidth-probing-}}), at which time it enters
 ProbeBW_REFILL.
 
-When using the QUIC ACK-FREQUENCY extension
-({{?I-D.draft-ietf-quic-ack-frequency}}), a BBR sender in ProbeBW_DOWN or
-ProbeBW_CRUISE MAY reduce ACK frequency to lower overhead, since these
-phases do not rely on rapid feedback for probing. The sender MAY set
-Requested Max Ack Delay up to 0.5 * smoothed_rtt and Ack-Eliciting
-Threshold up to roughly half the number of maximum-sized packets that
-fit in the current congestion window. Keeping these values moderate
-ensures that loss detection is not excessively delayed by infrequent
-ACKs. The sender SHOULD increase ACK frequency before entering
-ProbeBW_REFILL (see {{probebwrefill}}).
-
 
 #### ProbeBW_REFILL {#probebwrefill}
 
@@ -1945,16 +1957,6 @@ opportunity to place as many packets in flight as its BBR.bw and BBR.inflight_lo
 permit. Correspondingly, at this point the flow starts to see bandwidth samples
 reflecting its ProbeBW_REFILL behavior, which may be putting too much data
 in flight.
-
-When using the QUIC ACK-FREQUENCY extension
-({{?I-D.draft-ietf-quic-ack-frequency}}), a BBR sender SHOULD request higher
-ACK frequency before or upon entering ProbeBW_REFILL, to ensure timely
-round-trip detection and accurate delivery rate samples during the subsequent
-ProbeBW_UP phase. The sender SHOULD set Requested Max Ack Delay to no more
-than 0.25 * smoothed_rtt when entering ProbeBW_REFILL, since the
-flow will soon be probing for additional bandwidth in ProbeBW_UP and
-will benefit from frequent feedback for accurate bandwidth estimation and
-loss detection.
 
 
 #### ProbeBW_UP {#probebwup}
@@ -2371,15 +2373,6 @@ Exit conditions: After maintaining C.inflight at
 BBR.ProbeRTTCwndGain\*BBR.bdp for at least BBR.ProbeRTTDuration (200 ms) and at
 least one packet-timed round trip, BBR leaves ProbeRTT and transitions to
 ProbeBW if it estimates the pipe was filled already, or Startup otherwise.
-
-When using the QUIC ACK-FREQUENCY extension
-({{?I-D.draft-ietf-quic-ack-frequency}}), a BBR sender entering ProbeRTT
-SHOULD send an IMMEDIATE_ACK frame to solicit a prompt acknowledgment, in
-order to obtain a timely and accurate BBR.min_rtt sample while the queue
-is drained. Additionally, since ProbeRTT lasts only BBR.ProbeRTTDuration
-(200 ms), the sender SHOULD request a short Requested Max Ack Delay
-during ProbeRTT to maximize the number of RTT samples obtained during
-this brief window.
 
 
 #### ProbeRTT Design Rationale {#probertt-design-rationale}
@@ -2905,16 +2898,15 @@ and ACK aggregation effects such as batching and slotting at shared-medium
 L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms
 (TSO, GSO, LRO, GRO), and end host or middlebox ACK decimation/thinning.
 
-Note that when using the QUIC ACK-FREQUENCY extension
-({{?I-D.draft-ietf-quic-ack-frequency}}) with a large Ack-Eliciting
-Threshold or Requested Max Ack Delay, the resulting infrequent ACKs can
+Note that when the sender has requested reduced ACK frequency (see
+{{impact-of-changing-ack-frequency}}), the resulting infrequent ACKs can
 produce bursty ACK arrivals that resemble ACK aggregation. The
 BBR.extra_acked estimator will account for this by increasing C.cwnd to
 allow the sender to continue transmitting during inter-ACK gaps. However,
-if the sender is also the entity controlling the ACK frequency via
-ACK_FREQUENCY frames, it SHOULD account for its own requested ACK delay
-when interpreting BBR.extra_acked, to avoid conflating intentional ACK
-thinning with network-induced aggregation.
+if the sender is also the entity controlling the ACK frequency, it
+SHOULD account for its own requested ACK delay when interpreting
+BBR.extra_acked, to avoid conflating intentional ACK thinning with
+network-induced aggregation.
 
 BBR augments C.cwnd by BBR.extra_acked to allow the connection to keep
 sending during inter-ACK silences, to an extent that matches the recently
