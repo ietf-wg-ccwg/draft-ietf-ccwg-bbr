@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-14T02:42:23.003717+00:00",
+  "timestamp": "2026-04-19T02:49:44.334186+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -7350,15 +7350,15 @@
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
-      "body": "[AI-assisted] This is an initial suggestion to start the discussion. We can either keep this information in the existing sections for the different BBR phases or we could consolidate them into a separate section.",
+      "body": "  - Describe how reduced ACK frequency affects delivery rate sampling and round-trip counting.\r\n  - Provide per-phase guidance on when to increase or decrease ACK frequency.\r\n  - Reference both QUIC ACK-FREQUENCY and TCP TARR extensions.\r\n  - Note how QUIC Receive Timestamps can improve measurement fidelity under reduced ACK frequency.\r\n  - Warn against conflating sender-requested ACK thinning with network-induced aggregation in the extra_acked estimator.",
       "createdAt": "2026-04-13T20:15:42Z",
-      "updatedAt": "2026-04-13T20:36:57Z",
+      "updatedAt": "2026-04-17T23:57:28Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_ackfrequency",
-      "headRefOid": "86b92a31e227e472d90122245dfc08746ca3b704",
+      "headRefOid": "a7a6ba9c3b3eaad46bb2ff1f79fa7d2cebce9e83",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
