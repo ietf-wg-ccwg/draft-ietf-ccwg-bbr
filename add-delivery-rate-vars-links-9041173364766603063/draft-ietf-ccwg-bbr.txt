@@ -316,10 +316,6 @@ Table of Contents
    C.next_send_time: The earliest pacing departure time another packet
    can be sent.
 
-   More per-connection variables used for the Delivery Rate Sampling
-   Algorithm are defined in Section Per-connection (C) state
-   (Section 4.1.2.1.1).
-
 2.3.  Per-ACK Rate Sample State
 
    RS.delivered: The volume of data delivered between the transmission
@@ -346,10 +342,6 @@ Table of Contents
    transmission and acknowledgment of the packet that has just been
    ACKed (the most recently sent packet among packets ACKed by the ACK
    that was just received).
-
-   More per-packet variables used for the Delivery Rate Sampling
-   Algorithm are defined in Section Per-packet (P) state
-   (Section 4.1.2.1.2).
 
 2.4.  Output Control Parameters
 
