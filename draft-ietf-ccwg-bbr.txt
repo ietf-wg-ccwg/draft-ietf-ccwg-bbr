@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 27 August 2026                                   J. Beshay, Ed.
+Expires: 22 October 2026                                  J. Beshay, Ed.
                                                                     Meta
-                                                        23 February 2026
+                                                           20 April 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 27 August 2026.
+   This Internet-Draft will expire on 22 October 2026.
 
 Copyright Notice
 
@@ -77,23 +77,24 @@ Table of Contents
 
    1.  Introduction
    2.  Terminology
-     2.1.  Transport Connection State
-     2.2.  Per-ACK Rate Sample State
-     2.3.  Output Control Parameters
-     2.4.  Pacing State and Parameters
-     2.5.  cwnd State and Parameters
-     2.6.  General Algorithm State
-     2.7.  Core Algorithm Design Parameters
-     2.8.  Network Path Model Parameters
-       2.8.1.  Data Rate Network Path Model Parameters
-       2.8.2.  Data Volume Network Path Model Parameters
-     2.9.  State for Responding to Congestion
-     2.10. Estimating BBR.max_bw
-     2.11. Estimating BBR.extra_acked
-     2.12. Startup Parameters and State
-     2.13. ProbeRTT and min_rtt Parameters and State
-       2.13.1.  Parameters for Estimating BBR.min_rtt
-       2.13.2.  Parameters for Scheduling ProbeRTT
+     2.1.  Delivery Rate Sampling State
+     2.2.  Transport Connection State
+     2.3.  Per-ACK Rate Sample State
+     2.4.  Output Control Parameters
+     2.5.  Pacing State and Parameters
+     2.6.  cwnd State and Parameters
+     2.7.  General Algorithm State
+     2.8.  Core Algorithm Design Parameters
+     2.9.  Network Path Model Parameters
+       2.9.1.  Data Rate Network Path Model Parameters
+       2.9.2.  Data Volume Network Path Model Parameters
+     2.10. State for Responding to Congestion
+     2.11. Estimating BBR.max_bw
+     2.12. Estimating BBR.extra_acked
+     2.13. Startup Parameters and State
+     2.14. ProbeRTT and min_rtt Parameters and State
+       2.14.1.  Parameters for Estimating BBR.min_rtt
+       2.14.2.  Parameters for Scheduling ProbeRTT
    3.  Design Overview
      3.1.  High-Level Design Goals
      3.2.  Algorithm Overview
@@ -262,7 +263,13 @@ Table of Contents
    cumulative acknowledgment [RFC9293], or TCP SACK ("Selective
    Acknowledgment") block [RFC2018].
 
-2.1.  Transport Connection State
+2.1.  Delivery Rate Sampling State
+
+   Connection and per-packet state used in the delivery rate sampling
+   algorithm is defined in Section [Delivery Rate Sampling State
+   Variables] (#delivery-rate-sampling-state-variables).
+
+2.2.  Transport Connection State
 
    C.SMSS: The Sender Maximum Send Size in bytes.  The maximum size of a
    single transmission, including the portion of the packet that the
@@ -310,7 +317,7 @@ Table of Contents
    C.next_send_time: The earliest pacing departure time another packet
    can be sent.
 
-2.2.  Per-ACK Rate Sample State
+2.3.  Per-ACK Rate Sample State
 
    RS.delivered: The volume of data delivered between the transmission
    of the packet that has just been ACKed and the current time.
@@ -337,7 +344,7 @@ Table of Contents
    ACKed (the most recently sent packet among packets ACKed by the ACK
    that was just received).
 
-2.3.  Output Control Parameters
+2.4.  Output Control Parameters
 
    C.cwnd: The transport sender's congestion window.  When transmitting
    data, the sending connection ensures that C.inflight does not exceed
@@ -350,7 +357,7 @@ Table of Contents
    transmitted together as a unit, e.g., to amortize per-packet
    transmission overheads.
 
-2.4.  Pacing State and Parameters
+2.5.  Pacing State and Parameters
 
    BBR.pacing_gain: The dynamic gain factor used to scale BBR.bw to
    produce C.pacing_rate.
@@ -371,7 +378,7 @@ Table of Contents
    BBR.PacingMarginPercent: The static discount factor of 1% used to
    scale BBR.bw to produce C.pacing_rate.
 
-2.5.  cwnd State and Parameters
+2.6.  cwnd State and Parameters
 
    BBR.cwnd_gain: The dynamic gain factor used to scale the estimated
    BDP to produce a congestion window (C.cwnd).
@@ -381,7 +388,7 @@ Table of Contents
    [BBRStartupCwndGain].  Used by default in most phases for
    BBR.cwnd_gain.
 
-2.6.  General Algorithm State
+2.7.  General Algorithm State
 
    BBR.state: The current state of a BBR flow in the BBR state machine.
 
@@ -399,7 +406,7 @@ Table of Contents
    BBR.drain_start_round: The value of round_count when Drain state
    started.
 
-2.7.  Core Algorithm Design Parameters
+2.8.  Core Algorithm Design Parameters
 
    BBR.LossThresh: A constant specifying the maximum tolerated per-
    round-trip packet loss rate when probing for bandwidth (the default
@@ -419,9 +426,9 @@ Table of Contents
    pipelining with endpoints that follow an "ACK every other packet"
    delayed-ACK policy: 4 * C.SMSS.
 
-2.8.  Network Path Model Parameters
+2.9.  Network Path Model Parameters
 
-2.8.1.  Data Rate Network Path Model Parameters
+2.9.1.  Data Rate Network Path Model Parameters
 
    The data rate model parameters together estimate both the sending
    rate required to reach the full bandwidth available to the flow
@@ -445,7 +452,7 @@ Table of Contents
    given all available signals in the model, at any time scale.  It is
    the min() of max_bw and bw_shortterm.
 
-2.8.2.  Data Volume Network Path Model Parameters
+2.9.2.  Data Volume Network Path Model Parameters
 
    The data volume model parameters together estimate both the inflight
    required to reach the full bandwidth available to the flow
@@ -489,7 +496,7 @@ Table of Contents
    in the current bandwidth probing cycle.  This is generally lower than
    max_inflight or inflight_longterm.  (Part of the short-term model.)
 
-2.9.  State for Responding to Congestion
+2.10.  State for Responding to Congestion
 
    RS: The rate sample calculated from the most recent acknowledgment.
 
@@ -499,7 +506,7 @@ Table of Contents
    BBR.inflight_latest: a 1-round-trip max of delivered volume of data
    (RS.delivered).
 
-2.10.  Estimating BBR.max_bw
+2.11.  Estimating BBR.max_bw
 
    BBR.max_bw_filter: A windowed max filter for RS.delivery_rate
    samples, for estimating BBR.max_bw.
@@ -514,7 +521,7 @@ Table of Contents
    from two time slots: the previous ProbeBW cycle and the current
    ProbeBW cycle.
 
-2.11.  Estimating BBR.extra_acked
+2.12.  Estimating BBR.extra_acked
 
    BBR.extra_acked_interval_start: The start of the time interval for
    estimating the excess amount of data acknowledged due to aggregation
@@ -530,7 +537,7 @@ Table of Contents
    the BBR.extra_acked_filter max filter window in steady-state = 10 (in
    units of packet-timed round trips).
 
-2.12.  Startup Parameters and State
+2.13.  Startup Parameters and State
 
    BBR.full_bw_reached: A boolean that records whether BBR estimates
    that it has ever fully utilized its available bandwidth over the
@@ -546,9 +553,9 @@ Table of Contents
    BBR.full_bw_count: The number of non-app-limited round trips without
    large increases in BBR.full_bw.
 
-2.13.  ProbeRTT and min_rtt Parameters and State
+2.14.  ProbeRTT and min_rtt Parameters and State
 
-2.13.1.  Parameters for Estimating BBR.min_rtt
+2.14.1.  Parameters for Estimating BBR.min_rtt
 
    BBR.min_rtt_stamp: The wall clock time at which the current
    BBR.min_rtt sample was obtained.
@@ -556,7 +563,7 @@ Table of Contents
    BBR.MinRTTFilterLen: A constant specifying the length of the
    BBR.min_rtt min filter window, BBR.MinRTTFilterLen is 10 secs.
 
-2.13.2.  Parameters for Scheduling ProbeRTT
+2.14.2.  Parameters for Scheduling ProbeRTT
 
    BBR.ProbeRTTCwndGain = A constant specifying the gain value for
    calculating C.cwnd during ProbeRTT: 0.5 (meaning that ProbeRTT
@@ -742,7 +749,7 @@ Table of Contents
    Rather than using a single control parameter, like the C.cwnd
    parameter that limits C.inflight in the Reno and CUBIC congestion
    control algorithms, BBR uses three distinct control parameters:
-   C.pacing_race, C.send_quantum, and C.cwnd, defined in (Section 2.3):
+   C.pacing_race, C.send_quantum, and C.cwnd, defined in (Section 2.4):
 
 3.6.  Environment and Usage
 
@@ -1021,7 +1028,7 @@ Table of Contents
 
 4.1.2.  Detailed Delivery Rate Sampling Algorithm
 
-4.1.2.1.  Variables
+4.1.2.1.  Delivery Rate Sampling State Variables
 
 4.1.2.1.1.  Per-connection (C) state
 
@@ -3472,11 +3479,11 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
 
       -  Source code URLs:
 
-         o  https://cs.chromium.org/chromium/src/net/third_party/quiche/
-            src/quic/core/congestion_control/bbr2_sender.cc
+         o  https://cs.chromium.org/chromium/src/net/third_party/quiche/src/quic/
+            core/congestion_control/bbr2_sender.cc
 
-         o  https://cs.chromium.org/chromium/src/net/third_party/quiche/
-            src/quic/core/congestion_control/bbr2_sender.h
+         o  https://cs.chromium.org/chromium/src/net/third_party/quiche/src/quic/
+            core/congestion_control/bbr2_sender.h
 
       -  Source: Google
 
@@ -3495,8 +3502,9 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
 
       -  Source code URL:
 
-         o  GPLv2 license: https://git.kernel.org/pub/scm/linux/kernel/g
-            it/torvalds/linux.git/tree/net/ipv4/tcp_rate.c
+         o  GPLv2 license:
+            https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/
+            net/ipv4/tcp_rate.c
 
          o  BSD-style license: https://groups.google.com/d/msg/bbr-
             dev/X0LbDptlOzo/EVgkRjVHBQAJ
@@ -3682,21 +3690,23 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    [BBRDrainPacingGain]
               Cardwell, N., Cheng, Y., Hassas Yeganeh, S., and V.
               Jacobson, "BBR Drain Pacing Gain: a Derivation", September
-              2021, <https://github.com/google/bbr/blob/master/Documenta
-              tion/startup/gain/analysis/bbr_drain_gain.pdf>.
+              2021,
+              <https://github.com/google/bbr/blob/master/Documentation/startup/
+              gain/analysis/bbr_drain_gain.pdf>.
 
    [BBRStartupCwndGain]
               Swett, I., Cardwell, N., Cheng, Y., Hassas Yeganeh, S.,
               and V. Jacobson, "BBR Startup cwnd Gain: a Derivation",
-              July 2018, <https://github.com/google/bbr/blob/master/Docu
-              mentation/startup/gain/analysis/
-              bbr_startup_cwnd_gain.pdf>.
+              July 2018,
+              <https://github.com/google/bbr/blob/master/Documentation/startup/
+              gain/analysis/bbr_startup_cwnd_gain.pdf>.
 
    [BBRStartupPacingGain]
               Cardwell, N., Cheng, Y., Hassas Yeganeh, S., and V.
               Jacobson, "BBR Startup Pacing Gain: a Derivation", June
-              2018, <https://github.com/google/bbr/blob/master/Documenta
-              tion/startup/gain/analysis/bbr_startup_gain.pdf>.
+              2018,
+              <https://github.com/google/bbr/blob/master/Documentation/startup/
+              gain/analysis/bbr_startup_gain.pdf>.
 
    [BP95]     Brakmo, L. and L. Peterson, "TCP Vegas: end-to-end
               congestion avoidance on a global Internet", IEEE Journal
@@ -3755,8 +3765,9 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    [KN_FILTER]
               Nichols, K., Cardwell, N., and V. Jacobson, "Linux
               implementation of Kathleen Nichols' windowed min/max
-              algorithm", <https://git.kernel.org/pub/scm/linux/kernel/g
-              it/torvalds/linux.git/commit/lib/
+              algorithm",
+              <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
+              commit/lib/
               win_minmax.c?id=a4f1f9ac8153e22869b6408832b5a9bb9c762bf6>.
 
    [MM19]     Mathis, M. and J. Mahdavi, "Deprecating The TCP
