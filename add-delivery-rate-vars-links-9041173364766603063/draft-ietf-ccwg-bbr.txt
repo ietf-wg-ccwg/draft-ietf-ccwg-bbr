@@ -77,8 +77,8 @@ Table of Contents
 
    1.  Introduction
    2.  Terminology
-     2.1.  Delivery Rate Sampling State
-     2.2.  Transport Connection State
+     2.1.  Transport Connection State
+     2.2.  Delivery Rate Sampling State
      2.3.  Per-ACK Rate Sample State
      2.4.  Output Control Parameters
      2.5.  Pacing State and Parameters
@@ -263,13 +263,7 @@ Table of Contents
    cumulative acknowledgment [RFC9293], or TCP SACK ("Selective
    Acknowledgment") block [RFC2018].
 
-2.1.  Delivery Rate Sampling State
-
-   Connection and per-packet state used in the delivery rate sampling
-   algorithm is defined in Section [Delivery Rate Sampling State
-   Variables] (#delivery-rate-sampling-state-variables).
-
-2.2.  Transport Connection State
+2.1.  Transport Connection State
 
    C.SMSS: The Sender Maximum Send Size in bytes.  The maximum size of a
    single transmission, including the portion of the packet that the
@@ -316,6 +310,12 @@ Table of Contents
 
    C.next_send_time: The earliest pacing departure time another packet
    can be sent.
+
+2.2.  Delivery Rate Sampling State
+
+   Connection and per-packet state used in the delivery rate sampling
+   algorithm is defined in Section Detailed Delivery Rate Sampling
+   Algorithm (Section 4.1.2).
 
 2.3.  Per-ACK Rate Sample State
 
@@ -1028,7 +1028,7 @@ Table of Contents
 
 4.1.2.  Detailed Delivery Rate Sampling Algorithm
 
-4.1.2.1.  Delivery Rate Sampling State Variables
+4.1.2.1.  Variables
 
 4.1.2.1.1.  Per-connection (C) state
 

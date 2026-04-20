@@ -1187,10 +1187,10 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
             <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
-                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-delivery-rate-sampling-stat" class="internal xref">Delivery Rate Sampling State</a></p>
+                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-transport-connection-state" class="internal xref">Transport Connection State</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
-                <p id="section-toc.1-1.2.2.2.1" class="keepWithNext"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-transport-connection-state" class="internal xref">Transport Connection State</a></p>
+                <p id="section-toc.1-1.2.2.2.1" class="keepWithNext"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-delivery-rate-sampling-stat" class="internal xref">Delivery Rate Sampling State</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
                 <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-per-ack-rate-sample-state" class="internal xref">Per-ACK Rate Sample State</a></p>
@@ -1555,22 +1555,12 @@ RECOMMENDED that BBR implementations use bytes and bytes per second.<a href="#se
 data that the remote transport endpoint has confirmed that it has received,
 e.g., via a QUIC ACK Range <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>, TCP cumulative acknowledgment
 <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>, or TCP SACK ("Selective Acknowledgment") block <span>[<a href="#RFC2018" class="cite xref">RFC2018</a>]</span>.<a href="#section-2-5" class="pilcrow">¶</a></p>
-<div id="delivery-rate-sampling-state">
-<section id="section-2.1">
-        <h3 id="name-delivery-rate-sampling-stat">
-<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-delivery-rate-sampling-stat" class="section-name selfRef">Delivery Rate Sampling State</a>
-        </h3>
-<p id="section-2.1-1">Connection and per-packet state used in the delivery rate sampling algorithm
-is defined in Section [Delivery Rate Sampling State Variables]
-(#delivery-rate-sampling-state-variables).<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-</section>
-</div>
 <div id="transport-connection-state">
-<section id="section-2.2">
+<section id="section-2.1">
         <h3 id="name-transport-connection-state">
-<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-transport-connection-state" class="section-name selfRef">Transport Connection State</a>
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-transport-connection-state" class="section-name selfRef">Transport Connection State</a>
         </h3>
-<p id="section-2.2-1">C.SMSS: The Sender Maximum Send Size in bytes. The maximum
+<p id="section-2.1-1">C.SMSS: The Sender Maximum Send Size in bytes. The maximum
 size of a single transmission, including the portion
 of the packet that the transport protocol implementation tracks for
 congestion control purposes. C.SMSS MUST include transport protocol
@@ -1585,29 +1575,38 @@ the C.SMSS SHOULD be the QUIC "maximum datagram size"
 the QUIC headers, but not UDP or IP headers. In addition to including
 transport protocol payload and headers, implementations MAY include
 in C.SMSS the size of other headers, such as network-layer or
-link-layer headers.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
-<p id="section-2.2-2">C.has_selective_acks: True if the connection has the capability to receive
+link-layer headers.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">C.has_selective_acks: True if the connection has the capability to receive
 selective acknowledgments and thus is able to detect more than one
 packet loss per round trip in fast recovery. For example, this is true
 for all QUIC connections by virtue of the QUIC ACK Range <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>
 mechanism, and is true for TCP connections that have negotiated support
-for the TCP SACK ("Selective Acknowledgment") <span>[<a href="#RFC2018" class="cite xref">RFC2018</a>]</span> mechanism.<a href="#section-2.2-2" class="pilcrow">¶</a></p>
-<p id="section-2.2-3">C.InitialCwnd: The initial congestion window set by the transport protocol
-implementation for the connection at initialization time.<a href="#section-2.2-3" class="pilcrow">¶</a></p>
-<p id="section-2.2-4">C.delivered: The total amount of data
+for the TCP SACK ("Selective Acknowledgment") <span>[<a href="#RFC2018" class="cite xref">RFC2018</a>]</span> mechanism.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3">C.InitialCwnd: The initial congestion window set by the transport protocol
+implementation for the connection at initialization time.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.1-4">C.delivered: The total amount of data
 delivered so far over the lifetime of the transport connection C.
 This MUST NOT include pure ACK packets. It SHOULD include spurious
-retransmissions that have been acknowledged as delivered.<a href="#section-2.2-4" class="pilcrow">¶</a></p>
-<p id="section-2.2-5">C.inflight: The connection's best estimate of the number of bytes
+retransmissions that have been acknowledged as delivered.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<p id="section-2.1-5">C.inflight: The connection's best estimate of the number of bytes
 outstanding in the network. This includes the number of bytes that
 have been sent and have not been acknowledged or
 marked as lost since their last transmission
 (e.g. "pipe" from <span>[<a href="#RFC6675" class="cite xref">RFC6675</a>]</span> or "bytes_in_flight" from <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>).
-This MUST NOT include pure ACK packets.<a href="#section-2.2-5" class="pilcrow">¶</a></p>
-<p id="section-2.2-6">C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
-point in the last packet-timed round trip.<a href="#section-2.2-6" class="pilcrow">¶</a></p>
-<p id="section-2.2-7">C.next_send_time: The earliest pacing departure time another packet can be
-sent.<a href="#section-2.2-7" class="pilcrow">¶</a></p>
+This MUST NOT include pure ACK packets.<a href="#section-2.1-5" class="pilcrow">¶</a></p>
+<p id="section-2.1-6">C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
+point in the last packet-timed round trip.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
+<p id="section-2.1-7">C.next_send_time: The earliest pacing departure time another packet can be
+sent.<a href="#section-2.1-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="delivery-rate-sampling-state">
+<section id="section-2.2">
+        <h3 id="name-delivery-rate-sampling-stat">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-delivery-rate-sampling-stat" class="section-name selfRef">Delivery Rate Sampling State</a>
+        </h3>
+<p id="section-2.2-1">Connection and per-packet state used in the delivery rate sampling algorithm
+is defined in Section <span><a href="#detailed-delivery-rate-sampling-algorithm" class="internal xref">Detailed Delivery Rate Sampling Algorithm</a> (<a href="#detailed-delivery-rate-sampling-algorithm" class="auto internal xref">Section 4.1.2</a>)</span>.<a href="#section-2.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="per-ack-rate-sample-state">
@@ -2425,10 +2424,10 @@ well in practice for congestion control and telemetry purposes.<a href="#section
           <h4 id="name-detailed-delivery-rate-samp">
 <a href="#section-4.1.2" class="section-number selfRef">4.1.2. </a><a href="#name-detailed-delivery-rate-samp" class="section-name selfRef">Detailed Delivery Rate Sampling Algorithm</a>
           </h4>
-<div id="delivery-rate-sampling-state-variables">
+<div id="variables">
 <section id="section-4.1.2.1">
-            <h5 id="name-delivery-rate-sampling-state">
-<a href="#section-4.1.2.1" class="section-number selfRef">4.1.2.1. </a><a href="#name-delivery-rate-sampling-state" class="section-name selfRef">Delivery Rate Sampling State Variables</a>
+            <h5 id="name-variables">
+<a href="#section-4.1.2.1" class="section-number selfRef">4.1.2.1. </a><a href="#name-variables" class="section-name selfRef">Variables</a>
             </h5>
 <div id="per-connection-c-state">
 <section id="section-4.1.2.1.1">
