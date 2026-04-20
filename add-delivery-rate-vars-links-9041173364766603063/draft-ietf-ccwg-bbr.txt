@@ -265,8 +265,9 @@ Table of Contents
 
 2.1.  Delivery Rate Sampling State
 
-   State used in the delivery rate sampling algorithm is defined in
-   Section Delivery Rate Sampling State Variables (Section 4.1.2.1).
+   Connection and per-packet state used in the delivery rate sampling
+   algorithm is defined in Section [Delivery Rate Sampling State
+   Variables] (#delivery-rate-sampling-state-variables).
 
 2.2.  Transport Connection State
 
