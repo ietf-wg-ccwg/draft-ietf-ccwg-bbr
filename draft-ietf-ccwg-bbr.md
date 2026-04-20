@@ -316,8 +316,9 @@ e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
 
 ## Delivery Rate Sampling State
 
-State used in the delivery rate sampling algorithm is defined in Section
-[Delivery Rate Sampling State Variables](#delivery-rate-sampling-state-variables).
+Connection and per-packet state used in the delivery rate sampling algorithm
+is defined in Section [Delivery Rate Sampling State Variables]
+(#delivery-rate-sampling-state-variables).
 
 ## Transport Connection State {#transport-connection-state}
 
