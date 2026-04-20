@@ -314,12 +314,6 @@ data that the remote transport endpoint has confirmed that it has received,
 e.g., via a QUIC ACK Range {{RFC9000}}, TCP cumulative acknowledgment
 {{RFC9293}}, or TCP SACK ("Selective Acknowledgment") block {{RFC2018}}.
 
-## Delivery Rate Sampling State
-
-Connection and per-packet state used in the delivery rate sampling algorithm
-is defined in Section [Delivery Rate Sampling State Variables]
-(#delivery-rate-sampling-state-variables).
-
 ## Transport Connection State {#transport-connection-state}
 
 C.SMSS: The Sender Maximum Send Size in bytes. The maximum
@@ -367,6 +361,11 @@ point in the last packet-timed round trip.
 C.next_send_time: The earliest pacing departure time another packet can be
 sent.
 
+## Delivery Rate Sampling State
+
+Connection and per-packet state used in the delivery rate sampling algorithm
+is defined in Section [Detailed Delivery Rate Sampling Algorithm](#detailed-delivery-rate-sampling-algorithm).
+
 ## Per-ACK Rate Sample State {#per-ack-rate-sample-state}
 
 RS.delivered: The volume of data delivered between the transmission of the
@@ -393,6 +392,7 @@ received).
 RS.lost: The volume of data that was declared lost between the transmission
 and acknowledgment of the packet that has just been ACKed (the most recently
 sent packet among packets ACKed by the ACK that was just received).
+
 
 ## Output Control Parameters {#output-control-parameters}
 
@@ -1081,7 +1081,7 @@ well in practice for congestion control and telemetry purposes.
 
 ### Detailed Delivery Rate Sampling Algorithm {#detailed-delivery-rate-sampling-algorithm}
 
-#### Delivery Rate Sampling State Variables {#delivery-rate-sampling-state-variables}
+#### Variables {#variables}
 
 ##### Per-connection (C) state {#per-connection-c-state}
 
