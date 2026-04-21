@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-19T02:49:44.334186+00:00",
+  "timestamp": "2026-04-21T02:43:52.593611+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1083,7 +1083,7 @@
       "id": "I_kwDOL3MllM7ASZYQ",
       "title": "Per-Packet and Connection State variables are spread across multiple Sections",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/68",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "marten-seemann",
       "authorAssociation": "NONE",
       "assignees": [
@@ -1094,8 +1094,8 @@
       ],
       "body": "Section 2.1 and section 4.1.2.1.1 define connection state. Similarly, per-packet state is defined in both section 2.2 and section 4.1.2.1.2.\n\nI assume this split exists to highlight that the some variables are only used by the Delivery Rate Sampling Algorithm, but I think it would be helpful to see all the state in one place. If the intention is to keep these separate, I'd argue that section 2.1 should link to 4.1.2.1.1 and say something like:\n> More per-connection variables used for the Delivery Rate Sampling Algorithm are defined in section 4.1.2.1.1.",
       "createdAt": "2025-07-13T02:52:07Z",
-      "updatedAt": "2026-04-06T20:54:47Z",
-      "closedAt": null,
+      "updatedAt": "2026-04-20T20:48:08Z",
+      "closedAt": "2026-04-20T20:48:08Z",
       "comments": []
     },
     {
@@ -1386,6 +1386,22 @@
       "createdAt": "2025-11-16T18:50:21Z",
       "updatedAt": "2026-02-04T13:37:37Z",
       "closedAt": "2026-02-04T13:37:37Z",
+      "comments": []
+    },
+    {
+      "number": 106,
+      "id": "I_kwDOL3MllM8AAAABAEsDRQ",
+      "title": "Extra Acked text doesn't mention Startup",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/106",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The extra acked pseudocode indicates the window for Extra Acked is 1 round during Startup, and the 10 after that, but the text just talks about 10 rounds.\n\nhttps://www.ietf.org/archive/id/draft-ietf-ccwg-bbr-05.html#section-5.5.9",
+      "createdAt": "2026-04-21T02:24:44Z",
+      "updatedAt": "2026-04-21T02:24:44Z",
+      "closedAt": null,
       "comments": []
     }
   ],
@@ -7285,24 +7301,26 @@
       "id": "PR_kwDOL3MllM7QUSLl",
       "title": "Add links to Delivery Rate Sampling Algorithm state variables",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/104",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #68 by adding links from the main Transport Connection State and Per-ACK Rate Sample State sections to the corresponding state sections defined for the Delivery Rate Sampling Algorithm. This makes the full set of state variables easier to discover for readers.\r\n\r\n---\r\n*PR created automatically by Jules for task [9041173364766603063](https://jules.google.com/task/9041173364766603063) started by @ianswett*",
       "createdAt": "2026-04-06T21:04:29Z",
-      "updatedAt": "2026-04-13T21:18:26Z",
+      "updatedAt": "2026-04-20T20:48:07Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-delivery-rate-vars-links-9041173364766603063",
-      "headRefOid": "deed63fcb49312d96a6d7d097a22db393ed93673",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "537bf3d230fc4323f850382e6c9e1d1efe3f14dd",
+      "closedAt": "2026-04-20T20:48:07Z",
+      "mergedAt": "2026-04-20T20:48:07Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "1dffcecb2fef96f915fc9d8614b02a74fd305956"
+      },
       "comments": [],
       "reviews": [
         {
@@ -7337,6 +7355,79 @@
               "updatedAt": "2026-04-13T21:18:26Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7288jU",
+          "commit": {
+            "abbreviatedOid": "1aa7749"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-20T20:17:01Z",
+          "updatedAt": "2026-04-20T20:17:02Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "```suggestion\nConnection and per-packet state used in the delivery rate sampling algorithm\nis defined in Section [Delivery Rate Sampling State Variables]\n(#delivery-rate-sampling-state-variables).\n```",
+              "createdAt": "2026-04-20T20:17:01Z",
+              "updatedAt": "2026-04-20T20:17:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM72898Z",
+          "commit": {
+            "abbreviatedOid": "cfba21f"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-20T20:17:43Z",
+          "updatedAt": "2026-04-20T20:17:43Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "I updated the PR, PTAL",
+              "createdAt": "2026-04-20T20:17:43Z",
+              "updatedAt": "2026-04-20T20:17:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM729CL3",
+          "commit": {
+            "abbreviatedOid": "882b433"
+          },
+          "author": "google-labs-jules",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-20T20:19:56Z",
+          "updatedAt": "2026-04-20T20:19:56Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "I have updated the fix to implement the suggested change and formatting, effectively grouping the references under a new 'Delivery Rate Sampling State' section. I've also verified this builds without warnings.",
+              "createdAt": "2026-04-20T20:19:56Z",
+              "updatedAt": "2026-04-20T20:19:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM729cqq",
+          "commit": {
+            "abbreviatedOid": "537bf3d"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-04-20T20:34:52Z",
+          "updatedAt": "2026-04-20T20:34:52Z",
+          "comments": []
         }
       ]
     },
@@ -7352,7 +7443,7 @@
       "labels": [],
       "body": "  - Describe how reduced ACK frequency affects delivery rate sampling and round-trip counting.\r\n  - Provide per-phase guidance on when to increase or decrease ACK frequency.\r\n  - Reference both QUIC ACK-FREQUENCY and TCP TARR extensions.\r\n  - Note how QUIC Receive Timestamps can improve measurement fidelity under reduced ACK frequency.\r\n  - Warn against conflating sender-requested ACK thinning with network-induced aggregation in the extra_acked estimator.",
       "createdAt": "2026-04-13T20:15:42Z",
-      "updatedAt": "2026-04-17T23:57:28Z",
+      "updatedAt": "2026-04-20T21:34:19Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
@@ -7382,6 +7473,112 @@
               "body": "Maybe we should add an informational reference to TARR? https://datatracker.ietf.org/doc/draft-ietf-tcpm-ack-rate-request/",
               "createdAt": "2026-04-13T20:36:57Z",
               "updatedAt": "2026-04-13T20:36:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM70fAIT",
+          "commit": {
+            "abbreviatedOid": "a7a6ba9"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Thanks for the update, this is looking good.  Some detailed comments.",
+          "createdAt": "2026-04-13T20:37:52Z",
+          "updatedAt": "2026-04-20T19:54:48Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "nit: this is a weird section reference name",
+              "createdAt": "2026-04-13T20:37:52Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            },
+            {
+              "originalPosition": 25,
+              "body": "Is it the delivery rate that's underestimated or the effective RTT and therefore CWND necessary to fill the pipe?",
+              "createdAt": "2026-04-20T18:37:53Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            },
+            {
+              "originalPosition": 26,
+              "body": "Maybe add a section reference?",
+              "createdAt": "2026-04-20T18:38:16Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            },
+            {
+              "originalPosition": 45,
+              "body": "I'm not sure the \"(low Ack-Eliciting Threshold and short ACK delay)\" part is useful, so I'd be inclined to delete it.",
+              "createdAt": "2026-04-20T19:48:34Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            },
+            {
+              "originalPosition": 48,
+              "body": "Can we be more specific about Ack-Eliciting Threshold as well?  Is it 1/8 RTT, because CWND = 2 * BDP?",
+              "createdAt": "2026-04-20T19:49:18Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            },
+            {
+              "originalPosition": 52,
+              "body": "reduce is potentially confusing here, so how about:\n\n\"The sender MAY request less frequent ACKs\"",
+              "createdAt": "2026-04-20T19:51:10Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            },
+            {
+              "originalPosition": 56,
+              "body": "Given CWND = 2 * BDP, should this be 1/4 CWND?",
+              "createdAt": "2026-04-20T19:52:03Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            },
+            {
+              "originalPosition": 61,
+              "body": "\"higher ACK frequency\" => \"more frequent acknowledgments\"",
+              "createdAt": "2026-04-20T19:53:02Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            },
+            {
+              "originalPosition": 60,
+              "body": "How is this different from Startup?",
+              "createdAt": "2026-04-20T19:53:26Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            },
+            {
+              "originalPosition": 74,
+              "body": "Given relatively few packets are sent, I can imagine implementations not changing the delay and instead relying only on IMMEDIATE_ACK?",
+              "createdAt": "2026-04-20T19:54:32Z",
+              "updatedAt": "2026-04-20T19:54:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM72-lMt",
+          "commit": {
+            "abbreviatedOid": "a7a6ba9"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-20T21:19:03Z",
+          "updatedAt": "2026-04-20T21:34:19Z",
+          "comments": [
+            {
+              "originalPosition": 25,
+              "body": "AFAICT changing the ACK frequency should not cause an error in the RTT calculation, as long as the data receiver is ACKing some packet immediately after some data arrives, and as long as the data sender is calculating an RTT using the transmission and ACK time of the most recently sent packet that was ACKed in a given ACK.\n",
+              "createdAt": "2026-04-20T21:19:04Z",
+              "updatedAt": "2026-04-20T21:34:19Z"
+            },
+            {
+              "originalPosition": 12,
+              "body": "Looking back at the \"Impact of ACK losses\" section, it does say: 'This can underestimate the delivery rate due the artificially inflated \"RS.interval\". The impact of this effect is mitigated using the BBR.max_bw filter.'\n\nBut I'm having a hard time convincing myself that this is true. :-)\n\nAFAICT with reduced ACK frequency the sender sees an ACK \"staircase\" that has fewer, sparser \"steps\", but AFAICT if the sender is sending at a constant pacing rate then there should not be an error introduced by having fewer, sparser \"steps\".\n\nAFAICT where things get into trouble is if the sending rate and/or delivery rate changes in between two ACKs. Then the sparsity can cause distortions. I guess if the delivery rate increases between the steps, then the bandwidth estimate can underestimate the delivery rate; and if the delivery rate decreases between the steps, then the bandwidth estimate can overestimate the delivery rate?\n\nMaybe we could say something to indicate that reducing the ACK frequency can cause distortions in delivery rate samples, particularly if the delivery rate changes between two ACKs?\n",
+              "createdAt": "2026-04-20T21:28:01Z",
+              "updatedAt": "2026-04-20T21:34:19Z"
+            },
+            {
+              "originalPosition": 18,
+              "body": "Ian raised an additional good point in the meeting today, that decreasing the ACK frequency can cause the data sender to exhaust its cwnd more often, and underutilize the path. I would imagine this is a significant issue if the bottleneck has a relatively shallow buffer or AQM, so that the cwnd is only marginally higher than the BDP.\n\nShould we RECOMMEND implementations increase the ACK frequency if they exhaust the cwnd?",
+              "createdAt": "2026-04-20T21:34:13Z",
+              "updatedAt": "2026-04-20T21:34:19Z"
             }
           ]
         }
