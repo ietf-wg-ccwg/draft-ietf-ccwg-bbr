@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-21T02:43:52.593611+00:00",
+  "timestamp": "2026-05-07T03:21:18.540161+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1401,6 +1401,24 @@
       "body": "The extra acked pseudocode indicates the window for Extra Acked is 1 round during Startup, and the 10 after that, but the text just talks about 10 rounds.\n\nhttps://www.ietf.org/archive/id/draft-ietf-ccwg-bbr-05.html#section-5.5.9",
       "createdAt": "2026-04-21T02:24:44Z",
       "updatedAt": "2026-04-21T02:24:44Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 107,
+      "id": "I_kwDOL3MllM8AAAABBd6LFw",
+      "title": "Do all psuedocode methods need to start with BBR?",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/107",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "Starting all the methods with BBR can make the names a bit awkward, for example BBRBDPMultiple.\n\nParticularly for methods that are only used within a section, maybe we can drop the BBR from the front?",
+      "createdAt": "2026-05-06T18:09:17Z",
+      "updatedAt": "2026-05-06T18:09:17Z",
       "closedAt": null,
       "comments": []
     }
