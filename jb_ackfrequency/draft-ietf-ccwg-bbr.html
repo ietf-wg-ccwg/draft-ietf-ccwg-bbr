@@ -4500,11 +4500,7 @@ L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms
 <a href="#impact-of-changing-ack-frequency" class="auto internal xref">Section 4.1.3.3</a>), the resulting infrequent ACKs can
 produce bursty ACK arrivals that resemble ACK aggregation. The
 BBR.extra_acked estimator will account for this by increasing C.cwnd to
-allow the sender to continue transmitting during inter-ACK gaps. However,
-if the sender is also the entity controlling the ACK frequency, it
-SHOULD account for its own requested ACK delay when interpreting
-BBR.extra_acked, to avoid conflating intentional ACK thinning with
-network-induced aggregation.<a href="#section-5.5.9-3" class="pilcrow">¶</a></p>
+allow the sender to continue transmitting during inter-ACK gaps.<a href="#section-5.5.9-3" class="pilcrow">¶</a></p>
 <p id="section-5.5.9-4">BBR augments C.cwnd by BBR.extra_acked to allow the connection to keep
 sending during inter-ACK silences, to an extent that matches the recently
 measured degree of aggregation.<a href="#section-5.5.9-4" class="pilcrow">¶</a></p>
