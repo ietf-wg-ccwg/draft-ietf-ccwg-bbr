@@ -1384,7 +1384,7 @@ BBR state machine transitions that are gated on round-trip progress (e.g.,
 exiting Startup, transitioning from ProbeBW_REFILL to ProbeBW_UP).
 
 Reduced ACK frequency can also cause the sender to exhaust its
-congestion window more often, leading to underutilization of the path.
+congestion window more often, leading to underutilization.
 This effect is particularly significant when the bottleneck has a
 relatively shallow buffer or AQM, such that C.cwnd is only marginally
 higher than the path BDP. If a sender that has requested reduced ACK
