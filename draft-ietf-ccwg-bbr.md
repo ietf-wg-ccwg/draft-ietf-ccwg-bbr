@@ -2913,11 +2913,7 @@ Note that when the sender has requested reduced ACK frequency (see
 {{impact-of-changing-ack-frequency}}), the resulting infrequent ACKs can
 produce bursty ACK arrivals that resemble ACK aggregation. The
 BBR.extra_acked estimator will account for this by increasing C.cwnd to
-allow the sender to continue transmitting during inter-ACK gaps. However,
-if the sender is also the entity controlling the ACK frequency, it
-SHOULD account for its own requested ACK delay when interpreting
-BBR.extra_acked, to avoid conflating intentional ACK thinning with
-network-induced aggregation.
+allow the sender to continue transmitting during inter-ACK gaps.
 
 BBR augments C.cwnd by BBR.extra_acked to allow the connection to keep
 sending during inter-ACK silences, to an extent that matches the recently
