@@ -1359,14 +1359,22 @@ Some transport protocol extensions allow the sender to control how
 frequently the receiver sends acknowledgments. Examples include the QUIC
 ACK-FREQUENCY extension ({{?I-D.draft-ietf-quic-ack-frequency}}) and the
 TCP ACK Rate Request (TARR) option
-({{?I-D.draft-ietf-tcpm-ack-rate-request}}). When the receiver
-acknowledges packets less frequently than the default behavior, fewer
-delivery rate samples are generated per round trip. Similar to the case
-of ACK losses (see {{impact-of-ack-losses}}), this can produce delivery
-rate samples with artificially inflated "RS.interval" values, potentially
-underestimating the delivery rate sample. The BBR.max_bw windowed maximum
-filter (see {{bbr-max-bw}}) mitigates this effect
-by retaining the highest recent sample.
+({{?I-D.draft-ietf-tcpm-ack-rate-request}}). These extensions enable a
+BBR sender to tune the trade-off between the overhead of sending
+acknowledgments (e.g., reverse-path bandwidth, receiver CPU and battery
+cost) and the fidelity of feedback that BBR's measurement and control
+loops rely on.
+
+When the receiver acknowledges packets less frequently than the default
+behavior, fewer delivery rate samples are generated per round trip.
+Similar to the case of ACK losses (see {{impact-of-ack-losses}}), reduced
+ACK frequency can produce distortions in delivery rate samples,
+particularly when the actual delivery rate changes between two
+consecutive ACKs. If the
+delivery rate increases between samples, the bandwidth estimate may
+underestimate the delivery rate; if it decreases, the estimate may
+overestimate. The BBR.max_bw windowed maximum filter (see {{bbr-max-bw}})
+mitigates the underestimation case by retaining the highest recent sample.
 
 Additionally, reduced ACK frequency can affect the timeliness of
 BBR's round-trip counting (see {{bbr-round-count}}).
@@ -1375,9 +1383,19 @@ may delay the detection of round-trip completions, which in turn can delay
 BBR state machine transitions that are gated on round-trip progress (e.g.,
 exiting Startup, transitioning from ProbeBW_REFILL to ProbeBW_UP).
 
-When a BBR sender has the ability to control ACK frequency, it can
-mitigate these effects by adapting the requested ACK frequency to the
-current BBR phase. The following per-phase guidance applies:
+Reduced ACK frequency can also cause the sender to exhaust its
+congestion window more often, leading to underutilization of the path.
+This effect is particularly significant when the bottleneck has a
+relatively shallow buffer or AQM, such that C.cwnd is only marginally
+higher than the path BDP. If a sender that has requested reduced ACK
+frequency observes that it frequently exhausts C.cwnd before the next
+ACK arrives, it SHOULD increase the requested ACK frequency.
+
+A BBR sender that has the ability to control ACK frequency SHOULD
+adjust it based on the current BBR phase, requesting more frequent
+acknowledgments when timely feedback is most beneficial and less
+frequent acknowledgments to reduce overhead in steady-state phases.
+The following per-phase guidance applies:
 
 * Startup, ProbeBW_REFILL, and ProbeBW_UP: The sender SHOULD request
   frequent acknowledgments to ensure that delivery rate samples are
