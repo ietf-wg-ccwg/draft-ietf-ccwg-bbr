@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-05-07T03:21:18.540161+00:00",
+  "timestamp": "2026-05-12T03:26:31.483518+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1412,15 +1412,25 @@
       "state": "OPEN",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "ianswett"
+      ],
       "labels": [
         "Editorial"
       ],
       "body": "Starting all the methods with BBR can make the names a bit awkward, for example BBRBDPMultiple.\n\nParticularly for methods that are only used within a section, maybe we can drop the BBR from the front?",
       "createdAt": "2026-05-06T18:09:17Z",
-      "updatedAt": "2026-05-06T18:09:17Z",
+      "updatedAt": "2026-05-11T20:39:15Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Good point. Dropping the BBR from the front of all methods SGTM. Thanks!\n",
+          "createdAt": "2026-05-10T18:29:18Z",
+          "updatedAt": "2026-05-10T18:29:18Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -7461,13 +7471,13 @@
       "labels": [],
       "body": "  - Describe how reduced ACK frequency affects delivery rate sampling and round-trip counting.\r\n  - Provide per-phase guidance on when to increase or decrease ACK frequency.\r\n  - Reference both QUIC ACK-FREQUENCY and TCP TARR extensions.\r\n  - Note how QUIC Receive Timestamps can improve measurement fidelity under reduced ACK frequency.\r\n  - Warn against conflating sender-requested ACK thinning with network-induced aggregation in the extra_acked estimator.",
       "createdAt": "2026-04-13T20:15:42Z",
-      "updatedAt": "2026-04-20T21:34:19Z",
+      "updatedAt": "2026-05-11T22:13:25Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_ackfrequency",
-      "headRefOid": "a7a6ba9c3b3eaad46bb2ff1f79fa7d2cebce9e83",
+      "headRefOid": "870ddcdb06da71df9c9b6805b4ef7390ae77aeff",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -7599,6 +7609,72 @@
               "updatedAt": "2026-04-20T21:34:19Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7-WUTc",
+          "commit": {
+            "abbreviatedOid": "6fc9042"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-05-11T20:43:46Z",
+          "updatedAt": "2026-05-11T20:43:46Z",
+          "comments": [
+            {
+              "originalPosition": 35,
+              "body": "```suggestion\ncongestion window more often, leading to underutilization.\n```",
+              "createdAt": "2026-05-11T20:43:46Z",
+              "updatedAt": "2026-05-11T20:43:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7-WeWs",
+          "commit": {
+            "abbreviatedOid": "6fc9042"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-05-11T20:49:44Z",
+          "updatedAt": "2026-05-11T20:49:44Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM7-Wxww",
+          "commit": {
+            "abbreviatedOid": "6fc9042"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-05-11T21:02:58Z",
+          "updatedAt": "2026-05-11T21:02:58Z",
+          "comments": [
+            {
+              "originalPosition": 115,
+              "body": "```suggestion\nallow the sender to continue transmitting during inter-ACK gaps.\n```",
+              "createdAt": "2026-05-11T21:02:58Z",
+              "updatedAt": "2026-05-11T21:02:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM7-WylP",
+          "commit": {
+            "abbreviatedOid": "6fc9042"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-05-11T21:03:22Z",
+          "updatedAt": "2026-05-11T21:03:22Z",
+          "comments": []
         }
       ]
     }
