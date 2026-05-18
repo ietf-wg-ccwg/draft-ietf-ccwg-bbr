@@ -1358,6 +1358,84 @@ can underestimate the delivery rate due the artificially inflated
 filter.
 
 
+#### Impact of changing ACK frequency {#impact-of-changing-ack-frequency}
+
+Some transport protocol extensions allow the sender to control how
+frequently the receiver sends acknowledgments. Examples include the QUIC
+ACK-FREQUENCY extension ({{?I-D.draft-ietf-quic-ack-frequency}}) and the
+TCP ACK Rate Request (TARR) option
+({{?I-D.draft-ietf-tcpm-ack-rate-request}}). These extensions enable a
+BBR sender to tune the trade-off between the overhead of sending
+acknowledgments (e.g., reverse-path bandwidth, receiver CPU and battery
+cost) and the fidelity of feedback that BBR's measurement and control
+loops rely on.
+
+When the receiver acknowledges packets less frequently than the default
+behavior, fewer delivery rate samples are generated per round trip.
+Similar to the case of ACK losses (see {{impact-of-ack-losses}}), reduced
+ACK frequency can produce distortions in delivery rate samples,
+particularly when the actual delivery rate changes between two
+consecutive ACKs. If the
+delivery rate increases between samples, the bandwidth estimate may
+underestimate the delivery rate; if it decreases, the estimate may
+overestimate. The BBR.max_bw windowed maximum filter (see {{bbr-max-bw}})
+mitigates the underestimation case by retaining the highest recent sample.
+
+Additionally, reduced ACK frequency can affect the timeliness of
+BBR's round-trip counting (see {{bbr-round-count}}).
+Since BBR detects round-trip boundaries upon receiving ACKs, fewer ACKs
+may delay the detection of round-trip completions, which in turn can delay
+BBR state machine transitions that are gated on round-trip progress (e.g.,
+exiting Startup, transitioning from ProbeBW_REFILL to ProbeBW_UP).
+
+Reduced ACK frequency can also cause the sender to exhaust its
+congestion window more often, leading to underutilization.
+This effect is particularly significant when the bottleneck has a
+relatively shallow buffer or AQM, such that C.cwnd is only marginally
+higher than the path BDP. If a sender that has requested reduced ACK
+frequency observes that it frequently exhausts C.cwnd before the next
+ACK arrives, it SHOULD increase the requested ACK frequency.
+
+A BBR sender that has the ability to control ACK frequency SHOULD
+adjust it based on the current BBR phase, requesting more frequent
+acknowledgments when timely feedback is most beneficial and less
+frequent acknowledgments to reduce overhead in steady-state phases.
+The following per-phase guidance applies:
+
+* Startup, ProbeBW_REFILL, and ProbeBW_UP: The sender SHOULD request
+  frequent acknowledgments to ensure that delivery rate samples are
+  generated often enough for timely full-pipe detection and accurate
+  bandwidth probing. The sender SHOULD request parameters that yield
+  at least 4 acknowledgments per round trip. Before or upon entering
+  ProbeBW_REFILL, the sender SHOULD increase acknowledgment frequency
+  if it was previously reduced during ProbeBW_DOWN or ProbeBW_CRUISE.
+
+* ProbeBW_DOWN and ProbeBW_CRUISE: The sender MAY request less frequent
+  ACKs to lower overhead, since these phases do not rely on rapid
+  feedback for probing. The sender MAY request an ACK delay of up to
+  0.5 * smoothed_rtt and an ACK threshold of up to roughly a quarter
+  of the current congestion window. Keeping these values moderate
+  ensures that loss detection is not excessively delayed by infrequent
+  ACKs.
+
+* ProbeRTT: During ProbeRTT, the sender SHOULD solicit a prompt
+  acknowledgment (e.g., via a QUIC IMMEDIATE_ACK frame or a TCP TARR
+  option with R=0) on the last packet of each flight of data, to obtain
+  a timely and accurate BBR.min_rtt sample while the queue is drained.
+  Implementations MAY also request a short ACK delay during ProbeRTT,
+  though this is often unnecessary since few packets are sent during
+  this brief phase.
+
+When available, the QUIC Receive Timestamps extension
+({{?I-D.draft-ietf-quic-receive-ts}}) can improve the fidelity of
+delivery rate estimation under reduced ACK frequency. Receive timestamps
+allow the sender to compute more accurate inter-packet arrival times at
+the receiver, providing finer-grained bandwidth measurement even when
+ACKs are infrequent. A sender MAY use receive timestamps to refine its
+"ack_rate" calculation by substituting receiver-side timing information
+for ACK arrival times.
+
+
 #### Impact of packet reordering {#impact-of-packet-reordering}
 
 This algorithm is robust to packet reordering; it makes no assumptions about
@@ -2531,7 +2609,7 @@ calculates and uses its value. We can group the parameter into three groups:
 * parameters to model the appropriate inflight
 
 
-### BBR.round_count: Tracking Packet-Timed Round Trips {#bbrroundcount-tracking-packet-timed-round-trips}
+### BBR.round_count: Tracking Packet-Timed Round Trips {#bbr-round-count}
 
 Several aspects of BBR depend on counting the progress of "packet-timed"
 round trips, which start at the transmission of some packet, and then end
@@ -2591,7 +2669,7 @@ the count of such round trips elapsed:
 ~~~~
 
 
-### BBR.max_bw: Estimated Maximum Bandwidth {#bbrmaxbw-estimated-maximum-bandwidth}
+### BBR.max_bw: Estimated Maximum Bandwidth {#bbr-max-bw}
 
 BBR.max_bw is BBR's estimate of the maximum bottleneck bandwidth available to
 data transmissions for the transport flow. At any time, a transport
@@ -2835,6 +2913,12 @@ The BBR.extra_acked thus reflects the recently-measured magnitude of data
 and ACK aggregation effects such as batching and slotting at shared-medium
 L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms
 (TSO, GSO, LRO, GRO), and end host or middlebox ACK decimation/thinning.
+
+Note that when the sender has requested reduced ACK frequency (see
+{{impact-of-changing-ack-frequency}}), the resulting infrequent ACKs can
+produce bursty ACK arrivals that resemble ACK aggregation. The
+BBR.extra_acked estimator will account for this by increasing C.cwnd to
+allow the sender to continue transmitting during inter-ACK gaps.
 
 BBR augments C.cwnd by BBR.extra_acked to allow the connection to keep
 sending during inter-ACK silences, to an extent that matches the recently
