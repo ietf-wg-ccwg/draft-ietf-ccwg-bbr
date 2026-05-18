@@ -38,8 +38,8 @@ specifies version 3 of the BBR algorithm, BBRv3.
     platformdirs 4.9.6
     pycountry 24.6.1
     PyYAML 6.0.3
-    requests 2.32.5
-    wcwidth 0.6.0
+    requests 2.33.1
+    wcwidth 0.7.0
 -->
 <link href="draft-ietf-ccwg-bbr.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1060,11 +1060,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">April 2026</td>
+<td class="right">May 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 22 October 2026</td>
+<td class="center">Expires 19 November 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1077,12 +1077,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-04-20" class="published">20 April 2026</time>
+<time datetime="2026-05-18" class="published">18 May 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-10-22">22 October 2026</time></dd>
+<dd class="expires"><time datetime="2026-11-19">19 November 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1151,7 +1151,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 22 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 19 November 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2718,54 +2718,135 @@ can underestimate the delivery rate due the artificially inflated
 filter.<a href="#section-4.1.3.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="impact-of-packet-reordering">
+<div id="impact-of-changing-ack-frequency">
 <section id="section-4.1.3.3">
-            <h5 id="name-impact-of-packet-reordering">
-<a href="#section-4.1.3.3" class="section-number selfRef">4.1.3.3. </a><a href="#name-impact-of-packet-reordering" class="section-name selfRef">Impact of packet reordering</a>
+            <h5 id="name-impact-of-changing-ack-freq">
+<a href="#section-4.1.3.3" class="section-number selfRef">4.1.3.3. </a><a href="#name-impact-of-changing-ack-freq" class="section-name selfRef">Impact of changing ACK frequency</a>
             </h5>
-<p id="section-4.1.3.3-1">This algorithm is robust to packet reordering; it makes no assumptions about
+<p id="section-4.1.3.3-1">Some transport protocol extensions allow the sender to control how
+frequently the receiver sends acknowledgments. Examples include the QUIC
+ACK-FREQUENCY extension (<span>[<a href="#I-D.draft-ietf-quic-ack-frequency" class="cite xref">I-D.draft-ietf-quic-ack-frequency</a>]</span>) and the
+TCP ACK Rate Request (TARR) option
+(<span>[<a href="#I-D.draft-ietf-tcpm-ack-rate-request" class="cite xref">I-D.draft-ietf-tcpm-ack-rate-request</a>]</span>). These extensions enable a
+BBR sender to tune the trade-off between the overhead of sending
+acknowledgments (e.g., reverse-path bandwidth, receiver CPU and battery
+cost) and the fidelity of feedback that BBR's measurement and control
+loops rely on.<a href="#section-4.1.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.3.3-2">When the receiver acknowledges packets less frequently than the default
+behavior, fewer delivery rate samples are generated per round trip.
+Similar to the case of ACK losses (see <a href="#impact-of-ack-losses" class="auto internal xref">Section 4.1.3.2</a>), reduced
+ACK frequency can produce distortions in delivery rate samples,
+particularly when the actual delivery rate changes between two
+consecutive ACKs. If the
+delivery rate increases between samples, the bandwidth estimate may
+underestimate the delivery rate; if it decreases, the estimate may
+overestimate. The BBR.max_bw windowed maximum filter (see <a href="#bbr-max-bw" class="auto internal xref">Section 5.5.2</a>)
+mitigates the underestimation case by retaining the highest recent sample.<a href="#section-4.1.3.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.1.3.3-3">Additionally, reduced ACK frequency can affect the timeliness of
+BBR's round-trip counting (see <a href="#bbr-round-count" class="auto internal xref">Section 5.5.1</a>).
+Since BBR detects round-trip boundaries upon receiving ACKs, fewer ACKs
+may delay the detection of round-trip completions, which in turn can delay
+BBR state machine transitions that are gated on round-trip progress (e.g.,
+exiting Startup, transitioning from ProbeBW_REFILL to ProbeBW_UP).<a href="#section-4.1.3.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.1.3.3-4">Reduced ACK frequency can also cause the sender to exhaust its
+congestion window more often, leading to underutilization.
+This effect is particularly significant when the bottleneck has a
+relatively shallow buffer or AQM, such that C.cwnd is only marginally
+higher than the path BDP. If a sender that has requested reduced ACK
+frequency observes that it frequently exhausts C.cwnd before the next
+ACK arrives, it SHOULD increase the requested ACK frequency.<a href="#section-4.1.3.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.1.3.3-5">A BBR sender that has the ability to control ACK frequency SHOULD
+adjust it based on the current BBR phase, requesting more frequent
+acknowledgments when timely feedback is most beneficial and less
+frequent acknowledgments to reduce overhead in steady-state phases.
+The following per-phase guidance applies:<a href="#section-4.1.3.3-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.1.3.3-6.1">
+                <p id="section-4.1.3.3-6.1.1">Startup, ProbeBW_REFILL, and ProbeBW_UP: The sender SHOULD request
+frequent acknowledgments to ensure that delivery rate samples are
+generated often enough for timely full-pipe detection and accurate
+bandwidth probing. The sender SHOULD request parameters that yield
+at least 4 acknowledgments per round trip. Before or upon entering
+ProbeBW_REFILL, the sender SHOULD increase acknowledgment frequency
+if it was previously reduced during ProbeBW_DOWN or ProbeBW_CRUISE.<a href="#section-4.1.3.3-6.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.1.3.3-6.2">
+                <p id="section-4.1.3.3-6.2.1">ProbeBW_DOWN and ProbeBW_CRUISE: The sender MAY request less frequent
+ACKs to lower overhead, since these phases do not rely on rapid
+feedback for probing. The sender MAY request an ACK delay of up to
+0.5 * smoothed_rtt and an ACK threshold of up to roughly a quarter
+of the current congestion window. Keeping these values moderate
+ensures that loss detection is not excessively delayed by infrequent
+ACKs.<a href="#section-4.1.3.3-6.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-4.1.3.3-6.3">
+                <p id="section-4.1.3.3-6.3.1">ProbeRTT: During ProbeRTT, the sender SHOULD solicit a prompt
+acknowledgment (e.g., via a QUIC IMMEDIATE_ACK frame or a TCP TARR
+option with R=0) on the last packet of each flight of data, to obtain
+a timely and accurate BBR.min_rtt sample while the queue is drained.
+Implementations MAY also request a short ACK delay during ProbeRTT,
+though this is often unnecessary since few packets are sent during
+this brief phase.<a href="#section-4.1.3.3-6.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-4.1.3.3-7">When available, the QUIC Receive Timestamps extension
+(<span>[<a href="#I-D.draft-ietf-quic-receive-ts" class="cite xref">I-D.draft-ietf-quic-receive-ts</a>]</span>) can improve the fidelity of
+delivery rate estimation under reduced ACK frequency. Receive timestamps
+allow the sender to compute more accurate inter-packet arrival times at
+the receiver, providing finer-grained bandwidth measurement even when
+ACKs are infrequent. A sender MAY use receive timestamps to refine its
+"ack_rate" calculation by substituting receiver-side timing information
+for ACK arrival times.<a href="#section-4.1.3.3-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="impact-of-packet-reordering">
+<section id="section-4.1.3.4">
+            <h5 id="name-impact-of-packet-reordering">
+<a href="#section-4.1.3.4" class="section-number selfRef">4.1.3.4. </a><a href="#name-impact-of-packet-reordering" class="section-name selfRef">Impact of packet reordering</a>
+            </h5>
+<p id="section-4.1.3.4-1">This algorithm is robust to packet reordering; it makes no assumptions about
 the order in which packets are delivered or ACKed. In particular, for a
 particular packet P, it does not matter which packets are delivered between the
 transmission of P and the ACK of packet P, since C.delivered will be
-incremented appropriately in any case.<a href="#section-4.1.3.3-1" class="pilcrow">¶</a></p>
+incremented appropriately in any case.<a href="#section-4.1.3.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="impact-of-packet-loss-and-retransmissions">
-<section id="section-4.1.3.4">
+<section id="section-4.1.3.5">
             <h5 id="name-impact-of-packet-loss-and-r">
-<a href="#section-4.1.3.4" class="section-number selfRef">4.1.3.4. </a><a href="#name-impact-of-packet-loss-and-r" class="section-name selfRef">Impact of packet loss and retransmissions</a>
+<a href="#section-4.1.3.5" class="section-number selfRef">4.1.3.5. </a><a href="#name-impact-of-packet-loss-and-r" class="section-name selfRef">Impact of packet loss and retransmissions</a>
             </h5>
-<p id="section-4.1.3.4-1">There are several possible approaches for handling cases where a delivery
-rate sample is based on a retransmitted packet.<a href="#section-4.1.3.4-1" class="pilcrow">¶</a></p>
-<p id="section-4.1.3.4-2">If the transport protocol supports unambiguous ACKs for retransmitted data
+<p id="section-4.1.3.5-1">There are several possible approaches for handling cases where a delivery
+rate sample is based on a retransmitted packet.<a href="#section-4.1.3.5-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.3.5-2">If the transport protocol supports unambiguous ACKs for retransmitted data
 (as in QUIC <span>[<a href="#RFC9000" class="cite xref">RFC9000</a>]</span>) then the algorithm is perfectly robust to retransmissions,
-because the starting packet, P, for the sample can be unambiguously retrieved.<a href="#section-4.1.3.4-2" class="pilcrow">¶</a></p>
-<p id="section-4.1.3.4-3">If the transport protocol, like TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>, has ambiguous ACKs for
-retransmitted sequence ranges, then the following approaches MAY be used:<a href="#section-4.1.3.4-3" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-4.1.3.4-4">
-<li id="section-4.1.3.4-4.1">
-                <p id="section-4.1.3.4-4.1.1">The sender MAY choose to filter out implausible delivery rate samples, as
+because the starting packet, P, for the sample can be unambiguously retrieved.<a href="#section-4.1.3.5-2" class="pilcrow">¶</a></p>
+<p id="section-4.1.3.5-3">If the transport protocol, like TCP <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>, has ambiguous ACKs for
+retransmitted sequence ranges, then the following approaches MAY be used:<a href="#section-4.1.3.5-3" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.1.3.5-4">
+<li id="section-4.1.3.5-4.1">
+                <p id="section-4.1.3.5-4.1.1">The sender MAY choose to filter out implausible delivery rate samples, as
   described in the GenerateRateSample() step in the "Upon receiving an ACK"
   section, by discarding samples whose RS.interval is lower than the minimum
-  RTT seen on the connection.<a href="#section-4.1.3.4-4.1.1" class="pilcrow">¶</a></p>
+  RTT seen on the connection.<a href="#section-4.1.3.5-4.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-4.1.3.4-4.2">
-                <p id="section-4.1.3.4-4.2.1">The sender MAY choose to skip the generation of a delivery rate sample for
-  a retransmitted sequence range.<a href="#section-4.1.3.4-4.2.1" class="pilcrow">¶</a></p>
+              <li id="section-4.1.3.5-4.2">
+                <p id="section-4.1.3.5-4.2.1">The sender MAY choose to skip the generation of a delivery rate sample for
+  a retransmitted sequence range.<a href="#section-4.1.3.5-4.2.1" class="pilcrow">¶</a></p>
 </li>
             </ol>
 <div id="connections-without-sack">
-<section id="section-4.1.3.4.1">
+<section id="section-4.1.3.5.1">
               <h6 id="name-tcp-connections-without-sac">
-<a href="#section-4.1.3.4.1" class="section-number selfRef">4.1.3.4.1. </a><a href="#name-tcp-connections-without-sac" class="section-name selfRef">TCP Connections without SACK</a>
+<a href="#section-4.1.3.5.1" class="section-number selfRef">4.1.3.5.1. </a><a href="#name-tcp-connections-without-sac" class="section-name selfRef">TCP Connections without SACK</a>
               </h6>
-<p id="section-4.1.3.4.1-1">Whenever possibile, TCP connections using BBR as a congestion controller SHOULD
+<p id="section-4.1.3.5.1-1">Whenever possibile, TCP connections using BBR as a congestion controller SHOULD
 use both SACK and timestamps. Failure to do so will cause BBR's RTT and
-bandwidth measurements to be much less accurate.<a href="#section-4.1.3.4.1-1" class="pilcrow">¶</a></p>
-<p id="section-4.1.3.4.1-2">When using TCP without SACK (i.e., either or both ends of the connections do
+bandwidth measurements to be much less accurate.<a href="#section-4.1.3.5.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.3.5.1-2">When using TCP without SACK (i.e., either or both ends of the connections do
 not accept SACK), this algorithm can be extended to estimate approximate
 delivery rates using duplicate ACKs (much like Reno and <span>[<a href="#RFC5681" class="cite xref">RFC5681</a>]</span> estimates
-that each duplicate ACK indicates that a data packet has been delivered).<a href="#section-4.1.3.4.1-2" class="pilcrow">¶</a></p>
+that each duplicate ACK indicates that a data packet has been delivered).<a href="#section-4.1.3.5.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -4072,7 +4153,7 @@ calculates and uses its value. We can group the parameter into three groups:<a h
             <p id="section-5.5-2.3.1">parameters to model the appropriate inflight<a href="#section-5.5-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<div id="bbrroundcount-tracking-packet-timed-round-trips">
+<div id="bbr-round-count">
 <section id="section-5.5.1">
           <h4 id="name-bbrround_count-tracking-pac">
 <a href="#section-5.5.1" class="section-number selfRef">5.5.1. </a><a href="#name-bbrround_count-tracking-pac" class="section-name selfRef">BBR.round_count: Tracking Packet-Timed Round Trips</a>
@@ -4134,7 +4215,7 @@ the count of such round trips elapsed:<a href="#section-5.5.1-9" class="pilcrow"
 </div>
 </section>
 </div>
-<div id="bbrmaxbw-estimated-maximum-bandwidth">
+<div id="bbr-max-bw">
 <section id="section-5.5.2">
           <h4 id="name-bbrmax_bw-estimated-maximum">
 <a href="#section-5.5.2" class="section-number selfRef">5.5.2. </a><a href="#name-bbrmax_bw-estimated-maximum" class="section-name selfRef">BBR.max_bw: Estimated Maximum Bandwidth</a>
@@ -4428,11 +4509,16 @@ start from the current time.<a href="#section-5.5.9-1" class="pilcrow">¶</a></p
 and ACK aggregation effects such as batching and slotting at shared-medium
 L2 hops (wifi, cellular, DOCSIS), as well as end-host offload mechanisms
 (TSO, GSO, LRO, GRO), and end host or middlebox ACK decimation/thinning.<a href="#section-5.5.9-2" class="pilcrow">¶</a></p>
-<p id="section-5.5.9-3">BBR augments C.cwnd by BBR.extra_acked to allow the connection to keep
+<p id="section-5.5.9-3">Note that when the sender has requested reduced ACK frequency (see
+<a href="#impact-of-changing-ack-frequency" class="auto internal xref">Section 4.1.3.3</a>), the resulting infrequent ACKs can
+produce bursty ACK arrivals that resemble ACK aggregation. The
+BBR.extra_acked estimator will account for this by increasing C.cwnd to
+allow the sender to continue transmitting during inter-ACK gaps.<a href="#section-5.5.9-3" class="pilcrow">¶</a></p>
+<p id="section-5.5.9-4">BBR augments C.cwnd by BBR.extra_acked to allow the connection to keep
 sending during inter-ACK silences, to an extent that matches the recently
-measured degree of aggregation.<a href="#section-5.5.9-3" class="pilcrow">¶</a></p>
-<p id="section-5.5.9-4">More precisely, this is computed as:<a href="#section-5.5.9-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.5.9-5">
+measured degree of aggregation.<a href="#section-5.5.9-4" class="pilcrow">¶</a></p>
+<p id="section-5.5.9-5">More precisely, this is computed as:<a href="#section-5.5.9-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.5.9-6">
 <pre>
   BBRUpdateACKAggregation():
     /* Find excess ACKed beyond expected amount over this interval */
@@ -4456,7 +4542,7 @@ measured degree of aggregation.<a href="#section-5.5.9-3" class="pilcrow">¶</a>
         value=extra,
         time=BBR.round_count,
         window_length=filter_len)
-</pre><a href="#section-5.5.9-5" class="pilcrow">¶</a>
+</pre><a href="#section-5.5.9-6" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -5524,6 +5610,14 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dt id="I-D.draft-ietf-quic-ack-frequency">[I-D.draft-ietf-quic-ack-frequency]</dt>
         <dd>
 <span class="refAuthor">Iyengar, J.</span>, <span class="refAuthor">Swett, I.</span>, and <span class="refAuthor">M. Kühlewind</span>, <span class="refTitle">"QUIC Acknowledgment Frequency"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-ack-frequency-14</span>, <time datetime="2026-02-05" class="refDate">5 February 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-ack-frequency-14">https://datatracker.ietf.org/doc/html/draft-ietf-quic-ack-frequency-14</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.draft-ietf-quic-receive-ts">[I-D.draft-ietf-quic-receive-ts]</dt>
+        <dd>
+<span class="refAuthor">Swett, I.</span> and <span class="refAuthor">J. Beshay</span>, <span class="refTitle">"QUIC Extended Acknowledgement for Reporting Packet Receive Timestamps"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-receive-ts-02</span>, <time datetime="2026-03-16" class="refDate">16 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-02">https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.draft-ietf-tcpm-ack-rate-request">[I-D.draft-ietf-tcpm-ack-rate-request]</dt>
+        <dd>
+<span class="refAuthor">Gomez, C.</span>, <span class="refAuthor">Crowcroft, J.</span>, and <span class="refAuthor">M. Tüxen</span>, <span class="refTitle">"TCP ACK Rate Request Option"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tcpm-ack-rate-request-11</span>, <time datetime="2026-03-02" class="refDate">2 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tcpm-ack-rate-request-11">https://datatracker.ietf.org/doc/html/draft-ietf-tcpm-ack-rate-request-11</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="Jac88">[Jac88]</dt>
         <dd>
