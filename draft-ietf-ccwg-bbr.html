@@ -3043,7 +3043,7 @@ sub-steps invoked referenced below are described below.<a href="#section-5.2-1" 
 steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.2.1-2">
 <pre>
-  BBROnInit():
+  OnInit():
     InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
     BBR.min_rtt = C.srtt ? C.srtt : Infinity
     BBR.min_rtt_stamp = Now()
@@ -3054,12 +3054,12 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
     BBR.extra_acked_interval_start = Now()
     BBR.extra_acked_delivered = 0
     BBR.full_bw_reached = false
-    BBRResetCongestionSignals()
-    BBRResetShortTermModel()
-    BBRInitRoundCounting()
-    BBRResetFullBW()
-    BBRInitPacingRate()
-    BBREnterStartup()
+    ResetCongestionSignals()
+    ResetShortTermModel()
+    InitRoundCounting()
+    ResetFullBW()
+    InitPacingRate()
+    EnterStartup()
 </pre><a href="#section-5.2.1-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -3073,8 +3073,8 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
 is restarting from idle:<a href="#section-5.2.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.2.2-2">
 <pre>
-  BBROnTransmit():
-    BBRHandleRestartFromIdle()
+  OnTransmit():
+    HandleRestartFromIdle()
 </pre><a href="#section-5.2.2-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -3084,33 +3084,33 @@ is restarting from idle:<a href="#section-5.2.2-1" class="pilcrow">¶</a></p>
           <h4 id="name-per-ack-steps">
 <a href="#section-5.2.3" class="section-number selfRef">5.2.3. </a><a href="#name-per-ack-steps" class="section-name selfRef">Per-ACK Steps</a>
           </h4>
-<p id="section-5.2.3-1">On every ACK, the BBR algorithm executes the following BBRUpdateOnACK() steps
+<p id="section-5.2.3-1">On every ACK, the BBR algorithm executes the following UpdateOnACK() steps
 in order to update its network path model, update its state machine, and
 adjust its control parameters to adapt to the updated model:<a href="#section-5.2.3-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.2.3-2">
 <pre>
-  BBRUpdateOnACK():
+  UpdateOnACK():
     GenerateRateSample()
-    BBRUpdateModelAndState()
-    BBRUpdateControlParameters()
+    UpdateModelAndState()
+    UpdateControlParameters()
 
-  BBRUpdateModelAndState():
-    BBRUpdateLatestDeliverySignals()
-    BBRUpdateCongestionSignals()
-    BBRUpdateACKAggregation()
-    BBRCheckFullBWReached()
-    BBRCheckStartupDone()
-    BBRCheckDrainDone()
-    BBRUpdateProbeBWCyclePhase()
-    BBRUpdateMinRTT()
-    BBRCheckProbeRTT()
-    BBRAdvanceLatestDeliverySignals()
-    BBRBoundBWForModel()
+  UpdateModelAndState():
+    UpdateLatestDeliverySignals()
+    UpdateCongestionSignals()
+    UpdateACKAggregation()
+    CheckFullBWReached()
+    CheckStartupDone()
+    CheckDrainDone()
+    UpdateProbeBWCyclePhase()
+    UpdateMinRTT()
+    CheckProbeRTT()
+    AdvanceLatestDeliverySignals()
+    BoundBWForModel()
 
-  BBRUpdateControlParameters():
-    BBRSetPacingRate()
-    BBRSetSendQuantum()
-    BBRSetCwnd()
+  UpdateControlParameters():
+    SetPacingRate()
+    SetSendQuantum()
+    SetCwnd()
 </pre><a href="#section-5.2.3-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -3121,7 +3121,7 @@ adjust its control parameters to adapt to the updated model:<a href="#section-5.
 <a href="#section-5.2.4" class="section-number selfRef">5.2.4. </a><a href="#name-per-loss-steps" class="section-name selfRef">Per-Loss Steps</a>
           </h4>
 <p id="section-5.2.4-1">On every packet loss event where the transport protocol marks some packet P as
-lost, the BBR algorithm calls BBRHandleLostPacket(P) to update its network path
+lost, the BBR algorithm calls HandleLostPacket(P) to update its network path
 model (see <a href="#probing-for-bandwidth-in-probebw" class="auto internal xref">Section 5.5.10.2</a>).<a href="#section-5.2.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -3131,7 +3131,7 @@ model (see <a href="#probing-for-bandwidth-in-probebw" class="auto internal xref
 <a href="#section-5.2.5" class="section-number selfRef">5.2.5. </a><a href="#name-spurious-loss-recovery-step" class="section-name selfRef">Spurious Loss Recovery Steps</a>
           </h4>
 <p id="section-5.2.5-1">If the transport protocol detects that a loss recovery episode was spurious,
-BBR calls BBRHandleSpuriousLossDetection() to update its network path model
+BBR calls HandleSpuriousLossDetection() to update its network path model
 (see <a href="#updating-the-model-upon-spurious-packet-loss" class="auto internal xref">Section 5.5.11</a>).<a href="#section-5.2.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -3164,10 +3164,10 @@ values that will allow the sending rate to double each round: in Startup BBR
 sets BBR.pacing_gain to BBR.StartupPacingGain (2.77) <span>[<a href="#BBRStartupPacingGain" class="cite xref">BBRStartupPacingGain</a>]</span>
 and BBR.cwnd_gain to BBR.DefaultCwndGain (2) <span>[<a href="#BBRStartupCwndGain" class="cite xref">BBRStartupCwndGain</a>]</span>.<a href="#section-5.3.1.1-2" class="pilcrow">¶</a></p>
 <p id="section-5.3.1.1-3">When initializing a connection, or upon any later entry into Startup mode,
-BBR executes the following BBREnterStartup() steps:<a href="#section-5.3.1.1-3" class="pilcrow">¶</a></p>
+BBR executes the following EnterStartup() steps:<a href="#section-5.3.1.1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.1.1-4">
 <pre>
-  BBREnterStartup():
+  EnterStartup():
     BBR.state = Startup
     BBR.pacing_gain = BBR.StartupPacingGain
     BBR.cwnd_gain = BBR.DefaultCwndGain
@@ -3184,10 +3184,10 @@ The first looks for a plateau in the BBR.max_bw estimate. The second looks
 for packet loss. The following subsections discuss these estimators.<a href="#section-5.3.1.1-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.1.1-7">
 <pre>
-  BBRCheckStartupDone():
-    BBRCheckStartupHighLoss()
+  CheckStartupDone():
+    CheckStartupHighLoss()
     if (BBR.state == Startup &amp;&amp; BBR.full_bw_reached)
-      BBREnterDrain()
+      EnterDrain()
 </pre><a href="#section-5.3.1.1-7" class="pilcrow">¶</a>
 </div>
 </section>
@@ -3217,7 +3217,7 @@ and sets both BBR.full_bw_now and BBR.full_bw_reached to true.<a href="#section-
 for an increase in bandwidth), the following steps are taken:<a href="#section-5.3.1.2-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.1.2-5">
 <pre>
-  BBRResetFullBW():
+  ResetFullBW():
     BBR.full_bw = 0
     BBR.full_bw_count = 0
     BBR.full_bw_now = 0
@@ -3228,11 +3228,11 @@ new data, and when the delivery rate sample is not application-limited
 (see <a href="#delivery-rate-samples" class="auto internal xref">Section 4.1</a>), BBR runs the "full pipe" estimator:<a href="#section-5.3.1.2-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.1.2-7">
 <pre>
-  BBRCheckFullBWReached():
+  CheckFullBWReached():
     if (BBR.full_bw_now || !BBR.round_start || RS.is_app_limited)
       return  /* no need to check for a full pipe now */
     if (RS.delivery_rate &gt;= BBR.full_bw * 1.25)
-      BBRResetFullBW()       /* bw is still growing, so reset */
+      ResetFullBW()       /* bw is still growing, so reset */
       BBR.full_bw = RS.delivery_rate  /* record new baseline bw */
       return
     BBR.full_bw_count++   /* another round w/o much growth */
@@ -3257,7 +3257,7 @@ receive window.<a href="#section-5.3.1.2-8" class="pilcrow">¶</a></p>
 is by looking at packet losses.<a href="#section-5.3.1.3-1" class="pilcrow">¶</a></p>
 <p id="section-5.3.1.3-2">For connections that can detect more than one packet loss per round trip
 (i.e., a connection where C.has_selective_acks is true),
-BBRCheckStartupHighLoss() exits Startup based on packet loss if the following
+CheckStartupHighLoss() exits Startup based on packet loss if the following
 criteria are all met:<a href="#section-5.3.1.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.3.1.3-3.1">
@@ -3274,10 +3274,10 @@ lost in that round trip.<a href="#section-5.3.1.3-3.3.1" class="pilcrow">¶</a><
 </li>
             </ul>
 <p id="section-5.3.1.3-4">For connections for which C.has_selective_acks is false and thus the connection
-can only detect one packet loss per round trip, BBRCheckStartupHighLoss() exits
+can only detect one packet loss per round trip, CheckStartupHighLoss() exits
 Startup based on packet loss if any packet loss is detected during fast
 recovery.<a href="#section-5.3.1.3-4" class="pilcrow">¶</a></p>
-<p id="section-5.3.1.3-5">If BBRCheckStartupHighLoss() exits Startup based on packet loss, it takes the
+<p id="section-5.3.1.3-5">If CheckStartupHighLoss() exits Startup based on packet loss, it takes the
 following steps. First, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
@@ -3304,7 +3304,7 @@ uses a pacing_gain of BBR.DrainPacingGain = 0.5, chosen via analysis
 than one round-trip:<a href="#section-5.3.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.2-2">
 <pre>
-  BBREnterDrain():
+  EnterDrain():
     BBR.state = Drain
     BBR.pacing_gain = BBR.DrainPacingGain    /* pace slowly */
     BBR.cwnd_gain = BBR.DefaultCwndGain      /* maintain cwnd */
@@ -3321,11 +3321,11 @@ after 3 round-trips, allowing the bandwidth max filter to advance during the
 next probing cycle. To implement this, upon every ACK BBR executes:<a href="#section-5.3.2-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.2-4">
 <pre>
-  BBRCheckDrainDone():
+  CheckDrainDone():
     if (BBR.state == Drain &amp;&amp;
-        (C.inflight &lt;= BBRInflight(1.0) ||
+        (C.inflight &lt;= Inflight(1.0) ||
          BBR.round_count &gt; BBR.drain_start_round + 3))
-      BBREnterProbeBW()
+      EnterProbeBW()
 </pre><a href="#section-5.3.2-4" class="pilcrow">¶</a>
 </div>
 </section>
@@ -3482,14 +3482,14 @@ transitions to ProbeBW_DOWN to try to drain the bottleneck queue when either
 of the following conditions are met:<a href="#section-5.3.3.4-5" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-5.3.3.4-6">
 <li id="section-5.3.3.4-6.1">
-                <p id="section-5.3.3.4-6.1.1">Bandwidth saturation: BBRIsTimeToGoDown() (see below) uses the "full pipe"
+                <p id="section-5.3.3.4-6.1.1">Bandwidth saturation: IsTimeToGoDown() (see below) uses the "full pipe"
   estimator (see <a href="#exiting-acceleration-based-on-bandwidth-plateau" class="auto internal xref">Section 5.3.1.2</a>) to
   estimate whether the flow has saturated the available per-flow bandwidth
   ("filled the pipe"), by looking for a plateau in the measured
   RS.delivery_rate. If, during this process, C.inflight is constrained
   by BBR.inflight_longterm (the flow becomes cwnd-limited while cwnd is limited by
   BBR.inflight_longterm), then the flow cannot fully explore the available bandwidth,
-  and so it resets the "full pipe" estimator by calling BBRResetFullBW().<a href="#section-5.3.3.4-6.1.1" class="pilcrow">¶</a></p>
+  and so it resets the "full pipe" estimator by calling ResetFullBW().<a href="#section-5.3.3.4-6.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-5.3.3.4-6.2">
                 <p id="section-5.3.3.4-6.2.1">Loss: The current loss rate, over the time scale of the last round trip,
@@ -3664,17 +3664,17 @@ as follows:<a href="#section-5.3.3.5.3-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.3.5.3-7">
 <pre>
   /* Is it time to transition from DOWN or CRUISE to REFILL? */
-  BBRIsTimeToProbeBW():
-    if (BBRHasElapsedInPhase(BBR.bw_probe_wait) ||
-        BBRIsRenoCoexistenceProbeTime())
-      BBRStartProbeBW_REFILL()
+  IsTimeToProbeBW():
+    if (HasElapsedInPhase(BBR.bw_probe_wait) ||
+        IsRenoCoexistenceProbeTime())
+      StartProbeBW_REFILL()
       return true
     return false
 
   /* Randomized decision about how long to wait until
    * probing for bandwidth, using round count and wall clock.
    */
-  BBRPickProbeWait():
+  PickProbeWait():
     /* Decide random round-trip bound for wait: */
     BBR.rounds_since_bw_probe =
       random_int_between(0, 1); /* 0 or 1 */
@@ -3682,14 +3682,14 @@ as follows:<a href="#section-5.3.3.5.3-6" class="pilcrow">¶</a></p>
     BBR.bw_probe_wait =
       2 + random_float_between(0.0, 1.0) /* 0..1 sec */
 
-  BBRIsRenoCoexistenceProbeTime():
-    reno_rounds = BBRTargetInflight()
+  IsRenoCoexistenceProbeTime():
+    reno_rounds = TargetInflight()
     rounds = min(reno_rounds, 63)
     return BBR.rounds_since_bw_probe &gt;= rounds
 
   /* How much data do we want in flight?
    * Our estimated BDP, unless congestion cut C.cwnd. */
-  BBRTargetInflight()
+  TargetInflight()
     return min(BBR.bdp, C.cwnd)
 </pre><a href="#section-5.3.3.5.3-7" class="pilcrow">¶</a>
 </div>
@@ -3706,76 +3706,76 @@ as follows:<a href="#section-5.3.3.5.3-6" class="pilcrow">¶</a></p>
 <p id="section-5.3.3.6-2">Upon entering ProbeBW, BBR executes:<a href="#section-5.3.3.6-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.3.6-3">
 <pre>
-  BBREnterProbeBW():
+  EnterProbeBW():
     BBR.cwnd_gain = BBR.DefaultCwndGain
-    BBRStartProbeBW_DOWN()
+    StartProbeBW_DOWN()
 </pre><a href="#section-5.3.3.6-3" class="pilcrow">¶</a>
 </div>
 <p id="section-5.3.3.6-4">The core logic for entering each state:<a href="#section-5.3.3.6-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.3.6-5">
 <pre>
-  BBRStartProbeBW_DOWN():
-    BBRResetCongestionSignals()
+  StartProbeBW_DOWN():
+    ResetCongestionSignals()
     BBR.probe_up_cnt = Infinity /* not growing BBR.inflight_longterm */
-    BBRPickProbeWait()
+    PickProbeWait()
     BBR.cycle_stamp = Now()  /* start wall clock */
     BBR.ack_phase  = ACKS_PROBE_STOPPING
-    BBRStartRound()
+    StartRound()
     BBR.state = ProbeBW_DOWN
 
-  BBRStartProbeBW_CRUISE():
+  StartProbeBW_CRUISE():
     BBR.state = ProbeBW_CRUISE
 
-  BBRStartProbeBW_REFILL():
-    BBRResetShortTermModel()
+  StartProbeBW_REFILL():
+    ResetShortTermModel()
     BBR.bw_probe_up_rounds = 0
     BBR.bw_probe_up_acks = 0
     BBR.ack_phase = ACKS_REFILLING
-    BBRStartRound()
+    StartRound()
     BBR.state = ProbeBW_REFILL
 
-  BBRStartProbeBW_UP():
+  StartProbeBW_UP():
     BBR.ack_phase = ACKS_PROBE_STARTING
-    BBRStartRound()
-    BBRResetFullBW()
+    StartRound()
+    ResetFullBW()
     BBR.full_bw = RS.delivery_rate
     BBR.state = ProbeBW_UP
-    BBRRaiseInflightLongtermSlope()
+    RaiseInflightLongtermSlope()
 </pre><a href="#section-5.3.3.6-5" class="pilcrow">¶</a>
 </div>
-<p id="section-5.3.3.6-6">BBR executes the following BBRUpdateProbeBWCyclePhase() logic on each ACK
+<p id="section-5.3.3.6-6">BBR executes the following UpdateProbeBWCyclePhase() logic on each ACK
 that acknowledges new data, to advance the ProbeBW state machine:<a href="#section-5.3.3.6-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.3.6-7">
 <pre>
   /* The core state machine logic for ProbeBW: */
-  BBRUpdateProbeBWCyclePhase():
+  UpdateProbeBWCyclePhase():
     if (!BBR.full_bw_reached)
       return  /* only handling steady-state behavior here */
-    BBRAdaptLongTermModel()
+    AdaptLongTermModel()
     if (!IsInAProbeBWState())
       return /* only handling ProbeBW states here: */
 
     switch (state)
 
     ProbeBW_DOWN:
-      if (BBRIsTimeToProbeBW())
+      if (IsTimeToProbeBW())
         return /* already decided state transition */
-      if (BBRIsTimeToCruise())
-        BBRStartProbeBW_CRUISE()
+      if (IsTimeToCruise())
+        StartProbeBW_CRUISE()
 
     ProbeBW_CRUISE:
-      if (BBRIsTimeToProbeBW())
+      if (IsTimeToProbeBW())
         return /* already decided state transition */
 
     ProbeBW_REFILL:
       /* After one round of REFILL, start UP */
       if (BBR.round_start)
         BBR.bw_probe_samples = 1
-        BBRStartProbeBW_UP()
+        StartProbeBW_UP()
 
     ProbeBW_UP:
-      if (BBRIsTimeToGoDown())
-        BBRStartProbeBW_DOWN()
+      if (IsTimeToGoDown())
+        StartProbeBW_DOWN()
 </pre><a href="#section-5.3.3.6-7" class="pilcrow">¶</a>
 </div>
 <p id="section-5.3.3.6-8">The ancillary logic to implement the ProbeBW state machine:<a href="#section-5.3.3.6-8" class="pilcrow">¶</a></p>
@@ -3789,35 +3789,35 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
             state == ProbeBW_UP)
 
   /* Time to transition from DOWN to CRUISE? */
-  BBRIsTimeToCruise():
-    if (C.inflight &gt; BBRInflightWithHeadroom())
+  IsTimeToCruise():
+    if (C.inflight &gt; InflightWithHeadroom())
       return false /* not enough headroom */
-    if (C.inflight &gt; BBRInflight(BBR.max_bw, 1.0))
+    if (C.inflight &gt; Inflight(BBR.max_bw, 1.0))
       return false /* C.inflight &gt; estimated BDP */
     return true
 
   /* Time to transition from UP to DOWN? */
-  BBRIsTimeToGoDown():
+  IsTimeToGoDown():
     if (C.is_cwnd_limited &amp;&amp; C.cwnd &gt;= BBR.inflight_longterm)
-      BBRResetFullBW()   /* bw is limited by BBR.inflight_longterm */
+      ResetFullBW()   /* bw is limited by BBR.inflight_longterm */
       BBR.full_bw = RS.delivery_rate
     else if (BBR.full_bw_now)
       return true  /* we estimate we've fully used path bw */
     return false
 
-  BBRIsProbingBW():
+  IsProbingBW():
     return (BBR.state == Startup or
             BBR.state == ProbeBW_REFILL or
             BBR.state == ProbeBW_UP)
 
-  BBRHasElapsedInPhase(interval):
+  HasElapsedInPhase(interval):
     return Now() &gt; BBR.cycle_stamp + interval
 
   /* Return a volume of data that tries to leave free
    * headroom in the bottleneck buffer or link for
    * other flows, for fairness convergence and lower
    * RTTs and loss */
-  BBRInflightWithHeadroom():
+  InflightWithHeadroom():
     if (BBR.inflight_longterm == Infinity)
       return Infinity
     headroom = max(1*SMSS, BBR.Headroom * BBR.inflight_longterm)
@@ -3825,13 +3825,13 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
                BBR.MinPipeCwnd)
 
   /* Raise BBR.inflight_longterm slope if appropriate. */
-  BBRRaiseInflightLongtermSlope():
+  RaiseInflightLongtermSlope():
     growth_this_round = 1*SMSS &lt;&lt; BBR.bw_probe_up_rounds
     BBR.bw_probe_up_rounds = min(BBR.bw_probe_up_rounds + 1, 30)
     BBR.probe_up_cnt = max(C.cwnd / growth_this_round, 1)
 
   /* Increase BBR.inflight_longterm if appropriate. */
-  BBRProbeInflightLongtermUpward():
+  ProbeInflightLongtermUpward():
     if (!C.is_cwnd_limited || C.cwnd &lt; BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
    BBR.bw_probe_up_acks += RS.newly_acked
@@ -3840,18 +3840,18 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
      BBR.bw_probe_up_acks -= delta * BBR.bw_probe_up_cnt
      BBR.inflight_longterm += delta
    if (BBR.round_start)
-     BBRRaiseInflightLongtermSlope()
+     RaiseInflightLongtermSlope()
 
   /* Track ACK state and update BBR.max_bw window and
    * BBR.inflight_longterm. */
-  BBRAdaptLongTermModel():
+  AdaptLongTermModel():
     if (BBR.ack_phase == ACKS_PROBE_STARTING &amp;&amp; BBR.round_start)
       /* starting to get bw probing samples */
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
     if (BBR.ack_phase == ACKS_PROBE_STOPPING &amp;&amp; BBR.round_start)
       /* end of samples from bw probing phase */
       if (IsInAProbeBWState() &amp;&amp; !RS.is_app_limited)
-        BBRAdvanceMaxBwFilter()
+        AdvanceMaxBwFilter()
 
     if (!IsInflightTooHigh())
       /* Loss rate is safe. Adjust upper bounds upward. */
@@ -3860,7 +3860,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
       if (RS.tx_in_flight &gt; BBR.inflight_longterm)
         BBR.inflight_longterm = RS.tx_in_flight
       if (BBR.state == ProbeBW_UP)
-        BBRProbeInflightLongtermUpward()
+        ProbeInflightLongtermUpward()
 </pre><a href="#section-5.3.3.6-9" class="pilcrow">¶</a>
 </div>
 </section>
@@ -3967,12 +3967,12 @@ has increased.<a href="#section-5.3.4.2-7" class="pilcrow">¶</a></p>
             <h5 id="name-probertt-logic">
 <a href="#section-5.3.4.3" class="section-number selfRef">5.3.4.3. </a><a href="#name-probertt-logic" class="section-name selfRef">ProbeRTT Logic</a>
             </h5>
-<p id="section-5.3.4.3-1">On every ACK BBR executes BBRUpdateMinRTT() to update its ProbeRTT scheduling
+<p id="section-5.3.4.3-1">On every ACK BBR executes UpdateMinRTT() to update its ProbeRTT scheduling
 state (BBR.probe_rtt_min_delay and BBR.probe_rtt_min_stamp) and its BBR.min_rtt
 estimate:<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.4.3-2">
 <pre>
-  BBRUpdateMinRTT()
+  UpdateMinRTT()
     BBR.probe_rtt_expired =
       Now() &gt; BBR.probe_rtt_min_stamp + ProbeRTTInterval
     if (RS.rtt &gt;= 0 &amp;&amp;
@@ -3992,53 +3992,53 @@ estimate:<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.3-3">Here BBR.probe_rtt_expired is a boolean recording whether the
 BBR.probe_rtt_min_delay has expired and is due for a refresh, via either
 an application idle period or a transition into ProbeRTT state.<a href="#section-5.3.4.3-3" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.3-4">On every ACK BBR executes BBRCheckProbeRTT() to handle the steps related
+<p id="section-5.3.4.3-4">On every ACK BBR executes CheckProbeRTT() to handle the steps related
 to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.4.3-5">
 <pre>
-  BBRCheckProbeRTT():
+  CheckProbeRTT():
     if (BBR.state != ProbeRTT &amp;&amp;
         BBR.probe_rtt_expired &amp;&amp;
         !BBR.idle_restart)
-      BBREnterProbeRTT()
-      BBRSaveCwnd()
+      EnterProbeRTT()
+      SaveCwnd()
       BBR.probe_rtt_done_stamp = 0
       BBR.ack_phase = ACKS_PROBE_STOPPING
-      BBRStartRound()
+      StartRound()
     if (BBR.state == ProbeRTT)
-      BBRHandleProbeRTT()
+      HandleProbeRTT()
     if (RS.delivered &gt; 0)
       BBR.idle_restart = false
 
-  BBREnterProbeRTT():
+  EnterProbeRTT():
     BBR.state = ProbeRTT
     BBR.pacing_gain = 1
     BBR.cwnd_gain = BBRProbeRTTCwndGain  /* 0.5 */
 
-  BBRHandleProbeRTT():
+  HandleProbeRTT():
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
     if (BBR.probe_rtt_done_stamp == 0 &amp;&amp;
-        C.inflight &lt;= BBRProbeRTTCwnd())
+        C.inflight &lt;= ProbeRTTCwnd())
       /* Wait for at least ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
         Now() + ProbeRTTDuration
       /* Wait for at least one round to elapse: */
       BBR.probe_rtt_round_done = false
-      BBRStartRound()
+      StartRound()
     else if (BBR.probe_rtt_done_stamp != 0)
       if (BBR.round_start)
         BBR.probe_rtt_round_done = true
       if (BBR.probe_rtt_round_done)
-        BBRCheckProbeRTTDone()
+        CheckProbeRTTDone()
 
-  BBRCheckProbeRTTDone():
+  CheckProbeRTTDone():
     if (BBR.probe_rtt_done_stamp != 0 &amp;&amp;
         Now() &gt; BBR.probe_rtt_done_stamp)
       /* schedule next ProbeRTT: */
       BBR.probe_rtt_min_stamp = Now()
-      BBRRestoreCwnd()
-      BBRExitProbeRTT()
+      RestoreCwnd()
+      ExitProbeRTT()
 </pre><a href="#section-5.3.4.3-5" class="pilcrow">¶</a>
 </div>
 </section>
@@ -4050,7 +4050,7 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
             </h5>
 <p id="section-5.3.4.4-1">When exiting ProbeRTT, BBR transitions to ProbeBW if it estimates the pipe
 was filled already, or Startup otherwise.<a href="#section-5.3.4.4-1" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.4-2">When transitioning out of ProbeRTT, BBR calls BBRResetShortTermModel() to reset
+<p id="section-5.3.4.4-2">When transitioning out of ProbeRTT, BBR calls ResetShortTermModel() to reset
 the short-term model, since any congestion encountered in ProbeRTT may have pulled
 it far below the capacity of the path.<a href="#section-5.3.4.4-2" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.4-3">But the algorithm is cautious in timing the next bandwidth probe: raising
@@ -4062,13 +4062,13 @@ ProbeBW_CRUISE.<a href="#section-5.3.4.4-3" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.4-4">To summarize, the logic for exiting ProbeRTT is as follows:<a href="#section-5.3.4.4-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.4.4-5">
 <pre>
-  BBRExitProbeRTT():
-    BBRResetShortTermModel()
+  ExitProbeRTT():
+    ResetShortTermModel()
     if (BBR.full_bw_reached)
-      BBRStartProbeBW_DOWN()
-      BBRStartProbeBW_CRUISE()
+      StartProbeBW_DOWN()
+      StartProbeBW_CRUISE()
     else
-      BBREnterStartup()
+      EnterStartup()
 </pre><a href="#section-5.3.4.4-5" class="pilcrow">¶</a>
 </div>
 </section>
@@ -4099,17 +4099,17 @@ idle during ProbeRTT then often it will have met those exit conditions by
 the time it restarts, so that the connection can restore C.cwnd to its full
 value before it starts transmitting a new flight of data.<a href="#section-5.4.1-2" class="pilcrow">¶</a></p>
 <p id="section-5.4.1-3">More precisely, the BBR algorithm takes the following steps in
-BBRHandleRestartFromIdle() before sending a packet for a flow:<a href="#section-5.4.1-3" class="pilcrow">¶</a></p>
+HandleRestartFromIdle() before sending a packet for a flow:<a href="#section-5.4.1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.4.1-4">
 <pre>
-  BBRHandleRestartFromIdle():
+  HandleRestartFromIdle():
     if (C.inflight == 0 &amp;&amp; C.app_limited)
       BBR.idle_restart = true
       BBR.extra_acked_interval_start = Now()
       if (IsInAProbeBWState())
-        BBRSetPacingRateWithGain(1)
+        SetPacingRateWithGain(1)
       else if (BBR.state == ProbeRTT)
-        BBRCheckProbeRTTDone()
+        CheckProbeRTTDone()
 </pre><a href="#section-5.4.1-4" class="pilcrow">¶</a>
 </div>
 </section>
@@ -4173,7 +4173,7 @@ packet, using the following pseudocode:<a href="#section-5.5.1-2" class="pilcrow
 <p id="section-5.5.1-3">Upon connection initialization:<a href="#section-5.5.1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.1-4">
 <pre>
-  BBRInitRoundCounting():
+  InitRoundCounting():
     BBR.next_round_delivered = 0
     BBR.round_start = false
     BBR.round_count = 0
@@ -4200,16 +4200,16 @@ the following logic to see if a round trip has elapsed, and if so, increment
 the count of such round trips elapsed:<a href="#section-5.5.1-9" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.1-10">
 <pre>
-  BBRUpdateRound():
+  UpdateRound():
     if (packet.delivered &gt;= BBR.next_round_delivered)
-      BBRStartRound()
+      StartRound()
       BBR.round_count++
       BBR.rounds_since_bw_probe++
       BBR.round_start = true
     else
       BBR.round_start = false
 
-  BBRStartRound():
+  StartRound():
     BBR.next_round_delivered = C.delivered
 </pre><a href="#section-5.5.1-10" class="pilcrow">¶</a>
 </div>
@@ -4302,11 +4302,11 @@ estimate, since this indicates the current BBR.Max_bw estimate is too low.<a hre
 <a href="#section-5.5.5" class="section-number selfRef">5.5.5. </a><a href="#name-updating-the-bbrmax_bw-max-" class="section-name selfRef">Updating the BBR.max_bw Max Filter</a>
           </h4>
 <p id="section-5.5.5-1">For every ACK that acknowledges some data packets as delivered, BBR invokes
-BBRUpdateMaxBw() to update the BBR.max_bw estimator as follows:<a href="#section-5.5.5-1" class="pilcrow">¶</a></p>
+UpdateMaxBw() to update the BBR.max_bw estimator as follows:<a href="#section-5.5.5-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.5-2">
 <pre>
-  BBRUpdateMaxBw()
-    BBRUpdateRound()
+  UpdateMaxBw()
+    UpdateRound()
     if (RS.delivery_rate &gt; 0 &amp;&amp;
         (RS.delivery_rate &gt;= BBR.max_bw || !RS.is_app_limited))
         BBR.max_bw = UpdateWindowedMaxFilter(
@@ -4338,7 +4338,7 @@ needs to track samples from two time slots: the previous ProbeBW cycle and the
 current ProbeBW cycle:<a href="#section-5.5.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.6-2">
 <pre>
-  BBRAdvanceMaxBwFilter():
+  AdvanceMaxBwFilter():
     BBR.cycle_count++
 </pre><a href="#section-5.5.6-2" class="pilcrow">¶</a>
 </div>
@@ -4447,7 +4447,7 @@ This varies based on the transport protocol and operating environment.<a href="#
 <p id="section-5.5.8.1-2">For TCP, offload_budget can be computed as follows:<a href="#section-5.5.8.1-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.8.1-3">
 <pre>
-    BBRUpdateOffloadBudget():
+    UpdateOffloadBudget():
       BBR.offload_budget = 3 * C.send_quantum
 </pre><a href="#section-5.5.8.1-3" class="pilcrow">¶</a>
 </div>
@@ -4474,7 +4474,7 @@ the receiver host's LRO/GRO/delayed-ACK engine<a href="#section-5.5.8.1-5.3.1" c
 <p id="section-5.5.8.2-1">For QUIC, in the simplest case, offload_budget is equal to the send quantum:<a href="#section-5.5.8.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.8.2-2">
 <pre>
-    BBRUpdateOffloadBudget():
+    UpdateOffloadBudget():
       BBR.offload_budget = C.send_quantum
 </pre><a href="#section-5.5.8.2-2" class="pilcrow">¶</a>
 </div>
@@ -4520,7 +4520,7 @@ measured degree of aggregation.<a href="#section-5.5.9-4" class="pilcrow">¶</a>
 <p id="section-5.5.9-5">More precisely, this is computed as:<a href="#section-5.5.9-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.9-6">
 <pre>
-  BBRUpdateACKAggregation():
+  UpdateACKAggregation():
     /* Find excess ACKed beyond expected amount over this interval */
     interval = (Now() - BBR.extra_acked_interval_start)
     expected_delivered = BBR.bw * interval
@@ -4586,13 +4586,13 @@ reduces BBR.inflight_longterm:<a href="#section-5.5.10.2-1" class="pilcrow">¶</
     return ((RS.lost &gt; RS.tx_in_flight * BBR.LossThresh) ||
             (RS.lost &gt; 0 &amp;&amp; !C.has_selective_acks))
 
-  BBRHandleInflightTooHigh():
+  HandleInflightTooHigh():
     BBR.bw_probe_samples = 0;  /* only react once per bw probe */
     if (!RS.is_app_limited)
       BBR.inflight_longterm = max(RS.tx_in_flight,
-                            BBRTargetInflight() * BBR.Beta))
+                            TargetInflight() * BBR.Beta))
     If (BBR.state == ProbeBW_UP)
-      BBRStartProbeBW_DOWN()
+      StartProbeBW_DOWN()
 </pre><a href="#section-5.5.10.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-5.5.10.2-3">Here RS.tx_in_flight is the C.inflight value
@@ -4637,25 +4637,25 @@ represents the data lost among that previous in-flight data.<a href="#section-5.
 <p id="section-5.5.10.2-11">In pseudocode:<a href="#section-5.5.10.2-11" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.10.2-12">
 <pre>
-  BBRNoteLoss()
+  NoteLoss()
     if (!BBR.loss_in_round)   /* first loss in this round trip? */
       BBR.loss_round_delivered = C.delivered
-      BBRSaveStateUponLoss()
+      SaveStateUponLoss()
     BBR.loss_in_round = 1
 
-  BBRHandleLostPacket(packet):
-    BBRNoteLoss()
+  HandleLostPacket(packet):
+    NoteLoss()
     if (!BBR.bw_probe_samples)
       return /* not a packet sent while probing bandwidth */
     RS.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
     RS.lost = C.lost - P.lost /* data lost since transmit */
     RS.is_app_limited = P.is_app_limited;
     if (IsInflightTooHigh())
-      RS.tx_in_flight = BBRInflightAtLoss(rs, packet)
-      BBRHandleInflightTooHigh()
+      RS.tx_in_flight = InflightAtLoss(rs, packet)
+      HandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
-  BBRInflightAtLoss(RS, packet):
+  InflightAtLoss(RS, packet):
     size = packet.size
     /* What was in flight before this packet? */
     inflight_prev = RS.tx_in_flight - size
@@ -4704,7 +4704,7 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
 <div class="alignLeft art-text artwork" id="section-5.5.10.3-9">
 <pre>
   /* Near start of ACK processing: */
-  BBRUpdateLatestDeliverySignals():
+  UpdateLatestDeliverySignals():
     BBR.loss_round_start = 0
     BBR.bw_latest       = max(BBR.bw_latest,       RS.delivery_rate)
     BBR.inflight_latest = max(BBR.inflight_latest, RS.delivered)
@@ -4713,51 +4713,51 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
       BBR.loss_round_start = 1
 
   /* Near end of ACK processing: */
-  BBRAdvanceLatestDeliverySignals():
+  AdvanceLatestDeliverySignals():
     if (BBR.loss_round_start)
       BBR.bw_latest       = RS.delivery_rate
       BBR.inflight_latest = RS.delivered
 
-  BBRResetCongestionSignals():
+  ResetCongestionSignals():
     BBR.loss_in_round = 0
     BBR.bw_latest = 0
     BBR.inflight_latest = 0
 
   /* Update congestion state on every ACK */
-  BBRUpdateCongestionSignals():
-    BBRUpdateMaxBw()
+  UpdateCongestionSignals():
+    UpdateMaxBw()
     if (!BBR.loss_round_start)
       return  /* wait until end of round trip */
-    BBRAdaptLowerBoundsFromCongestion()  /* once per round, adapt */
+    AdaptLowerBoundsFromCongestion()  /* once per round, adapt */
     BBR.loss_in_round = 0
 
   /* Once per round-trip respond to congestion */
-  BBRAdaptLowerBoundsFromCongestion():
-    if (BBRIsProbingBW())
+  AdaptLowerBoundsFromCongestion():
+    if (IsProbingBW())
       return
     if (BBR.loss_in_round)
-      BBRInitLowerBounds()
-      BBRLossLowerBounds()
+      InitLowerBounds()
+      LossLowerBounds()
 
   /* Handle the first congestion episode in this cycle */
-  BBRInitLowerBounds():
+  InitLowerBounds():
     if (BBR.bw_shortterm == Infinity)
       BBR.bw_shortterm = BBR.max_bw
     if (BBR.inflight_shortterm == Infinity)
       BBR.inflight_shortterm = C.cwnd
 
   /* Adjust model once per round based on loss */
-  BBRLossLowerBounds()
+  LossLowerBounds()
     BBR.bw_shortterm       = max(BBR.bw_latest,
                           BBR.Beta * BBR.bw_shortterm)
     BBR.inflight_shortterm = max(BBR.inflight_latest,
                           BBR.Beta * BBR.inflight_shortterm)
 
-  BBRResetShortTermModel():
+  ResetShortTermModel():
     BBR.bw_shortterm       = Infinity
     BBR.inflight_shortterm = Infinity
 
-  BBRBoundBWForModel():
+  BoundBWForModel():
     BBR.bw = min(BBR.max_bw, BBR.bw_shortterm)
 
 </pre><a href="#section-5.5.10.3-9" class="pilcrow">¶</a>
@@ -4792,7 +4792,7 @@ state as follows:<a href="#section-5.5.11.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.11.1-2">
 <pre>
   /* Save state in case a loss episode is later declared spurious */
-  BBRSaveStateUponLoss():
+  SaveStateUponLoss():
     BBR.undo_state       = BBR.state
     BBR.undo_bw_shortterm       = BBR.bw_shortterm
     BBR.undo_inflight_shortterm = BBR.inflight_shortterm
@@ -4811,18 +4811,18 @@ state to their previously saved values as follows:<a href="#section-5.5.11.2-1" 
 <div class="alignLeft art-text artwork" id="section-5.5.11.2-2">
 <pre>
   /* Handle a declaration of a spurious loss episode */
-  BBRHandleSpuriousLossDetection():
+  HandleSpuriousLossDetection():
     BBR.loss_in_round = 0
-    BBRResetFullBW():
+    ResetFullBW():
     BBR.bw_shortterm       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
     BBR.inflight_shortterm = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
     BBR.inflight_longterm = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)
     /* If flow was probing bandwidth, return to that state: */
     if (BBR.state != ProbeRTT &amp;&amp; BBR.state != BBR.undo_state)
       if (BBR.undo_state == Startup)
-        BBREnterStartup()
+        EnterStartup()
       else if (BBR.undo_state == ProbeBW_UP)
-        BBRStartProbeBW_UP()
+        StartProbeBW_UP()
 </pre><a href="#section-5.5.11.2-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -4872,7 +4872,7 @@ to compute C.cwnd.<a href="#section-5.6.1-2.6.1" class="pilcrow">¶</a></p>
           </ul>
 <p id="section-5.6.1-3">The control behavior can be summarized as follows. Upon processing each ACK,
 BBR uses the values in the table below to compute BBR.bw in
-BBRBoundBWForModel(), and C.cwnd in BBRBoundCwndForModel():<a href="#section-5.6.1-3" class="pilcrow">¶</a></p>
+BoundBWForModel(), and C.cwnd in BoundCwndForModel():<a href="#section-5.6.1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.1-4">
 <pre>
 ---------------+--------+--------+------+--------------+-----------------
@@ -4933,7 +4933,7 @@ initial congestion window ("C.InitialCwnd", e.g. from <span>[<a href="#RFC6928" 
 initial C.srtt after the first non-zero RTT sample, and the initial pacing_gain:<a href="#section-5.6.2-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.2-6">
 <pre>
-  BBRInitPacingRate():
+  InitPacingRate():
     nominal_bandwidth = C.InitialCwnd / (C.srtt ? C.srtt : 1ms)
     C.pacing_rate =  BBR.StartupPacingGain * nominal_bandwidth
 </pre><a href="#section-5.6.2-6" class="pilcrow">¶</a>
@@ -4946,16 +4946,16 @@ helps the connection probe robustly for bandwidth until it estimates it has
 reached its full available bandwidth ("filled the pipe"). In particular,
 this prevents the pacing rate from being reduced when the connection has only
 seen application-limited bandwidth samples. BBR updates the pacing rate on each
-ACK by executing the BBRSetPacingRate() step as follows:<a href="#section-5.6.2-7" class="pilcrow">¶</a></p>
+ACK by executing the SetPacingRate() step as follows:<a href="#section-5.6.2-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.2-8">
 <pre>
-  BBRSetPacingRateWithGain(pacing_gain):
+  SetPacingRateWithGain(pacing_gain):
     rate = pacing_gain * bw * (100 - BBR.PacingMarginPercent) / 100
     if (BBR.full_bw_reached || rate &gt; C.pacing_rate)
       C.pacing_rate = rate
 
-  BBRSetPacingRate():
-    BBRSetPacingRateWithGain(C.pacing_gain)
+  SetPacingRate():
+    SetPacingRateWithGain(C.pacing_gain)
 </pre><a href="#section-5.6.2-8" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6.2-9">To help drive the network toward lower queues and low latency while maintaining
@@ -4988,11 +4988,11 @@ in lower CPU overheads at the sending and receiving hosts, who can ship larger
 amounts of data with a single trip through the networking stack.<a href="#section-5.6.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-5.6.3-3">On each ACK, BBR runs BBRSetSendQuantum() to update C.send_quantum  as
+<p id="section-5.6.3-3">On each ACK, BBR runs SetSendQuantum() to update C.send_quantum  as
 follows:<a href="#section-5.6.3-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.3-4">
 <pre>
-  BBRSetSendQuantum():
+  SetSendQuantum():
     C.send_quantum = C.pacing_rate * 1ms
     C.send_quantum = min(C.send_quantum, 64 KBytes)
     C.send_quantum = max(C.send_quantum, 2 * C.SMSS)
@@ -5049,32 +5049,32 @@ considerations have been satisfied: the flow is not in loss recovery, does not
 need to probe BBR.min_rtt, and has accumulated confidence in its model
 parameters by receiving enough ACKs to gradually grow the current C.cwnd to meet
 the BBR.max_inflight.<a href="#section-5.6.4.2-1" class="pilcrow">¶</a></p>
-<p id="section-5.6.4.2-2">On each ACK, BBR calculates the BBR.max_inflight in BBRUpdateMaxInflight()
+<p id="section-5.6.4.2-2">On each ACK, BBR calculates the BBR.max_inflight in UpdateMaxInflight()
 as follows:<a href="#section-5.6.4.2-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.2-3">
 <pre>
-  BBRBDPMultiple(gain):
+  BDPMultiple(gain):
     if (BBR.min_rtt == Infinity)
       return C.InitialCwnd /* no valid RTT samples yet */
     BBR.bdp = BBR.bw * BBR.min_rtt
     return gain * BBR.bdp
 
-  BBRQuantizationBudget(inflight_cap)
-    BBRUpdateOffloadBudget()
+  QuantizationBudget(inflight_cap)
+    UpdateOffloadBudget()
     inflight_cap = max(inflight_cap, BBR.offload_budget)
     inflight_cap = max(inflight_cap, BBR.MinPipeCwnd)
     if (BBR.state == ProbeBW_UP)
       inflight_cap += 2*C.SMSS
     return inflight_cap
 
-  BBRInflight(gain):
-    inflight_cap = BBRBDPMultiple(gain)
-    return BBRQuantizationBudget(inflight_cap)
+  Inflight(gain):
+    inflight_cap = BDPMultiple(gain)
+    return QuantizationBudget(inflight_cap)
 
-  BBRUpdateMaxInflight():
-    inflight_cap = BBRBDPMultiple(BBR.cwnd_gain)
+  UpdateMaxInflight():
+    inflight_cap = BDPMultiple(BBR.cwnd_gain)
     inflight_cap += BBR.extra_acked
-    BBR.max_inflight = BBRQuantizationBudget(inflight_cap)
+    BBR.max_inflight = QuantizationBudget(inflight_cap)
 </pre><a href="#section-5.6.4.2-3" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6.4.2-4">The "estimated_bdp" term tries to allow enough packets in flight to fully
@@ -5124,18 +5124,18 @@ event was spurious.<a href="#section-5.6.4.4-4" class="pilcrow">¶</a></p>
 <p id="section-5.6.4.4-6">Upon retransmission timeout (RTO):<a href="#section-5.6.4.4-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.4-7">
 <pre>
-  BBROnEnterRTO():
-    BBRSaveCwnd()
-    BBRSaveStateUponLoss()
+  OnEnterRTO():
+    SaveCwnd()
+    SaveStateUponLoss()
     C.cwnd = C.inflight + 1
 </pre><a href="#section-5.6.4.4-7" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6.4.4-8">Upon entering Fast Recovery:<a href="#section-5.6.4.4-8" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.4-9">
 <pre>
-  BBROnEnterFastRecovery():
-    BBRSaveCwnd()
-    BBRSaveStateUponLoss()
+  OnEnterFastRecovery():
+    SaveCwnd()
+    SaveStateUponLoss()
 </pre><a href="#section-5.6.4.4-9" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6.4.4-10">Upon exiting loss recovery (RTO recovery or Fast Recovery), either by repairing
@@ -5143,25 +5143,25 @@ all losses or undoing recovery, BBR restores the best-known cwnd value we
 had upon entering loss recovery:<a href="#section-5.6.4.4-10" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.4-11">
 <pre>
-  BBRRestoreCwnd()
+  RestoreCwnd()
 </pre><a href="#section-5.6.4.4-11" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6.4.4-12">Note that exiting loss recovery happens during ACK processing, and at the
-end of ACK processing BBRBoundCwndForModel() will bound the cwnd based on
+end of ACK processing BoundCwndForModel() will bound the cwnd based on
 the current model parameters. Thus the cwnd and pacing rate after loss recovery
 will generally be smaller than the values entering loss recovery.<a href="#section-5.6.4.4-12" class="pilcrow">¶</a></p>
-<p id="section-5.6.4.4-13">The BBRSaveCwnd() and BBRRestoreCwnd() helpers help remember and restore
+<p id="section-5.6.4.4-13">The SaveCwnd() and RestoreCwnd() helpers help remember and restore
 the last-known good C.cwnd (the latest C.cwnd unmodulated by loss recovery or
 ProbeRTT), and is defined as follows:<a href="#section-5.6.4.4-13" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.4-14">
 <pre>
-  BBRSaveCwnd():
+  SaveCwnd():
     if (!InLossRecovery() &amp;&amp; BBR.state != ProbeRTT)
       BBR.prior_cwnd = C.cwnd
     else
       BBR.prior_cwnd = max(BBR.prior_cwnd, C.cwnd)
 
-  BBRRestoreCwnd():
+  RestoreCwnd():
     C.cwnd = max(C.cwnd, BBR.prior_cwnd)
 </pre><a href="#section-5.6.4.4-14" class="pilcrow">¶</a>
 </div>
@@ -5179,14 +5179,14 @@ this mode, BBR bounds C.cwnd to BBR.MinPipeCwnd, the minimal value that
 allows pipelining (see the "Minimum cwnd for Pipelining" section, above):<a href="#section-5.6.4.5-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.5-2">
 <pre>
-  BBRProbeRTTCwnd():
-    probe_rtt_cwnd = BBRBDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)
+  ProbeRTTCwnd():
+    probe_rtt_cwnd = BDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)
     probe_rtt_cwnd = max(probe_rtt_cwnd, BBR.MinPipeCwnd)
     return probe_rtt_cwnd
 
-  BBRBoundCwndForProbeRTT():
+  BoundCwndForProbeRTT():
     if (BBR.state == ProbeRTT)
-      C.cwnd = min(C.cwnd, BBRProbeRTTCwnd())
+      C.cwnd = min(C.cwnd, ProbeRTTCwnd())
 </pre><a href="#section-5.6.4.5-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -5204,18 +5204,18 @@ to the BBR.max_inflight. When C.cwnd is below BBR.max_inflight, BBR raises
 C.cwnd gradually and cautiously, increasing C.cwnd by no more than the amount of
 data acknowledged (cumulatively or selectively) upon each ACK.<a href="#section-5.6.4.6-1" class="pilcrow">¶</a></p>
 <p id="section-5.6.4.6-2">Specifically, on each ACK that acknowledges "RS.newly_acked" packets as newly
-acknowledged, BBR runs the following BBRSetCwnd() steps to update C.cwnd:<a href="#section-5.6.4.6-2" class="pilcrow">¶</a></p>
+acknowledged, BBR runs the following SetCwnd() steps to update C.cwnd:<a href="#section-5.6.4.6-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.6-3">
 <pre>
-  BBRSetCwnd():
-    BBRUpdateMaxInflight()
+  SetCwnd():
+    UpdateMaxInflight()
     if (BBR.full_bw_reached)
       C.cwnd = min(C.cwnd + RS.newly_acked, BBR.max_inflight)
     else if (C.cwnd &lt; BBR.max_inflight || C.delivered &lt; C.InitialCwnd)
       C.cwnd = C.cwnd + RS.newly_acked
     C.cwnd = max(C.cwnd, BBR.MinPipeCwnd)
-    BBRBoundCwndForProbeRTT()
-    BBRBoundCwndForModel()
+    BoundCwndForProbeRTT()
+    BoundCwndForModel()
 </pre><a href="#section-5.6.4.6-3" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6.4.6-4">There are several considerations embodied in the logic above. If BBR has
@@ -5241,14 +5241,14 @@ a floor of BBR.MinPipeCwnd in order to allow pipelining even with small BDPs
 State Machine" section:<a href="#section-5.6.4.7-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.7-2">
 <pre>
-  BBRBoundCwndForModel():
+  BoundCwndForModel():
     cap = Infinity
     if (IsInAProbeBWState() &amp;&amp;
         BBR.state != ProbeBW_CRUISE)
       cap = BBR.inflight_longterm
     else if (BBR.state == ProbeRTT ||
              BBR.state == ProbeBW_CRUISE)
-      cap = BBRInflightWithHeadroom()
+      cap = InflightWithHeadroom()
 
     /* apply BBR.inflight_shortterm (possibly infinite): */
     cap = min(cap, BBR.inflight_shortterm)
