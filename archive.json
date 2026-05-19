@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-05-14T03:33:49.896387+00:00",
+  "timestamp": "2026-05-19T03:40:44.348089+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1416,7 +1416,7 @@
       "id": "I_kwDOL3MllM8AAAABBd6LFw",
       "title": "Do all psuedocode methods need to start with BBR?",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/107",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -1427,8 +1427,8 @@
       ],
       "body": "Starting all the methods with BBR can make the names a bit awkward, for example BBRBDPMultiple.\n\nParticularly for methods that are only used within a section, maybe we can drop the BBR from the front?",
       "createdAt": "2026-05-06T18:09:17Z",
-      "updatedAt": "2026-05-11T20:39:15Z",
-      "closedAt": null,
+      "updatedAt": "2026-05-18T21:02:57Z",
+      "closedAt": "2026-05-18T21:02:57Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -1438,6 +1438,22 @@
           "updatedAt": "2026-05-10T18:29:18Z"
         }
       ]
+    },
+    {
+      "number": 109,
+      "id": "I_kwDOL3MllM8AAAABCo-BjA",
+      "title": "risks of an inflated BBR.min_rtt during PROBE_RTT",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/109",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "A problem: AFAICT there are 2 related potential issues with interactions between min_rtt and PROBE_RTT time intervals:\n\n+ (1) If the probe RTT window equals the min RTT window (as recent discussions have discussed ProbeRTTInterval == MinRTTFilterLen == 10 sec) then when BBRv3 enters PROBE_RTT, we will also expire min_rtt, so we will use a bad min RTT (quite likely very inflated) for the BDP calculation used to size cwnd during BBRv3 PROBE_RTT.\n+ (2) Even if the probe RTT window is 5 sec and the min RTT window is 10 sec, after a long idle period (longer than 10 sec) both might expire. And in such cases, with the current BBRv3 logic we might enter PROBE_RTT and use a bad min RTT (quite likely very inflated) for the\u00a0 BDP calculation.\n\nA solution: a possible improvement:\u00a0\n\n+ revert min_rtt and PROBE_RTT logic to mostly match\u00a0 the vastly simpler BBRv1 logic\u00a0\n\n+ use 10 sec min_rtt window and 10 sec probe_rtt window, as in BBRv1\u00a0\n\n+ before expiring the min_rtt sample, set a probe_rtt_cwnd to 0.5*estimated_BDP based on the old, pre-expiration min_rtt\u00a0\n\n+ even with the new probe_rtt_cwnd field, it's still a net reduction in space because we can get rid of the following 3 fields:\n     + BBR.probe_rtt_min_delay: The minimum RTT sample recorded in the last ProbeRTTInterval.\n     + BBR.probe_rtt_min_stamp: The wall clock time at which the current BBR.probe_rtt_min_delay sample was obtained.\n     + BBR.probe_rtt_expired: A boolean recording whether the BBR.probe_rtt_min_delay has expired and is due for a refresh with an application idle period or a transition into ProbeRTT state.",
+      "createdAt": "2026-05-18T19:56:57Z",
+      "updatedAt": "2026-05-18T19:56:57Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -7471,24 +7487,26 @@
       "id": "PR_kwDOL3MllM7SGrt1",
       "title": "Add considerations for ACK_FREQUENCY and ACK_RECEIVE_TIMESTAMPS QUIC extensions",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/105",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "  - Describe how reduced ACK frequency affects delivery rate sampling and round-trip counting.\r\n  - Provide per-phase guidance on when to increase or decrease ACK frequency.\r\n  - Reference both QUIC ACK-FREQUENCY and TCP TARR extensions.\r\n  - Note how QUIC Receive Timestamps can improve measurement fidelity under reduced ACK frequency.\r\n  - Warn against conflating sender-requested ACK thinning with network-induced aggregation in the extra_acked estimator.",
       "createdAt": "2026-04-13T20:15:42Z",
-      "updatedAt": "2026-05-11T22:13:25Z",
+      "updatedAt": "2026-05-18T20:38:07Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_ackfrequency",
       "headRefOid": "870ddcdb06da71df9c9b6805b4ef7390ae77aeff",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-05-18T20:38:02Z",
+      "mergedAt": "2026-05-18T20:38:01Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "584c1e956e84b57b67dc90b4919c5fe80b2cc713"
+      },
       "comments": [],
       "reviews": [
         {
@@ -7682,6 +7700,19 @@
           "createdAt": "2026-05-11T21:03:22Z",
           "updatedAt": "2026-05-11T21:03:22Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABAR3WDQ",
+          "commit": {
+            "abbreviatedOid": "870ddcd"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "LGTM, thanks!\n",
+          "createdAt": "2026-05-18T20:37:48Z",
+          "updatedAt": "2026-05-18T20:37:48Z",
+          "comments": []
         }
       ]
     },
@@ -7690,7 +7721,7 @@
       "id": "PR_kwDOL3MllM7bMKRt",
       "title": "Remove 'BBR' from pseudocode methods",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/108",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -7699,17 +7730,19 @@
       ],
       "body": "Fixes #107",
       "createdAt": "2026-05-13T15:57:52Z",
-      "updatedAt": "2026-05-13T15:59:03Z",
+      "updatedAt": "2026-05-18T21:02:57Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "1dffcecb2fef96f915fc9d8614b02a74fd305956",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-less-bbr",
       "headRefOid": "c5cc37634370a9794f721438bf4a93975d1b8571",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-05-18T21:02:56Z",
+      "mergedAt": "2026-05-18T21:02:56Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "a1241cde3482b7b760d7ddc11457f39f31b5e6ab"
+      },
       "comments": [],
       "reviews": [
         {
@@ -7731,6 +7764,52 @@
               "updatedAt": "2026-05-13T15:59:03Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABAR2sjQ",
+          "commit": {
+            "abbreviatedOid": "c5cc376"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-05-18T20:36:23Z",
+          "updatedAt": "2026-05-18T20:36:23Z",
+          "comments": [
+            {
+              "originalPosition": 49,
+              "body": "I think it's fine to keep it without a prefix. We have it clearly defined later in the draft.",
+              "createdAt": "2026-05-18T20:36:23Z",
+              "updatedAt": "2026-05-18T20:36:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABAR5x2g",
+          "commit": {
+            "abbreviatedOid": "c5cc376"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-05-18T20:43:08Z",
+          "updatedAt": "2026-05-18T20:43:08Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABASC4gA",
+          "commit": {
+            "abbreviatedOid": "c5cc376"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thanks! LGTM and LG to Gemini (internal version of Antigravity as well).\n\n",
+          "createdAt": "2026-05-18T21:02:38Z",
+          "updatedAt": "2026-05-18T21:02:38Z",
+          "comments": []
         }
       ]
     }
