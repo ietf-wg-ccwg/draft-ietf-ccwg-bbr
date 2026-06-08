@@ -600,6 +600,33 @@ the pipe" in Startup.
 BBR.full_bw_count: The number of non-app-limited round trips without large
 increases in BBR.full_bw.
 
+## ProbeBW State {#probe-bw-state}
+
+BBR.ack_phase: The current phase in a state machine that tracks the meaning of
+the ACK feedback the connection is receiving, with respect to the bandwidth
+probing. The phases are as follows:
+
+~~~~
+  ACKS_INIT: not probing bandwidth; not getting probe feedback
+  ACKS_REFILLING: sending at estimated bandwidth to fill pipe
+  ACKS_PROBE_STARTING: inflight rising to probe bandwidth
+  ACKS_PROBE_FEEDBACK: getting feedback from bandwidth probing
+  ACKS_PROBE_STOPPING: stopped bandwidth probing; still getting feedback
+~~~~
+
+BBR.bw_probe_samples: A boolean tracking whether the connection is receiving rate samples from a bandwidth-probing phase.
+
+BBR.bw_probe_up_acked: The volume of data ACKed since increasing BBR.inflight_longterm.
+
+BBR.probe_up_cnt: The volume of data that must be ACKed before BBR.inflight_longterm is increased by C.SMSS.
+
+BBR.bw_probe_up_rounds: The number of round trips over which BBR.inflight_longterm has been grown in the current ProbeBW_UP episode.
+
+BBR.rounds_since_bw_probe: The number of round trips elapsed since the last bandwidth probe cycle.
+
+BBR.bw_probe_wait: The maximum wall clock time duration BBR waits before probing bandwidth again.
+
+BBR.cycle_stamp: The wall clock time at which the current ProbeBW cycle started.
 
 ## ProbeRTT and min_rtt Parameters and State {#probertt-and-minrtt-parameters-and-state}
 
@@ -1635,6 +1662,15 @@ steps:
     BBR.extra_acked_interval_start = Now()
     BBR.extra_acked_delivered = 0
     BBR.full_bw_reached = false
+    BBR.inflight_longterm = Infinity
+    BBR.probe_up_cnt = Infinity
+    BBR.bw_probe_up_acked = 0
+    BBR.bw_probe_up_rounds = 0
+    BBR.rounds_since_bw_probe = 0
+    BBR.bw_probe_samples = false
+    BBR.ack_phase = ACKS_INIT
+    BBR.cycle_stamp = 0
+    BBR.bw_probe_wait = 0
     ResetCongestionSignals()
     ResetShortTermModel()
     InitRoundCounting()
@@ -2211,7 +2247,7 @@ The core logic for entering each state:
   StartProbeBW_REFILL():
     ResetShortTermModel()
     BBR.bw_probe_up_rounds = 0
-    BBR.bw_probe_up_acks = 0
+    BBR.bw_probe_up_acked = 0
     BBR.ack_phase = ACKS_REFILLING
     StartRound()
     BBR.state = ProbeBW_REFILL
@@ -2252,7 +2288,7 @@ that acknowledges new data, to advance the ProbeBW state machine:
     ProbeBW_REFILL:
       /* After one round of REFILL, start UP */
       if (BBR.round_start)
-        BBR.bw_probe_samples = 1
+        BBR.bw_probe_samples = true
         StartProbeBW_UP()
 
     ProbeBW_UP:
@@ -2308,19 +2344,19 @@ The ancillary logic to implement the ProbeBW state machine:
 
   /* Raise BBR.inflight_longterm slope if appropriate. */
   RaiseInflightLongtermSlope():
-    growth_this_round = 1*C.SMSS << BBR.bw_probe_up_rounds
+    growth_this_round = 1 << BBR.bw_probe_up_rounds
     BBR.bw_probe_up_rounds = min(BBR.bw_probe_up_rounds + 1, 30)
-    BBR.probe_up_cnt = max(C.cwnd / growth_this_round, 1)
+    BBR.probe_up_cnt = max(C.cwnd / growth_this_round, C.SMSS)
 
   /* Increase BBR.inflight_longterm if appropriate. */
   ProbeInflightLongtermUpward():
     if (!C.is_cwnd_limited || C.cwnd < BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
-   BBR.bw_probe_up_acks += RS.newly_acked
-   if (BBR.bw_probe_up_acks >= BBR.probe_up_cnt)
-     delta = BBR.bw_probe_up_acks / BBR.probe_up_cnt
-     BBR.bw_probe_up_acks -= delta * BBR.probe_up_cnt
-     BBR.inflight_longterm += delta
+   BBR.bw_probe_up_acked += RS.newly_acked
+   if (BBR.bw_probe_up_acked >= BBR.probe_up_cnt)
+     delta = BBR.bw_probe_up_acked / BBR.probe_up_cnt
+     BBR.bw_probe_up_acked -= delta * BBR.probe_up_cnt
+     BBR.inflight_longterm += delta * C.SMSS
    if (BBR.round_start)
      RaiseInflightLongtermSlope()
 
@@ -2332,6 +2368,8 @@ The ancillary logic to implement the ProbeBW state machine:
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
     if (BBR.ack_phase == ACKS_PROBE_STOPPING && BBR.round_start)
       /* end of samples from bw probing phase */
+      BBR.bw_probe_samples = false
+      BBR.ack_phase = ACKS_INIT
       if (IsInAProbeBWState() && !RS.is_app_limited)
         AdvanceMaxBwFilter()
 
@@ -2984,7 +3022,7 @@ reduces BBR.inflight_longterm:
             (RS.lost > 0 && !C.has_selective_acks))
 
   HandleInflightTooHigh():
-    BBR.bw_probe_samples = 0;  /* only react once per bw probe */
+    BBR.bw_probe_samples = false;  /* only react once per bw probe */
     if (!RS.is_app_limited)
       BBR.inflight_longterm = max(RS.tx_in_flight,
                             TargetInflight() * BBR.Beta))
