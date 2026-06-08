@@ -306,16 +306,19 @@ h1, h2, h3, h4, h5, h6 {
   font-size-adjust: 0.5;
   color: var(--title-color);
 }
-h1#title {
-  font-size: 32px;
-  line-height: 40px;
-  clear: both;
-}
-h1#title, h1#rfcnum {
-  margin: 1.5em 0 0.2em;
-}
-h1#rfcnum + h1#title {
-  margin: 0.2em 0;
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
 }
 
 h1, h2, h3 {
@@ -335,10 +338,10 @@ h4, h5, h6 {
 #abstract+p {
   font-size: 18px;
   line-height: 24px;
-}
-#abstract+p code, #abstract+p samp, #abstract+p tt {
-  font-size: 16px;
-  line-height: 0;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
 }
 
 p {
@@ -349,59 +352,59 @@ p {
 div {
   margin: 0;
 }
-.alignRight.art-text {
-  background-color: var(--highlight-color);
-  border: 1px solid var(--line-color);
-  border-radius: 3px;
-  padding: 0.5em 1em 0;
-  margin-bottom: 0.5em;
-}
-.alignRight.art-text pre {
-  padding: 0;
-  width: auto;
-}
 .alignRight {
   margin: 1em 0;
-}
-.alignRight > *:first-child {
-  border: none;
-  margin: 0;
-  float: right;
-  clear: both;
-}
-.alignRight > *:nth-child(2) {
-  clear: both;
-  display: block;
-  border: none;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
 }
 svg {
   display: block;
-}
-/* font-family isn't space-separated, but =~ will have to do */
-svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
-  font-family: var(--font-mono);
-}
-.alignCenter.art-text {
-  background-color: var(--highlight-color);
-  border: 1px solid var(--line-color);
-  border-radius: 3px;
-  padding: 0.5em 1em 0;
-  margin-bottom: 0.5em;
-}
-.alignCenter.art-text pre {
-  padding: 0;
-  width: auto;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
 }
 .alignCenter {
   margin: 1em 0;
-}
-.alignCenter > *:first-child {
-  border: none;
-  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
-     support flexbox yet.
-  */
-  display: table;
-  margin: 0 auto;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
 }
 
 /* lists */
@@ -439,26 +442,25 @@ dl {
     --indent: 5ch;
     & > dt {
       min-width: calc(var(--indent) - 2ch);
+      float: none;
     }
-  }
-  &.olPercent > dt {
-    float: none;
   }
 
   dl > dd > & {
     margin-top: 0.5em;
     margin-bottom: 0;
   }
-}
-dl:not(.dlNewline) > dt {
-  float: left;
-  margin-right: 2ch;
-  min-width: 8ch;
-}
-dl > dd {
-  margin-bottom: .8em;
-  margin-left: var(--indent) !important; /* stupid element overrides */
-  min-height: 2ex;
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
 }
 :is(dl.compact, .dlCompact) > dd {
   margin-bottom: 0;
@@ -474,20 +476,22 @@ dl > dd {
 }
 
 /* links */
-a, a[href].selfRef:hover {
+a {
   text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
 }
-a[href] {
-  color: var(--link-color);
-}
-a[href].selfRef, .iref + a[href].internal {
+.iref + a[href].internal {
   color: var(--text-color);
-}
-a[href]:hover {
-  text-decoration: underline;
-}
-a[href].selfRef:hover {
-  background-color: var(--highlight-color);
 }
 a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
   white-space: nowrap;
@@ -523,9 +527,9 @@ img {
 figure {
   margin: 0.5em 0;
   padding: 0;
-}
-figure blockquote {
-  margin: 0.8em 0.4em 0.4em;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
 }
 figcaption, caption {
   font-style: italic;
@@ -535,17 +539,19 @@ figcaption, caption {
 }
 @media screen {
   /* Auto-collapse boilerplate. */
-  :is(#status-of-memo, #copyright) p {
-    margin: -2px 0;
-    max-height: 0;
-    transition: max-height 2s ease, margin 0.5s ease 0.5s;
-    overflow: hidden;
-  }
-  :is(#status-of-memo, #copyright):hover p,
-  :is(#status-of-memo, #copyright) h2:target ~ p {
-    margin: 0.5em 0;
-    max-height: 500px;
-    overflow: auto;
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
   }
   pre, svg {
     display: inline-block;
@@ -595,25 +601,17 @@ table {
   max-width: 100%;
   margin: 0 0 1em;
   border-collapse: collapse;
-}
-table.right {
-  margin-left: auto;
-}
-table.center {
-  margin-left: auto;
-  margin-right: auto;
-}
-table.left {
-  margin-right: auto;
-}
-table .text-left {
-  text-align: left;
-}
-table .text-center {
-  text-align: center;
-}
-table .text-right {
-  text-align: right;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
 }
 
 thead, tbody {
@@ -633,13 +631,6 @@ th {
 :is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
   background-color: var(--highlight-color);
 }
-table caption {
-  margin: 0;
-  padding: 3px 0 3px 1em;
-}
-table p {
-  margin: 0;
-}
 
 /* pilcrow */
 a.pilcrow {
@@ -650,18 +641,16 @@ a.pilcrow {
     color: var(--pilcrow-weak);
     &:hover { text-decoration: none; }
   }
-}
-@media not print {
-  :hover > a.pilcrow, a.pilcrow:focus {
-    opacity: 1;
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
   }
-  a.pilcrow[href]:hover {
-    color: var(--pilcrow-strong);
-    background-color: transparent;
-  }
-}
-@media print {
-  a.pilcrow {
+  @media print {
     display: none;
   }
 }
@@ -720,9 +709,9 @@ sub, sup {
   font-size: 0.9em;
   font-style: italic;
   margin-top: 2em;
-}
-.docInfo .prepared {
-  float: right;
+  & .prepared {
+    float: right;
+  }
 }
 
 /* table of contents */
@@ -812,23 +801,27 @@ hr.addr {
   max-width: calc(100% - 16px);
 }
 @media (min-width: 500px) {
-  #authors-addresses > section {
-    column-count: 2;
-    column-gap: 20px;
-  }
-  #authors-addresses > section > h2 {
-    column-span: all;
-  }
-  /* hack for break-inside: avoid-column */
-  #authors-addresses address {
-    display: inline-block;
-    break-inside: avoid-column;
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
   }
 }
 
 /* Comments */
-.rfcEditorRemove p:first-of-type {
-  font-style: italic;
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
 }
 .cref {
   background-color: rgba(249, 232, 105, 0.3);
@@ -839,19 +832,21 @@ hr.addr {
 }
 
 @media screen {
-  #toc nav {
-    font-family: var(--font-title);
-    font-weight: 360;
-    & > ul { margin-bottom: 2em; }
-    & ul {
-      margin: 0 0 0 4px;
-      & :is(p, li) {
-        margin: 2px 0;
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
       }
     }
-  }
-  #toc a.toplink {
-    float: right;
+    & a.toplink {
+      float: right;
+    }
   }
 }
 @media not screen {
@@ -872,54 +867,54 @@ hr.addr {
     margin: 0;
     border-bottom: 1px solid #ccc;
     opacity: 0.6;
-  }
-  #toc h2 {
-    margin: 0;
-    padding: 2px 0 2px 6px;
-    padding-right: 1em;
-    font-size: 18px;
-    line-height: 24px;
-    min-width: 190px;
-    text-align: right;
-    background-color: #444;
-    color: white;
-    cursor: pointer;
-    &::before { /* css hamburger */
-      float: right;
-      position: relative;
-      width: 1em;
-      height: 1px;
-      left: -164px;
-      margin: 8px 0 0 0;
-      background: white none repeat scroll 0 0;
-      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
-      content: "";
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
     }
-  }
-  #toc nav {
-    display: none;
-    background-color: var(--background-color);
-    padding: 0.5em 1em 1em;
-    overflow: auto;
-    overscroll-behavior: contain;
-    height: calc(100vh - 48px);
-    border-left: 1px solid #ddd;
-  }
-  #toc.active {
-    opacity: 1;
-    & nav { display: block; }
-  }
-  /* Make the collapsed ToC header render white on gray also when it's a link */
-  #toc h2 a,
-  #toc h2 a:is(:link, :focus, :hover),
-  #toc a.toplink,
-  #toc a.toplink:hover {
-    color: white;
-    background-color: #444;
-    text-decoration: none;
-  }
-  #toc a.toplink {
-    margin: 2px 0.5em 0;
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
   }
 }
 
@@ -938,26 +933,26 @@ hr.addr {
     margin: 0;
     padding: 0;
     z-index: 1;
-  }
-  #toc h2 {
-    margin: 0;
-    padding: 0.25em 1em 1em 0;
-  }
-  #toc nav {
-    display: block;
-    height: calc(90vh - 84px);
-    bottom: 0;
-    padding: 0.5em 0 2em;
-    overflow: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
   }
   img { /* future proofing */
     max-width: 100%;
     height: auto;
-  }
-  #toc a.toplink {
-    margin: 8px 0.5em 0;
   }
 }
 
@@ -973,12 +968,13 @@ hr.addr {
   #n-copyright-notice {
     border-bottom: none;
   }
-  #toc, #n-introduction {
-    page-break-before: always;
-  }
   #toc {
+    page-break-before: always;
     border-top: none;
     padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
   }
   figure, pre, .vcard {
     page-break-inside: avoid;
@@ -1040,17 +1036,19 @@ hr.addr {
 }
 
 /* SVG Trick: a prefix match works because only black and white are allowed */
-svg :is([stroke="black"], [stroke^="#000"]) {
-  stroke: var(--text-color);
-}
-svg :is([stroke="white"], [stroke^="#fff"]) {
-  stroke: var(--background-color);
-}
-svg :is([fill="black"], [fill^="#000"], :not([fill])) {
-  fill: var(--text-color);
-}
-svg :is([fill="white"], [fill^="#fff"]) {
-  fill: var(--background-color);
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
 }
 </style>
 
@@ -1060,11 +1058,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">May 2026</td>
+<td class="right">June 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 19 November 2026</td>
+<td class="center">Expires 10 December 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1077,12 +1075,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-05-18" class="published">18 May 2026</time>
+<time datetime="2026-06-08" class="published">8 June 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-11-19">19 November 2026</time></dd>
+<dd class="expires"><time datetime="2026-12-10">10 December 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1151,7 +1149,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 19 November 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 10 December 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1542,7 +1540,7 @@ Variables that are not defined below are defined in
 <p id="section-2-3">In the pseudocode in this document, all functions have implicit access to the
 (C) connection state and (BBR) congestion control algorithm state for that
 connection. All functions involved in ACK processing additionally have implicit
-access to the the (RS) for for the rate sample populated processing that ACK.<a href="#section-2-3" class="pilcrow">¶</a></p>
+access to the (RS) rate sample populated while processing that ACK.<a href="#section-2-3" class="pilcrow">¶</a></p>
 <p id="section-2-4">In this document, the unit of all volumes of data is bytes, the unit of
 all times is seconds, and the unit of all data rates is bytes per second.
 Implementations MAY use other units, such as bits and bits per second,
@@ -1840,7 +1838,7 @@ filter window in steady-state = 10 (in units of packet-timed round trips).<a hre
 has ever fully utilized its available bandwidth over the lifetime of the
 connection.<a href="#section-2.13-1" class="pilcrow">¶</a></p>
 <p id="section-2.13-2">BBR.full_bw_now: A boolean that records whether BBR estimates that it has
-fully utilized its available bandwidth since it most recetly started looking.<a href="#section-2.13-2" class="pilcrow">¶</a></p>
+fully utilized its available bandwidth since it most recently started looking.<a href="#section-2.13-2" class="pilcrow">¶</a></p>
 <p id="section-2.13-3">BBR.full_bw: A recent baseline BBR.max_bw to estimate if BBR has "filled
 the pipe" in Startup.<a href="#section-2.13-3" class="pilcrow">¶</a></p>
 <p id="section-2.13-4">BBR.full_bw_count: The number of non-app-limited round trips without large
@@ -1868,7 +1866,7 @@ filter window, BBR.MinRTTFilterLen is 10 secs.<a href="#section-2.14.1-2" class=
           <h4 id="name-parameters-for-scheduling-p">
 <a href="#section-2.14.2" class="section-number selfRef">2.14.2. </a><a href="#name-parameters-for-scheduling-p" class="section-name selfRef">Parameters for Scheduling ProbeRTT</a>
           </h4>
-<p id="section-2.14.2-1">BBR.ProbeRTTCwndGain = A constant specifying the gain value for calculating
+<p id="section-2.14.2-1">BBR.ProbeRTTCwndGain: A constant specifying the gain value for calculating
 C.cwnd during ProbeRTT: 0.5 (meaning that ProbeRTT attempts to reduce in-flight
 data to 50% of the estimated BDP).<a href="#section-2.14.2-1" class="pilcrow">¶</a></p>
 <p id="section-2.14.2-2">BBR.ProbeRTTDuration: A constant specifying the minimum duration for which ProbeRTT
@@ -1876,7 +1874,7 @@ state holds C.inflight to BBR.MinPipeCwnd or fewer packets: 200 ms.<a href="#sec
 <p id="section-2.14.2-3">BBR.ProbeRTTInterval: A constant specifying the minimum time interval between
 ProbeRTT states: 5 secs.<a href="#section-2.14.2-3" class="pilcrow">¶</a></p>
 <p id="section-2.14.2-4">BBR.probe_rtt_min_delay: The minimum RTT sample recorded in the last
-ProbeRTTInterval.<a href="#section-2.14.2-4" class="pilcrow">¶</a></p>
+BBR.ProbeRTTInterval.<a href="#section-2.14.2-4" class="pilcrow">¶</a></p>
 <p id="section-2.14.2-5">BBR.probe_rtt_min_stamp: The wall clock time at which the current
 BBR.probe_rtt_min_delay sample was obtained.<a href="#section-2.14.2-5" class="pilcrow">¶</a></p>
 <p id="section-2.14.2-6">BBR.probe_rtt_expired: A boolean recording whether the BBR.probe_rtt_min_delay
@@ -2098,7 +2096,7 @@ abated and more capacity is available.<a href="#section-3.4.2.3-1" class="pilcro
 <p id="section-3.5-1">BBR uses its model to control the connection's sending behavior. Rather than
 using a single control parameter, like the C.cwnd parameter that limits
 C.inflight in the Reno and CUBIC congestion control algorithms,
-BBR uses three distinct control parameters: C.pacing_race, C.send_quantum,
+BBR uses three distinct control parameters: C.pacing_rate, C.send_quantum,
 and C.cwnd, defined in (<a href="#output-control-parameters" class="auto internal xref">Section 2.4</a>):<a href="#section-3.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2154,7 +2152,7 @@ has an ability to over-estimate delivery rate, as described in
 maximum bandwidth filter, this can cause BBR to send too quickly.
 BBR mitigates this by limiting any bandwidth sample by the sending rate,
 but that still might be higher than the available bandwidth,
-particularly in STARTUP.<a href="#section-3.8-4" class="pilcrow">¶</a></p>
+particularly in Startup.<a href="#section-3.8-4" class="pilcrow">¶</a></p>
 <p id="section-3.8-5">BBR does not deal well with persistently application limited traffic
 <a href="#detecting-application-limited-phases" class="auto internal xref">Section 4.1.2.4</a> , such as low latency audio or
 video flows.  When unable to fill the pipe for a full round trip,
@@ -2596,7 +2594,7 @@ information from the most recently sent packet to update the rate sample:<a href
   IsNewestPacket(Packet P):
     return (P.send_time &gt; C.first_send_time ||
             (P.send_time == C.first_send_time &amp;&amp;
-             P.packet_id &gt; RS.last_packet_id))
+             P.packet_id &gt; RS.last_acked_packet_id))
 </pre><a href="#section-4.1.2.3-4" class="pilcrow">¶</a>
 </div>
 <p id="section-4.1.2.3-5">Finally, after the connection has processed all newly acknowledged packets for this
@@ -2840,7 +2838,7 @@ retransmitted sequence ranges, then the following approaches MAY be used:<a href
               <h6 id="name-tcp-connections-without-sac">
 <a href="#section-4.1.3.5.1" class="section-number selfRef">4.1.3.5.1. </a><a href="#name-tcp-connections-without-sac" class="section-name selfRef">TCP Connections without SACK</a>
               </h6>
-<p id="section-4.1.3.5.1-1">Whenever possibile, TCP connections using BBR as a congestion controller SHOULD
+<p id="section-4.1.3.5.1-1">Whenever possible, TCP connections using BBR as a congestion controller SHOULD
 use both SACK and timestamps. Failure to do so will cause BBR's RTT and
 bandwidth measurements to be much less accurate.<a href="#section-4.1.3.5.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.1.3.5.1-2">When using TCP without SACK (i.e., either or both ends of the connections do
@@ -3315,7 +3313,7 @@ than one round-trip:<a href="#section-5.3.2-1" class="pilcrow">¶</a></p>
 estimated BDP, meaning BBR estimates that the queue at the bottleneck link
 has been fully drained, then BBR exits Drain and enters ProbeBW. Normally, this
 condition should be met within one round-trip of entering the drain state.
-However, it could take longer if the bandwdith was overestimated during Startup
+However, it could take longer if the bandwidth was overestimated during Startup
 due to interactions with competing flows. In that case, BBR enters ProbeBW
 after 3 round-trips, allowing the bandwidth max filter to advance during the
 next probing cycle. To implement this, upon every ACK BBR executes:<a href="#section-5.3.2-3" class="pilcrow">¶</a></p>
@@ -3342,7 +3340,7 @@ point (increase throughput and reduce queue pressure), and converge toward a
 more fair allocation of bottleneck bandwidth. To do this, the flow sequentially
 cycles through all three tactics: trying to send faster than, slower than, and
 at the same rate as the network delivery process. To achieve this, a BBR flow
-in ProbeBW mode cycles through the four Probe bw states (DOWN, CRUISE, REFILL,
+in ProbeBW mode cycles through the four ProbeBW states (DOWN, CRUISE, REFILL,
 and UP) described below in turn.<a href="#section-5.3.3-1" class="pilcrow">¶</a></p>
 <div id="probebwdown">
 <section id="section-5.3.3.1">
@@ -3837,7 +3835,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
    BBR.bw_probe_up_acks += RS.newly_acked
    if (BBR.bw_probe_up_acks &gt;= BBR.probe_up_cnt)
      delta = BBR.bw_probe_up_acks / BBR.probe_up_cnt
-     BBR.bw_probe_up_acks -= delta * BBR.bw_probe_up_cnt
+     BBR.bw_probe_up_acks -= delta * BBR.probe_up_cnt
      BBR.inflight_longterm += delta
    if (BBR.round_start)
      RaiseInflightLongtermSlope()
@@ -3888,12 +3886,12 @@ the bottleneck queue and make a robust BBR.min_rtt measurement. This allows the
 BBR.min_rtt estimates of ensembles of BBR flows to converge, avoiding feedback
 loops of ever-increasing queues and RTT samples.<a href="#section-5.3.4.1-2" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-3">The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
-every ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
+every BBR.ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
 by setting its cwnd_gain to BBR.ProbeRTTCwndGain = 0.5 to reduce
 C.inflight to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.<a href="#section-5.3.4.1-3" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.1-4">There are two main motivations for making the MinRTTFilterLen roughly twice
-the ProbeRTTInterval. First, this ensures that during a ProbeRTT episode
+<p id="section-5.3.4.1-4">There are two main motivations for making the BBR.MinRTTFilterLen roughly twice
+the BBR.ProbeRTTInterval. First, this ensures that during a ProbeRTT episode
 the flow will "remember" the BBR.min_rtt value it measured during the previous
 ProbeRTT episode, providing a robust BDP estimate for the C.cwnd = 0.5*BDP
 calculation, increasing the likelihood of fully draining the bottleneck
@@ -3903,7 +3901,7 @@ estimate.<a href="#section-5.3.4.1-4" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-5">The algorithm for ProbeRTT is as follows:<a href="#section-5.3.4.1-5" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-6">Entry conditions: In any state other than ProbeRTT itself, if the
 BBR.probe_rtt_min_delay estimate has not been updated (i.e., by getting a
-lower RTT measurement) for more than ProbeRTTInterval = 5 seconds, then BBR
+lower RTT measurement) for more than BBR.ProbeRTTInterval = 5 seconds, then BBR
 enters ProbeRTT and reduces the BBR.cwnd_gain to BBR.ProbeRTTCwndGain = 0.5.<a href="#section-5.3.4.1-6" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-7">Exit conditions: After maintaining C.inflight at
 BBR.ProbeRTTCwndGain*BBR.bdp for at least BBR.ProbeRTTDuration (200 ms) and at
@@ -3931,7 +3929,7 @@ cwnd capping to roughly 2%, with the average throughput targeted at:<a href="#se
 </pre><a href="#section-5.3.4.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-5.3.4.2-3">As discussed above, BBR's BBR.min_rtt filter window, BBR.MinRTTFilterLen, and
-time interval between ProbeRTT states, ProbeRTTInterval, work in concert.
+time interval between ProbeRTT states, BBR.ProbeRTTInterval, work in concert.
 BBR uses a BBR.MinRTTFilterLen equal to or longer than BBR.ProbeRTTInterval to allow
 the filter window to include at least one ProbeRTT.<a href="#section-5.3.4.2-3" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.2-4">To allow coordination with other BBR flows, each BBR flow MUST use the
@@ -3957,7 +3955,7 @@ flows or flows on lower BDP links that are less likely to have silences or
 low-rate periods, at the cost of slower convergence. Furthermore, some types
 of links can switch between paths of significantly different base
 RTT (e.g. LEO satellite or cellular handoff). If these path changes can be
-predicted or detected, initiating a ProbeRTT immediately could concievably
+predicted or detected, initiating a ProbeRTT immediately could conceivably
 speed up the convergence to an accurate BBR.min_rtt, especially when it
 has increased.<a href="#section-5.3.4.2-7" class="pilcrow">¶</a></p>
 </section>
@@ -3974,7 +3972,7 @@ estimate:<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
 <pre>
   UpdateMinRTT()
     BBR.probe_rtt_expired =
-      Now() &gt; BBR.probe_rtt_min_stamp + ProbeRTTInterval
+      Now() &gt; BBR.probe_rtt_min_stamp + BBR.ProbeRTTInterval
     if (RS.rtt &gt;= 0 &amp;&amp;
         (RS.rtt &lt; BBR.probe_rtt_min_delay ||
          BBR.probe_rtt_expired))
@@ -3982,7 +3980,7 @@ estimate:<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
        BBR.probe_rtt_min_stamp = Now()
 
     min_rtt_expired =
-      Now() &gt; BBR.min_rtt_stamp + MinRTTFilterLen
+      Now() &gt; BBR.min_rtt_stamp + BBR.MinRTTFilterLen
     if (BBR.probe_rtt_min_delay &lt; BBR.min_rtt ||
         min_rtt_expired)
       BBR.min_rtt       = BBR.probe_rtt_min_delay
@@ -4013,16 +4011,16 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
   EnterProbeRTT():
     BBR.state = ProbeRTT
     BBR.pacing_gain = 1
-    BBR.cwnd_gain = BBRProbeRTTCwndGain  /* 0.5 */
+    BBR.cwnd_gain = BBR.ProbeRTTCwndGain  /* 0.5 */
 
   HandleProbeRTT():
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
     if (BBR.probe_rtt_done_stamp == 0 &amp;&amp;
         C.inflight &lt;= ProbeRTTCwnd())
-      /* Wait for at least ProbeRTTDuration to elapse: */
+      /* Wait for at least BBR.ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
-        Now() + ProbeRTTDuration
+        Now() + BBR.ProbeRTTDuration
       /* Wait for at least one round to elapse: */
       BBR.probe_rtt_round_done = false
       StartRound()
@@ -4201,7 +4199,7 @@ the count of such round trips elapsed:<a href="#section-5.5.1-9" class="pilcrow"
 <div class="alignLeft art-text artwork" id="section-5.5.1-10">
 <pre>
   UpdateRound():
-    if (packet.delivered &gt;= BBR.next_round_delivered)
+    if (P.delivered &gt;= BBR.next_round_delivered)
       StartRound()
       BBR.round_count++
       BBR.rounds_since_bw_probe++
@@ -4293,7 +4291,7 @@ network limits, not application limits. By default, the estimator discards
 application-limited samples, since by definition they reflect application
 limits. However, the estimator does use application-limited samples if the
 measured delivery rate happens to be larger than the current BBR.max_bw
-estimate, since this indicates the current BBR.Max_bw estimate is too low.<a href="#section-5.5.4-1" class="pilcrow">¶</a></p>
+estimate, since this indicates the current BBR.max_bw estimate is too low.<a href="#section-5.5.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="updating-the-bbrmaxbw-max-filter">
@@ -4313,7 +4311,7 @@ UpdateMaxBw() to update the BBR.max_bw estimator as follows:<a href="#section-5.
                       filter=BBR.max_bw_filter,
                       value=RS.delivery_rate,
                       time=BBR.cycle_count,
-                      window_length=MaxBwFilterLen)
+                      window_length=BBR.MaxBwFilterLen)
 </pre><a href="#section-5.5.5-2" class="pilcrow">¶</a>
 </div>
 <p id="section-5.5.5-3">UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols' algorithm
@@ -4329,7 +4327,7 @@ available in Linux <span>[<a href="#KN_FILTER" class="cite xref">KN_FILTER</a>]<
           </h4>
 <p id="section-5.5.6-1">BBR tracks time for the BBR.max_bw filter window using a virtual
 (non-wall-clock) time tracked by counting the cyclical progression through
-ProbeBW cycles.  Each time through the Probe bw cycle, one round trip after
+ProbeBW cycles.  Each time through the ProbeBW cycle, one round trip after
 exiting ProbeBW_UP (the point at which the flow has its best chance to measure
 the highest throughput of the cycle), BBR increments BBR.cycle_count, the
 virtual time used by the BBR.max_bw filter window. Note that BBR.cycle_count
@@ -4501,7 +4499,7 @@ of aggregation in the network path. For each ACK, the algorithm computes
 a sample of the estimated extra ACKed data beyond the amount of data that
 the sender expected to be ACKed over the timescale of a round-trip, given
 the BBR.bw. Then it computes BBR.extra_acked as the windowed maximum sample
-over the last BBRExtraAckedFilterLen=10 packet-timed round-trips. If the
+over the last BBR.ExtraAckedFilterLen=10 packet-timed round-trips. If the
 ACK rate falls below the expected bandwidth, then the algorithm estimates
 an aggregation episode has terminated, and resets the sampling interval to
 start from the current time.<a href="#section-5.5.9-1" class="pilcrow">¶</a></p>
@@ -4533,7 +4531,7 @@ measured degree of aggregation.<a href="#section-5.5.9-4" class="pilcrow">¶</a>
     extra = BBR.extra_acked_delivered - expected_delivered
     extra = min(extra, C.cwnd)
     if (BBR.full_bw_reached)
-      filter_len = BBRExtraAckedFilterLen
+      filter_len = BBR.ExtraAckedFilterLen
     else
       filter_len = 1  /* in Startup, just remember 1 round */
     BBR.extra_acked =
@@ -4591,7 +4589,7 @@ reduces BBR.inflight_longterm:<a href="#section-5.5.10.2-1" class="pilcrow">¶</
     if (!RS.is_app_limited)
       BBR.inflight_longterm = max(RS.tx_in_flight,
                             TargetInflight() * BBR.Beta))
-    If (BBR.state == ProbeBW_UP)
+    if (BBR.state == ProbeBW_UP)
       StartProbeBW_DOWN()
 </pre><a href="#section-5.5.10.2-2" class="pilcrow">¶</a>
 </div>
@@ -4601,7 +4599,7 @@ is to try to ensure that BBR does not react more dramatically than CUBIC's
 0.7x multiplicative decrease factor.<a href="#section-5.5.10.2-3" class="pilcrow">¶</a></p>
 <p id="section-5.5.10.2-4">Some loss detection algorithms, including RACK <span>[<a href="#RFC8985" class="cite xref">RFC8985</a>]</span> or QUIC loss
 detection <span>[<a href="#RFC9002" class="cite xref">RFC9002</a>]</span>, delay loss marking to wait for potential
-reordering, so packets can be declared lost long after the loss itself.
+reordering, so packets can be declared lost long after the loss itself
 happened. In such cases, the tx_in_flight for the delivered sequence range
 that allowed the loss to be detected may be considerably smaller than the
 tx_in_flight of the lost packet itself. In such cases using the former
@@ -4651,7 +4649,7 @@ represents the data lost among that previous in-flight data.<a href="#section-5.
     RS.lost = C.lost - P.lost /* data lost since transmit */
     RS.is_app_limited = P.is_app_limited;
     if (IsInflightTooHigh())
-      RS.tx_in_flight = InflightAtLoss(rs, packet)
+      RS.tx_in_flight = InflightAtLoss(RS, packet)
       HandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
@@ -4662,7 +4660,7 @@ represents the data lost among that previous in-flight data.<a href="#section-5.
     /* What was lost before this packet? */
     lost_prev = RS.lost - size
     lost_prefix = (BBR.LossThresh * inflight_prev - lost_prev) /
-                  (1 - BB.RLossThresh)
+                  (1 - BBR.LossThresh)
     /* At what C.inflight value did losses cross BBR.LossThresh? */
     inflight_at_loss = inflight_prev + lost_prefix
     return inflight_at_loss
@@ -4813,7 +4811,7 @@ state to their previously saved values as follows:<a href="#section-5.5.11.2-1" 
   /* Handle a declaration of a spurious loss episode */
   HandleSpuriousLossDetection():
     BBR.loss_in_round = 0
-    ResetFullBW():
+    ResetFullBW()
     BBR.bw_shortterm       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
     BBR.inflight_shortterm = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
     BBR.inflight_longterm = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)
@@ -5035,7 +5033,7 @@ then adapts control decisions to the path based on that model. As such, the
 selection of the initial cwnd is considered to be outside the scope of the
 BBR algorithm, since at initialization there are no measurements yet upon
 which BBR can operate. Thus, at initialization, BBR uses the transport sender
-implementation's initial congestion window (e.g. from <span>[<a href="#RFC6298" class="cite xref">RFC6298</a>]</span> for TCP).<a href="#section-5.6.4.1-1" class="pilcrow">¶</a></p>
+implementation's initial congestion window (e.g. from <span>[<a href="#RFC6928" class="cite xref">RFC6928</a>]</span> for TCP).<a href="#section-5.6.4.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="computing-bbrmaxinflight">
@@ -5497,10 +5495,6 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dt id="RFC5681">[RFC5681]</dt>
         <dd>
 <span class="refAuthor">Allman, M.</span>, <span class="refAuthor">Paxson, V.</span>, and <span class="refAuthor">E. Blanton</span>, <span class="refTitle">"TCP Congestion Control"</span>, <span class="seriesInfo">RFC 5681</span>, <span class="seriesInfo">DOI 10.17487/RFC5681</span>, <time datetime="2009-09" class="refDate">September 2009</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5681">https://www.rfc-editor.org/rfc/rfc5681</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC6298">[RFC6298]</dt>
-        <dd>
-<span class="refAuthor">Paxson, V.</span>, <span class="refAuthor">Allman, M.</span>, <span class="refAuthor">Chu, J.</span>, and <span class="refAuthor">M. Sargent</span>, <span class="refTitle">"Computing TCP's Retransmission Timer"</span>, <span class="seriesInfo">RFC 6298</span>, <span class="seriesInfo">DOI 10.17487/RFC6298</span>, <time datetime="2011-06" class="refDate">June 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6298">https://www.rfc-editor.org/rfc/rfc6298</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC6675">[RFC6675]</dt>
         <dd>
