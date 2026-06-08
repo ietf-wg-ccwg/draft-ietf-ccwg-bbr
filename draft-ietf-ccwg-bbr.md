@@ -32,7 +32,6 @@ normative:
   RFC7323:
   RFC2119:
   RFC8126:
-  RFC6298:
   RFC5681:
   RFC7942:
   RFC9438:
@@ -298,7 +297,7 @@ Variables that are not defined below are defined in
 In the pseudocode in this document, all functions have implicit access to the
 (C) connection state and (BBR) congestion control algorithm state for that
 connection. All functions involved in ACK processing additionally have implicit
-access to the the (RS) for for the rate sample populated processing that ACK.
+access to the (RS) rate sample populated while processing that ACK.
 
 In this document, the unit of all volumes of data is bytes, the unit of
 all times is seconds, and the unit of all data rates is bytes per second.
@@ -593,7 +592,7 @@ has ever fully utilized its available bandwidth over the lifetime of the
 connection.
 
 BBR.full_bw_now: A boolean that records whether BBR estimates that it has
-fully utilized its available bandwidth since it most recetly started looking.
+fully utilized its available bandwidth since it most recently started looking.
 
 BBR.full_bw: A recent baseline BBR.max_bw to estimate if BBR has "filled
 the pipe" in Startup.
@@ -615,7 +614,7 @@ filter window, BBR.MinRTTFilterLen is 10 secs.
 
 ### Parameters for Scheduling ProbeRTT {#parameters-for-scheduling-probertt}
 
-BBR.ProbeRTTCwndGain = A constant specifying the gain value for calculating
+BBR.ProbeRTTCwndGain: A constant specifying the gain value for calculating
 C.cwnd during ProbeRTT: 0.5 (meaning that ProbeRTT attempts to reduce in-flight
 data to 50% of the estimated BDP).
 
@@ -626,7 +625,7 @@ BBR.ProbeRTTInterval: A constant specifying the minimum time interval between
 ProbeRTT states: 5 secs.
 
 BBR.probe_rtt_min_delay: The minimum RTT sample recorded in the last
-ProbeRTTInterval.
+BBR.ProbeRTTInterval.
 
 BBR.probe_rtt_min_stamp: The wall clock time at which the current
 BBR.probe_rtt_min_delay sample was obtained.
@@ -794,7 +793,7 @@ abated and more capacity is available.
 BBR uses its model to control the connection's sending behavior. Rather than
 using a single control parameter, like the C.cwnd parameter that limits
 C.inflight in the Reno and CUBIC congestion control algorithms,
-BBR uses three distinct control parameters: C.pacing_race, C.send_quantum,
+BBR uses three distinct control parameters: C.pacing_rate, C.send_quantum,
 and C.cwnd, defined in ({{output-control-parameters}}):
 
 ## Environment and Usage {#environment-and-usage}
@@ -842,7 +841,7 @@ has an ability to over-estimate delivery rate, as described in
 maximum bandwidth filter, this can cause BBR to send too quickly.
 BBR mitigates this by limiting any bandwidth sample by the sending rate,
 but that still might be higher than the available bandwidth,
-particularly in STARTUP.
+particularly in Startup.
 
 BBR does not deal well with persistently application limited traffic
 {{detecting-application-limited-phases}} , such as low latency audio or
@@ -1256,7 +1255,7 @@ information from the most recently sent packet to update the rate sample:
   IsNewestPacket(Packet P):
     return (P.send_time > C.first_send_time ||
             (P.send_time == C.first_send_time &&
-             P.packet_id > RS.last_packet_id))
+             P.packet_id > RS.last_acked_packet_id))
 ~~~~
 
 Finally, after the connection has processed all newly acknowledged packets for this
@@ -1468,7 +1467,7 @@ retransmitted sequence ranges, then the following approaches MAY be used:
 
 ##### TCP Connections without SACK {#connections-without-sack}
 
-Whenever possibile, TCP connections using BBR as a congestion controller SHOULD
+Whenever possible, TCP connections using BBR as a congestion controller SHOULD
 use both SACK and timestamps. Failure to do so will cause BBR's RTT and
 bandwidth measurements to be much less accurate.
 
@@ -1860,7 +1859,7 @@ In Drain, when the amount of data in flight is less than or equal to the
 estimated BDP, meaning BBR estimates that the queue at the bottleneck link
 has been fully drained, then BBR exits Drain and enters ProbeBW. Normally, this
 condition should be met within one round-trip of entering the drain state.
-However, it could take longer if the bandwdith was overestimated during Startup
+However, it could take longer if the bandwidth was overestimated during Startup
 due to interactions with competing flows. In that case, BBR enters ProbeBW
 after 3 round-trips, allowing the bandwidth max filter to advance during the
 next probing cycle. To implement this, upon every ACK BBR executes:
@@ -1883,7 +1882,7 @@ point (increase throughput and reduce queue pressure), and converge toward a
 more fair allocation of bottleneck bandwidth. To do this, the flow sequentially
 cycles through all three tactics: trying to send faster than, slower than, and
 at the same rate as the network delivery process. To achieve this, a BBR flow
-in ProbeBW mode cycles through the four Probe bw states (DOWN, CRUISE, REFILL,
+in ProbeBW mode cycles through the four ProbeBW states (DOWN, CRUISE, REFILL,
 and UP) described below in turn.
 
 #### ProbeBW_DOWN {#probebwdown}
@@ -2320,7 +2319,7 @@ The ancillary logic to implement the ProbeBW state machine:
    BBR.bw_probe_up_acks += RS.newly_acked
    if (BBR.bw_probe_up_acks >= BBR.probe_up_cnt)
      delta = BBR.bw_probe_up_acks / BBR.probe_up_cnt
-     BBR.bw_probe_up_acks -= delta * BBR.bw_probe_up_cnt
+     BBR.bw_probe_up_acks -= delta * BBR.probe_up_cnt
      BBR.inflight_longterm += delta
    if (BBR.round_start)
      RaiseInflightLongtermSlope()
@@ -2364,13 +2363,13 @@ BBR.min_rtt estimates of ensembles of BBR flows to converge, avoiding feedback
 loops of ever-increasing queues and RTT samples.
 
 The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
-every ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
+every BBR.ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
 by setting its cwnd_gain to BBR.ProbeRTTCwndGain = 0.5 to reduce
 C.inflight to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.
 
-There are two main motivations for making the MinRTTFilterLen roughly twice
-the ProbeRTTInterval. First, this ensures that during a ProbeRTT episode
+There are two main motivations for making the BBR.MinRTTFilterLen roughly twice
+the BBR.ProbeRTTInterval. First, this ensures that during a ProbeRTT episode
 the flow will "remember" the BBR.min_rtt value it measured during the previous
 ProbeRTT episode, providing a robust BDP estimate for the C.cwnd = 0.5\*BDP
 calculation, increasing the likelihood of fully draining the bottleneck
@@ -2382,7 +2381,7 @@ The algorithm for ProbeRTT is as follows:
 
 Entry conditions: In any state other than ProbeRTT itself, if the
 BBR.probe_rtt_min_delay estimate has not been updated (i.e., by getting a
-lower RTT measurement) for more than ProbeRTTInterval = 5 seconds, then BBR
+lower RTT measurement) for more than BBR.ProbeRTTInterval = 5 seconds, then BBR
 enters ProbeRTT and reduces the BBR.cwnd_gain to BBR.ProbeRTTCwndGain = 0.5.
 
 Exit conditions: After maintaining C.inflight at
@@ -2408,7 +2407,7 @@ cwnd capping to roughly 2%, with the average throughput targeted at:
 ~~~~
 
 As discussed above, BBR's BBR.min_rtt filter window, BBR.MinRTTFilterLen, and
-time interval between ProbeRTT states, ProbeRTTInterval, work in concert.
+time interval between ProbeRTT states, BBR.ProbeRTTInterval, work in concert.
 BBR uses a BBR.MinRTTFilterLen equal to or longer than BBR.ProbeRTTInterval to allow
 the filter window to include at least one ProbeRTT.
 
@@ -2438,7 +2437,7 @@ flows or flows on lower BDP links that are less likely to have silences or
 low-rate periods, at the cost of slower convergence. Furthermore, some types
 of links can switch between paths of significantly different base
 RTT (e.g. LEO satellite or cellular handoff). If these path changes can be
-predicted or detected, initiating a ProbeRTT immediately could concievably
+predicted or detected, initiating a ProbeRTT immediately could conceivably
 speed up the convergence to an accurate BBR.min_rtt, especially when it
 has increased.
 
@@ -2451,7 +2450,7 @@ estimate:
 ~~~~
   UpdateMinRTT()
     BBR.probe_rtt_expired =
-      Now() > BBR.probe_rtt_min_stamp + ProbeRTTInterval
+      Now() > BBR.probe_rtt_min_stamp + BBR.ProbeRTTInterval
     if (RS.rtt >= 0 &&
         (RS.rtt < BBR.probe_rtt_min_delay ||
          BBR.probe_rtt_expired))
@@ -2459,7 +2458,7 @@ estimate:
        BBR.probe_rtt_min_stamp = Now()
 
     min_rtt_expired =
-      Now() > BBR.min_rtt_stamp + MinRTTFilterLen
+      Now() > BBR.min_rtt_stamp + BBR.MinRTTFilterLen
     if (BBR.probe_rtt_min_delay < BBR.min_rtt ||
         min_rtt_expired)
       BBR.min_rtt       = BBR.probe_rtt_min_delay
@@ -2491,16 +2490,16 @@ to the ProbeRTT state as follows:
   EnterProbeRTT():
     BBR.state = ProbeRTT
     BBR.pacing_gain = 1
-    BBR.cwnd_gain = BBRProbeRTTCwndGain  /* 0.5 */
+    BBR.cwnd_gain = BBR.ProbeRTTCwndGain  /* 0.5 */
 
   HandleProbeRTT():
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
     if (BBR.probe_rtt_done_stamp == 0 &&
         C.inflight <= ProbeRTTCwnd())
-      /* Wait for at least ProbeRTTDuration to elapse: */
+      /* Wait for at least BBR.ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
-        Now() + ProbeRTTDuration
+        Now() + BBR.ProbeRTTDuration
       /* Wait for at least one round to elapse: */
       BBR.probe_rtt_round_done = false
       StartRound()
@@ -2656,7 +2655,7 @@ the count of such round trips elapsed:
 
 ~~~~
   UpdateRound():
-    if (packet.delivered >= BBR.next_round_delivered)
+    if (P.delivered >= BBR.next_round_delivered)
       StartRound()
       BBR.round_count++
       BBR.rounds_since_bw_probe++
@@ -2733,7 +2732,7 @@ network limits, not application limits. By default, the estimator discards
 application-limited samples, since by definition they reflect application
 limits. However, the estimator does use application-limited samples if the
 measured delivery rate happens to be larger than the current BBR.max_bw
-estimate, since this indicates the current BBR.Max_bw estimate is too low.
+estimate, since this indicates the current BBR.max_bw estimate is too low.
 
 
 ### Updating the BBR.max_bw Max Filter {#updating-the-bbrmaxbw-max-filter}
@@ -2750,7 +2749,7 @@ UpdateMaxBw() to update the BBR.max_bw estimator as follows:
                       filter=BBR.max_bw_filter,
                       value=RS.delivery_rate,
                       time=BBR.cycle_count,
-                      window_length=MaxBwFilterLen)
+                      window_length=BBR.MaxBwFilterLen)
 ~~~~
 
 UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols' algorithm
@@ -2763,7 +2762,7 @@ available in Linux {{KN_FILTER}}.
 
 BBR tracks time for the BBR.max_bw filter window using a virtual
 (non-wall-clock) time tracked by counting the cyclical progression through
-ProbeBW cycles.  Each time through the Probe bw cycle, one round trip after
+ProbeBW cycles.  Each time through the ProbeBW cycle, one round trip after
 exiting ProbeBW_UP (the point at which the flow has its best chance to measure
 the highest throughput of the cycle), BBR increments BBR.cycle_count, the
 virtual time used by the BBR.max_bw filter window. Note that BBR.cycle_count
@@ -2904,7 +2903,7 @@ of aggregation in the network path. For each ACK, the algorithm computes
 a sample of the estimated extra ACKed data beyond the amount of data that
 the sender expected to be ACKed over the timescale of a round-trip, given
 the BBR.bw. Then it computes BBR.extra_acked as the windowed maximum sample
-over the last BBRExtraAckedFilterLen=10 packet-timed round-trips. If the
+over the last BBR.ExtraAckedFilterLen=10 packet-timed round-trips. If the
 ACK rate falls below the expected bandwidth, then the algorithm estimates
 an aggregation episode has terminated, and resets the sampling interval to
 start from the current time.
@@ -2940,7 +2939,7 @@ More precisely, this is computed as:
     extra = BBR.extra_acked_delivered - expected_delivered
     extra = min(extra, C.cwnd)
     if (BBR.full_bw_reached)
-      filter_len = BBRExtraAckedFilterLen
+      filter_len = BBR.ExtraAckedFilterLen
     else
       filter_len = 1  /* in Startup, just remember 1 round */
     BBR.extra_acked =
@@ -2989,7 +2988,7 @@ reduces BBR.inflight_longterm:
     if (!RS.is_app_limited)
       BBR.inflight_longterm = max(RS.tx_in_flight,
                             TargetInflight() * BBR.Beta))
-    If (BBR.state == ProbeBW_UP)
+    if (BBR.state == ProbeBW_UP)
       StartProbeBW_DOWN()
 ~~~~
 
@@ -3000,7 +2999,7 @@ is to try to ensure that BBR does not react more dramatically than CUBIC's
 
 Some loss detection algorithms, including RACK {{RFC8985}} or QUIC loss
 detection {{RFC9002}}, delay loss marking to wait for potential
-reordering, so packets can be declared lost long after the loss itself.
+reordering, so packets can be declared lost long after the loss itself
 happened. In such cases, the tx_in_flight for the delivered sequence range
 that allowed the loss to be detected may be considerably smaller than the
 tx_in_flight of the lost packet itself. In such cases using the former
@@ -3051,7 +3050,7 @@ In pseudocode:
     RS.lost = C.lost - P.lost /* data lost since transmit */
     RS.is_app_limited = P.is_app_limited;
     if (IsInflightTooHigh())
-      RS.tx_in_flight = InflightAtLoss(rs, packet)
+      RS.tx_in_flight = InflightAtLoss(RS, packet)
       HandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
@@ -3062,7 +3061,7 @@ In pseudocode:
     /* What was lost before this packet? */
     lost_prev = RS.lost - size
     lost_prefix = (BBR.LossThresh * inflight_prev - lost_prev) /
-                  (1 - BB.RLossThresh)
+                  (1 - BBR.LossThresh)
     /* At what C.inflight value did losses cross BBR.LossThresh? */
     inflight_at_loss = inflight_prev + lost_prefix
     return inflight_at_loss
@@ -3201,7 +3200,7 @@ state to their previously saved values as follows:
   /* Handle a declaration of a spurious loss episode */
   HandleSpuriousLossDetection():
     BBR.loss_in_round = 0
-    ResetFullBW():
+    ResetFullBW()
     BBR.bw_shortterm       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
     BBR.inflight_shortterm = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
     BBR.inflight_longterm = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)
@@ -3393,7 +3392,7 @@ then adapts control decisions to the path based on that model. As such, the
 selection of the initial cwnd is considered to be outside the scope of the
 BBR algorithm, since at initialization there are no measurements yet upon
 which BBR can operate. Thus, at initialization, BBR uses the transport sender
-implementation's initial congestion window (e.g. from {{RFC6298}} for TCP).
+implementation's initial congestion window (e.g. from {{RFC6928}} for TCP).
 
 #### Computing BBR.max_inflight {#computing-bbrmaxinflight}
 
