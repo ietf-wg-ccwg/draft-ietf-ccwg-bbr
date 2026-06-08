@@ -3321,7 +3321,7 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    outside the scope of the BBR algorithm, since at initialization there
    are no measurements yet upon which BBR can operate.  Thus, at
    initialization, BBR uses the transport sender implementation's
-   initial congestion window (e.g. from [RFC6298] for TCP).
+   initial congestion window (e.g. from [RFC6928] for TCP).
 
 5.6.4.2.  Computing BBR.max_inflight
 
@@ -3691,11 +3691,6 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    [RFC5681]  Allman, M., Paxson, V., and E. Blanton, "TCP Congestion
               Control", RFC 5681, DOI 10.17487/RFC5681, September 2009,
               <https://www.rfc-editor.org/rfc/rfc5681>.
-
-   [RFC6298]  Paxson, V., Allman, M., Chu, J., and M. Sargent,
-              "Computing TCP's Retransmission Timer", RFC 6298,
-              DOI 10.17487/RFC6298, June 2011,
-              <https://www.rfc-editor.org/rfc/rfc6298>.
 
    [RFC6675]  Blanton, E., Allman, M., Wang, L., Jarvinen, I., Kojo, M.,
               and Y. Nishida, "A Conservative Loss Recovery Algorithm
