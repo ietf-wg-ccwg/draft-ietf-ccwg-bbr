@@ -1364,8 +1364,8 @@ Table of Contents
    *  ProbeBW_DOWN and ProbeBW_CRUISE: The sender MAY request less
       frequent ACKs to lower overhead, since these phases do not rely on
       rapid feedback for probing.  The sender MAY request an ACK delay
-      of up to 0.5 * smoothed_rtt and an ACK threshold of up to roughly
-      a quarter of the current congestion window.  Keeping these values
+      of up to 0.5 * C.srtt and an ACK threshold of up to roughly a
+      quarter of the current congestion window.  Keeping these values
       moderate ensures that loss detection is not excessively delayed by
       infrequent ACKs.
 
@@ -2250,13 +2250,13 @@ Table of Contents
   InflightWithHeadroom():
     if (BBR.inflight_longterm == Infinity)
       return Infinity
-    headroom = max(1*SMSS, BBR.Headroom * BBR.inflight_longterm)
+    headroom = max(1*C.SMSS, BBR.Headroom * BBR.inflight_longterm)
     return max(BBR.inflight_longterm - headroom,
                BBR.MinPipeCwnd)
 
   /* Raise BBR.inflight_longterm slope if appropriate. */
   RaiseInflightLongtermSlope():
-    growth_this_round = 1*SMSS << BBR.bw_probe_up_rounds
+    growth_this_round = 1*C.SMSS << BBR.bw_probe_up_rounds
     BBR.bw_probe_up_rounds = min(BBR.bw_probe_up_rounds + 1, 30)
     BBR.probe_up_cnt = max(C.cwnd / growth_this_round, 1)
 
