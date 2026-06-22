@@ -2902,8 +2902,8 @@ BBR.extra_acked is a volume of data that is the estimate of the recent degree
 of aggregation in the network path. For each ACK, the algorithm computes
 a sample of the estimated extra ACKed data beyond the amount of data that
 the sender expected to be ACKed over the timescale of a round-trip, given
-the BBR.bw. Then it computes BBR.extra_acked as the windowed maximum sample
-over the last BBR.ExtraAckedFilterLen=10 packet-timed round-trips. If the
+the BBR.bw. It then computes BBR.extra_acked as the windowed maximum over 1
+round trip during STARTUP and 10 round trips after exiting STARTUP. If the
 ACK rate falls below the expected bandwidth, then the algorithm estimates
 an aggregation episode has terminated, and resets the sampling interval to
 start from the current time.
