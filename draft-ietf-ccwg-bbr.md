@@ -2038,25 +2038,21 @@ If the flow has not set BBR.inflight_longterm, it implicitly tries to raise
 C.inflight to at least BBR.pacing_gain \* BBR.bdp = 1.25 \*
 BBR.bdp.
 
-If the flow has set BBR.inflight_longterm and encounters that limit, it then
-gradually increases the upper volume bound (BBR.inflight_longterm) using the
-following approach:
-
-* BBR.inflight_longterm: The flow raises BBR.inflight_longterm in ProbeBW_UP in a manner
-  that is slow and cautious at first, but increasingly rapid and bold over time.
-  The initial caution is motivated by the fact that a given BBR flow may be sharing
-  a shallow buffer with thousands of other flows, so that the buffer space
-  available to the flow may be quite tight (even just a single packet or
-  less). The increasingly rapid growth over time is motivated by the fact that
-  in a high-speed WAN the increase in available bandwidth (and thus the estimated
-  BDP) may require the flow to grow C.inflight by up to
-  O(1,000,000) packets; even a high-speed WAN BDP like
-  10Gbps \* 100ms is around 83,000 packets (with a 1500-byte MTU). The additive
-  increase to BBR.inflight_longterm exponentially doubles each round trip;
-  in each successive round trip, BBR.inflight_longterm grows by 1, 2, 4, 8, 16,
-  etc, with the increases spread uniformly across the entire round trip.
-  This helps allow BBR to utilize a larger BDP in O(log(BDP)) round trips,
-  meeting the design goal for scalable utilization of newly-available bandwidth.
+If the flow has set BBR.inflight_longterm and C.inflight encounters that limit,
+the flow raises BBR.inflight_longterm in ProbeBW_UP in a manner that is slow and
+cautious at first, but increasingly rapid over time.  The caution is motivated
+by the fact that a given BBR flow may be sharing a buffer with many other
+flows, and the buffer space available to the flow may be limited. The
+increasingly rapid growth over time is motivated by the fact that in a
+high-speed WAN the increase in available bandwidth (and thus the estimated BDP)
+may require the flow to grow C.inflight by up to O(1,000,000) packets; even a
+high-speed WAN BDP like 10Gbps \* 100ms is around 83,000 packets (with a
+1500-byte MTU). The additive increase to BBR.inflight_longterm doubles each
+round trip; in each successive round trip, BBR.inflight_longterm grows (in units
+of C.SMSS) by 1, 2, 4, 8, 16, etc, with the increases spread uniformly across the
+entire round trip. This allows BBR to utilize a larger BDP in O(log(BDP)) round
+trips, meeting the design goal for scalable utilization of newly-available
+bandwidth.
 
 #### Precautionary Bandwidth Probing  {#bandwidth-probing-caution}
 
