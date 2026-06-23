@@ -2352,13 +2352,13 @@ The ancillary logic to implement the ProbeBW state machine:
   ProbeInflightLongtermUpward():
     if (!C.is_cwnd_limited || C.cwnd < BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
-   BBR.bw_probe_up_acked += RS.newly_acked
-   if (BBR.bw_probe_up_acked >= BBR.probe_up_cnt)
-     delta = BBR.bw_probe_up_acked / BBR.probe_up_cnt
-     BBR.bw_probe_up_acked -= delta * BBR.probe_up_cnt
-     BBR.inflight_longterm += delta * C.SMSS
-   if (BBR.round_start)
-     RaiseInflightLongtermSlope()
+    BBR.bw_probe_up_acked += RS.newly_acked
+    if (BBR.bw_probe_up_acked >= BBR.probe_up_cnt)
+      delta = BBR.bw_probe_up_acked / BBR.probe_up_cnt
+      BBR.bw_probe_up_acked -= delta * BBR.probe_up_cnt
+      BBR.inflight_longterm += delta * C.SMSS
+    if (BBR.round_start)
+      RaiseInflightLongtermSlope()
 
   /* Track ACK state and update BBR.max_bw window and
    * BBR.inflight_longterm. */
@@ -3022,10 +3022,10 @@ reduces BBR.inflight_longterm:
             (RS.lost > 0 && !C.has_selective_acks))
 
   HandleInflightTooHigh():
-    BBR.bw_probe_samples = false;  /* only react once per bw probe */
+    BBR.bw_probe_samples = false  /* only react once per bw probe */
     if (!RS.is_app_limited)
       BBR.inflight_longterm = max(RS.tx_in_flight,
-                            TargetInflight() * BBR.Beta))
+                            TargetInflight() * BBR.Beta)
     if (BBR.state == ProbeBW_UP)
       StartProbeBW_DOWN()
 ~~~~
@@ -3080,20 +3080,20 @@ In pseudocode:
       SaveStateUponLoss()
     BBR.loss_in_round = 1
 
-  HandleLostPacket(packet):
+  HandleLostPacket(Packet P):
     NoteLoss()
     if (!BBR.bw_probe_samples)
       return /* not a packet sent while probing bandwidth */
     RS.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
     RS.lost = C.lost - P.lost /* data lost since transmit */
-    RS.is_app_limited = P.is_app_limited;
+    RS.is_app_limited = P.is_app_limited
     if (IsInflightTooHigh())
-      RS.tx_in_flight = InflightAtLoss(RS, packet)
+      RS.tx_in_flight = InflightAtLoss(RS, P)
       HandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
-  InflightAtLoss(RS, packet):
-    size = packet.size
+  InflightAtLoss(RS, Packet P):
+    size = P.size
     /* What was in flight before this packet? */
     inflight_prev = RS.tx_in_flight - size
     /* What was lost before this packet? */
