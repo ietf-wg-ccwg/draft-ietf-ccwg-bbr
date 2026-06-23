@@ -353,6 +353,9 @@ delivered so far over the lifetime of the transport connection C.
 This MUST NOT include pure ACK packets. It SHOULD include spurious
 retransmissions that have been acknowledged as delivered.
 
+C.lost: The total amount of data
+marked as lost so far over the lifetime of the transport connection C.
+
 C.inflight: The connection's best estimate of the number of bytes
 outstanding in the network. This includes the number of bytes that
 have been sent and have not been acknowledged or
@@ -1157,6 +1160,8 @@ per IP packet.
 P.delivered: C.delivered when the packet was sent from transport connection
 C.
 
+P.lost: C.lost when the packet was sent from transport connection C.
+
 P.delivered_time: C.delivered_time when the packet was sent.
 
 P.first_send_time: C.first_send_time when the packet was sent.
@@ -1228,6 +1233,7 @@ After each packet transmission, the sender executes the following steps:
     P.delivered       = C.delivered
     P.is_app_limited  = (C.app_limited != 0)
     P.tx_in_flight    = C.inflight    /* includes data in P */
+    P.lost            = C.lost
 ~~~~
 
 
@@ -3088,11 +3094,11 @@ In pseudocode:
     RS.lost = C.lost - P.lost /* data lost since transmit */
     RS.is_app_limited = P.is_app_limited
     if (IsInflightTooHigh())
-      RS.tx_in_flight = InflightAtLoss(RS, P)
+      RS.tx_in_flight = InflightAtLoss(P)
       HandleInflightTooHigh()
 
   /* At what prefix of packet did losses exceed BBR.LossThresh? */
-  InflightAtLoss(RS, Packet P):
+  InflightAtLoss(Packet P):
     size = P.size
     /* What was in flight before this packet? */
     inflight_prev = RS.tx_in_flight - size
