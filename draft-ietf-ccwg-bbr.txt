@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 10 December 2026                                 J. Beshay, Ed.
+Expires: 25 December 2026                                 J. Beshay, Ed.
                                                                     Meta
-                                                             8 June 2026
+                                                            23 June 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 December 2026.
+   This Internet-Draft will expire on 25 December 2026.
 
 Copyright Notice
 
@@ -2846,9 +2846,9 @@ Table of Contents
    recent degree of aggregation in the network path.  For each ACK, the
    algorithm computes a sample of the estimated extra ACKed data beyond
    the amount of data that the sender expected to be ACKed over the
-   timescale of a round-trip, given the BBR.bw.  Then it computes
-   BBR.extra_acked as the windowed maximum sample over the last
-   BBR.ExtraAckedFilterLen=10 packet-timed round-trips.  If the ACK rate
+   timescale of a round-trip, given the BBR.bw.  It then computes
+   BBR.extra_acked as the windowed maximum over 1 round trip during
+   STARTUP and 10 round trips after exiting STARTUP.  If the ACK rate
    falls below the expected bandwidth, then the algorithm estimates an
    aggregation episode has terminated, and resets the sampling interval
    to start from the current time.
