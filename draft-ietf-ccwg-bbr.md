@@ -3670,14 +3670,6 @@ data it so it exits STARTUP and naturally gets to the specified phase.
    and transitions to DRAIN, demonstrating that loss triggers the end of STARTUP
    even when bandwidth samples are application-limited.
 
-## No exit from STARTUP when app-limited and there is no loss
-
-
-
-## STARTUP with a CWND > 2*BDP
-
-
-
 ## Exit DRAIN based on inflight
 
 1. Start a flow and transition it from STARTUP to DRAIN.
@@ -3776,7 +3768,7 @@ data it so it exits STARTUP and naturally gets to the specified phase.
    (e.g., cellular link).
 2. Start a flow in STARTUP.
 3. Verify that `BBR.extra_acked` is calculated correctly from the bursty ACK
-   arrivals.
+   arrivals and that CWND > 2*BDP.
 4. Ensure that the delivery rate sampler handles the aggregated ACKs properly
    (capping by send rate if necessary) and the connection still successfully
    doubles its sending rate to discover the full bottleneck bandwidth.
