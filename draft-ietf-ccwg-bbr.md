@@ -3638,9 +3638,12 @@ are meeting BBR's needs, but there are no standalone tests for either.
 
 Unless otherwise mentioned, each test case is configured to create a single
 BBR connection traveling over a controlled path with a bottleneck bandwidth
-(ie: 10Mbps) and two-way propagation delay that are fixed for the entire
-duration of the test. The tests can use network emulation, network simulation,
+and two-way propagation delay that are fixed for the entire duration of the
+test. The tests can use network emulation, network simulation,
 or a controlled network path such as a laboratory environment.
+
+In order to cover the wide set of real-world usecases, test cases can be
+run with a variety of RTTs (ie: <1ms to 1s) and bandwidths (64kbit-10Gbit).
 
 To ensure internal state variables, including the Bandwidth Estimator,
 are initialized correctly, when an test case says it starts in a phase
