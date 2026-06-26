@@ -3721,6 +3721,14 @@ data it so it exits STARTUP and naturally gets to the specified phase.
 5. Verify the connection transitions to PROBE_DOWN and `BBR.inflight_longterm`
    is updated appropriately, regardless of the application-limited state.
 
+## Never exit PROBE_UP (or STARTUP) when app-limited and No loss
+
+1. Wait until the connection transitions to PROBE_UP (or STARTUP).
+2. Limit the application sending rate so bandwidth samples are application-
+   limited.
+3. Verify that as long as there is no loss and the rounds are app-limited,
+   the connection stays in PROBE_UP (or STARTUP) indefinitely.
+
 ## Exit PROBE_DOWN on inflight
 
 1. Wait until the connection transitions to PROBE_DOWN.
