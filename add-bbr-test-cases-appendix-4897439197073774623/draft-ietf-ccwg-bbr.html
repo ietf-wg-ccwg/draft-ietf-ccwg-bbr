@@ -5629,13 +5629,15 @@ those are critical to BBR's overall behavior.<a href="#appendix-A-1" class="pilc
 are meeting BBR's needs, but there are no standalone tests for either.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
 <p id="appendix-A-3">Unless otherwise mentioned, each test case is configured to create a single
 BBR connection traveling over a controlled path with a bottleneck bandwidth
-(ie: 10Mbps) and two-way propagation delay that are fixed for the entire
-duration of the test. The tests can use network emulation, network simulation,
+and two-way propagation delay that are fixed for the entire duration of the
+test. The tests can use network emulation, network simulation,
 or a controlled network path such as a laboratory environment.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
-<p id="appendix-A-4">To ensure internal state variables, including the Bandwidth Estimator,
+<p id="appendix-A-4">In order to cover the wide set of real-world usecases, test cases can be
+run with a variety of RTTs (ie: &lt;1ms to 1s) and bandwidths (64kbit-10Gbit).<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<p id="appendix-A-5">To ensure internal state variables, including the Bandwidth Estimator,
 are initialized correctly, when an test case says it starts in a phase
 after STARTUP, test cases expect the connection to be driven with enough
-data it so it exits STARTUP and naturally gets to the specified phase.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+data it so it exits STARTUP and naturally gets to the specified phase.<a href="#appendix-A-5" class="pilcrow">¶</a></p>
 <div id="exiting-startup-on-bandwidth-plateau">
 <section id="appendix-A.1">
         <h3 id="name-exiting-startup-on-bandwidt">
