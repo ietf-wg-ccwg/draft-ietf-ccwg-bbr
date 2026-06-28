@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-25T03:41:04.459551+00:00",
+  "timestamp": "2026-06-28T03:57:30.425087+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -6855,13 +6855,13 @@
       "labels": [],
       "body": "This PR fixes https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/71 by adding an Appendix section titled \"BBR Example Test Cases\". It details the 16 test cases originally discussed, along with 4 new edge cases brainstormed during planning. The cases use step-by-step logic detailing state transitions and variables without relying on QLog text.\n\n---\n*PR created automatically by Jules for task [4897439197073774623](https://jules.google.com/task/4897439197073774623) started by @ianswett*",
       "createdAt": "2026-04-06T19:25:18Z",
-      "updatedAt": "2026-04-13T20:34:31Z",
+      "updatedAt": "2026-06-26T20:38:06Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-bbr-test-cases-appendix-4897439197073774623",
-      "headRefOid": "3f9c1aa0d6aef37e56940c3baa18801432fc15ea",
+      "headRefOid": "905364efece6f0c2e04ac3a67fc1cceb6b65b3a9",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -6894,7 +6894,7 @@
             "abbreviatedOid": "836ff9c"
           },
           "author": "google-labs-jules",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-04-06T20:44:42Z",
@@ -7026,7 +7026,7 @@
             "abbreviatedOid": "7409403"
           },
           "author": "google-labs-jules",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-04-07T19:11:52Z",
@@ -7066,7 +7066,7 @@
             "abbreviatedOid": "885a328"
           },
           "author": "google-labs-jules",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-04-07T19:39:17Z",
@@ -7106,7 +7106,7 @@
             "abbreviatedOid": "81d911b"
           },
           "author": "google-labs-jules",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-04-07T19:42:47Z",
@@ -7146,7 +7146,7 @@
             "abbreviatedOid": "2ab9c3f"
           },
           "author": "google-labs-jules",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-04-07T19:55:08Z",
@@ -7206,7 +7206,7 @@
             "abbreviatedOid": "619bd67"
           },
           "author": "google-labs-jules",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-04-07T20:36:43Z",
@@ -7246,7 +7246,7 @@
             "abbreviatedOid": "e24a9a4"
           },
           "author": "google-labs-jules",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-04-07T20:42:55Z",
@@ -7286,7 +7286,7 @@
             "abbreviatedOid": "044ad7b"
           },
           "author": "google-labs-jules",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-04-07T20:43:41Z",
@@ -7369,6 +7369,86 @@
               "body": "I really appreciate the tests taking RTT and bottleneck bandwidth as parameters.  Running the same test under small, medium and larger RTTs are likely to expose different problems.\n\nConsider adding some wording encouraging implementers to explore behavior over a range of network params, including RTT=0 and 100msec+",
               "createdAt": "2026-04-08T19:20:17Z",
               "updatedAt": "2026-04-08T19:20:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABERwquw",
+          "commit": {
+            "abbreviatedOid": "bb064a7"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-06-26T19:04:10Z",
+          "updatedAt": "2026-06-26T19:04:10Z",
+          "comments": [
+            {
+              "originalPosition": 48,
+              "body": "I added that with No exit from PROBE_UP when app-limited and there is no loss.",
+              "createdAt": "2026-06-26T19:04:10Z",
+              "updatedAt": "2026-06-26T19:04:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABER1E3A",
+          "commit": {
+            "abbreviatedOid": "905364e"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-06-26T19:15:17Z",
+          "updatedAt": "2026-06-26T19:15:17Z",
+          "comments": [
+            {
+              "originalPosition": 175,
+              "body": "Are you thinking to constrain the test more?",
+              "createdAt": "2026-06-26T19:15:17Z",
+              "updatedAt": "2026-06-26T19:15:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABER3S_Q",
+          "commit": {
+            "abbreviatedOid": "905364e"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-06-26T19:20:58Z",
+          "updatedAt": "2026-06-26T19:20:58Z",
+          "comments": [
+            {
+              "originalPosition": 180,
+              "body": "Good point, we could put a tighter bound on it.  If inflight_longterm isn't set, it'd be about 11 Round trips ideally I believe? (1.25^11 > 10). But if inflight_longterm is set, it would depend upon the BDP.",
+              "createdAt": "2026-06-26T19:20:58Z",
+              "updatedAt": "2026-06-26T19:20:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABEST4rA",
+          "commit": {
+            "abbreviatedOid": "ce341b7"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-06-26T20:38:06Z",
+          "updatedAt": "2026-06-26T20:38:06Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "Good point, I added a sentence on that.",
+              "createdAt": "2026-06-26T20:38:06Z",
+              "updatedAt": "2026-06-26T20:38:06Z"
             }
           ]
         }
@@ -7978,13 +8058,13 @@
       "labels": [],
       "body": "- **Fix missing ProbeBW state definitions/init and minor bugs in ProbeBW pseudocode**\n- **Fix typos, indentation, and parameter naming in ProbeBW pseudocode**\n- **Define missing loss variables and remove redundant RS parameter**\n",
       "createdAt": "2026-06-23T04:02:43Z",
-      "updatedAt": "2026-06-23T15:02:45Z",
+      "updatedAt": "2026-06-26T18:00:37Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "03e7fd96d9cab62015506eef6a7c1af794a2b4c0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "fix-missing-probe-bw-state-definitions-and-transitions",
-      "headRefOid": "eb039ad902d2ad78b9956f5317fc50450abed440",
+      "headRefOid": "c9c872c52e5baedf4b3690350fd3c2d670bc98fc",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -7998,7 +8078,66 @@
           "updatedAt": "2026-06-23T04:12:10Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABEQf6hQ",
+          "commit": {
+            "abbreviatedOid": "c9c872c"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Thanks Neal, this reminds me that I need to update my PROBE_UP code.",
+          "createdAt": "2026-06-26T15:35:44Z",
+          "updatedAt": "2026-06-26T15:50:47Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "This is specifically since the last probe up, correct?  If so, I might be inclined to call this rounds_since_probe_up",
+              "createdAt": "2026-06-26T15:35:44Z",
+              "updatedAt": "2026-06-26T15:50:47Z"
+            },
+            {
+              "originalPosition": 32,
+              "body": "I don't have an immediate suggestion, but cnt isn't the most obvious name?",
+              "createdAt": "2026-06-26T15:37:27Z",
+              "updatedAt": "2026-06-26T15:50:47Z"
+            },
+            {
+              "originalPosition": 28,
+              "body": "Now that this is a bool, it's a non-obvious name.  Would is_probing_bw or is_probing_up or something else be better?",
+              "createdAt": "2026-06-26T15:40:57Z",
+              "updatedAt": "2026-06-26T15:50:47Z"
+            },
+            {
+              "originalPosition": 166,
+              "body": "What does \"what prefix of packet\" mean?  I think I understand the math and what we're trying to accomplish, though I am a bit confused about why BBR.LossThresh is used?\n\nWhy not just get the number of bytes in flight when P was sent?",
+              "createdAt": "2026-06-26T15:46:02Z",
+              "updatedAt": "2026-06-26T15:50:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABERZuSg",
+          "commit": {
+            "abbreviatedOid": "c9c872c"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-06-26T18:00:37Z",
+          "updatedAt": "2026-06-26T18:00:37Z",
+          "comments": [
+            {
+              "originalPosition": 70,
+              "body": "If we changing this to be a bool, should we change loss_in_round as well?",
+              "createdAt": "2026-06-26T18:00:37Z",
+              "updatedAt": "2026-06-26T18:00:37Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 115,
@@ -8012,7 +8151,7 @@
       "labels": [],
       "body": "Describe the \"Precautionary Bandwidth Probing\" mechanism using prose,\nstate definitions, and pseudocode. This mechanism has been in Linux\nTCP BBRv2 and TCP BBRv3 since 2018 in this form, and has shown\nsignificant reductions in queuing delay and packet loss.\n",
       "createdAt": "2026-06-23T15:06:56Z",
-      "updatedAt": "2026-06-23T15:06:57Z",
+      "updatedAt": "2026-06-26T18:24:02Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "fix-some-missing-probe-bw-state-definitions-and-transitions",
       "baseRefOid": "b6bdd25d312a5bfde755caac0e3a15492584adfd",
@@ -8024,7 +8163,52 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABERbRoA",
+          "commit": {
+            "abbreviatedOid": "eb039ad"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Thanks Neal, I think I understand this mechanism, a few editorial comments below.",
+          "createdAt": "2026-06-26T18:04:30Z",
+          "updatedAt": "2026-06-26T18:24:01Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Just reaching the inflight_longterm doesn't cause PROBE_UP to exit early, correct?",
+              "createdAt": "2026-06-26T18:04:30Z",
+              "updatedAt": "2026-06-26T18:24:01Z"
+            },
+            {
+              "originalPosition": 38,
+              "body": "It took me a few reads to fully understand the mechanism here, so I think a short intro of the algorithm and the state transitions would be very helpful.",
+              "createdAt": "2026-06-26T18:12:54Z",
+              "updatedAt": "2026-06-26T18:24:01Z"
+            },
+            {
+              "originalPosition": 17,
+              "body": "Maybe 'prev_probe_precautionary' or something similar would be a better name than 'stopped_risky_probe'?",
+              "createdAt": "2026-06-26T18:20:43Z",
+              "updatedAt": "2026-06-26T18:24:01Z"
+            },
+            {
+              "originalPosition": 6,
+              "body": "A forward reference to Precautionary Bandwidth Probing might also be helpful?",
+              "createdAt": "2026-06-26T18:21:37Z",
+              "updatedAt": "2026-06-26T18:24:01Z"
+            },
+            {
+              "originalPosition": 25,
+              "body": "Now that there are two types of ProbeBW_UP, can you add a sentence introducing them?",
+              "createdAt": "2026-06-26T18:23:18Z",
+              "updatedAt": "2026-06-26T18:24:01Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 116,
@@ -8038,7 +8222,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2026-06-23T15:16:06Z",
-      "updatedAt": "2026-06-23T15:28:08Z",
+      "updatedAt": "2026-06-26T13:29:06Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "add-precautionary-bandwidth-probing",
       "baseRefOid": "eb039ad902d2ad78b9956f5317fc50450abed440",
@@ -8050,7 +8234,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABEPpjAA",
+          "commit": {
+            "abbreviatedOid": "634dcd4"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-06-26T13:29:06Z",
+          "updatedAt": "2026-06-26T13:29:06Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 117,
@@ -8064,7 +8262,7 @@
       "labels": [],
       "body": "Based on implementation and testing experience with Linux TCP BBRv3,\nfix the undo state definitions, pseudocode, and prose, so that they\nmatch the current Linux TCP BBRv3 state and algorithm.\n",
       "createdAt": "2026-06-23T18:59:57Z",
-      "updatedAt": "2026-06-23T18:59:58Z",
+      "updatedAt": "2026-06-26T18:01:49Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "clarify-inflight_longterm-evolution-purely-editorial",
       "baseRefOid": "634dcd4284fddaef755eddf72844c79809b8ddf2",
@@ -8076,7 +8274,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABERaLww",
+          "commit": {
+            "abbreviatedOid": "1f83471"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "I'll note that the QUIC implementation doesn't implement undo, because its relatively complex and I haven't seen enough evidence of spurious loss detection causing issues, but I believe you said it was very useful for TCP, so maybe we should?",
+          "createdAt": "2026-06-26T18:01:49Z",
+          "updatedAt": "2026-06-26T18:01:49Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
