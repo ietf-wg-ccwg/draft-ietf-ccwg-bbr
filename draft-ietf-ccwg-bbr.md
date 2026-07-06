@@ -635,6 +635,15 @@ BBR.prev_probe_too_high: A boolean recording whether the most recent bandwidth p
 
 BBR.prev_probe_precautionary: A boolean recording whether the most recent ProbeBW_UP phase was stopped early because it reached the BBR.inflight_longterm threshold from the previous probe that went too high. See "Precautionary Bandwidth Probing" in {{bandwidth-probing-caution}} for how this is used.
 
+## Undo State {#undo-state}
+
+BBR.undo_state: the value of BBR.state saved upon a loss-induced state transition, to later restore if the loss recovery is detected to be spurious.
+
+BBR.undo_bw_shortterm: the value of BBR.bw_shortterm saved at the start of loss recovery, to later restore if the loss recovery is detected to be spurious.
+
+BBR.undo_inflight_shortterm: the value of BBR.inflight_shortterm saved at the start of loss recovery, to later restore if the loss recovery is detected to be spurious.
+
+BBR.undo_inflight_longterm: the value of BBR.inflight_longterm saved at the start of loss recovery, to later restore if the loss recovery is detected to be spurious.
 
 ## ProbeRTT and min_rtt Parameters and State {#probertt-and-minrtt-parameters-and-state}
 
@@ -1669,6 +1678,10 @@ steps:
     BBR.probe_rtt_done_stamp = 0
     BBR.probe_rtt_round_done = false
     BBR.prior_cwnd = 0
+    BBR.undo_state = None
+    BBR.undo_bw_shortterm = 0
+    BBR.undo_inflight_shortterm = 0
+    BBR.undo_inflight_longterm = 0
     BBR.idle_restart = false
     BBR.extra_acked_interval_start = Now()
     BBR.extra_acked_delivered = 0
@@ -1876,7 +1889,9 @@ Startup based on packet loss if any packet loss is detected during fast
 recovery.
 
 If CheckStartupHighLoss() exits Startup based on packet loss, it takes the
-following steps. First, it sets BBR.full_bw_reached = true. Then it sets
+following steps. First, it sets BBR.undo_state = Startup (to enable an
+undo of this step if the loss recovery is later detected to be spurious).
+Second, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
 BBR.inflight_latest is the max delivered volume of data (RS.delivered) over
@@ -3109,6 +3124,7 @@ reduces BBR.inflight_longterm:
       BBR.inflight_longterm = max(RS.tx_in_flight,
                             TargetInflight() * BBR.Beta)
     if (BBR.state == ProbeBW_UP)
+      BBR.undo_state = ProbeBW_UP
       StartProbeBW_DOWN()
 ~~~~
 
@@ -3300,36 +3316,57 @@ impact of spurious loss recovery episodes.
 If a connection's transport protocol starts a loss recovery episode that may
 later be declared spurious (including possibly fast recovery or RTO recovery,
 depending on the transport protocol), BBR saves information about its current
-state as follows:
+state. It saves the current congestion window, the short-term and long-term
+model parameters, and initializes the undo state to indicate no state restoration
+is yet needed:
 
 ~~~~
   /* Save state in case a loss episode is later declared spurious */
   SaveStateUponLoss():
-    BBR.undo_state       = BBR.state
+    SaveCwnd()
+    BBR.undo_state              = None
     BBR.undo_bw_shortterm       = BBR.bw_shortterm
     BBR.undo_inflight_shortterm = BBR.inflight_shortterm
-    BBR.undo_inflight_longterm = BBR.inflight_longterm
+    BBR.undo_inflight_longterm  = BBR.inflight_longterm
 ~~~~
 
 #### Handling a Spurious Loss Recovery {#handling-spurious-loss-recovery}
 
 If a loss recovery episode is declared spurious, BBR restores aspects of its
-state to their previously saved values as follows:
+state to their previously saved values. It restores the congestion window,
+resets the loss round state and the full bandwidth detector, and restores
+the short-term and long-term model parameters to be at least the values
+saved before the loss episode.
+
+Furthermore, if the connection transitioned out of Startup or ProbeBW_UP
+due to the loss recovery episode, and the connection is not currently in
+ProbeRTT, BBR returns to the state it was in before the loss recovery
+episode (returning to Startup, or returning to ProbeBW by starting a refill
+phase to restart the bandwidth probe):
 
 ~~~~
   /* Handle a declaration of a spurious loss episode */
   HandleSpuriousLossDetection():
+    RestoreCwnd()
     BBR.loss_in_round = 0
     ResetFullBW()
-    BBR.bw_shortterm       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
-    BBR.inflight_shortterm = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
-    BBR.inflight_longterm = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)
+    BBR.bw_shortterm       = max(BBR.bw_shortterm,
+                                 BBR.undo_bw_shortterm)
+    BBR.inflight_shortterm = max(BBR.inflight_shortterm,
+                                 BBR.undo_inflight_shortterm)
+    BBR.inflight_longterm  = max(BBR.inflight_longterm,
+                                 BBR.undo_inflight_longterm)
     /* If flow was probing bandwidth, return to that state: */
-    if (BBR.state != ProbeRTT && BBR.state != BBR.undo_state)
-      if (BBR.undo_state == Startup)
+    if (BBR.undo_state == Startup &&
+        BBR.state != Startup)
+      BBR.full_bw_reached = false
+      if (BBR.state != ProbeRTT)
         EnterStartup()
-      else if (BBR.undo_state == ProbeBW_UP)
-        StartProbeBW_UP()
+    else if (BBR.undo_state == ProbeBW_UP &&
+             BBR.state != ProbeBW_UP)
+      if (BBR.state != ProbeRTT)
+        StartProbeBW_REFILL()
+    BBR.undo_state = None
 ~~~~
 
 ## Updating Control Parameters {#updating-control-parameters}
