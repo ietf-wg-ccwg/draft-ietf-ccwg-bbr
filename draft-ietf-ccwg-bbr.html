@@ -1236,13 +1236,16 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
                 <p id="section-toc.1-1.2.2.14.1"><a href="#section-2.14" class="auto internal xref">2.14</a>. <a href="#name-probebw-state" class="internal xref">ProbeBW State</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.15">
-                <p id="section-toc.1-1.2.2.15.1"><a href="#section-2.15" class="auto internal xref">2.15</a>. <a href="#name-probertt-and-min_rtt-parame" class="internal xref">ProbeRTT and min_rtt Parameters and State</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.15.2.1">
-                    <p id="section-toc.1-1.2.2.15.2.1.1"><a href="#section-2.15.1" class="auto internal xref">2.15.1</a>.  <a href="#name-parameters-for-estimating-b" class="internal xref">Parameters for Estimating BBR.min_rtt</a></p>
+                <p id="section-toc.1-1.2.2.15.1"><a href="#section-2.15" class="auto internal xref">2.15</a>. <a href="#name-undo-state" class="internal xref">Undo State</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.15.2.2">
-                    <p id="section-toc.1-1.2.2.15.2.2.1"><a href="#section-2.15.2" class="auto internal xref">2.15.2</a>.  <a href="#name-parameters-for-scheduling-p" class="internal xref">Parameters for Scheduling ProbeRTT</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.16">
+                <p id="section-toc.1-1.2.2.16.1"><a href="#section-2.16" class="auto internal xref">2.16</a>. <a href="#name-probertt-and-min_rtt-parame" class="internal xref">ProbeRTT and min_rtt Parameters and State</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.16.2.1">
+                    <p id="section-toc.1-1.2.2.16.2.1.1"><a href="#section-2.16.1" class="auto internal xref">2.16.1</a>.  <a href="#name-parameters-for-estimating-b" class="internal xref">Parameters for Estimating BBR.min_rtt</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.16.2.2">
+                    <p id="section-toc.1-1.2.2.16.2.2.1"><a href="#section-2.16.2" class="auto internal xref">2.16.2</a>.  <a href="#name-parameters-for-scheduling-p" class="internal xref">Parameters for Scheduling ProbeRTT</a></p>
 </li>
                 </ul>
 </li>
@@ -1877,46 +1880,59 @@ detected in the current round trip.<a href="#section-2.14-4" class="pilcrow">¶<
 <p id="section-2.14-8">BBR.rounds_since_probe_up: The number of round trips elapsed since the last ProbeBW_UP bandwidth probe phase.<a href="#section-2.14-8" class="pilcrow">¶</a></p>
 <p id="section-2.14-9">BBR.bw_probe_wait: The maximum wall clock time duration BBR waits before probing bandwidth again.<a href="#section-2.14-9" class="pilcrow">¶</a></p>
 <p id="section-2.14-10">BBR.cycle_stamp: The wall clock time at which the current ProbeBW cycle started.<a href="#section-2.14-10" class="pilcrow">¶</a></p>
+<p id="section-2.14-11">BBR.prev_probe_too_high: A boolean recording whether the most recent bandwidth probe went too high (i.e., experienced a packet loss rate exceeding BBR.LossThresh). See "Precautionary Bandwidth Probing" in <a href="#bandwidth-probing-caution" class="auto internal xref">Section 5.3.3.6</a> for how this is used.<a href="#section-2.14-11" class="pilcrow">¶</a></p>
+<p id="section-2.14-12">BBR.prev_probe_precautionary: A boolean recording whether the most recent ProbeBW_UP phase was stopped early because it reached the BBR.inflight_longterm threshold from the previous probe that went too high. See "Precautionary Bandwidth Probing" in <a href="#bandwidth-probing-caution" class="auto internal xref">Section 5.3.3.6</a> for how this is used.<a href="#section-2.14-12" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="undo-state">
+<section id="section-2.15">
+        <h3 id="name-undo-state">
+<a href="#section-2.15" class="section-number selfRef">2.15. </a><a href="#name-undo-state" class="section-name selfRef">Undo State</a>
+        </h3>
+<p id="section-2.15-1">BBR.undo_state: the value of BBR.state saved upon a loss-induced state transition, to later restore if the loss recovery is detected to be spurious.<a href="#section-2.15-1" class="pilcrow">¶</a></p>
+<p id="section-2.15-2">BBR.undo_bw_shortterm: the value of BBR.bw_shortterm saved at the start of loss recovery, to later restore if the loss recovery is detected to be spurious.<a href="#section-2.15-2" class="pilcrow">¶</a></p>
+<p id="section-2.15-3">BBR.undo_inflight_shortterm: the value of BBR.inflight_shortterm saved at the start of loss recovery, to later restore if the loss recovery is detected to be spurious.<a href="#section-2.15-3" class="pilcrow">¶</a></p>
+<p id="section-2.15-4">BBR.undo_inflight_longterm: the value of BBR.inflight_longterm saved at the start of loss recovery, to later restore if the loss recovery is detected to be spurious.<a href="#section-2.15-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probertt-and-minrtt-parameters-and-state">
-<section id="section-2.15">
+<section id="section-2.16">
         <h3 id="name-probertt-and-min_rtt-parame">
-<a href="#section-2.15" class="section-number selfRef">2.15. </a><a href="#name-probertt-and-min_rtt-parame" class="section-name selfRef">ProbeRTT and min_rtt Parameters and State</a>
+<a href="#section-2.16" class="section-number selfRef">2.16. </a><a href="#name-probertt-and-min_rtt-parame" class="section-name selfRef">ProbeRTT and min_rtt Parameters and State</a>
         </h3>
 <div id="parameters-for-estimating-bbrminrtt">
-<section id="section-2.15.1">
+<section id="section-2.16.1">
           <h4 id="name-parameters-for-estimating-b">
-<a href="#section-2.15.1" class="section-number selfRef">2.15.1. </a><a href="#name-parameters-for-estimating-b" class="section-name selfRef">Parameters for Estimating BBR.min_rtt</a>
+<a href="#section-2.16.1" class="section-number selfRef">2.16.1. </a><a href="#name-parameters-for-estimating-b" class="section-name selfRef">Parameters for Estimating BBR.min_rtt</a>
           </h4>
-<p id="section-2.15.1-1">BBR.min_rtt_stamp: The wall clock time at which the current BBR.min_rtt sample
-was obtained.<a href="#section-2.15.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.15.1-2">BBR.MinRTTFilterLen: A constant specifying the length of the BBR.min_rtt min
-filter window, BBR.MinRTTFilterLen is 10 secs.<a href="#section-2.15.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.16.1-1">BBR.min_rtt_stamp: The wall clock time at which the current BBR.min_rtt sample
+was obtained.<a href="#section-2.16.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.16.1-2">BBR.MinRTTFilterLen: A constant specifying the length of the BBR.min_rtt min
+filter window, BBR.MinRTTFilterLen is 10 secs.<a href="#section-2.16.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="parameters-for-scheduling-probertt">
-<section id="section-2.15.2">
+<section id="section-2.16.2">
           <h4 id="name-parameters-for-scheduling-p">
-<a href="#section-2.15.2" class="section-number selfRef">2.15.2. </a><a href="#name-parameters-for-scheduling-p" class="section-name selfRef">Parameters for Scheduling ProbeRTT</a>
+<a href="#section-2.16.2" class="section-number selfRef">2.16.2. </a><a href="#name-parameters-for-scheduling-p" class="section-name selfRef">Parameters for Scheduling ProbeRTT</a>
           </h4>
-<p id="section-2.15.2-1">BBR.ProbeRTTCwndGain: A constant specifying the gain value for calculating
+<p id="section-2.16.2-1">BBR.ProbeRTTCwndGain: A constant specifying the gain value for calculating
 C.cwnd during ProbeRTT: 0.5 (meaning that ProbeRTT attempts to reduce in-flight
-data to 50% of the estimated BDP).<a href="#section-2.15.2-1" class="pilcrow">¶</a></p>
-<p id="section-2.15.2-2">BBR.ProbeRTTDuration: A constant specifying the minimum duration for which ProbeRTT
-state holds C.inflight to BBR.MinPipeCwnd or fewer packets: 200 ms.<a href="#section-2.15.2-2" class="pilcrow">¶</a></p>
-<p id="section-2.15.2-3">BBR.ProbeRTTInterval: A constant specifying the minimum time interval between
-ProbeRTT states: 5 secs.<a href="#section-2.15.2-3" class="pilcrow">¶</a></p>
-<p id="section-2.15.2-4">BBR.probe_rtt_min_delay: The minimum RTT sample recorded in the last
-BBR.ProbeRTTInterval.<a href="#section-2.15.2-4" class="pilcrow">¶</a></p>
-<p id="section-2.15.2-5">BBR.probe_rtt_min_stamp: The wall clock time at which the current
-BBR.probe_rtt_min_delay sample was obtained.<a href="#section-2.15.2-5" class="pilcrow">¶</a></p>
-<p id="section-2.15.2-6">BBR.probe_rtt_expired: A boolean recording whether the BBR.probe_rtt_min_delay
+data to 50% of the estimated BDP).<a href="#section-2.16.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-2">BBR.ProbeRTTDuration: A constant specifying the minimum duration for which ProbeRTT
+state holds C.inflight to BBR.MinPipeCwnd or fewer packets: 200 ms.<a href="#section-2.16.2-2" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-3">BBR.ProbeRTTInterval: A constant specifying the minimum time interval between
+ProbeRTT states: 5 secs.<a href="#section-2.16.2-3" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-4">BBR.probe_rtt_min_delay: The minimum RTT sample recorded in the last
+BBR.ProbeRTTInterval.<a href="#section-2.16.2-4" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-5">BBR.probe_rtt_min_stamp: The wall clock time at which the current
+BBR.probe_rtt_min_delay sample was obtained.<a href="#section-2.16.2-5" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-6">BBR.probe_rtt_expired: A boolean recording whether the BBR.probe_rtt_min_delay
 has expired and is due for a refresh with an application idle period or a
-transition into ProbeRTT state.<a href="#section-2.15.2-6" class="pilcrow">¶</a></p>
-<p id="section-2.15.2-7">The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+transition into ProbeRTT state.<a href="#section-2.16.2-6" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-7">The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to
-be interpreted as described in <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span>.<a href="#section-2.15.2-7" class="pilcrow">¶</a></p>
+be interpreted as described in <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span>.<a href="#section-2.16.2-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3084,6 +3100,10 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
     BBR.probe_rtt_done_stamp = 0
     BBR.probe_rtt_round_done = false
     BBR.prior_cwnd = 0
+    BBR.undo_state = None
+    BBR.undo_bw_shortterm = 0
+    BBR.undo_inflight_shortterm = 0
+    BBR.undo_inflight_longterm = 0
     BBR.idle_restart = false
     BBR.extra_acked_interval_start = Now()
     BBR.extra_acked_delivered = 0
@@ -3094,6 +3114,8 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
     BBR.bw_probe_up_rounds = 0
     BBR.rounds_since_probe_up = 0
     BBR.is_bw_probe_sample = false
+    BBR.prev_probe_too_high = false
+    BBR.prev_probe_precautionary = false
     BBR.ack_phase = ACKS_INIT
     BBR.cycle_stamp = 0
     BBR.bw_probe_wait = 0
@@ -3321,7 +3343,9 @@ can only detect one packet loss per round trip, CheckStartupHighLoss() exits
 Startup based on packet loss if any packet loss is detected during fast
 recovery.<a href="#section-5.3.1.3-4" class="pilcrow">¶</a></p>
 <p id="section-5.3.1.3-5">If CheckStartupHighLoss() exits Startup based on packet loss, it takes the
-following steps. First, it sets BBR.full_bw_reached = true. Then it sets
+following steps. First, it sets BBR.undo_state = Startup (to enable an
+undo of this step if the loss recovery is later detected to be spurious).
+Second, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
 BBR.inflight_latest is the max delivered volume of data (RS.delivered) over
@@ -3441,7 +3465,7 @@ reduced, and the flow needs to change to adapt, slowing down to match the
 latest delivery process.<a href="#section-5.3.3.2-1" class="pilcrow">¶</a></p>
 <p id="section-5.3.3.2-2">Exit conditions: The connection adaptively holds this state until it decides
 that it is time to probe for bandwidth (see "Time Scale for Bandwidth Probing",
-in <a href="#time-scale-for-bandwidth-probing-" class="auto internal xref">Section 5.3.3.5</a>), at which time it enters
+in <a href="#time-scale-for-bandwidth-probing-" class="auto internal xref">Section 5.3.3.8</a>), at which time it enters
 ProbeBW_REFILL.<a href="#section-5.3.3.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -3488,195 +3512,262 @@ in flight.<a href="#section-5.3.3.3-4" class="pilcrow">¶</a></p>
 <section id="section-5.3.3.4">
             <h5 id="name-probebw_up">
 <a href="#section-5.3.3.4" class="section-number selfRef">5.3.3.4. </a><a href="#name-probebw_up" class="section-name selfRef">ProbeBW_UP</a>
+          </h5>
+</section>
+</div>
+<div id="bandwidth-probing-accel">
+<section id="section-5.3.3.5">
+            <h5 id="name-accelerating-to-probe-for-b">
+<a href="#section-5.3.3.5" class="section-number selfRef">5.3.3.5. </a><a href="#name-accelerating-to-probe-for-b" class="section-name selfRef">Accelerating to Probe for Bandwidth</a>
             </h5>
-<p id="section-5.3.3.4-1">After ProbeBW_REFILL refills the pipe, ProbeBW_UP probes for possible
+<p id="section-5.3.3.5-1">After ProbeBW_REFILL refills the pipe, ProbeBW_UP probes for possible
 increases in available bandwidth by raising the sending rate, using a
 BBR.pacing_gain of 1.25, to send faster than the current estimated available
 bandwidth. It also raises BBR.cwnd_gain to 2.25, to ensure that the flow
 can send faster than it had been, even if C.cwnd was previously limiting the
-sending process.<a href="#section-5.3.3.4-1" class="pilcrow">¶</a></p>
-<p id="section-5.3.3.4-2">If the flow has not set BBR.inflight_longterm, it implicitly tries to raise
+sending process.<a href="#section-5.3.3.5-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.5-2">If the flow has not set BBR.inflight_longterm, it implicitly tries to raise
 C.inflight to at least BBR.pacing_gain * BBR.bdp = 1.25 *
-BBR.bdp.<a href="#section-5.3.3.4-2" class="pilcrow">¶</a></p>
-<p id="section-5.3.3.4-3">If the flow has set BBR.inflight_longterm and encounters that limit, it then
-gradually increases the upper volume bound (BBR.inflight_longterm) using the
-following approach:<a href="#section-5.3.3.4-3" class="pilcrow">¶</a></p>
+BBR.bdp.<a href="#section-5.3.3.5-2" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.5-3">If the flow has set BBR.inflight_longterm and C.inflight encounters that limit,
+the flow raises BBR.inflight_longterm in ProbeBW_UP in a manner that is slow and
+cautious at first, but increasingly rapid over time.  The caution is motivated
+by the fact that a given BBR flow may be sharing a buffer with many other
+flows, and the buffer space available to the flow may be limited. The
+increasingly rapid growth over time is motivated by the fact that in a
+high-speed WAN the increase in available bandwidth (and thus the estimated BDP)
+may require the flow to grow C.inflight by up to O(1,000,000) packets; even a
+high-speed WAN BDP like 10Gbps * 100ms is around 83,000 packets (with a
+1500-byte MTU). The additive increase to BBR.inflight_longterm doubles each
+round trip; in each successive round trip, BBR.inflight_longterm grows (in units
+of C.SMSS) by 1, 2, 4, 8, 16, etc, with the increases spread uniformly across the
+entire round trip. This allows BBR to utilize a larger BDP in O(log(BDP)) round
+trips, meeting the design goal for scalable utilization of newly-available
+bandwidth.<a href="#section-5.3.3.5-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="bandwidth-probing-caution">
+<section id="section-5.3.3.6">
+            <h5 id="name-precautionary-bandwidth-pro">
+<a href="#section-5.3.3.6" class="section-number selfRef">5.3.3.6. </a><a href="#name-precautionary-bandwidth-pro" class="section-name selfRef">Precautionary Bandwidth Probing</a>
+            </h5>
+<p id="section-5.3.3.6-1">Increasing a flow's sending rate is essential for ensuring proper bandwidth
+utilization, but raises risks for excessive queuing or packet loss. To mitigate
+these risks, ProbeBW_UP uses a "precautionary bandwidth probing"
+mechanism. With this mechanism, flows only persist in ProbeBW_UP if the most
+recent ProbeBW_UP phase did not result in excess loss. If ProbeBW_UP exits due
+to excess loss, then the following ProbeBW_UP phase is a brief "precautionary
+bandwidth probing" phase that lasts only until C.inflight reaches
+BBR.inflight_longterm. If the "precautionary bandwidth probing" phase succeeds
+(there is no excess loss) then the flow immediately returns to ProbeBW_REFILL
+and then ProbeBW_UP, and persists in ProbeBW_UP.<a href="#section-5.3.3.6-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.6-2">The "precautionary bandwidth probing" mechanism is motivated by the fact that a
+full round trip is required to receive feedback indicating the level of queuing
+delay and/or packet loss associated with a given level of
+C.inflight. Furthermore, BBR.inflight_longterm is designed to remember the
+lowest level of C.inflight that was associated with excess loss. Thus
+maintaining C.inflight at BBR.inflight_longterm for a full round trip, while
+necessary to safely raise BBR.inflight_longterm, runs a significant risk of
+holding a bottleneck buffer at full or near-full for that entire round trip.<a href="#section-5.3.3.6-2" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.6-3">To manage this trade-off and mitigate the risks, the "precautionary bandwidth
+probing" mechanism ensures the flow only maintains C.inflight at the
+BBR.inflight_longterm level for a full round trip when this has recently been
+measured to be "safe" (in the sense of not causing excess loss). To do this, it
+uses the following two aspects:<a href="#section-5.3.3.6-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.4-4.1">
-                <p id="section-5.3.3.4-4.1.1">BBR.inflight_longterm: The flow raises BBR.inflight_longterm in ProbeBW_UP in a manner
-that is slow and cautious at first, but increasingly rapid and bold over time.
-The initial caution is motivated by the fact that a given BBR flow may be sharing
-a shallow buffer with thousands of other flows, so that the buffer space
-available to the flow may be quite tight (even just a single packet or
-less). The increasingly rapid growth over time is motivated by the fact that
-in a high-speed WAN the increase in available bandwidth (and thus the estimated
-BDP) may require the flow to grow C.inflight by up to
-O(1,000,000) packets; even a high-speed WAN BDP like
-10Gbps * 100ms is around 83,000 packets (with a 1500-byte MTU). The additive
-increase to BBR.inflight_longterm exponentially doubles each round trip;
-in each successive round trip, BBR.inflight_longterm grows by 1, 2, 4, 8, 16,
-etc, with the increases spread uniformly across the entire round trip.
-This helps allow BBR to utilize a larger BDP in O(log(BDP)) round trips,
-meeting the design goal for scalable utilization of newly-available bandwidth.<a href="#section-5.3.3.4-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3.3.6-4.1">
+                <p id="section-5.3.3.6-4.1.1">Precautionary Bandwidth Probing: Deceleration: after
+BBR.inflight_longterm is set due to observing excess loss in bandwidth
+probing (setting BBR.prev_probe_too_high to true), when the flow next
+probes for bandwidth, it takes a cautious approach: rather than
+maintaining C.inflight at BBR.inflight_longterm for the full round trip,
+BBR transitions to ProbeBW_DOWN as soon as C.inflight reaches this risky
+level of BBR.inflight_longterm (recording this by setting
+BBR.prev_probe_precautionary to true).<a href="#section-5.3.3.6-4.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.3.3.6-4.2">
+                <p id="section-5.3.3.6-4.2.1">Precautionary Bandwidth Probing: Acceleration: If a round-trip elapses
+and the flow finishes receiving at least a full round trip of ACK
+feedback from bandwidth probing without detecting excess packet loss
+(meaning BBR.prev_probe_too_high remains false), then the flow
+immediately returns to ProbeBW_REFILL to probe for bandwidth again
+(bypassing the usual cruise phase), this time allowing itself to maintain
+C.inflight at BBR.inflight_longterm without precautionary deceleration.<a href="#section-5.3.3.6-4.2.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-<p id="section-5.3.3.4-5">Exit conditions: The BBR flow ends ProbeBW_UP bandwidth probing and
-transitions to ProbeBW_DOWN to try to drain the bottleneck queue when either
-of the following conditions are met:<a href="#section-5.3.3.4-5" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-5.3.3.4-6">
-<li id="section-5.3.3.4-6.1">
-                <p id="section-5.3.3.4-6.1.1">Bandwidth saturation: IsTimeToGoDown() (see below) uses the "full pipe"
+</section>
+</div>
+<div id="exit-conditions-for-bandwidth-probing-">
+<section id="section-5.3.3.7">
+            <h5 id="name-exit-conditions-for-bandwid">
+<a href="#section-5.3.3.7" class="section-number selfRef">5.3.3.7. </a><a href="#name-exit-conditions-for-bandwid" class="section-name selfRef">Exit Conditions for Bandwidth Probing</a>
+            </h5>
+<p id="section-5.3.3.7-1">The BBR flow ends ProbeBW_UP bandwidth probing and
+transitions to ProbeBW_DOWN to try to drain the bottleneck queue when any
+of the following conditions are met:<a href="#section-5.3.3.7-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.3.3.7-2">
+<li id="section-5.3.3.7-2.1">
+                <p id="section-5.3.3.7-2.1.1">Bandwidth saturation: IsTimeToGoDown() (see below) uses the "full pipe"
   estimator (see <a href="#exiting-acceleration-based-on-bandwidth-plateau" class="auto internal xref">Section 5.3.1.2</a>) to
   estimate whether the flow has saturated the available per-flow bandwidth
   ("filled the pipe"), by looking for a plateau in the measured
   RS.delivery_rate. If, during this process, C.inflight is constrained
   by BBR.inflight_longterm (the flow becomes cwnd-limited while cwnd is limited by
   BBR.inflight_longterm), then the flow cannot fully explore the available bandwidth,
-  and so it resets the "full pipe" estimator by calling ResetFullBW().<a href="#section-5.3.3.4-6.1.1" class="pilcrow">¶</a></p>
+  and so it resets the "full pipe" estimator by calling ResetFullBW().<a href="#section-5.3.3.7-2.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-5.3.3.4-6.2">
-                <p id="section-5.3.3.4-6.2.1">Loss: The current loss rate, over the time scale of the last round trip,
-  exceeds BBR.LossThresh (2%).<a href="#section-5.3.3.4-6.2.1" class="pilcrow">¶</a></p>
+              <li id="section-5.3.3.7-2.2">
+                <p id="section-5.3.3.7-2.2.1">Loss: The current loss rate, over the time scale of the last round trip,
+  exceeds BBR.LossThresh (2%).<a href="#section-5.3.3.7-2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-5.3.3.7-2.3">
+                <p id="section-5.3.3.7-2.3.1">Precautionary Bandwidth Probing: Deceleration: If the previous
+  ProbeBW_UP resulted in excess loss (BBR.prev_probe_too_high is true), and
+  C.inflight reaches the risky BBR.inflight_longterm level established
+  during that previous ProbeBW_UP, then the flow stops the bandwidth probe
+  early (setting BBR.prev_probe_precautionary to true) and transitions to
+  ProbeBW_DOWN, to reduce the risks of causing excessive queuing delay
+  and/or loss.<a href="#section-5.3.3.7-2.3.1" class="pilcrow">¶</a></p>
 </li>
             </ol>
 </section>
 </div>
 <div id="time-scale-for-bandwidth-probing-">
-<section id="section-5.3.3.5">
+<section id="section-5.3.3.8">
             <h5 id="name-time-scale-for-bandwidth-pr">
-<a href="#section-5.3.3.5" class="section-number selfRef">5.3.3.5. </a><a href="#name-time-scale-for-bandwidth-pr" class="section-name selfRef">Time Scale for Bandwidth Probing</a>
+<a href="#section-5.3.3.8" class="section-number selfRef">5.3.3.8. </a><a href="#name-time-scale-for-bandwidth-pr" class="section-name selfRef">Time Scale for Bandwidth Probing</a>
             </h5>
-<p id="section-5.3.3.5-1">Choosing the time scale for probing bandwidth is tied to the question of
+<p id="section-5.3.3.8-1">Choosing the time scale for probing bandwidth is tied to the question of
 how to coexist with legacy Reno/CUBIC flows, since probing for bandwidth
 runs a significant risk of causing packet loss, and causing packet loss can
-significantly limit the throughput of such legacy Reno/CUBIC flows.<a href="#section-5.3.3.5-1" class="pilcrow">¶</a></p>
+significantly limit the throughput of such legacy Reno/CUBIC flows.<a href="#section-5.3.3.8-1" class="pilcrow">¶</a></p>
 <div id="bandwidth-probing-and-coexistence-with-renocubic">
-<section id="section-5.3.3.5.1">
+<section id="section-5.3.3.8.1">
               <h6 id="name-bandwidth-probing-and-coexi">
-<a href="#section-5.3.3.5.1" class="section-number selfRef">5.3.3.5.1. </a><a href="#name-bandwidth-probing-and-coexi" class="section-name selfRef">Bandwidth Probing and Coexistence with Reno/CUBIC</a>
+<a href="#section-5.3.3.8.1" class="section-number selfRef">5.3.3.8.1. </a><a href="#name-bandwidth-probing-and-coexi" class="section-name selfRef">Bandwidth Probing and Coexistence with Reno/CUBIC</a>
               </h6>
-<p id="section-5.3.3.5.1-1">BBR has an explicit strategy for coexistence with Reno/CUBIC: to try to behave
+<p id="section-5.3.3.8.1-1">BBR has an explicit strategy for coexistence with Reno/CUBIC: to try to behave
 in a manner so that  Reno/CUBIC flows coexisting with BBR can continue to
-work well in the primary contexts where they do today:<a href="#section-5.3.3.5.1-1" class="pilcrow">¶</a></p>
+work well in the primary contexts where they do today:<a href="#section-5.3.3.8.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.5.1-2.1">
-                  <p id="section-5.3.3.5.1-2.1.1">Intra-datacenter/LAN traffic: the goal is to allow Reno/CUBIC to be able
-to perform well in 100M through 40G enterprise and datacenter Ethernet:<a href="#section-5.3.3.5.1-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3.3.8.1-2.1">
+                  <p id="section-5.3.3.8.1-2.1.1">Intra-datacenter/LAN traffic: the goal is to allow Reno/CUBIC to be able
+to perform well in 100M through 40G enterprise and datacenter Ethernet:<a href="#section-5.3.3.8.1-2.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.5.1-2.1.2.1">
-                      <p id="section-5.3.3.5.1-2.1.2.1.1">BDP = 40 Gbps * 20 us / (1514 bytes) ~= 66 packets<a href="#section-5.3.3.5.1-2.1.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3.3.8.1-2.1.2.1">
+                      <p id="section-5.3.3.8.1-2.1.2.1.1">BDP = 40 Gbps * 20 us / (1514 bytes) ~= 66 packets<a href="#section-5.3.3.8.1-2.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
                   </ul>
 </li>
-                <li class="normal" id="section-5.3.3.5.1-2.2">
-                  <p id="section-5.3.3.5.1-2.2.1">Public Internet last mile traffic: the goal is to allow Reno/CUBIC to be
+                <li class="normal" id="section-5.3.3.8.1-2.2">
+                  <p id="section-5.3.3.8.1-2.2.1">Public Internet last mile traffic: the goal is to allow Reno/CUBIC to be
 able to support up to 25Mbps (for 4K Video) at an RTT of 30ms, typical
-parameters for common CDNs for large video services:<a href="#section-5.3.3.5.1-2.2.1" class="pilcrow">¶</a></p>
+parameters for common CDNs for large video services:<a href="#section-5.3.3.8.1-2.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.5.1-2.2.2.1">
-                      <p id="section-5.3.3.5.1-2.2.2.1.1">BDP = 25Mbps * 30 ms / (1514 bytes) ~= 62 packets<a href="#section-5.3.3.5.1-2.2.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3.3.8.1-2.2.2.1">
+                      <p id="section-5.3.3.8.1-2.2.2.1.1">BDP = 25Mbps * 30 ms / (1514 bytes) ~= 62 packets<a href="#section-5.3.3.8.1-2.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
                   </ul>
 </li>
               </ul>
-<p id="section-5.3.3.5.1-3">The challenge in meeting these goals is that Reno/CUBIC need long periods
+<p id="section-5.3.3.8.1-3">The challenge in meeting these goals is that Reno/CUBIC need long periods
 of no loss to utilize large BDPs. The good news is that in the environments
 where Reno/CUBIC work well today (mentioned above), the BDPs are small, roughly
-~100 packets or less.<a href="#section-5.3.3.5.1-3" class="pilcrow">¶</a></p>
+~100 packets or less.<a href="#section-5.3.3.8.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="a-dual-time-scale-approach-for-coexistence">
-<section id="section-5.3.3.5.2">
+<section id="section-5.3.3.8.2">
               <h6 id="name-a-dual-time-scale-approach-">
-<a href="#section-5.3.3.5.2" class="section-number selfRef">5.3.3.5.2. </a><a href="#name-a-dual-time-scale-approach-" class="section-name selfRef">A Dual-Time-Scale Approach for Coexistence</a>
+<a href="#section-5.3.3.8.2" class="section-number selfRef">5.3.3.8.2. </a><a href="#name-a-dual-time-scale-approach-" class="section-name selfRef">A Dual-Time-Scale Approach for Coexistence</a>
               </h6>
-<p id="section-5.3.3.5.2-1">The BBR strategy has several aspects:<a href="#section-5.3.3.5.2-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-5.3.3.5.2-2">
-<li id="section-5.3.3.5.2-2.1">
-                  <p id="section-5.3.3.5.2-2.1.1">The highest priority is to estimate the bandwidth available to the BBR flow
-  in question.<a href="#section-5.3.3.5.2-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.8.2-1">The BBR strategy has several aspects:<a href="#section-5.3.3.8.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.3.3.8.2-2">
+<li id="section-5.3.3.8.2-2.1">
+                  <p id="section-5.3.3.8.2-2.1.1">The highest priority is to estimate the bandwidth available to the BBR flow
+  in question.<a href="#section-5.3.3.8.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-5.3.3.5.2-2.2">
-                  <p id="section-5.3.3.5.2-2.2.1">Secondarily, a given BBR flow adapts (within bounds) the frequency at which
+                <li id="section-5.3.3.8.2-2.2">
+                  <p id="section-5.3.3.8.2-2.2.1">Secondarily, a given BBR flow adapts (within bounds) the frequency at which
   it probes bandwidth and knowingly risks packet loss, to allow Reno/CUBIC
-  to reach a bandwidth at least as high as that given BBR flow.<a href="#section-5.3.3.5.2-2.2.1" class="pilcrow">¶</a></p>
+  to reach a bandwidth at least as high as that given BBR flow.<a href="#section-5.3.3.8.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
               </ol>
-<p id="section-5.3.3.5.2-3">To adapt the frequency of bandwidth probing, BBR considers two time scales:
-a BBR-native time scale, and a bounded Reno-conscious time scale:<a href="#section-5.3.3.5.2-3" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.8.2-3">To adapt the frequency of bandwidth probing, BBR considers two time scales:
+a BBR-native time scale, and a bounded Reno-conscious time scale:<a href="#section-5.3.3.8.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.5.2-4.1">
-                  <p id="section-5.3.3.5.2-4.1.1">T_bbr: BBR-native time-scale<a href="#section-5.3.3.5.2-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3.3.8.2-4.1">
+                  <p id="section-5.3.3.8.2-4.1.1">T_bbr: BBR-native time-scale<a href="#section-5.3.3.8.2-4.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.5.2-4.1.2.1">
-                      <p id="section-5.3.3.5.2-4.1.2.1.1">T_bbr = uniformly randomly distributed between 2 and 3 secs<a href="#section-5.3.3.5.2-4.1.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3.3.8.2-4.1.2.1">
+                      <p id="section-5.3.3.8.2-4.1.2.1.1">T_bbr = uniformly randomly distributed between 2 and 3 secs<a href="#section-5.3.3.8.2-4.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
                   </ul>
 </li>
-                <li class="normal" id="section-5.3.3.5.2-4.2">
-                  <p id="section-5.3.3.5.2-4.2.1">T_reno: Reno-coexistence time scale<a href="#section-5.3.3.5.2-4.2.1" class="pilcrow">¶</a></p>
+                <li class="normal" id="section-5.3.3.8.2-4.2">
+                  <p id="section-5.3.3.8.2-4.2.1">T_reno: Reno-coexistence time scale<a href="#section-5.3.3.8.2-4.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.5.2-4.2.2.1">
-                      <p id="section-5.3.3.5.2-4.2.2.1.1">T_reno_bound = pick_randomly_either({62, 63})<a href="#section-5.3.3.5.2-4.2.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3.3.8.2-4.2.2.1">
+                      <p id="section-5.3.3.8.2-4.2.2.1.1">T_reno_bound = pick_randomly_either({62, 63})<a href="#section-5.3.3.8.2-4.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
-                    <li class="normal" id="section-5.3.3.5.2-4.2.2.2">
-                      <p id="section-5.3.3.5.2-4.2.2.2.1">reno_bdp = min(BBR.bdp, C.cwnd)<a href="#section-5.3.3.5.2-4.2.2.2.1" class="pilcrow">¶</a></p>
+                    <li class="normal" id="section-5.3.3.8.2-4.2.2.2">
+                      <p id="section-5.3.3.8.2-4.2.2.2.1">reno_bdp = min(BBR.bdp, C.cwnd)<a href="#section-5.3.3.8.2-4.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
-                    <li class="normal" id="section-5.3.3.5.2-4.2.2.3">
-                      <p id="section-5.3.3.5.2-4.2.2.3.1">T_reno = min(reno_bdp, T_reno_bound) round trips<a href="#section-5.3.3.5.2-4.2.2.3.1" class="pilcrow">¶</a></p>
+                    <li class="normal" id="section-5.3.3.8.2-4.2.2.3">
+                      <p id="section-5.3.3.8.2-4.2.2.3.1">T_reno = min(reno_bdp, T_reno_bound) round trips<a href="#section-5.3.3.8.2-4.2.2.3.1" class="pilcrow">¶</a></p>
 </li>
                   </ul>
 </li>
-                <li class="normal" id="section-5.3.3.5.2-4.3">
-                  <p id="section-5.3.3.5.2-4.3.1">T_probe: The time between bandwidth probe UP phases:<a href="#section-5.3.3.5.2-4.3.1" class="pilcrow">¶</a></p>
+                <li class="normal" id="section-5.3.3.8.2-4.3">
+                  <p id="section-5.3.3.8.2-4.3.1">T_probe: The time between bandwidth probe UP phases:<a href="#section-5.3.3.8.2-4.3.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.5.2-4.3.2.1">
-                      <p id="section-5.3.3.5.2-4.3.2.1.1">T_probe = min(T_bbr, T_reno)<a href="#section-5.3.3.5.2-4.3.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3.3.8.2-4.3.2.1">
+                      <p id="section-5.3.3.8.2-4.3.2.1.1">T_probe = min(T_bbr, T_reno)<a href="#section-5.3.3.8.2-4.3.2.1.1" class="pilcrow">¶</a></p>
 </li>
                   </ul>
 </li>
               </ul>
-<p id="section-5.3.3.5.2-5">This dual-time-scale approach is similar to that used by CUBIC, which has
+<p id="section-5.3.3.8.2-5">This dual-time-scale approach is similar to that used by CUBIC, which has
 a CUBIC-native time scale given by a cubic curve, and a "Reno emulation"
 module that estimates what C.cwnd would give the flow Reno-equivalent throughput.
 At any given moment, choose the C.cwnd implied by the more aggressive
-strategy.<a href="#section-5.3.3.5.2-5" class="pilcrow">¶</a></p>
-<p id="section-5.3.3.5.2-6">We randomize both the T_bbr and T_reno parameters, for better mixing and
-fairness convergence.<a href="#section-5.3.3.5.2-6" class="pilcrow">¶</a></p>
+strategy.<a href="#section-5.3.3.8.2-5" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.8.2-6">We randomize both the T_bbr and T_reno parameters, for better mixing and
+fairness convergence.<a href="#section-5.3.3.8.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="design-considerations-for-choosing-constant-parameters">
-<section id="section-5.3.3.5.3">
+<section id="section-5.3.3.8.3">
               <h6 id="name-design-considerations-for-c">
-<a href="#section-5.3.3.5.3" class="section-number selfRef">5.3.3.5.3. </a><a href="#name-design-considerations-for-c" class="section-name selfRef">Design Considerations for Choosing Constant Parameters</a>
+<a href="#section-5.3.3.8.3" class="section-number selfRef">5.3.3.8.3. </a><a href="#name-design-considerations-for-c" class="section-name selfRef">Design Considerations for Choosing Constant Parameters</a>
               </h6>
-<p id="section-5.3.3.5.3-1">We design the maximum wall-clock bounds of BBR-native inter-bandwidth-probe
-wall clock time, T_bbr, to be:<a href="#section-5.3.3.5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.8.3-1">We design the maximum wall-clock bounds of BBR-native inter-bandwidth-probe
+wall clock time, T_bbr, to be:<a href="#section-5.3.3.8.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.5.3-2.1">
-                  <p id="section-5.3.3.5.3-2.1.1">Higher than 2 sec to try to avoid causing loss for a long enough time to
+<li class="normal" id="section-5.3.3.8.3-2.1">
+                  <p id="section-5.3.3.8.3-2.1.1">Higher than 2 sec to try to avoid causing loss for a long enough time to
 allow Reno flow with RTT=30ms to get 25Mbps (4K video) throughput. For this
 workload, given the Reno sawtooth that raises C.cwnd from roughly BDP to 2*BDP,
 one C.SMSS per round trip,  the inter-bandwidth-probe time must be at least:
-BDP * RTT = 25Mbps * .030 sec / (1514 bytes) * 0.030 sec = 1.9secs<a href="#section-5.3.3.5.3-2.1.1" class="pilcrow">¶</a></p>
+BDP * RTT = 25Mbps * .030 sec / (1514 bytes) * 0.030 sec = 1.9secs<a href="#section-5.3.3.8.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li class="normal" id="section-5.3.3.5.3-2.2">
-                  <p id="section-5.3.3.5.3-2.2.1">Lower than 3 sec to ensure flows can start probing in a reasonable amount
+                <li class="normal" id="section-5.3.3.8.3-2.2">
+                  <p id="section-5.3.3.8.3-2.2.1">Lower than 3 sec to ensure flows can start probing in a reasonable amount
 of time to discover unutilized bw on human-scale interactive  time-scales
-(e.g. perhaps traffic from a competing web page download is now complete).<a href="#section-5.3.3.5.3-2.2.1" class="pilcrow">¶</a></p>
+(e.g. perhaps traffic from a competing web page download is now complete).<a href="#section-5.3.3.8.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
-<p id="section-5.3.3.5.3-3">The maximum round-trip bounds of the Reno-coexistence time scale, T_reno,
-are chosen to be 62-63 with the following considerations in mind:<a href="#section-5.3.3.5.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.8.3-3">The maximum round-trip bounds of the Reno-coexistence time scale, T_reno,
+are chosen to be 62-63 with the following considerations in mind:<a href="#section-5.3.3.8.3-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3.3.5.3-4.1">
-                  <p id="section-5.3.3.5.3-4.1.1">Choosing a value smaller than roughly 60 would imply that when BBR flows
+<li class="normal" id="section-5.3.3.8.3-4.1">
+                  <p id="section-5.3.3.8.3-4.1.1">Choosing a value smaller than roughly 60 would imply that when BBR flows
 coexisted with Reno/CUBIC flows on public Internet broadband links, the
 Reno/CUBIC flows would not be able to achieve enough bandwidth to show 4K
-video.<a href="#section-5.3.3.5.3-4.1.1" class="pilcrow">¶</a></p>
+video.<a href="#section-5.3.3.8.3-4.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li class="normal" id="section-5.3.3.5.3-4.2">
-                  <p id="section-5.3.3.5.3-4.2.1">Choosing a value that is too large would prevent BBR from reaching its goal
+                <li class="normal" id="section-5.3.3.8.3-4.2">
+                  <p id="section-5.3.3.8.3-4.2.1">Choosing a value that is too large would prevent BBR from reaching its goal
 of tolerating 1% loss per round trip.
 Given that the steady-state (non-bandwidth-probing) BBR response to
 a non-application-limited round trip with X% packet loss is to
@@ -3694,17 +3785,17 @@ That is, we expect the flow will be able to fully respond to packet
 loss signals in ProbeBW_CRUISE while also fully re-measuring its
 maximum achievable throughput in ProbeBW_UP.
 However, with a larger number of round trips of ProbeBW_CRUISE, the
-flow would not be able to sustain its achievable throughput.<a href="#section-5.3.3.5.3-4.2.1" class="pilcrow">¶</a></p>
+flow would not be able to sustain its achievable throughput.<a href="#section-5.3.3.8.3-4.2.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
-<p id="section-5.3.3.5.3-5">The resulting behavior is that for BBR flows with small BDPs, the bandwidth
+<p id="section-5.3.3.8.3-5">The resulting behavior is that for BBR flows with small BDPs, the bandwidth
 probing will be on roughly the same time scale as Reno/CUBIC; flows with
 large BDPs will intentionally probe more rapidly/frequently than Reno/CUBIC
 would (roughly every 62 round trips for low-RTT flows, or 2-3 secs for
-high-RTT flows).<a href="#section-5.3.3.5.3-5" class="pilcrow">¶</a></p>
-<p id="section-5.3.3.5.3-6">The considerations above for timing bandwidth probing can be implemented
-as follows:<a href="#section-5.3.3.5.3-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3.3.5.3-7">
+high-RTT flows).<a href="#section-5.3.3.8.3-5" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.8.3-6">The considerations above for timing bandwidth probing can be implemented
+as follows:<a href="#section-5.3.3.8.3-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3.3.8.3-7">
 <pre>
   /* Is it time to transition from DOWN or CRUISE to REFILL? */
   IsTimeToProbeBW():
@@ -3734,28 +3825,28 @@ as follows:<a href="#section-5.3.3.5.3-6" class="pilcrow">¶</a></p>
    * Our estimated BDP, unless congestion cut C.cwnd. */
   TargetInflight()
     return min(BBR.bdp, C.cwnd)
-</pre><a href="#section-5.3.3.5.3-7" class="pilcrow">¶</a>
+</pre><a href="#section-5.3.3.8.3-7" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 </section>
 </div>
 <div id="probebw-algorithm-details">
-<section id="section-5.3.3.6">
+<section id="section-5.3.3.9">
             <h5 id="name-probebw-algorithm-details">
-<a href="#section-5.3.3.6" class="section-number selfRef">5.3.3.6. </a><a href="#name-probebw-algorithm-details" class="section-name selfRef">ProbeBW Algorithm Details</a>
+<a href="#section-5.3.3.9" class="section-number selfRef">5.3.3.9. </a><a href="#name-probebw-algorithm-details" class="section-name selfRef">ProbeBW Algorithm Details</a>
             </h5>
-<p id="section-5.3.3.6-1">BBR's ProbeBW algorithm operates as follows.<a href="#section-5.3.3.6-1" class="pilcrow">¶</a></p>
-<p id="section-5.3.3.6-2">Upon entering ProbeBW, BBR executes:<a href="#section-5.3.3.6-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3.3.6-3">
+<p id="section-5.3.3.9-1">BBR's ProbeBW algorithm operates as follows.<a href="#section-5.3.3.9-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.9-2">Upon entering ProbeBW, BBR executes:<a href="#section-5.3.3.9-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3.3.9-3">
 <pre>
   EnterProbeBW():
     BBR.cwnd_gain = BBR.DefaultCwndGain
     StartProbeBW_DOWN()
-</pre><a href="#section-5.3.3.6-3" class="pilcrow">¶</a>
+</pre><a href="#section-5.3.3.9-3" class="pilcrow">¶</a>
 </div>
-<p id="section-5.3.3.6-4">The core logic for entering each state:<a href="#section-5.3.3.6-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3.3.6-5">
+<p id="section-5.3.3.9-4">The core logic for entering each state:<a href="#section-5.3.3.9-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3.3.9-5">
 <pre>
   StartProbeBW_DOWN():
     ResetCongestionSignals()
@@ -3773,6 +3864,7 @@ as follows:<a href="#section-5.3.3.5.3-6" class="pilcrow">¶</a></p>
     ResetShortTermModel()
     BBR.bw_probe_up_rounds = 0
     BBR.bw_probe_up_acked = 0
+    BBR.prev_probe_precautionary = false
     BBR.ack_phase = ACKS_REFILLING
     StartRound()
     BBR.state = ProbeBW_REFILL
@@ -3784,17 +3876,18 @@ as follows:<a href="#section-5.3.3.5.3-6" class="pilcrow">¶</a></p>
     BBR.full_bw = RS.delivery_rate
     BBR.state = ProbeBW_UP
     RaiseInflightLongtermSlope()
-</pre><a href="#section-5.3.3.6-5" class="pilcrow">¶</a>
+</pre><a href="#section-5.3.3.9-5" class="pilcrow">¶</a>
 </div>
-<p id="section-5.3.3.6-6">BBR executes the following UpdateProbeBWCyclePhase() logic on each ACK
-that acknowledges new data, to advance the ProbeBW state machine:<a href="#section-5.3.3.6-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3.3.6-7">
+<p id="section-5.3.3.9-6">BBR executes the following UpdateProbeBWCyclePhase() logic on each ACK
+that acknowledges new data, to advance the ProbeBW state machine:<a href="#section-5.3.3.9-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3.3.9-7">
 <pre>
   /* The core state machine logic for ProbeBW: */
   UpdateProbeBWCyclePhase():
     if (!BBR.full_bw_reached)
       return  /* only handling steady-state behavior here */
-    AdaptLongTermModel()
+    if (AdaptLongTermModel())
+      return  /* already decided state transition */
     if (!IsInAProbeBWState())
       return /* only handling ProbeBW states here: */
 
@@ -3818,11 +3911,12 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
 
     ProbeBW_UP:
       if (IsTimeToGoDown())
+        BBR.prev_probe_too_high = false  /* no high loss (yet) */
         StartProbeBW_DOWN()
-</pre><a href="#section-5.3.3.6-7" class="pilcrow">¶</a>
+</pre><a href="#section-5.3.3.9-7" class="pilcrow">¶</a>
 </div>
-<p id="section-5.3.3.6-8">The ancillary logic to implement the ProbeBW state machine:<a href="#section-5.3.3.6-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3.3.6-9">
+<p id="section-5.3.3.9-8">The ancillary logic to implement the ProbeBW state machine:<a href="#section-5.3.3.9-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3.3.9-9">
 <pre>
   IsInAProbeBWState()
     state = BBR.state
@@ -3841,6 +3935,10 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
 
   /* Time to transition from UP to DOWN? */
   IsTimeToGoDown():
+    /* Precautionary Bandwidth Probing: Deceleration */
+    if (BBR.prev_probe_too_high &amp;&amp; C.inflight &gt;= BBR.inflight_longterm)
+      BBR.prev_probe_precautionary = true
+      return true
     if (C.is_cwnd_limited &amp;&amp; C.cwnd &gt;= BBR.inflight_longterm)
       ResetFullBW()   /* bw is limited by BBR.inflight_longterm */
       BBR.full_bw = RS.delivery_rate
@@ -3886,7 +3984,8 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
       RaiseInflightLongtermSlope()
 
   /* Track ACK state and update BBR.max_bw window and
-   * BBR.inflight_longterm. */
+   * BBR.inflight_longterm.
+   * Returns true if it decided a state transition, false otherwise. */
   AdaptLongTermModel():
     if (BBR.ack_phase == ACKS_PROBE_STARTING &amp;&amp; BBR.round_start)
       /* starting to get bw probing samples */
@@ -3897,16 +3996,23 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
       BBR.ack_phase = ACKS_INIT
       if (IsInAProbeBWState() &amp;&amp; !RS.is_app_limited)
         AdvanceMaxBwFilter()
+      /* Precautionary Bandwidth Probing: Acceleration */
+      if (IsInAProbeBWState() &amp;&amp;
+          BBR.prev_probe_precautionary &amp;&amp;
+          !BBR.prev_probe_too_high)
+        StartProbeBW_REFILL()
+        return true
 
     if (!IsInflightTooHigh())
       /* Loss rate is safe. Adjust upper bounds upward. */
       if (BBR.inflight_longterm == Infinity)
-        return /* no upper bounds to raise */
+        return false /* no upper bounds to raise */
       if (RS.tx_in_flight &gt; BBR.inflight_longterm)
         BBR.inflight_longterm = RS.tx_in_flight
       if (BBR.state == ProbeBW_UP)
         ProbeInflightLongtermUpward()
-</pre><a href="#section-5.3.3.6-9" class="pilcrow">¶</a>
+    return false
+</pre><a href="#section-5.3.3.9-9" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -4632,11 +4738,13 @@ reduces BBR.inflight_longterm:<a href="#section-5.5.10.2-1" class="pilcrow">¶</
             (RS.lost &gt; 0 &amp;&amp; !C.has_selective_acks))
 
   HandleInflightTooHigh():
+    BBR.prev_probe_too_high = true
     BBR.is_bw_probe_sample = false  /* only react once per bw probe */
     if (!RS.is_app_limited)
       BBR.inflight_longterm = max(RS.tx_in_flight,
                             TargetInflight() * BBR.Beta)
     if (BBR.state == ProbeBW_UP)
+      BBR.undo_state = ProbeBW_UP
       StartProbeBW_DOWN()
 </pre><a href="#section-5.5.10.2-2" class="pilcrow">¶</a>
 </div>
@@ -4837,15 +4945,18 @@ impact of spurious loss recovery episodes.<a href="#section-5.5.11-2" class="pil
 <p id="section-5.5.11.1-1">If a connection's transport protocol starts a loss recovery episode that may
 later be declared spurious (including possibly fast recovery or RTO recovery,
 depending on the transport protocol), BBR saves information about its current
-state as follows:<a href="#section-5.5.11.1-1" class="pilcrow">¶</a></p>
+state. It saves the current congestion window, the short-term and long-term
+model parameters, and initializes the undo state to indicate no state restoration
+is yet needed:<a href="#section-5.5.11.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5.11.1-2">
 <pre>
   /* Save state in case a loss episode is later declared spurious */
   SaveStateUponLoss():
-    BBR.undo_state       = BBR.state
+    SaveCwnd()
+    BBR.undo_state              = None
     BBR.undo_bw_shortterm       = BBR.bw_shortterm
     BBR.undo_inflight_shortterm = BBR.inflight_shortterm
-    BBR.undo_inflight_longterm = BBR.inflight_longterm
+    BBR.undo_inflight_longterm  = BBR.inflight_longterm
 </pre><a href="#section-5.5.11.1-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -4856,23 +4967,40 @@ state as follows:<a href="#section-5.5.11.1-1" class="pilcrow">¶</a></p>
 <a href="#section-5.5.11.2" class="section-number selfRef">5.5.11.2. </a><a href="#name-handling-a-spurious-loss-re" class="section-name selfRef">Handling a Spurious Loss Recovery</a>
             </h5>
 <p id="section-5.5.11.2-1">If a loss recovery episode is declared spurious, BBR restores aspects of its
-state to their previously saved values as follows:<a href="#section-5.5.11.2-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.5.11.2-2">
+state to their previously saved values. It restores the congestion window,
+resets the loss round state and the full bandwidth detector, and restores
+the short-term and long-term model parameters to be at least the values
+saved before the loss episode.<a href="#section-5.5.11.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.5.11.2-2">Furthermore, if the connection transitioned out of Startup or ProbeBW_UP
+due to the loss recovery episode, and the connection is not currently in
+ProbeRTT, BBR returns to the state it was in before the loss recovery
+episode (returning to Startup, or returning to ProbeBW by starting a refill
+phase to restart the bandwidth probe):<a href="#section-5.5.11.2-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.5.11.2-3">
 <pre>
   /* Handle a declaration of a spurious loss episode */
   HandleSpuriousLossDetection():
+    RestoreCwnd()
     BBR.is_loss_in_round = false
     ResetFullBW()
-    BBR.bw_shortterm       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
-    BBR.inflight_shortterm = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
-    BBR.inflight_longterm = max(BBR.inflight_longterm, BBR.undo_inflight_longterm)
+    BBR.bw_shortterm       = max(BBR.bw_shortterm,
+                                 BBR.undo_bw_shortterm)
+    BBR.inflight_shortterm = max(BBR.inflight_shortterm,
+                                 BBR.undo_inflight_shortterm)
+    BBR.inflight_longterm  = max(BBR.inflight_longterm,
+                                 BBR.undo_inflight_longterm)
     /* If flow was probing bandwidth, return to that state: */
-    if (BBR.state != ProbeRTT &amp;&amp; BBR.state != BBR.undo_state)
-      if (BBR.undo_state == Startup)
+    if (BBR.undo_state == Startup &amp;&amp;
+        BBR.state != Startup)
+      BBR.full_bw_reached = false
+      if (BBR.state != ProbeRTT)
         EnterStartup()
-      else if (BBR.undo_state == ProbeBW_UP)
-        StartProbeBW_UP()
-</pre><a href="#section-5.5.11.2-2" class="pilcrow">¶</a>
+    else if (BBR.undo_state == ProbeBW_UP &amp;&amp;
+             BBR.state != ProbeBW_UP)
+      if (BBR.state != ProbeRTT)
+        StartProbeBW_REFILL()
+    BBR.undo_state = None
+</pre><a href="#section-5.5.11.2-3" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
