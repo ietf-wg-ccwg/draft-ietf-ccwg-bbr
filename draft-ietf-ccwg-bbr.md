@@ -524,8 +524,8 @@ BBR.extra_acked: A volume of data that is the estimate of the recent degree
 of aggregation in the network path.
 
 BBR.offload_budget: The estimate of the minimum volume of data necessary
-to achieve full throughput when using sender (i.e., TSO/GSO) and
-receiver (i.e., LRO, GRO) host offload mechanisms.
+to achieve full throughput when using sender (e.g., TSO/GSO) and
+receiver (e.g., LRO, GRO) host offload mechanisms.
 
 BBR.max_inflight: The estimate of C.inflight required to
 fully utilize the bottleneck bandwidth available to the flow, based on the
@@ -617,15 +617,19 @@ probing. The phases are as follows:
   ACKS_PROBE_STOPPING: stopped bandwidth probing; still getting feedback
 ~~~~
 
-BBR.bw_probe_samples: A boolean tracking whether the connection is receiving rate samples from a bandwidth-probing phase.
+
+BBR.is_bw_probe_sample: A boolean tracking whether the connection is receiving rate samples from a bandwidth-probing phase.
+
+BBR.is_loss_in_round: A boolean tracking whether there was a packet loss
+detected in the current round trip.
 
 BBR.bw_probe_up_acked: The volume of data ACKed since increasing BBR.inflight_longterm.
 
-BBR.probe_up_cnt: The volume of data that must be ACKed before BBR.inflight_longterm is increased by C.SMSS.
+BBR.probe_up_acked_per_inc: The volume of data that must be ACKed before BBR.inflight_longterm is increased by C.SMSS.
 
 BBR.bw_probe_up_rounds: The number of round trips over which BBR.inflight_longterm has been grown in the current ProbeBW_UP episode.
 
-BBR.rounds_since_bw_probe: The number of round trips elapsed since the last bandwidth probe cycle.
+BBR.rounds_since_probe_up: The number of round trips elapsed since the last ProbeBW_UP bandwidth probe phase.
 
 BBR.bw_probe_wait: The maximum wall clock time duration BBR waits before probing bandwidth again.
 
@@ -1687,11 +1691,11 @@ steps:
     BBR.extra_acked_delivered = 0
     BBR.full_bw_reached = false
     BBR.inflight_longterm = Infinity
-    BBR.probe_up_cnt = Infinity
+    BBR.probe_up_acked_per_inc = Infinity
     BBR.bw_probe_up_acked = 0
     BBR.bw_probe_up_rounds = 0
-    BBR.rounds_since_bw_probe = 0
-    BBR.bw_probe_samples = false
+    BBR.rounds_since_probe_up = 0
+    BBR.is_bw_probe_sample = false
     BBR.prev_probe_too_high = false
     BBR.prev_probe_precautionary = false
     BBR.ack_phase = ACKS_INIT
@@ -2280,7 +2284,7 @@ as follows:
    */
   PickProbeWait():
     /* Decide random round-trip bound for wait: */
-    BBR.rounds_since_bw_probe =
+    BBR.rounds_since_probe_up =
       random_int_between(0, 1); /* 0 or 1 */
     /* Decide the random wall clock bound for wait: */
     BBR.bw_probe_wait =
@@ -2289,7 +2293,7 @@ as follows:
   IsRenoCoexistenceProbeTime():
     reno_rounds = TargetInflight()
     rounds = min(reno_rounds, 63)
-    return BBR.rounds_since_bw_probe >= rounds
+    return BBR.rounds_since_probe_up >= rounds
 
   /* How much data do we want in flight?
    * Our estimated BDP, unless congestion cut C.cwnd. */
@@ -2315,7 +2319,7 @@ The core logic for entering each state:
 ~~~~
   StartProbeBW_DOWN():
     ResetCongestionSignals()
-    BBR.probe_up_cnt = Infinity /* not growing BBR.inflight_longterm */
+    BBR.probe_up_acked_per_inc = Infinity /* not growing BBR.inflight_longterm */
     PickProbeWait()
     BBR.cycle_stamp = Now()  /* start wall clock */
     BBR.ack_phase  = ACKS_PROBE_STOPPING
@@ -2371,7 +2375,7 @@ that acknowledges new data, to advance the ProbeBW state machine:
     ProbeBW_REFILL:
       /* After one round of REFILL, start UP */
       if (BBR.round_start)
-        BBR.bw_probe_samples = true
+        BBR.is_bw_probe_sample = true
         StartProbeBW_UP()
 
     ProbeBW_UP:
@@ -2434,16 +2438,16 @@ The ancillary logic to implement the ProbeBW state machine:
   RaiseInflightLongtermSlope():
     growth_this_round = 1 << BBR.bw_probe_up_rounds
     BBR.bw_probe_up_rounds = min(BBR.bw_probe_up_rounds + 1, 30)
-    BBR.probe_up_cnt = max(C.cwnd / growth_this_round, C.SMSS)
+    BBR.probe_up_acked_per_inc = max(C.cwnd / growth_this_round, C.SMSS)
 
   /* Increase BBR.inflight_longterm if appropriate. */
   ProbeInflightLongtermUpward():
     if (!C.is_cwnd_limited || C.cwnd < BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
     BBR.bw_probe_up_acked += RS.newly_acked
-    if (BBR.bw_probe_up_acked >= BBR.probe_up_cnt)
-      delta = BBR.bw_probe_up_acked / BBR.probe_up_cnt
-      BBR.bw_probe_up_acked -= delta * BBR.probe_up_cnt
+    if (BBR.bw_probe_up_acked >= BBR.probe_up_acked_per_inc)
+      delta = BBR.bw_probe_up_acked / BBR.probe_up_acked_per_inc
+      BBR.bw_probe_up_acked -= delta * BBR.probe_up_acked_per_inc
       BBR.inflight_longterm += delta * C.SMSS
     if (BBR.round_start)
       RaiseInflightLongtermSlope()
@@ -2457,7 +2461,7 @@ The ancillary logic to implement the ProbeBW state machine:
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
     if (BBR.ack_phase == ACKS_PROBE_STOPPING && BBR.round_start)
       /* end of samples from bw probing phase */
-      BBR.bw_probe_samples = false
+      BBR.is_bw_probe_sample = false
       BBR.ack_phase = ACKS_INIT
       if (IsInAProbeBWState() && !RS.is_app_limited)
         AdvanceMaxBwFilter()
@@ -2792,7 +2796,7 @@ the count of such round trips elapsed:
     if (P.delivered >= BBR.next_round_delivered)
       StartRound()
       BBR.round_count++
-      BBR.rounds_since_bw_probe++
+      BBR.rounds_since_probe_up++
       BBR.round_start = true
     else
       BBR.round_start = false
@@ -3036,8 +3040,8 @@ BBR.extra_acked is a volume of data that is the estimate of the recent degree
 of aggregation in the network path. For each ACK, the algorithm computes
 a sample of the estimated extra ACKed data beyond the amount of data that
 the sender expected to be ACKed over the timescale of a round-trip, given
-the BBR.bw. Then it computes BBR.extra_acked as the windowed maximum sample
-over the last BBR.ExtraAckedFilterLen=10 packet-timed round-trips. If the
+the BBR.bw. It then computes BBR.extra_acked as the windowed maximum over 1
+round trip during STARTUP and 10 round trips after exiting STARTUP. If the
 ACK rate falls below the expected bandwidth, then the algorithm estimates
 an aggregation episode has terminated, and resets the sampling interval to
 start from the current time.
@@ -3119,7 +3123,7 @@ reduces BBR.inflight_longterm:
 
   HandleInflightTooHigh():
     BBR.prev_probe_too_high = true
-    BBR.bw_probe_samples = false  /* only react once per bw probe */
+    BBR.is_bw_probe_sample = false  /* only react once per bw probe */
     if (!RS.is_app_limited)
       BBR.inflight_longterm = max(RS.tx_in_flight,
                             TargetInflight() * BBR.Beta)
@@ -3143,7 +3147,7 @@ tx_in_flight rather than the latter can cause BBR.inflight_longterm to be
 significantly underestimated. To avoid such issues, BBR processes each loss
 detection event to more precisely estimate C.inflight at
 which loss rates cross BBR.LossThresh, noting that this may have happened
-mid-way through some TSO/GSO offload burst (represented as a "packet" in
+mid-way through some offload burst (represented as a "packet" in
 the pseudocode in this document). To estimate this threshold volume of data,
 we can solve for "lost_prefix" in the following way, where inflight_prev
 represents C.inflight preceding this packet, and lost_prev
@@ -3173,14 +3177,14 @@ In pseudocode:
 
 ~~~~
   NoteLoss()
-    if (!BBR.loss_in_round)   /* first loss in this round trip? */
+    if (!BBR.is_loss_in_round)   /* first loss in this round trip? */
       BBR.loss_round_delivered = C.delivered
       SaveStateUponLoss()
-    BBR.loss_in_round = 1
+    BBR.is_loss_in_round = true
 
   HandleLostPacket(Packet P):
     NoteLoss()
-    if (!BBR.bw_probe_samples)
+    if (!BBR.is_bw_probe_sample)
       return /* not a packet sent while probing bandwidth */
     RS.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
     RS.lost = C.lost - P.lost /* data lost since transmit */
@@ -3189,7 +3193,11 @@ In pseudocode:
       RS.tx_in_flight = InflightAtLoss(P)
       HandleInflightTooHigh()
 
-  /* At what prefix of packet did losses exceed BBR.LossThresh? */
+  /* At what prefix of "packet" P did losses exceed BBR.LossThresh?
+     We perform this computation because P may be an offload burst
+     containing many packets, and it's important to estimate which
+     fraction of that burst fits safely in the network path.
+   */
   InflightAtLoss(Packet P):
     size = P.size
     /* What was in flight before this packet? */
@@ -3255,7 +3263,7 @@ This logic can be represented as follows:
       BBR.inflight_latest = RS.delivered
 
   ResetCongestionSignals():
-    BBR.loss_in_round = 0
+    BBR.is_loss_in_round = false
     BBR.bw_latest = 0
     BBR.inflight_latest = 0
 
@@ -3265,13 +3273,13 @@ This logic can be represented as follows:
     if (!BBR.loss_round_start)
       return  /* wait until end of round trip */
     AdaptLowerBoundsFromCongestion()  /* once per round, adapt */
-    BBR.loss_in_round = 0
+    BBR.is_loss_in_round = false
 
   /* Once per round-trip respond to congestion */
   AdaptLowerBoundsFromCongestion():
     if (IsProbingBW())
       return
-    if (BBR.loss_in_round)
+    if (BBR.is_loss_in_round)
       InitLowerBounds()
       LossLowerBounds()
 
@@ -3348,7 +3356,7 @@ phase to restart the bandwidth probe):
   /* Handle a declaration of a spurious loss episode */
   HandleSpuriousLossDetection():
     RestoreCwnd()
-    BBR.loss_in_round = 0
+    BBR.is_loss_in_round = false
     ResetFullBW()
     BBR.bw_shortterm       = max(BBR.bw_shortterm,
                                  BBR.undo_bw_shortterm)
