@@ -631,9 +631,9 @@ BBR.bw_probe_wait: The maximum wall clock time duration BBR waits before probing
 
 BBR.cycle_stamp: The wall clock time at which the current ProbeBW cycle started.
 
-BBR.prev_probe_too_high: A boolean recording whether the most recent bandwidth probe went too high (i.e., experienced a packet loss rate exceeding BBR.LossThresh).
+BBR.prev_probe_too_high: A boolean recording whether the most recent bandwidth probe went too high (i.e., experienced a packet loss rate exceeding BBR.LossThresh). See "Precautionary Bandwidth Probing" in {{bandwidth-probing-caution}} for how this is used.
 
-BBR.stopped_risky_probe: A boolean recording whether the most recent ProbeBW_UP phase was stopped early because it reached the BBR.inflight_longterm threshold from the previous probe that went too high.
+BBR.prev_probe_precautionary: A boolean recording whether the most recent ProbeBW_UP phase was stopped early because it reached the BBR.inflight_longterm threshold from the previous probe that went too high. See "Precautionary Bandwidth Probing" in {{bandwidth-probing-caution}} for how this is used.
 
 
 ## ProbeRTT and min_rtt Parameters and State {#probertt-and-minrtt-parameters-and-state}
@@ -1680,7 +1680,7 @@ steps:
     BBR.rounds_since_bw_probe = 0
     BBR.bw_probe_samples = false
     BBR.prev_probe_too_high = false
-    BBR.stopped_risky_probe = false
+    BBR.prev_probe_precautionary = false
     BBR.ack_phase = ACKS_INIT
     BBR.cycle_stamp = 0
     BBR.bw_probe_wait = 0
@@ -2058,21 +2058,29 @@ bandwidth.
 
 Increasing a flow's sending rate is essential for ensuring proper bandwidth
 utilization, but raises risks for excessive queuing or packet loss. To mitigate
-these risks, BBR uses a "precautionary bandwidth probing" mechanism.
+these risks, ProbeBW_UP uses a "precautionary bandwidth probing"
+mechanism. With this mechanism, flows only persist in ProbeBW_UP if the most
+recent ProbeBW_UP phase did not result in excess loss. If ProbeBW_UP exits due
+to excess loss, then the following ProbeBW_UP phase is a brief "precautionary
+bandwidth probing" phase that lasts only until C.inflight reaches
+BBR.inflight_longterm. If the "precautionary bandwidth probing" phase succeeds
+(there is no excess loss) then the flow immediately returns to ProbeBW_REFILL
+and then ProbeBW_UP, and persists in ProbeBW_UP.
 
-A full round trip is required to receive feedback indicating the level of
-queuing delay and/or packet loss associated with a given level of
+The "precautionary bandwidth probing" mechanism is motivated by the fact that a
+full round trip is required to receive feedback indicating the level of queuing
+delay and/or packet loss associated with a given level of
 C.inflight. Furthermore, BBR.inflight_longterm is designed to remember the
 lowest level of C.inflight that was associated with excess loss. Thus
 maintaining C.inflight at BBR.inflight_longterm for a full round trip, while
 necessary to safely raise BBR.inflight_longterm, runs a significant risk of
 holding a bottleneck buffer at full or near-full for that entire round trip.
 
-To manage this trade-off and mitigate the risks, the "precautionary
-bandwidth probing" mechanism ensures the flow only maintains C.inflight at
-the BBR.inflight_longterm level for a full round trip when this has
-recently been proven to be "safe" (in the sense of not causing excess
-loss). To do this, it uses the following two aspects:
+To manage this trade-off and mitigate the risks, the "precautionary bandwidth
+probing" mechanism ensures the flow only maintains C.inflight at the
+BBR.inflight_longterm level for a full round trip when this has recently been
+measured to be "safe" (in the sense of not causing excess loss). To do this, it
+uses the following two aspects:
 
 * Precautionary Bandwidth Probing: Deceleration: after
   BBR.inflight_longterm is set due to observing excess loss in bandwidth
@@ -2081,7 +2089,7 @@ loss). To do this, it uses the following two aspects:
   maintaining C.inflight at BBR.inflight_longterm for the full round trip,
   BBR transitions to ProbeBW_DOWN as soon as C.inflight reaches this risky
   level of BBR.inflight_longterm (recording this by setting
-  BBR.stopped_risky_probe to true).
+  BBR.prev_probe_precautionary to true).
 
 * Precautionary Bandwidth Probing: Acceleration: If a round-trip elapses
   and the flow finishes receiving at least a full round trip of ACK
@@ -2113,7 +2121,7 @@ of the following conditions are met:
   ProbeBW_UP resulted in excess loss (BBR.prev_probe_too_high is true), and
   C.inflight reaches the risky BBR.inflight_longterm level established
   during that previous ProbeBW_UP, then the flow stops the bandwidth probe
-  early (setting BBR.stopped_risky_probe to true) and transitions to
+  early (setting BBR.prev_probe_precautionary to true) and transitions to
   ProbeBW_DOWN, to reduce the risks of causing excessive queuing delay
   and/or loss.
 
@@ -2306,7 +2314,7 @@ The core logic for entering each state:
     ResetShortTermModel()
     BBR.bw_probe_up_rounds = 0
     BBR.bw_probe_up_acked = 0
-    BBR.stopped_risky_probe = false
+    BBR.prev_probe_precautionary = false
     BBR.ack_phase = ACKS_REFILLING
     StartRound()
     BBR.state = ProbeBW_REFILL
@@ -2379,7 +2387,7 @@ The ancillary logic to implement the ProbeBW state machine:
   IsTimeToGoDown():
     /* Precautionary Bandwidth Probing: Deceleration */
     if (BBR.prev_probe_too_high && C.inflight >= BBR.inflight_longterm)
-      BBR.stopped_risky_probe = true
+      BBR.prev_probe_precautionary = true
       return true
     if (C.is_cwnd_limited && C.cwnd >= BBR.inflight_longterm)
       ResetFullBW()   /* bw is limited by BBR.inflight_longterm */
@@ -2440,7 +2448,7 @@ The ancillary logic to implement the ProbeBW state machine:
         AdvanceMaxBwFilter()
       /* Precautionary Bandwidth Probing: Acceleration */
       if (IsInAProbeBWState() &&
-          BBR.stopped_risky_probe &&
+          BBR.prev_probe_precautionary &&
           !BBR.prev_probe_too_high)
         StartProbeBW_REFILL()
         return true
