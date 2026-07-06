@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 25 December 2026                                 J. Beshay, Ed.
+Expires: 7 January 2027                                   J. Beshay, Ed.
                                                                     Meta
-                                                            23 June 2026
+                                                             6 July 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 December 2026.
+   This Internet-Draft will expire on 7 January 2027.
 
 Copyright Notice
 
@@ -92,9 +92,10 @@ Table of Contents
      2.11. Estimating BBR.max_bw
      2.12. Estimating BBR.extra_acked
      2.13. Startup Parameters and State
-     2.14. ProbeRTT and min_rtt Parameters and State
-       2.14.1.  Parameters for Estimating BBR.min_rtt
-       2.14.2.  Parameters for Scheduling ProbeRTT
+     2.14. ProbeBW State
+     2.15. ProbeRTT and min_rtt Parameters and State
+       2.15.1.  Parameters for Estimating BBR.min_rtt
+       2.15.2.  Parameters for Scheduling ProbeRTT
    3.  Design Overview
      3.1.  High-Level Design Goals
      3.2.  Algorithm Overview
@@ -304,6 +305,9 @@ Table of Contents
    ACK packets.  It SHOULD include spurious retransmissions that have
    been acknowledged as delivered.
 
+   C.lost: The total amount of data marked as lost so far over the
+   lifetime of the transport connection C.
+
    C.inflight: The connection's best estimate of the number of bytes
    outstanding in the network.  This includes the number of bytes that
    have been sent and have not been acknowledged or marked as lost since
@@ -474,8 +478,8 @@ Table of Contents
    degree of aggregation in the network path.
 
    BBR.offload_budget: The estimate of the minimum volume of data
-   necessary to achieve full throughput when using sender (i.e., TSO/
-   GSO) and receiver (i.e., LRO, GRO) host offload mechanisms.
+   necessary to achieve full throughput when using sender (e.g., TSO/
+   GSO) and receiver (e.g., LRO, GRO) host offload mechanisms.
 
    BBR.max_inflight: The estimate of C.inflight required to fully
    utilize the bottleneck bandwidth available to the flow, based on the
@@ -553,9 +557,46 @@ Table of Contents
    BBR.full_bw_count: The number of non-app-limited round trips without
    large increases in BBR.full_bw.
 
-2.14.  ProbeRTT and min_rtt Parameters and State
+2.14.  ProbeBW State
 
-2.14.1.  Parameters for Estimating BBR.min_rtt
+   BBR.ack_phase: The current phase in a state machine that tracks the
+   meaning of the ACK feedback the connection is receiving, with respect
+   to the bandwidth probing.  The phases are as follows:
+
+  ACKS_INIT: not probing bandwidth; not getting probe feedback
+  ACKS_REFILLING: sending at estimated bandwidth to fill pipe
+  ACKS_PROBE_STARTING: inflight rising to probe bandwidth
+  ACKS_PROBE_FEEDBACK: getting feedback from bandwidth probing
+  ACKS_PROBE_STOPPING: stopped bandwidth probing; still getting feedback
+
+   BBR.is_bw_probe_sample: A boolean tracking whether the connection is
+   receiving rate samples from a bandwidth-probing phase.
+
+   BBR.is_loss_in_round: A boolean tracking whether there was a packet
+   loss detected in the current round trip.
+
+   BBR.bw_probe_up_acked: The volume of data ACKed since increasing
+   BBR.inflight_longterm.
+
+   BBR.probe_up_acked_per_inc: The volume of data that must be ACKed
+   before BBR.inflight_longterm is increased by C.SMSS.
+
+   BBR.bw_probe_up_rounds: The number of round trips over which
+   BBR.inflight_longterm has been grown in the current ProbeBW_UP
+   episode.
+
+   BBR.rounds_since_probe_up: The number of round trips elapsed since
+   the last ProbeBW_UP bandwidth probe phase.
+
+   BBR.bw_probe_wait: The maximum wall clock time duration BBR waits
+   before probing bandwidth again.
+
+   BBR.cycle_stamp: The wall clock time at which the current ProbeBW
+   cycle started.
+
+2.15.  ProbeRTT and min_rtt Parameters and State
+
+2.15.1.  Parameters for Estimating BBR.min_rtt
 
    BBR.min_rtt_stamp: The wall clock time at which the current
    BBR.min_rtt sample was obtained.
@@ -563,7 +604,7 @@ Table of Contents
    BBR.MinRTTFilterLen: A constant specifying the length of the
    BBR.min_rtt min filter window, BBR.MinRTTFilterLen is 10 secs.
 
-2.14.2.  Parameters for Scheduling ProbeRTT
+2.15.2.  Parameters for Scheduling ProbeRTT
 
    BBR.ProbeRTTCwndGain: A constant specifying the gain value for
    calculating C.cwnd during ProbeRTT: 0.5 (meaning that ProbeRTT
@@ -1081,6 +1122,8 @@ Table of Contents
    P.delivered: C.delivered when the packet was sent from transport
    connection C.
 
+   P.lost: C.lost when the packet was sent from transport connection C.
+
    P.delivered_time: C.delivered_time when the packet was sent.
 
    P.first_send_time: C.first_send_time when the packet was sent.
@@ -1158,6 +1201,7 @@ Table of Contents
        P.delivered       = C.delivered
        P.is_app_limited  = (C.app_limited != 0)
        P.tx_in_flight    = C.inflight    /* includes data in P */
+       P.lost            = C.lost
 
 4.1.2.3.  Upon receiving an ACK
 
@@ -1590,6 +1634,15 @@ Table of Contents
        BBR.extra_acked_interval_start = Now()
        BBR.extra_acked_delivered = 0
        BBR.full_bw_reached = false
+       BBR.inflight_longterm = Infinity
+       BBR.probe_up_acked_per_inc = Infinity
+       BBR.bw_probe_up_acked = 0
+       BBR.bw_probe_up_rounds = 0
+       BBR.rounds_since_probe_up = 0
+       BBR.is_bw_probe_sample = false
+       BBR.ack_phase = ACKS_INIT
+       BBR.cycle_stamp = 0
+       BBR.bw_probe_wait = 0
        ResetCongestionSignals()
        ResetShortTermModel()
        InitRoundCounting()
@@ -2120,7 +2173,7 @@ Table of Contents
       */
      PickProbeWait():
        /* Decide random round-trip bound for wait: */
-       BBR.rounds_since_bw_probe =
+       BBR.rounds_since_probe_up =
          random_int_between(0, 1); /* 0 or 1 */
        /* Decide the random wall clock bound for wait: */
        BBR.bw_probe_wait =
@@ -2129,7 +2182,7 @@ Table of Contents
      IsRenoCoexistenceProbeTime():
        reno_rounds = TargetInflight()
        rounds = min(reno_rounds, 63)
-       return BBR.rounds_since_bw_probe >= rounds
+       return BBR.rounds_since_probe_up >= rounds
 
      /* How much data do we want in flight?
       * Our estimated BDP, unless congestion cut C.cwnd. */
@@ -2148,33 +2201,33 @@ Table of Contents
 
    The core logic for entering each state:
 
-   StartProbeBW_DOWN():
-     ResetCongestionSignals()
-     BBR.probe_up_cnt = Infinity /* not growing BBR.inflight_longterm */
-     PickProbeWait()
-     BBR.cycle_stamp = Now()  /* start wall clock */
-     BBR.ack_phase  = ACKS_PROBE_STOPPING
-     StartRound()
-     BBR.state = ProbeBW_DOWN
+  StartProbeBW_DOWN():
+    ResetCongestionSignals()
+    BBR.probe_up_acked_per_inc = Infinity /* not growing BBR.inflight_longterm */
+    PickProbeWait()
+    BBR.cycle_stamp = Now()  /* start wall clock */
+    BBR.ack_phase  = ACKS_PROBE_STOPPING
+    StartRound()
+    BBR.state = ProbeBW_DOWN
 
-   StartProbeBW_CRUISE():
-     BBR.state = ProbeBW_CRUISE
+  StartProbeBW_CRUISE():
+    BBR.state = ProbeBW_CRUISE
 
-   StartProbeBW_REFILL():
-     ResetShortTermModel()
-     BBR.bw_probe_up_rounds = 0
-     BBR.bw_probe_up_acks = 0
-     BBR.ack_phase = ACKS_REFILLING
-     StartRound()
-     BBR.state = ProbeBW_REFILL
+  StartProbeBW_REFILL():
+    ResetShortTermModel()
+    BBR.bw_probe_up_rounds = 0
+    BBR.bw_probe_up_acked = 0
+    BBR.ack_phase = ACKS_REFILLING
+    StartRound()
+    BBR.state = ProbeBW_REFILL
 
-   StartProbeBW_UP():
-     BBR.ack_phase = ACKS_PROBE_STARTING
-     StartRound()
-     ResetFullBW()
-     BBR.full_bw = RS.delivery_rate
-     BBR.state = ProbeBW_UP
-     RaiseInflightLongtermSlope()
+  StartProbeBW_UP():
+    BBR.ack_phase = ACKS_PROBE_STARTING
+    StartRound()
+    ResetFullBW()
+    BBR.full_bw = RS.delivery_rate
+    BBR.state = ProbeBW_UP
+    RaiseInflightLongtermSlope()
 
    BBR executes the following UpdateProbeBWCyclePhase() logic on each
    ACK that acknowledges new data, to advance the ProbeBW state machine:
@@ -2202,7 +2255,7 @@ Table of Contents
        ProbeBW_REFILL:
          /* After one round of REFILL, start UP */
          if (BBR.round_start)
-           BBR.bw_probe_samples = 1
+           BBR.is_bw_probe_sample = true
            StartProbeBW_UP()
 
        ProbeBW_UP:
@@ -2256,21 +2309,21 @@ Table of Contents
 
   /* Raise BBR.inflight_longterm slope if appropriate. */
   RaiseInflightLongtermSlope():
-    growth_this_round = 1*C.SMSS << BBR.bw_probe_up_rounds
+    growth_this_round = 1 << BBR.bw_probe_up_rounds
     BBR.bw_probe_up_rounds = min(BBR.bw_probe_up_rounds + 1, 30)
-    BBR.probe_up_cnt = max(C.cwnd / growth_this_round, 1)
+    BBR.probe_up_acked_per_inc = max(C.cwnd / growth_this_round, C.SMSS)
 
   /* Increase BBR.inflight_longterm if appropriate. */
   ProbeInflightLongtermUpward():
     if (!C.is_cwnd_limited || C.cwnd < BBR.inflight_longterm)
       return  /* not fully using BBR.inflight_longterm, so don't grow it */
-   BBR.bw_probe_up_acks += RS.newly_acked
-   if (BBR.bw_probe_up_acks >= BBR.probe_up_cnt)
-     delta = BBR.bw_probe_up_acks / BBR.probe_up_cnt
-     BBR.bw_probe_up_acks -= delta * BBR.probe_up_cnt
-     BBR.inflight_longterm += delta
-   if (BBR.round_start)
-     RaiseInflightLongtermSlope()
+    BBR.bw_probe_up_acked += RS.newly_acked
+    if (BBR.bw_probe_up_acked >= BBR.probe_up_acked_per_inc)
+      delta = BBR.bw_probe_up_acked / BBR.probe_up_acked_per_inc
+      BBR.bw_probe_up_acked -= delta * BBR.probe_up_acked_per_inc
+      BBR.inflight_longterm += delta * C.SMSS
+    if (BBR.round_start)
+      RaiseInflightLongtermSlope()
 
   /* Track ACK state and update BBR.max_bw window and
    * BBR.inflight_longterm. */
@@ -2280,6 +2333,8 @@ Table of Contents
       BBR.ack_phase = ACKS_PROBE_FEEDBACK
     if (BBR.ack_phase == ACKS_PROBE_STOPPING && BBR.round_start)
       /* end of samples from bw probing phase */
+      BBR.is_bw_probe_sample = false
+      BBR.ack_phase = ACKS_INIT
       if (IsInAProbeBWState() && !RS.is_app_limited)
         AdvanceMaxBwFilter()
 
@@ -2596,7 +2651,7 @@ Table of Contents
        if (P.delivered >= BBR.next_round_delivered)
          StartRound()
          BBR.round_count++
-         BBR.rounds_since_bw_probe++
+         BBR.rounds_since_probe_up++
          BBR.round_start = true
        else
          BBR.round_start = false
@@ -2921,18 +2976,18 @@ Table of Contents
    it allowed in flight exceeded what matches the current delivery
    process on the path, and reduces BBR.inflight_longterm:
 
-     /* Do loss signals suggest C.inflight was too high? */
-     IsInflightTooHigh():
-       return ((RS.lost > RS.tx_in_flight * BBR.LossThresh) ||
-               (RS.lost > 0 && !C.has_selective_acks))
+    /* Do loss signals suggest C.inflight was too high? */
+    IsInflightTooHigh():
+      return ((RS.lost > RS.tx_in_flight * BBR.LossThresh) ||
+              (RS.lost > 0 && !C.has_selective_acks))
 
-     HandleInflightTooHigh():
-       BBR.bw_probe_samples = 0;  /* only react once per bw probe */
-       if (!RS.is_app_limited)
-         BBR.inflight_longterm = max(RS.tx_in_flight,
-                               TargetInflight() * BBR.Beta))
-       if (BBR.state == ProbeBW_UP)
-         StartProbeBW_DOWN()
+    HandleInflightTooHigh():
+      BBR.is_bw_probe_sample = false  /* only react once per bw probe */
+      if (!RS.is_app_limited)
+        BBR.inflight_longterm = max(RS.tx_in_flight,
+                              TargetInflight() * BBR.Beta)
+      if (BBR.state == ProbeBW_UP)
+        StartProbeBW_DOWN()
 
    Here RS.tx_in_flight is the C.inflight value when the most recently
    ACKed packet was sent.  And the BBR.Beta (0.7x) bound is to try to
@@ -2950,12 +3005,11 @@ Table of Contents
    To avoid such issues, BBR processes each loss detection event to more
    precisely estimate C.inflight at which loss rates cross
    BBR.LossThresh, noting that this may have happened mid-way through
-   some TSO/GSO offload burst (represented as a "packet" in the
-   pseudocode in this document).  To estimate this threshold volume of
-   data, we can solve for "lost_prefix" in the following way, where
-   inflight_prev represents C.inflight preceding this packet, and
-   lost_prev represents the data lost among that previous in-flight
-   data.
+   some offload burst (represented as a "packet" in the pseudocode in
+   this document).  To estimate this threshold volume of data, we can
+   solve for "lost_prefix" in the following way, where inflight_prev
+   represents C.inflight preceding this packet, and lost_prev represents
+   the data lost among that previous in-flight data.
 
    First we start with:
 
@@ -2974,25 +3028,29 @@ Table of Contents
    In pseudocode:
 
      NoteLoss()
-       if (!BBR.loss_in_round)   /* first loss in this round trip? */
+       if (!BBR.is_loss_in_round)   /* first loss in this round trip? */
          BBR.loss_round_delivered = C.delivered
          SaveStateUponLoss()
-       BBR.loss_in_round = 1
+       BBR.is_loss_in_round = true
 
-     HandleLostPacket(packet):
+     HandleLostPacket(Packet P):
        NoteLoss()
-       if (!BBR.bw_probe_samples)
+       if (!BBR.is_bw_probe_sample)
          return /* not a packet sent while probing bandwidth */
        RS.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
        RS.lost = C.lost - P.lost /* data lost since transmit */
-       RS.is_app_limited = P.is_app_limited;
+       RS.is_app_limited = P.is_app_limited
        if (IsInflightTooHigh())
-         RS.tx_in_flight = InflightAtLoss(RS, packet)
+         RS.tx_in_flight = InflightAtLoss(P)
          HandleInflightTooHigh()
 
-     /* At what prefix of packet did losses exceed BBR.LossThresh? */
-     InflightAtLoss(RS, packet):
-       size = packet.size
+     /* At what prefix of "packet" P did losses exceed BBR.LossThresh?
+        We perform this computation because P may be an offload burst
+        containing many packets, and it's important to estimate which
+        fraction of that burst fits safely in the network path.
+      */
+     InflightAtLoss(Packet P):
+       size = P.size
        /* What was in flight before this packet? */
        inflight_prev = RS.tx_in_flight - size
        /* What was lost before this packet? */
@@ -3054,7 +3112,7 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
          BBR.inflight_latest = RS.delivered
 
      ResetCongestionSignals():
-       BBR.loss_in_round = 0
+       BBR.is_loss_in_round = false
        BBR.bw_latest = 0
        BBR.inflight_latest = 0
 
@@ -3064,13 +3122,13 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
        if (!BBR.loss_round_start)
          return  /* wait until end of round trip */
        AdaptLowerBoundsFromCongestion()  /* once per round, adapt */
-       BBR.loss_in_round = 0
+       BBR.is_loss_in_round = false
 
      /* Once per round-trip respond to congestion */
      AdaptLowerBoundsFromCongestion():
        if (IsProbingBW())
          return
-       if (BBR.loss_in_round)
+       if (BBR.is_loss_in_round)
          InitLowerBounds()
          LossLowerBounds()
 
@@ -3131,7 +3189,7 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
 
   /* Handle a declaration of a spurious loss episode */
   HandleSpuriousLossDetection():
-    BBR.loss_in_round = 0
+    BBR.is_loss_in_round = false
     ResetFullBW()
     BBR.bw_shortterm       = max(BBR.bw_shortterm,       BBR.undo_bw_shortterm)
     BBR.inflight_shortterm = max(BBR.inflight_shortterm, BBR.undo_inflight_shortterm)
@@ -3837,9 +3895,9 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    [I-D.draft-ietf-tcpm-ack-rate-request]
               Gomez, C., Crowcroft, J., and M. Tüxen, "TCP ACK Rate
               Request Option", Work in Progress, Internet-Draft, draft-
-              ietf-tcpm-ack-rate-request-11, 2 March 2026,
+              ietf-tcpm-ack-rate-request-12, 4 July 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-tcpm-
-              ack-rate-request-11>.
+              ack-rate-request-12>.
 
    [Jac88]    Jacobson, V., "Congestion Avoidance and Control", SIGCOMM
               1988, Computer Communication Review, vol. 18, no. 4, pp.
