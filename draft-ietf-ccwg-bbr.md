@@ -198,7 +198,30 @@ informative:
   TrafficPolicing:
     target: https://dl.acm.org/doi/10.1145/2934872.2934873
     title: An Internet-Wide Analysis of Traffic Policing
+    author:
+    - ins: T. Flach
+      name: Tobias Flach
+    - ins: N. Dukkipati
+      name: Nandita Dukkipati
+    - ins: A. Terzis
+      name: Andreas Terzis
+    - ins: B. Raghavan
+      name: Barath Raghavan
+    - ins: N. Cardwell
+      name: Neal Cardwell
+    - ins: Y. Cheng
+      name: Yuchung Cheng
+    - ins: A. Jain
+      name: Ankur Jain
+    - ins: S. Hao
+      name: Shuai Hao
+    - ins: E. Katz-Bassett
+      name: Ethan Katz-Bassett
+    - ins: R. Govindan
+      name: Ramesh Govindan
     date: 2016
+    seriesinfo:
+      ACM SIGCOMM 2016: ''
 
 
 --- abstract
@@ -3895,13 +3918,13 @@ and two-way propagation delay that are fixed for the entire duration of the
 test. The tests can use network emulation, network simulation,
 or a controlled network path such as a laboratory environment.
 
-In order to cover the wide set of real-world usecases, test cases can be
-run with a variety of RTTs (ie: <1ms to 1s) and bandwidths (64kbit-10Gbit).
+In order to cover the wide set of real-world use cases, test cases can be
+run with a variety of RTTs (e.g., < 1 ms to 1 s) and bandwidths (e.g., 64 kbit/s to 10 Gbit/s).
 
 To ensure internal state variables, including the Bandwidth Estimator,
-are initialized correctly, when an test case says it starts in a phase
+are initialized correctly, when a test case says it starts in a phase
 after STARTUP, test cases expect the connection to be driven with enough
-data it so it exits STARTUP and naturally gets to the specified phase.
+data so that it exits STARTUP and naturally gets to the specified phase.
 
 ## Exiting STARTUP on Bandwidth Plateau
 
@@ -3911,22 +3934,21 @@ data it so it exits STARTUP and naturally gets to the specified phase.
    and ensure the estimated bandwidth (BBR.max_bw) is close (i.e., within 2%) to
    the simulated bandwidth.
 4. Verify that after 3 consecutive rounds where the delivery rate grows by less
-   than 25%, `BBR.full_bw_now` and `BBR.full_bw_reached` are set to `true`.
+   than 25% (i.e., when BBR.full_bw_count reaches 3), `BBR.full_bw_now` and `BBR.full_bw_reached` are set to `true`.
 5. Verify the connection transitions from STARTUP to DRAIN.
 
-## Exiting STARTUP on Loss when app-limited
+## Exiting STARTUP on Loss When Application-Limited
 
 1. Start a flow in the STARTUP phase.
-2. Limit the application sending rate so bandwidth samples are application-
-   limited.
-3. Introduce packet loss exceeding the `BBR.LossThresh` (2%) and sequence range
+2. Limit the application sending rate so bandwidth samples are application-limited.
+3. Introduce packet loss exceeding `BBR.LossThresh` (2%) and sequence range
    criteria over the time scale of a single full round trip.
 4. Verify that `BBRCheckStartupHighLoss()` observes the high loss rate.
-5. Verify the connection sets `BBR.full_bw_reached` to `true`, exits STARTUP,
+5. Verify the connection sets `BBR.full_bw_now` and `BBR.full_bw_reached` to `true`, exits STARTUP,
    and transitions to DRAIN, demonstrating that loss triggers the end of STARTUP
    even when bandwidth samples are application-limited.
 
-## Exit DRAIN based on inflight
+## Exiting DRAIN Based on Inflight
 
 1. Start a flow and transition it from STARTUP to DRAIN.
 2. Verify `BBR.pacing_gain` is set to `BBR.DrainPacingGain` (0.5).
@@ -3935,33 +3957,33 @@ data it so it exits STARTUP and naturally gets to the specified phase.
 4. Verify that when `C.inflight` drops below or equal to `BBRInflight(1.0)`, the
    connection exits DRAIN and transitions to PROBE_BW.
 
-## Exit DRAIN based on time
+## Exiting DRAIN Based on Time
 
 1. Start a flow and transition it from STARTUP to DRAIN.
 2. Decrease the available bandwidth by 10% upon entering DRAIN to simulate
    an over-estimation of the available bandwidth.
 3. Ensure `C.inflight` remains higher than `BBRInflight(1.0)` for several
    round trips.
-5. Track `BBR.drain_start_round` and current `BBR.round_count`.
-6. Verify that after 3 round trips in DRAIN, the connection exits DRAIN and
+4. Track `BBR.drain_start_round` and current `BBR.round_count`.
+5. Verify that after 3 round trips in DRAIN, the connection exits DRAIN and
    transitions to PROBE_BW even though `C.inflight` has not reached the target
    BDP.
 
-## Exit PROBE_UP on Bandwidth Plateau
+## Exiting PROBE_UP on Bandwidth Plateau
 
 1. Wait until the connection is in the PROBE_UP phase of PROBE_BW.
 2. Ensure the connection is fully utilizing `BBR.inflight_longterm` or cwnd
    without packet loss.
 3. Observe that the delivery rate plateaus.
 4. Verify that `BBRIsTimeToGoDown()` triggers when `BBR.full_bw_now` is set to
-   `true` after 3 rounds of little growth.
+   `true` after 3 consecutive rounds where the delivery rate grows by less than 25%
+   (i.e., when BBR.full_bw_count reaches 3).
 5. Verify the connection transitions to PROBE_DOWN.
 
-## Exit PROBE_UP on Loss when app-limited
+## Exiting PROBE_UP on Loss When Application-Limited
 
 1. Wait until the connection is in the PROBE_UP phase of PROBE_BW.
-2. Limit the application sending rate so bandwidth samples are application-
-   limited.
+2. Limit the application sending rate so bandwidth samples are application-limited.
 3. Introduce packet loss exceeding `BBR.LossThresh` (2%) over the last round
    trip.
 4. Verify that the loss is detected and `BBRIsTimeToGoDown()` is triggered due
@@ -3969,37 +3991,36 @@ data it so it exits STARTUP and naturally gets to the specified phase.
 5. Verify the connection transitions to PROBE_DOWN and `BBR.inflight_longterm`
    is updated appropriately, regardless of the application-limited state.
 
-## Never exit PROBE_UP (or STARTUP) when app-limited and No loss
+## Never Exiting PROBE_UP (or STARTUP) When Application-Limited With No Loss
 
 1. Wait until the connection transitions to PROBE_UP (or STARTUP).
-2. Limit the application sending rate so bandwidth samples are application-
-   limited.
-3. Verify that as long as there is no loss and the rounds are app-limited,
+2. Limit the application sending rate so bandwidth samples are application-limited.
+3. Verify that as long as there is no loss and the rounds are application-limited,
    the connection stays in PROBE_UP (or STARTUP) indefinitely.
 
-## Exit PROBE_DOWN on inflight
+## Exiting PROBE_DOWN on Inflight
 
 1. Wait until the connection transitions to PROBE_DOWN.
-2. Verify that `BBR.pacing_gain` is 0.90.
+2. Verify that `BBR.pacing_gain` is set to `BBR.ProbeDownPacingGain` (0.90).
 3. Track `C.inflight` and `BBRInflightWithHeadroom()`.
 4. Wait for the queue to drain and `C.inflight` to fall below or equal to
-   `BBRInflightWithHeadroom()` and `BBRInflight(BBR.max_bw, 1.0)`.
+   both `BBRInflightWithHeadroom()` and `BBRInflight(1.0)`.
 5. Verify the connection transitions to PROBE_CRUISE.
 
-## Exit PROBE_DOWN after max time
+## Exiting PROBE_DOWN After Max Time
 
 1. Wait until the connection transitions to PROBE_DOWN.
 2. Prevent `C.inflight` from dropping below `BBRInflightWithHeadroom()` by
    decreasing the available bandwidth by 10% upon entering PROBE_DOWN.
-4. Verify that after `BBR.bw_probe_wait` time elapses, `BBRIsTimeToProbeBW()`
+3. Verify that after `BBR.bw_probe_wait` time elapses, `BBRIsTimeToProbeBW()`
    returns `true`.
-5. Verify the connection transitions directly to PROBE_REFILL, bypassing
+4. Verify the connection transitions directly to PROBE_REFILL, bypassing
    PROBE_CRUISE.
 
-## PROBE_RTT and exit
+## Entering and Exiting PROBE_RTT
 
 1. Wait until the connection transitions to PROBE_BW.
-2. Wait for `ProbeRTTInterval` (5 seconds) without updating
+2. Wait for `BBR.ProbeRTTInterval` (5 seconds) without updating
    `BBR.probe_rtt_min_delay`.
 3. Verify the connection enters PROBE_RTT and sets `BBR.cwnd_gain` to
    `BBR.ProbeRTTCwndGain` (0.5).
@@ -4007,39 +4028,39 @@ data it so it exits STARTUP and naturally gets to the specified phase.
 5. Verify the connection correctly exits PROBE_RTT, transitions back to PROBE_BW
    (since `BBR.full_bw_reached` is `true`), and resumes sending.
 
-## Skip PROBE_RTT due to app-limited sending
+## Skipping PROBE_RTT Due to Application-Limited Sending
 
 1. Wait until the connection transitions to PROBE_BW.
 2. Pause the application from sending data for a period, making the connection
    idle and causing `C.inflight` to drop to 0.
-3. Allow the `ProbeRTTInterval` (5 seconds) to elapse during this idle period.
+3. Allow `BBR.ProbeRTTInterval` (5 seconds) to elapse during this idle period.
 4. Verify that upon sending new data, `BBRHandleRestartFromIdle()` sets
    `BBR.idle_restart` to `true`.
 5. Verify the connection skips entering PROBE_RTT because `BBR.idle_restart` is
    `true` and idleness is deemed a sufficient attempt to drain the queue.
 
-## Achieve expected STARTUP bandwidth on a link with aggregation
+## Achieving Expected STARTUP Bandwidth on a Link With Aggregation
 
 1. Simulate a network path with significant ACK aggregation or L2 batching
    (e.g., cellular link).
 2. Start a flow in STARTUP.
 3. Verify that `BBR.extra_acked` is calculated correctly from the bursty ACK
-   arrivals and that CWND > 2*BDP.
+   arrivals and that `C.cwnd` > 2 * BDP.
 4. Ensure that the delivery rate sampler handles the aggregated ACKs properly
    (capping by send rate if necessary) and the connection still successfully
    doubles its sending rate to discover the full bottleneck bandwidth.
 
-## Achieve expected Cruise bandwidth on a link with aggregation
+## Achieving Expected Cruise Bandwidth on a Link With Aggregation
 
 1. Wait until the connection transitions to PROBE_CRUISE.
 2. Simulate significant ACK aggregation on the path.
 3. Verify that `BBR.extra_acked` updates correctly using the max filter over the
-   last `BBRExtraAckedFilterLen` round trips.
+   last `BBR.ExtraAckedFilterLen` round trips.
 4. Verify that `C.cwnd` is augmented by `BBR.extra_acked`, preventing the
    connection from stalling during inter-ACK silences and maintaining full
    utilization.
 
-## Correctly manage sub-packet BDPs
+## Correctly Managing Sub-Packet BDPs
 
 1. Configure a bottleneck with a very low BDP (e.g., < 1 packet).
 2. Wait until the connection transitions to PROBE_BW.
@@ -4047,60 +4068,70 @@ data it so it exits STARTUP and naturally gets to the specified phase.
 4. Ensure the pacing rate correctly matches the low bandwidth, while the
    4-packet cwnd allows for delayed ACKs without stalling the pipeline.
 
-## Increase Bandwidth 10x and ensure full bandwidth is reached
+## Increasing Bandwidth 10x and Ensuring Full Bandwidth is Reached
 
 1. Wait until the connection transitions to PROBE_BW.
-2. Suddenly increase the bottleneck bandwidth by 10x (e.g., to 100 Mbps).
-3. Verify that during PROBE_UP, the additive increase to `BBR.inflight_longterm`
-   exponentially doubles each round trip.
-4. Ensure the connection discovers the full 100 Mbps bandwidth within a
+2. Suddenly increase the bottleneck bandwidth by 10x (e.g., from 10 Mbit/s to 100 Mbit/s).
+3. Verify that during PROBE_UP, the step size added to `BBR.inflight_longterm`
+   doubles each round trip (resulting in exponential growth).
+4. Ensure the connection discovers the full 100 Mbit/s bandwidth within a
    reasonable number of round trips (O(log(BDP))).
 
-## Decrease Bandwidth 10x and ensure Max Bandwidth adapts down
+## Decreasing Bandwidth 10x and Ensuring Max Bandwidth Adapts Down
 
 1. Wait until the connection transitions to PROBE_BW.
-2. Suddenly decrease the bottleneck bandwidth by 10x (e.g., to 1 Mbps).
+2. Suddenly decrease the bottleneck bandwidth by 10x (e.g., from 100 Mbit/s to 10 Mbit/s).
 3. Verify that `BBR.bw_shortterm` rapidly adapts downwards due to the resulting
    packet loss.
-4. Verify that after the `BBR.max_bw_filter` window expires (2 PROBE_BW cycles),
-   `BBR.max_bw` drops to the new 10 Mbps limit, matching the path's delivery
+4. Verify that after the `BBR.max_bw` window expires (2 PROBE_BW cycles, or `BBR.MaxBwFilterLen`),
+   `BBR.max_bw` drops to the new 10 Mbit/s limit, matching the path's delivery
    rate.
 
-## Token Bucket Policer
+## Handling Token Bucket Policers
 
 1. Configure the path with a token bucket policer (e.g., rate limit with a
    specific initial burst size and no additional buffering beyond the bucket).
    See {{TrafficPolicing}} for more details.
-3. Wait until the connection transitions to PROBE_BW.
-4. Verify that when the burst size is exhausted and the policer drops packets,
+2. Wait until the connection transitions to PROBE_BW.
+3. Verify that when the burst size is exhausted and the policer drops packets,
    BBR reacts to the loss by adapting `BBR.inflight_shortterm` and
    `BBR.bw_shortterm`.
-5. Ensure BBR eventually reaches a stable operating point that conforms to the
+4. Ensure BBR eventually reaches a stable operating point that conforms to the
    token rate without excessive continuous packet loss.
 
-## Handling Spurious Loss Recovery in Test Cases
+## Handling Spurious Fast Recovery
 
 1. Introduce packet reordering on the network path that triggers a spurious Fast
-   Recovery or RTO.
+   Recovery.
 2. Verify `BBRSaveStateUponLoss()` saves the current `BBR.state`,
-   `BBR.bw_shortterm`, `BBR.inflight_shortterm`, and `BBR.inflight_longterm`.
-3. Once the transport protocol detects the loss was spurious (e.g., receiving an
-   ACK for the retransmitted packet that shows it was already delivered), verify
+   `BBR.bw_shortterm`, `BBR.inflight_shortterm` (to `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to `BBR.undo_inflight_longterm`).
+3. Once the transport protocol detects the loss was spurious (e.g., via TCP DSACK or QUIC packet numbers indicating the original packet was delivered and the retransmission was spurious), verify
    `BBRHandleSpuriousLossDetection()` restores the saved parameters.
 4. Ensure the connection seamlessly returns to its previous state (e.g.,
    PROBE_UP).
 
-## Entering and Exiting PROBE_RTT during STARTUP
+## Handling Spurious RTO Recovery
+
+1. Introduce packet reordering on the network path that triggers a spurious RTO
+   Recovery.
+2. Verify `BBRSaveStateUponLoss()` saves the current `BBR.state`,
+   `BBR.bw_shortterm`, `BBR.inflight_shortterm` (to `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to `BBR.undo_inflight_longterm`).
+3. Once the transport protocol detects the loss was spurious (e.g., via TCP DSACK or QUIC packet numbers indicating the original packet was delivered and the retransmission was spurious), verify
+   `BBRHandleSpuriousLossDetection()` restores the saved parameters.
+4. Ensure the connection seamlessly returns to its previous state (e.g.,
+   PROBE_UP).
+
+## Entering and Exiting PROBE_RTT During STARTUP
 
 1. Start a flow and artificially trigger PROBE_RTT before `BBR.full_bw_reached`
-   becomes `true` (e.g., by ensuring `ProbeRTTInterval` expires during an
+   becomes `true` (e.g., by ensuring `BBR.ProbeRTTInterval` expires during an
    extended, slow STARTUP phase).
 2. Allow the PROBE_RTT duration to elapse.
 3. Verify that upon exiting PROBE_RTT, the connection correctly transitions back
    to STARTUP rather than PROBE_BW, allowing it to continue searching for the
    max bandwidth.
 
-## Loss during PROBE_UP after inflight_longterm is set
+## Handling Loss During PROBE_UP After inflight_longterm is Set
 
 1. Ensure the connection is in PROBE_BW and has an established
    `BBR.inflight_longterm`.
@@ -4112,14 +4143,14 @@ data it so it exits STARTUP and naturally gets to the specified phase.
 5. Verify the connection aborts PROBE_UP and immediately transitions to
    PROBE_DOWN.
 
-## Application-limited during PROBE_REFILL
+## Handling Application-Limited Sending During PROBE_REFILL
 
 1. Wait for the connection to transition to PROBE_REFILL.
 2. Immediately pause the application from sending data, causing the connection
    to become application-limited for the duration of the PROBE_REFILL round
    trip.
 3. Verify that because the bandwidth samples during this round are marked as
-   application-limited, BBR does not incorrectly update its max bandwidth
-   estimate with artificially low values.
+   application-limited and are lower than `BBR.max_bw` (`RS.delivery_rate` < `BBR.max_bw`), BBR does not update its max bandwidth
+   estimate with these artificially low values.
 4. Verify the connection transitions to PROBE_UP after the PROBE_REFILL round
    trip, and correctly handles subsequent probing.
