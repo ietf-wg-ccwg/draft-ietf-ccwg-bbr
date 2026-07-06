@@ -40,7 +40,7 @@ specifies version 3 of the BBR algorithm, BBRv3.
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.1
+    wcwidth 0.8.2
 -->
 <link href="draft-ietf-ccwg-bbr.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1059,11 +1059,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">June 2026</td>
+<td class="right">July 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 25 December 2026</td>
+<td class="center">Expires 7 January 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1076,12 @@ svg {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-06-23" class="published">23 June 2026</time>
+<time datetime="2026-07-06" class="published">6 July 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-12-25">25 December 2026</time></dd>
+<dd class="expires"><time datetime="2027-01-07">7 January 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1150,7 +1150,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 25 December 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1878,8 +1878,8 @@ probing. The phases are as follows:<a href="#section-2.14-1" class="pilcrow">¶<
 <p id="section-2.14-7">BBR.rounds_since_bw_probe: The number of round trips elapsed since the last bandwidth probe cycle.<a href="#section-2.14-7" class="pilcrow">¶</a></p>
 <p id="section-2.14-8">BBR.bw_probe_wait: The maximum wall clock time duration BBR waits before probing bandwidth again.<a href="#section-2.14-8" class="pilcrow">¶</a></p>
 <p id="section-2.14-9">BBR.cycle_stamp: The wall clock time at which the current ProbeBW cycle started.<a href="#section-2.14-9" class="pilcrow">¶</a></p>
-<p id="section-2.14-10">BBR.prev_probe_too_high: A boolean recording whether the most recent bandwidth probe went too high (i.e., experienced a packet loss rate exceeding BBR.LossThresh).<a href="#section-2.14-10" class="pilcrow">¶</a></p>
-<p id="section-2.14-11">BBR.stopped_risky_probe: A boolean recording whether the most recent ProbeBW_UP phase was stopped early because it reached the BBR.inflight_longterm threshold from the previous probe that went too high.<a href="#section-2.14-11" class="pilcrow">¶</a></p>
+<p id="section-2.14-10">BBR.prev_probe_too_high: A boolean recording whether the most recent bandwidth probe went too high (i.e., experienced a packet loss rate exceeding BBR.LossThresh). See "Precautionary Bandwidth Probing" in <a href="#bandwidth-probing-caution" class="auto internal xref">Section 5.3.3.6</a> for how this is used.<a href="#section-2.14-10" class="pilcrow">¶</a></p>
+<p id="section-2.14-11">BBR.prev_probe_precautionary: A boolean recording whether the most recent ProbeBW_UP phase was stopped early because it reached the BBR.inflight_longterm threshold from the previous probe that went too high. See "Precautionary Bandwidth Probing" in <a href="#bandwidth-probing-caution" class="auto internal xref">Section 5.3.3.6</a> for how this is used.<a href="#section-2.14-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="undo-state">
@@ -3113,7 +3113,7 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
     BBR.rounds_since_bw_probe = 0
     BBR.bw_probe_samples = false
     BBR.prev_probe_too_high = false
-    BBR.stopped_risky_probe = false
+    BBR.prev_probe_precautionary = false
     BBR.ack_phase = ACKS_INIT
     BBR.cycle_stamp = 0
     BBR.bw_probe_wait = 0
@@ -3551,19 +3551,27 @@ bandwidth.<a href="#section-5.3.3.5-3" class="pilcrow">¶</a></p>
             </h5>
 <p id="section-5.3.3.6-1">Increasing a flow's sending rate is essential for ensuring proper bandwidth
 utilization, but raises risks for excessive queuing or packet loss. To mitigate
-these risks, BBR uses a "precautionary bandwidth probing" mechanism.<a href="#section-5.3.3.6-1" class="pilcrow">¶</a></p>
-<p id="section-5.3.3.6-2">A full round trip is required to receive feedback indicating the level of
-queuing delay and/or packet loss associated with a given level of
+these risks, ProbeBW_UP uses a "precautionary bandwidth probing"
+mechanism. With this mechanism, flows only persist in ProbeBW_UP if the most
+recent ProbeBW_UP phase did not result in excess loss. If ProbeBW_UP exits due
+to excess loss, then the following ProbeBW_UP phase is a brief "precautionary
+bandwidth probing" phase that lasts only until C.inflight reaches
+BBR.inflight_longterm. If the "precautionary bandwidth probing" phase succeeds
+(there is no excess loss) then the flow immediately returns to ProbeBW_REFILL
+and then ProbeBW_UP, and persists in ProbeBW_UP.<a href="#section-5.3.3.6-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.6-2">The "precautionary bandwidth probing" mechanism is motivated by the fact that a
+full round trip is required to receive feedback indicating the level of queuing
+delay and/or packet loss associated with a given level of
 C.inflight. Furthermore, BBR.inflight_longterm is designed to remember the
 lowest level of C.inflight that was associated with excess loss. Thus
 maintaining C.inflight at BBR.inflight_longterm for a full round trip, while
 necessary to safely raise BBR.inflight_longterm, runs a significant risk of
 holding a bottleneck buffer at full or near-full for that entire round trip.<a href="#section-5.3.3.6-2" class="pilcrow">¶</a></p>
-<p id="section-5.3.3.6-3">To manage this trade-off and mitigate the risks, the "precautionary
-bandwidth probing" mechanism ensures the flow only maintains C.inflight at
-the BBR.inflight_longterm level for a full round trip when this has
-recently been proven to be "safe" (in the sense of not causing excess
-loss). To do this, it uses the following two aspects:<a href="#section-5.3.3.6-3" class="pilcrow">¶</a></p>
+<p id="section-5.3.3.6-3">To manage this trade-off and mitigate the risks, the "precautionary bandwidth
+probing" mechanism ensures the flow only maintains C.inflight at the
+BBR.inflight_longterm level for a full round trip when this has recently been
+measured to be "safe" (in the sense of not causing excess loss). To do this, it
+uses the following two aspects:<a href="#section-5.3.3.6-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.3.3.6-4.1">
                 <p id="section-5.3.3.6-4.1.1">Precautionary Bandwidth Probing: Deceleration: after
@@ -3573,7 +3581,7 @@ probes for bandwidth, it takes a cautious approach: rather than
 maintaining C.inflight at BBR.inflight_longterm for the full round trip,
 BBR transitions to ProbeBW_DOWN as soon as C.inflight reaches this risky
 level of BBR.inflight_longterm (recording this by setting
-BBR.stopped_risky_probe to true).<a href="#section-5.3.3.6-4.1.1" class="pilcrow">¶</a></p>
+BBR.prev_probe_precautionary to true).<a href="#section-5.3.3.6-4.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.3.3.6-4.2">
                 <p id="section-5.3.3.6-4.2.1">Precautionary Bandwidth Probing: Acceleration: If a round-trip elapses
@@ -3615,7 +3623,7 @@ of the following conditions are met:<a href="#section-5.3.3.7-1" class="pilcrow"
   ProbeBW_UP resulted in excess loss (BBR.prev_probe_too_high is true), and
   C.inflight reaches the risky BBR.inflight_longterm level established
   during that previous ProbeBW_UP, then the flow stops the bandwidth probe
-  early (setting BBR.stopped_risky_probe to true) and transitions to
+  early (setting BBR.prev_probe_precautionary to true) and transitions to
   ProbeBW_DOWN, to reduce the risks of causing excessive queuing delay
   and/or loss.<a href="#section-5.3.3.7-2.3.1" class="pilcrow">¶</a></p>
 </li>
@@ -3854,7 +3862,7 @@ as follows:<a href="#section-5.3.3.8.3-6" class="pilcrow">¶</a></p>
     ResetShortTermModel()
     BBR.bw_probe_up_rounds = 0
     BBR.bw_probe_up_acked = 0
-    BBR.stopped_risky_probe = false
+    BBR.prev_probe_precautionary = false
     BBR.ack_phase = ACKS_REFILLING
     StartRound()
     BBR.state = ProbeBW_REFILL
@@ -3927,7 +3935,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
   IsTimeToGoDown():
     /* Precautionary Bandwidth Probing: Deceleration */
     if (BBR.prev_probe_too_high &amp;&amp; C.inflight &gt;= BBR.inflight_longterm)
-      BBR.stopped_risky_probe = true
+      BBR.prev_probe_precautionary = true
       return true
     if (C.is_cwnd_limited &amp;&amp; C.cwnd &gt;= BBR.inflight_longterm)
       ResetFullBW()   /* bw is limited by BBR.inflight_longterm */
@@ -3988,7 +3996,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
         AdvanceMaxBwFilter()
       /* Precautionary Bandwidth Probing: Acceleration */
       if (IsInAProbeBWState() &amp;&amp;
-          BBR.stopped_risky_probe &amp;&amp;
+          BBR.prev_probe_precautionary &amp;&amp;
           !BBR.prev_probe_too_high)
         StartProbeBW_REFILL()
         return true
@@ -5776,7 +5784,7 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dd class="break"></dd>
 <dt id="I-D.draft-ietf-tcpm-ack-rate-request">[I-D.draft-ietf-tcpm-ack-rate-request]</dt>
         <dd>
-<span class="refAuthor">Gomez, C.</span>, <span class="refAuthor">Crowcroft, J.</span>, and <span class="refAuthor">M. Tüxen</span>, <span class="refTitle">"TCP ACK Rate Request Option"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tcpm-ack-rate-request-11</span>, <time datetime="2026-03-02" class="refDate">2 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tcpm-ack-rate-request-11">https://datatracker.ietf.org/doc/html/draft-ietf-tcpm-ack-rate-request-11</a>&gt;</span>. </dd>
+<span class="refAuthor">Gomez, C.</span>, <span class="refAuthor">Crowcroft, J.</span>, and <span class="refAuthor">M. Tüxen</span>, <span class="refTitle">"TCP ACK Rate Request Option"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-tcpm-ack-rate-request-12</span>, <time datetime="2026-07-04" class="refDate">4 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-tcpm-ack-rate-request-12">https://datatracker.ietf.org/doc/html/draft-ietf-tcpm-ack-rate-request-12</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="Jac88">[Jac88]</dt>
         <dd>
