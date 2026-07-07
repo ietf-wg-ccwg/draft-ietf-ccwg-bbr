@@ -447,7 +447,7 @@ Startup mode for BBR.pacing_gain.
 
 BBR.DrainPacingGain: A constant specifying the pacing gain value used in
 Drain mode, to attempt to drain the estimated queue at the bottleneck link
-in one round-trip or less. As noted in {{BBRDrainPacingGain}}, any
+in one round trip or less. As noted in {{BBRDrainPacingGain}}, any
 value at or below 1 / BBRStartupCwndGain = 1 / 2 = 0.5 will theoretically
 achieve this. BBR uses the value 0.5, which has been shown to offer good
 performance when compared with other alternatives.
@@ -1940,7 +1940,7 @@ drain any queue at the bottleneck link that was created in Startup by switching
 to a pacing_gain well below 1.0, until any estimated queue has been drained. It
 uses a pacing_gain of BBR.DrainPacingGain = 0.5, chosen via analysis
 {{BBRDrainPacingGain}} and experimentation to try to drain the queue in less
-than one round-trip:
+than one round trip:
 
 ~~~~
   EnterDrain():
@@ -1953,10 +1953,10 @@ than one round-trip:
 In Drain, when the amount of data in flight is less than or equal to the
 estimated BDP, meaning BBR estimates that the queue at the bottleneck link
 has been fully drained, then BBR exits Drain and enters ProbeBW. Normally, this
-condition should be met within one round-trip of entering the drain state.
+condition should be met within one round trip of entering the drain state.
 However, it could take longer if the bandwidth was overestimated during Startup
 due to interactions with competing flows. In that case, BBR enters ProbeBW
-after 3 round-trips, allowing the bandwidth max filter to advance during the
+after 3 round trips, allowing the bandwidth max filter to advance during the
 next probing cycle. To implement this, upon every ACK BBR executes:
 
 ~~~~
@@ -2137,7 +2137,7 @@ uses the following two aspects:
   level of BBR.inflight_longterm (recording this by setting
   BBR.prev_probe_precautionary to true).
 
-* Precautionary Bandwidth Probing: Acceleration: If a round-trip elapses
+* Precautionary Bandwidth Probing: Acceleration: If a round trip elapses
   and the flow finishes receiving at least a full round trip of ACK
   feedback from bandwidth probing without detecting excess packet loss
   (meaning BBR.prev_probe_too_high remains false), then the flow
@@ -3066,7 +3066,7 @@ to account for delayed acknowledgements.
 BBR.extra_acked is a volume of data that is the estimate of the recent degree
 of aggregation in the network path. For each ACK, the algorithm computes
 a sample of the estimated extra ACKed data beyond the amount of data that
-the sender expected to be ACKed over the timescale of a round-trip, given
+the sender expected to be ACKed over the timescale of a round trip, given
 the BBR.bw. It then computes BBR.extra_acked as the windowed maximum over 1
 round trip during STARTUP and 10 round trips after exiting STARTUP. If the
 ACK rate falls below the expected bandwidth, then the algorithm estimates
@@ -3302,7 +3302,7 @@ This logic can be represented as follows:
     AdaptLowerBoundsFromCongestion()  /* once per round, adapt */
     BBR.is_loss_in_round = false
 
-  /* Once per round-trip respond to congestion */
+  /* Once per round trip respond to congestion */
   AdaptLowerBoundsFromCongestion():
     if (IsProbingBW())
       return
