@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-28T03:57:30.425087+00:00",
+  "timestamp": "2026-07-07T03:31:12.028192+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1164,7 +1164,7 @@
       "id": "I_kwDOL3MllM7BqS0r",
       "title": "Consider adding test cases to an appendix",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/71",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -1173,8 +1173,8 @@
       "labels": [],
       "body": "Today in CCWG there was interest in example test cases of some form for BBR, so implementers could ensure they implemented it correctly.\n\nQLog was mentioned as a common logging framework for QUIC that could be used for congestion control debugging and might allow implementations to compare traces.",
       "createdAt": "2025-07-21T15:22:28Z",
-      "updatedAt": "2026-05-13T06:17:52Z",
-      "closedAt": null,
+      "updatedAt": "2026-07-06T20:44:52Z",
+      "closedAt": "2026-07-06T20:44:52Z",
       "comments": [
         {
           "author": "toidiu",
@@ -1478,9 +1478,17 @@
       ],
       "body": "Both are frequently used in the draft.",
       "createdAt": "2026-06-22T20:45:50Z",
-      "updatedAt": "2026-06-22T20:45:50Z",
+      "updatedAt": "2026-07-06T22:12:07Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "My understanding is that they can both be correct, depending on whether we're talking about a noun (in which case the correct form is 'round trip') or a compound adjective (in which case the correct form is 'round-trip'). FWIW, I tried to use that approach in my edits, but some inconsistencies may have accumulated over time. :-) \n\nI suppose we can have some AI audit/correct things for us.\n\nHere's a nice summary from Gemini:\n\n---\n\nIn networking\u2014just like in standard English\u2014the difference comes down to whether you are using the phrase as a **noun** or an **adjective**.\n\nHere is the exact breakdown of when to use which.\n\n## \"Round trip\" (Two words, no hyphen)\n\nUse the unhyphenated form when the phrase acts as a **noun**. In this case, you are referring to the actual journey a packet or signal takes from the source to the destination and back again.\n\n* **Correct:** \"The packet completed its **round trip** in 12 milliseconds.\"\n* **Correct:** \"A TCP handshake requires a full **round trip** before data can be sent.\"\n\n## \"Round-trip\" (Hyphenated)\n\nUse the hyphenated form when it acts as a **compound adjective** that modifies another noun immediately following it.\n\n* **Correct:** \"The **round-trip** time (RTT) on this link is too high.\"\n* **Correct:** \"We need to measure the **round-trip** delay.\"\n* **Correct:** \"Let's run a **round-trip** test.\"\n\nIn all of these examples, \"round-trip\" describes the *time*, the *delay*, or the *test*. Because the two words are teaming up to describe the next word, they are linked with a hyphen.\n\n---\n\n> **The Industry Reality:** While \"round-trip time\" is the grammatically correct way to write out the RTT acronym, you will frequently see engineers write \"round trip time\" without the hyphen in casual tickets, Slack messages, and documentation. However, formal networking standards\u2014such as IETF RFCs and IEEE papers\u2014strictly adhere to the hyphenated **round-trip time**.",
+          "createdAt": "2026-07-06T22:12:07Z",
+          "updatedAt": "2026-07-06T22:12:07Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -6848,24 +6856,26 @@
       "id": "PR_kwDOL3MllM7QS5mz",
       "title": "Add BBR Example Test Cases Appendix",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/103",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "This PR fixes https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/71 by adding an Appendix section titled \"BBR Example Test Cases\". It details the 16 test cases originally discussed, along with 4 new edge cases brainstormed during planning. The cases use step-by-step logic detailing state transitions and variables without relying on QLog text.\n\n---\n*PR created automatically by Jules for task [4897439197073774623](https://jules.google.com/task/4897439197073774623) started by @ianswett*",
       "createdAt": "2026-04-06T19:25:18Z",
-      "updatedAt": "2026-06-26T20:38:06Z",
+      "updatedAt": "2026-07-06T20:44:51Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "b0d64c8d856f52ccc4620222a00224563b390aa0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-bbr-test-cases-appendix-4897439197073774623",
       "headRefOid": "905364efece6f0c2e04ac3a67fc1cceb6b65b3a9",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-07-06T20:44:51Z",
+      "mergedAt": "2026-07-06T20:44:51Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "dcb43ee724b57c8a5543b51a54ba9bc99fb67e3d"
+      },
       "comments": [],
       "reviews": [
         {
@@ -7451,6 +7461,19 @@
               "updatedAt": "2026-06-26T20:38:06Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFIsFsQ",
+          "commit": {
+            "abbreviatedOid": "905364e"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "LGTM. Thanks!\n",
+          "createdAt": "2026-07-06T20:44:11Z",
+          "updatedAt": "2026-07-06T20:44:11Z",
+          "comments": []
         }
       ]
     },
@@ -8051,24 +8074,26 @@
       "id": "PR_kwDOL3MllM7pePiF",
       "title": "Fix missing state definitions/init and minor bugs in pseudocode",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/114",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "- **Fix missing ProbeBW state definitions/init and minor bugs in ProbeBW pseudocode**\n- **Fix typos, indentation, and parameter naming in ProbeBW pseudocode**\n- **Define missing loss variables and remove redundant RS parameter**\n",
       "createdAt": "2026-06-23T04:02:43Z",
-      "updatedAt": "2026-06-26T18:00:37Z",
+      "updatedAt": "2026-07-06T19:14:15Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "03e7fd96d9cab62015506eef6a7c1af794a2b4c0",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "fix-missing-probe-bw-state-definitions-and-transitions",
-      "headRefOid": "c9c872c52e5baedf4b3690350fd3c2d670bc98fc",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "3ad198f92b9d71676e1004a6b46cefea024b5c91",
+      "closedAt": "2026-07-06T19:14:03Z",
+      "mergedAt": "2026-07-06T19:14:03Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "d0db67c7e3f2031429ebe1254d53acf12fe0eac3"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -8076,6 +8101,13 @@
           "body": "@ianswett @jbeshay \r\n",
           "createdAt": "2026-06-23T04:12:10Z",
           "updatedAt": "2026-06-23T04:12:10Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks, Ian! Incorporating feedback!\r\n",
+          "createdAt": "2026-07-06T16:09:05Z",
+          "updatedAt": "2026-07-06T16:09:05Z"
         }
       ],
       "reviews": [
@@ -8136,6 +8168,119 @@
               "updatedAt": "2026-06-26T18:00:37Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFGrFZw",
+          "commit": {
+            "abbreviatedOid": "c9c872c"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-07-06T15:48:21Z",
+          "updatedAt": "2026-07-06T15:48:21Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "Done. Thanks!\r\n",
+              "createdAt": "2026-07-06T15:48:21Z",
+              "updatedAt": "2026-07-06T15:48:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFGsVFw",
+          "commit": {
+            "abbreviatedOid": "c9c872c"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-07-06T15:51:03Z",
+          "updatedAt": "2026-07-06T15:51:03Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "Yeah, good point. I borrowed \"cnt\" from an analogous quantity in the Linux TCP CUBIC code, to try to make the analogy clearer. But you're right that it's a terrible name. :-) Proposed to switch to BBR.probe_up_acked_per_inc.",
+              "createdAt": "2026-07-06T15:51:03Z",
+              "updatedAt": "2026-07-06T15:51:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFGtCnA",
+          "commit": {
+            "abbreviatedOid": "c9c872c"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-07-06T15:52:36Z",
+          "updatedAt": "2026-07-06T15:52:36Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "Good idea. Switched to: BBR.is_bw_probe_sample",
+              "createdAt": "2026-07-06T15:52:36Z",
+              "updatedAt": "2026-07-06T15:52:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFGxaaw",
+          "commit": {
+            "abbreviatedOid": "c9c872c"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-07-06T16:02:24Z",
+          "updatedAt": "2026-07-06T16:02:24Z",
+          "comments": [
+            {
+              "originalPosition": 166,
+              "body": "Good question. I added a comment to try to explain this:\r\n\r\n```\r\n  /* At what prefix of \"packet\" P did losses exceed BBR.LossThresh?                                                                                                \r\n     We perform this computation because P may be an offload burst                                                                                                 \r\n     containing many packets, and it's important to estimate which                                                                                                 \r\n     fraction of that burst fits safely in the network path.                                                                                                       \r\n   */                                                                                                                                                              \r\n```\r\n\r\nFor example, in the exteme case, if we send  an offload P burst of 50 packets, it's a very different story if 1 packet is delivered and 49 lost, or 49 packets delivered and 1 lost.\r\n",
+              "createdAt": "2026-07-06T16:02:24Z",
+              "updatedAt": "2026-07-06T16:02:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFGzK1g",
+          "commit": {
+            "abbreviatedOid": "c9c872c"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-07-06T16:06:03Z",
+          "updatedAt": "2026-07-06T16:06:03Z",
+          "comments": [
+            {
+              "originalPosition": 70,
+              "body": "Good idea. Renamed it to BBR.is_loss_in_round, made it a boolean, and added a definition.\r\n",
+              "createdAt": "2026-07-06T16:06:03Z",
+              "updatedAt": "2026-07-06T16:06:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFH_DUQ",
+          "commit": {
+            "abbreviatedOid": "3ad198f"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Thanks, this is much easier to read!",
+          "createdAt": "2026-07-06T18:55:17Z",
+          "updatedAt": "2026-07-06T18:55:17Z",
+          "comments": []
         }
       ]
     },
@@ -8144,25 +8289,35 @@
       "id": "PR_kwDOL3MllM7ptQPF",
       "title": "Add \"Precautionary Bandwidth Probing\" prose, state definitions, and pseudocode",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/115",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Describe the \"Precautionary Bandwidth Probing\" mechanism using prose,\nstate definitions, and pseudocode. This mechanism has been in Linux\nTCP BBRv2 and TCP BBRv3 since 2018 in this form, and has shown\nsignificant reductions in queuing delay and packet loss.\n",
       "createdAt": "2026-06-23T15:06:56Z",
-      "updatedAt": "2026-06-26T18:24:02Z",
+      "updatedAt": "2026-07-06T19:15:01Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "fix-some-missing-probe-bw-state-definitions-and-transitions",
       "baseRefOid": "b6bdd25d312a5bfde755caac0e3a15492584adfd",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-precautionary-bandwidth-probing",
-      "headRefOid": "eb039ad902d2ad78b9956f5317fc50450abed440",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "43c6bdf28055283cea8f7ef311658f053b140c20",
+      "closedAt": "2026-07-06T19:14:53Z",
+      "mergedAt": "2026-07-06T19:14:53Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "cbcf67c6da1c63f23b0d5d7bd5fbfe1ee4255090"
+      },
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Incorporating feedback...\r\n",
+          "createdAt": "2026-07-06T18:29:49Z",
+          "updatedAt": "2026-07-06T18:29:49Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM8AAAABERbRoA",
@@ -8207,6 +8362,99 @@
               "updatedAt": "2026-06-26T18:24:01Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFHmLeg",
+          "commit": {
+            "abbreviatedOid": "eb039ad"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-07-06T17:59:00Z",
+          "updatedAt": "2026-07-06T17:59:00Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Re \"Just reaching the inflight_longterm doesn't cause PROBE_UP to exit early, correct?\": Correct, just reaching the inflight_longterm doesn't cause PROBE_UP to exit early. This \"Precautionary Bandwidth Probing\" mechanism only exits PROBE_UP early if inflight reaches inflight_longterm and the most recent PROBE_UP caused loss to match or exceed BBR.LossThresh.\r\n\r\nRe: \"A forward reference to Precautionary Bandwidth Probing might also be helpful?\". Good idea. After the text for both definitions, I added: See \"Precautionary Bandwidth Probing\" in {{bandwidth-probing-caution}} for how this is used.",
+              "createdAt": "2026-07-06T17:59:00Z",
+              "updatedAt": "2026-07-06T17:59:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFHnquw",
+          "commit": {
+            "abbreviatedOid": "eb039ad"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-07-06T18:02:15Z",
+          "updatedAt": "2026-07-06T18:02:15Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "Good idea. Switched from stopped_risky_probe to prev_probe_precautionary.\r\n",
+              "createdAt": "2026-07-06T18:02:15Z",
+              "updatedAt": "2026-07-06T18:02:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFHtwNw",
+          "commit": {
+            "abbreviatedOid": "eb039ad"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-07-06T18:17:08Z",
+          "updatedAt": "2026-07-06T18:17:08Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "Good point. Added a high-level overview of the mechanism in the first paragraph of the \"Precautionary Bandwidth Probing\" section.\r\n",
+              "createdAt": "2026-07-06T18:17:08Z",
+              "updatedAt": "2026-07-06T18:17:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFHzNiA",
+          "commit": {
+            "abbreviatedOid": "eb039ad"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-07-06T18:29:33Z",
+          "updatedAt": "2026-07-06T18:29:33Z",
+          "comments": [
+            {
+              "originalPosition": 25,
+              "body": "In my mental model I wasn't thinking of the state machine in terms of \"two types of ProbeBW_UP\", but rather, in terms of extra rules for exiting and re-entering ProbeBW_UP that make the algorithm behavior more cautious. I worry if we frame things in terms of \"two types of ProbeBW_UP\" we'll need to come up with names for the two types, and this will add more complexity and jargon and risk more confusion. :-) If you have specific ideas for how to add text here, LMK and I'm happy to incorporate it in this PR. Or you can draft a PR with some text? Either way. Thanks! :-) \r\n",
+              "createdAt": "2026-07-06T18:29:33Z",
+              "updatedAt": "2026-07-06T18:29:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFIAKww",
+          "commit": {
+            "abbreviatedOid": "43c6bdf"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Thanks!",
+          "createdAt": "2026-07-06T18:57:50Z",
+          "updatedAt": "2026-07-06T18:57:50Z",
+          "comments": []
         }
       ]
     },
@@ -8215,24 +8463,26 @@
       "id": "PR_kwDOL3MllM7ptejD",
       "title": "Clarify and re-format BBR.inflight_longterm increase prose",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/116",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2026-06-23T15:16:06Z",
-      "updatedAt": "2026-06-26T13:29:06Z",
+      "updatedAt": "2026-07-06T19:26:20Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
-      "baseRefName": "add-precautionary-bandwidth-probing",
-      "baseRefOid": "eb039ad902d2ad78b9956f5317fc50450abed440",
+      "baseRefName": "fix-some-missing-probe-bw-state-definitions-and-transitions",
+      "baseRefOid": "cbcf67c6da1c63f23b0d5d7bd5fbfe1ee4255090",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "clarify-inflight_longterm-evolution-purely-editorial",
-      "headRefOid": "634dcd4284fddaef755eddf72844c79809b8ddf2",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "7c00b2b9df41f1e988f0abfcf08153715c91d665",
+      "closedAt": "2026-07-06T19:26:15Z",
+      "mergedAt": "2026-07-06T19:26:15Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "9c348ec0faa35c5cfdb396ae7eadd3561e0e5ea1"
+      },
       "comments": [],
       "reviews": [
         {
@@ -8255,25 +8505,35 @@
       "id": "PR_kwDOL3MllM7pywsb",
       "title": "Fix Undo state definitions, pseudocode, and prose",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/117",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Based on implementation and testing experience with Linux TCP BBRv3,\nfix the undo state definitions, pseudocode, and prose, so that they\nmatch the current Linux TCP BBRv3 state and algorithm.\n",
       "createdAt": "2026-06-23T18:59:57Z",
-      "updatedAt": "2026-06-26T18:01:49Z",
+      "updatedAt": "2026-07-06T19:40:20Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
-      "baseRefName": "clarify-inflight_longterm-evolution-purely-editorial",
-      "baseRefOid": "634dcd4284fddaef755eddf72844c79809b8ddf2",
+      "baseRefName": "fix-some-missing-probe-bw-state-definitions-and-transitions",
+      "baseRefOid": "9c348ec0faa35c5cfdb396ae7eadd3561e0e5ea1",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "fix-undo-logic-to-match-linux-tcp-bbrv3",
-      "headRefOid": "1f83471e150f957eb7b802bdcbb53e70e39ddf77",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "6d2bb31345aecac3f924cbd4e4e4a03f6c752075",
+      "closedAt": "2026-07-06T19:40:05Z",
+      "mergedAt": "2026-07-06T19:40:05Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "e0bf4031615c11eb0b4143b6d747fe023dbb23dd"
+      },
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I'll note that the QUIC implementation doesn't implement undo, because its relatively complex and I haven't seen enough evidence of spurious loss detection causing issues, but I believe you said it was very useful for TCP, so maybe we should?\r\n\r\nI suspect it's worthwhile to implement Undo. For Linux TCP BBRv2, with YouTube A/B experiments, we saw regressions in rebuffering and playback startup latency when we disabled the undo mechanism. The code has changed a bit since those experiments in 2019, but I'd imagine that, if anything, given the more sophisticated Undo handling now the gains from Undo would be even larger now.\r\n",
+          "createdAt": "2026-07-06T18:58:56Z",
+          "updatedAt": "2026-07-06T18:58:56Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM8AAAABERaLww",
@@ -8289,6 +8549,175 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 118,
+      "id": "PR_kwDOL3MllM7uhQNp",
+      "title": "Merge PRs #115, #116, #117 into main branch",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/118",
+      "state": "MERGED",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Merge PRs #115, #116, #117 into main branch of BBR draft.",
+      "createdAt": "2026-07-06T19:50:27Z",
+      "updatedAt": "2026-07-06T20:03:04Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "d0db67c7e3f2031429ebe1254d53acf12fe0eac3",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "pr-115-116-117",
+      "headRefOid": "b746838eb4060cb67e5b623df6bc63fb331c7343",
+      "closedAt": "2026-07-06T20:03:04Z",
+      "mergedAt": "2026-07-06T20:03:04Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "7708441b655e3c5f1d55a47168491b886fcf704d"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 119,
+      "id": "PR_kwDOL3MllM7ui3eM",
+      "title": "Refine BBR Example Test Cases appendix and reference",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/119",
+      "state": "MERGED",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Tweak Example Test Cases appendix.\n\n* Add authors and SIGCOMM 2016 publication venue to the TrafficPolicing reference.\n* Standardize all subsection titles to Title Case with gerund verb forms.\n* Correct step numbering jumps in DRAIN time-based exit, PROBE_DOWN max time exit, and Token Bucket Policer sections.\n* Standardize BBRInflight() function invocations and BBR. prefix on constants (ProbeRTTInterval, ExtraAckedFilterLen, etc.).\n* Correct bandwidth values in Section 18 to align with a 10x reduction from 100 Mbit/s to 10 Mbit/s.\n* Clarify spurious loss detection mechanism across TCP and QUIC.\n* Add explicit separate tests of spurious loss recovery handling for Fast Recovery and RTO Recovery.\n* Cite specific undo state variables (BBR.undo_inflight_shortterm, BBR.undo_inflight_longterm) upon loss.\n* Standardize terminology on application-limited and clarify BBR's max_bw sampling rule when app-limited.\n",
+      "createdAt": "2026-07-06T21:00:32Z",
+      "updatedAt": "2026-07-06T21:29:33Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "dcb43ee724b57c8a5543b51a54ba9bc99fb67e3d",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "tweak-example-test-cases-appendix",
+      "headRefOid": "8241e3475bac94a77d7316d774348fadb1562056",
+      "closedAt": "2026-07-06T21:29:27Z",
+      "mergedAt": "2026-07-06T21:29:27Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "6db913f5ec575a8852bea926bd6001884e579496"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFI2jPQ",
+          "commit": {
+            "abbreviatedOid": "8241e34"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "LG overall, but some words were capitalized that I wouldn't have.",
+          "createdAt": "2026-07-06T21:15:32Z",
+          "updatedAt": "2026-07-06T21:21:26Z",
+          "comments": [
+            {
+              "originalPosition": 74,
+              "body": "nit: I probably wouldn't capitalize Based\n\n\n```suggestion\n## Exiting DRAIN based on Inflight\n```",
+              "createdAt": "2026-07-06T21:15:32Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 83,
+              "body": "```suggestion\n## Exiting DRAIN based on Time\n```",
+              "createdAt": "2026-07-06T21:15:40Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 111,
+              "body": "```suggestion\n## Exiting PROBE_UP on Loss when Application-Limited\n```",
+              "createdAt": "2026-07-06T21:16:13Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 98,
+              "body": "To me, Exit feels more natural, but it's clear either way",
+              "createdAt": "2026-07-06T21:16:48Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 58,
+              "body": "```suggestion\n## Exiting STARTUP on Loss when Application-Limited\n```",
+              "createdAt": "2026-07-06T21:17:01Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 125,
+              "body": "```suggestion\n## Never Exiting PROBE_UP (or STARTUP) when Application-Limited with No Loss\n```",
+              "createdAt": "2026-07-06T21:17:29Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 148,
+              "body": "```suggestion\n## Exiting PROBE_DOWN after Max Time\n```",
+              "createdAt": "2026-07-06T21:19:17Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 174,
+              "body": "```suggestion\n## Skipping PROBE_RTT due to Application-Limited Sending\n```",
+              "createdAt": "2026-07-06T21:19:36Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 187,
+              "body": "```suggestion\n## Achieving Expected STARTUP Bandwidth on a Link with Aggregation\n```",
+              "createdAt": "2026-07-06T21:19:55Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 200,
+              "body": "```suggestion\n## Achieving Expected Cruise Bandwidth on a Link with Aggregation\n```",
+              "createdAt": "2026-07-06T21:20:08Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 292,
+              "body": "```suggestion\n## Entering and Exiting PROBE_RTT during STARTUP\n```",
+              "createdAt": "2026-07-06T21:20:52Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            },
+            {
+              "originalPosition": 313,
+              "body": "```suggestion\n## Handling Application-Limited Sending during PROBE_REFILL\n```",
+              "createdAt": "2026-07-06T21:21:01Z",
+              "updatedAt": "2026-07-06T21:21:26Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 120,
+      "id": "PR_kwDOL3MllM7ukcfD",
+      "title": "fix \"round-trip\" -> \"round trip\" in BBR draft",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/120",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #112\n\nUpdate all noun and compound adjective usages of \"round trip\" across both prose and pseudocode comments to ensure consistency:\n\n- draft-ietf-ccwg-bbr.md:L450: Changed `in one round-trip or less` to `in one round trip or less` (noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L1943: Changed `in less than one round-trip:` to `in less than one round trip:` (noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L1956: Changed `within one round-trip of entering` to `within one round trip of entering` (noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L1959: Changed `after 3 round-trips,` to `after 3 round trips,` (plural noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L2140: Changed `If a round-trip elapses` to `If a round trip elapses` (noun as subject of verb).\n- draft-ietf-ccwg-bbr.md:L3069: Changed `over the timescale of a round-trip,` to `over the timescale of a round trip,` (noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L3305: Changed `/* Once per round-trip respond to congestion */` to `/* Once per round trip respond to congestion */` (noun in pseudocode comment, consistent with other `per round trip` usages).\n\nAll 27 remaining occurrences of `round-trip` (e.g., round-trip time, round-trip propagation delay, per-round-trip packet loss, round-trip counting, round-trip bounds, 1-round-trip max) were verified to be compound adjectives modifying a subsequent noun.\n\nChange made with Google Antigravity.\n",
+      "createdAt": "2026-07-06T22:24:57Z",
+      "updatedAt": "2026-07-06T22:24:58Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "6db913f5ec575a8852bea926bd6001884e579496",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "audit-round-trip-vs-round-hyphen-trip",
+      "headRefOid": "b9bb1ee6654bbbc1ec9f85c2155ebe3aa913f989",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
