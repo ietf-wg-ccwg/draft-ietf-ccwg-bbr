@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-07T03:31:12.028192+00:00",
+  "timestamp": "2026-07-09T03:24:02.844032+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1469,7 +1469,7 @@
       "id": "I_kwDOL3MllM8AAAABGVvYcQ",
       "title": "Be consistent about 'round trip' vs 'round-trip'",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/112",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -1478,8 +1478,8 @@
       ],
       "body": "Both are frequently used in the draft.",
       "createdAt": "2026-06-22T20:45:50Z",
-      "updatedAt": "2026-07-06T22:12:07Z",
-      "closedAt": null,
+      "updatedAt": "2026-07-07T15:58:32Z",
+      "closedAt": "2026-07-07T15:58:32Z",
       "comments": [
         {
           "author": "nealcardwell",
@@ -8698,26 +8698,42 @@
       "id": "PR_kwDOL3MllM7ukcfD",
       "title": "fix \"round-trip\" -> \"round trip\" in BBR draft",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/120",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #112\n\nUpdate all noun and compound adjective usages of \"round trip\" across both prose and pseudocode comments to ensure consistency:\n\n- draft-ietf-ccwg-bbr.md:L450: Changed `in one round-trip or less` to `in one round trip or less` (noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L1943: Changed `in less than one round-trip:` to `in less than one round trip:` (noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L1956: Changed `within one round-trip of entering` to `within one round trip of entering` (noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L1959: Changed `after 3 round-trips,` to `after 3 round trips,` (plural noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L2140: Changed `If a round-trip elapses` to `If a round trip elapses` (noun as subject of verb).\n- draft-ietf-ccwg-bbr.md:L3069: Changed `over the timescale of a round-trip,` to `over the timescale of a round trip,` (noun as object of preposition).\n- draft-ietf-ccwg-bbr.md:L3305: Changed `/* Once per round-trip respond to congestion */` to `/* Once per round trip respond to congestion */` (noun in pseudocode comment, consistent with other `per round trip` usages).\n\nAll 27 remaining occurrences of `round-trip` (e.g., round-trip time, round-trip propagation delay, per-round-trip packet loss, round-trip counting, round-trip bounds, 1-round-trip max) were verified to be compound adjectives modifying a subsequent noun.\n\nChange made with Google Antigravity.\n",
       "createdAt": "2026-07-06T22:24:57Z",
-      "updatedAt": "2026-07-06T22:24:58Z",
+      "updatedAt": "2026-07-07T15:58:31Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "6db913f5ec575a8852bea926bd6001884e579496",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "audit-round-trip-vs-round-hyphen-trip",
       "headRefOid": "b9bb1ee6654bbbc1ec9f85c2155ebe3aa913f989",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-07-07T15:58:31Z",
+      "mergedAt": "2026-07-07T15:58:31Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "4b5923db823cf5cd999e1fffd4325334ba622041"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABFPkvTA",
+          "commit": {
+            "abbreviatedOid": "b9bb1ee"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-07-07T15:58:24Z",
+          "updatedAt": "2026-07-07T15:58:24Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
