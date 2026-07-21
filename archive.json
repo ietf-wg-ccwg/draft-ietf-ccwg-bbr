@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-09T03:24:02.844032+00:00",
+  "timestamp": "2026-07-21T02:46:07.035397+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1460,9 +1460,31 @@
       "labels": [],
       "body": "A problem: AFAICT there are 2 related potential issues with interactions between min_rtt and PROBE_RTT time intervals:\n\n+ (1) If the probe RTT window equals the min RTT window (as recent discussions have discussed ProbeRTTInterval == MinRTTFilterLen == 10 sec) then when BBRv3 enters PROBE_RTT, we will also expire min_rtt, so we will use a bad min RTT (quite likely very inflated) for the BDP calculation used to size cwnd during BBRv3 PROBE_RTT.\n+ (2) Even if the probe RTT window is 5 sec and the min RTT window is 10 sec, after a long idle period (longer than 10 sec) both might expire. And in such cases, with the current BBRv3 logic we might enter PROBE_RTT and use a bad min RTT (quite likely very inflated) for the\u00a0 BDP calculation.\n\nA solution: a possible improvement:\u00a0\n\n+ revert min_rtt and PROBE_RTT logic to mostly match\u00a0 the vastly simpler BBRv1 logic\u00a0\n\n+ use 10 sec min_rtt window and 10 sec probe_rtt window, as in BBRv1\u00a0\n\n+ before expiring the min_rtt sample, set a probe_rtt_cwnd to 0.5*estimated_BDP based on the old, pre-expiration min_rtt\u00a0\n\n+ even with the new probe_rtt_cwnd field, it's still a net reduction in space because we can get rid of the following 3 fields:\n     + BBR.probe_rtt_min_delay: The minimum RTT sample recorded in the last ProbeRTTInterval.\n     + BBR.probe_rtt_min_stamp: The wall clock time at which the current BBR.probe_rtt_min_delay sample was obtained.\n     + BBR.probe_rtt_expired: A boolean recording whether the BBR.probe_rtt_min_delay has expired and is due for a refresh with an application idle period or a transition into ProbeRTT state.",
       "createdAt": "2026-05-18T19:56:57Z",
-      "updatedAt": "2026-05-18T19:56:57Z",
+      "updatedAt": "2026-07-20T20:58:31Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I'd be fine with adding a probe_rtt_cwnd field.  It makes sense that the CWND target wouldn't change during PROBE_RTT.\n\nWhat about not expiring min_rtt until exiting ProbeRTT (or an equivalent, like going idle for long enough)?  That being said, I'm not sure that's any better than adding probe_rtt_cwnd.",
+          "createdAt": "2026-07-19T19:04:05Z",
+          "updatedAt": "2026-07-19T19:04:05Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> (2) Even if the probe RTT window is 5 sec and the min RTT window is 10 sec, after a long idle period (longer than 10 sec) both might expire. And in such cases, with the current BBRv3 logic we might enter PROBE_RTT and use a bad min RTT (quite likely very inflated) for the  BDP calculation.\n\nI guess this part is probably not really a problem because in this case the connection would be restarting from idle, so BBR.idle_restart would be true, so the connection would not actually enter PROBE_RTT.\n",
+          "createdAt": "2026-07-20T20:58:07Z",
+          "updatedAt": "2026-07-20T20:58:07Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc: @ianswett @jbeshay \n",
+          "createdAt": "2026-07-20T20:58:31Z",
+          "updatedAt": "2026-07-20T20:58:31Z"
+        }
+      ]
     },
     {
       "number": 112,
