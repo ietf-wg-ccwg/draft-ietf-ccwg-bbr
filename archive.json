@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-21T02:46:07.035397+00:00",
+  "timestamp": "2026-07-23T02:49:37.771334+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1511,6 +1511,22 @@
           "updatedAt": "2026-07-06T22:12:07Z"
         }
       ]
+    },
+    {
+      "number": 121,
+      "id": "I_kwDOL3MllM8AAAABJmHjrg",
+      "title": "Use BCP 14 MUST language for mandatory Precautionary Bandwidth Probing behavior",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/121",
+      "state": "OPEN",
+      "author": "altanai",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "`draft-ietf-ccwg-bbr-06` describes Precautionary Bandwidth Probing in Section 5.3.3.6, but the current text uses descriptive language such as \u201cuses\u201d and \u201censures\u201d rather than BCP 14 requirement language.\n\nIMO current text can be read as algorithm description rather than a conformance requirement. If Precautionary Bandwidth Probing is mandatory behavior for BBRv3, the draft should say so explicitly with `MUST` language.\n( I asked there congestion during IETF 126 and learned it is infact mandatory) ..\n\nSuggested clarification:\n- Section 5.3.3.6 should state that BBRv3 implementations `MUST` use Precautionary Bandwidth Probing during `ProbeBW_UP`.\n- Section 5.3.3.7 should state that when `BBR.prev_probe_too_high` is true and `C.inflight >= BBR.inflight_longterm`, the flow `MUST` stop the bandwidth probe early, set `BBR.prev_probe_precautionary` to true, and transition to `ProbeBW_DOWN`.\n",
+      "createdAt": "2026-07-21T12:38:16Z",
+      "updatedAt": "2026-07-21T12:38:16Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
