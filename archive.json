@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-23T02:49:37.771334+00:00",
+  "timestamp": "2026-07-28T02:35:45.810527+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1520,11 +1520,13 @@
       "state": "OPEN",
       "author": "altanai",
       "authorAssociation": "NONE",
-      "assignees": [],
+      "assignees": [
+        "jbeshay"
+      ],
       "labels": [],
       "body": "`draft-ietf-ccwg-bbr-06` describes Precautionary Bandwidth Probing in Section 5.3.3.6, but the current text uses descriptive language such as \u201cuses\u201d and \u201censures\u201d rather than BCP 14 requirement language.\n\nIMO current text can be read as algorithm description rather than a conformance requirement. If Precautionary Bandwidth Probing is mandatory behavior for BBRv3, the draft should say so explicitly with `MUST` language.\n( I asked there congestion during IETF 126 and learned it is infact mandatory) ..\n\nSuggested clarification:\n- Section 5.3.3.6 should state that BBRv3 implementations `MUST` use Precautionary Bandwidth Probing during `ProbeBW_UP`.\n- Section 5.3.3.7 should state that when `BBR.prev_probe_too_high` is true and `C.inflight >= BBR.inflight_longterm`, the flow `MUST` stop the bandwidth probe early, set `BBR.prev_probe_precautionary` to true, and transition to `ProbeBW_DOWN`.\n",
       "createdAt": "2026-07-21T12:38:16Z",
-      "updatedAt": "2026-07-21T12:38:16Z",
+      "updatedAt": "2026-07-27T20:41:52Z",
       "closedAt": null,
       "comments": []
     }
@@ -4365,11 +4367,13 @@
       "state": "OPEN",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "ianswett"
+      ],
       "labels": [],
       "body": "Neal noted this difference between unacknowledged and inflight in this comment: \r\nhttps://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/50#discussion_r2183626841",
       "createdAt": "2025-07-03T20:44:15Z",
-      "updatedAt": "2026-03-09T21:06:12Z",
+      "updatedAt": "2026-07-27T20:45:26Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "2f894a4a1abba33774ea2403404a715b1ed51768",
