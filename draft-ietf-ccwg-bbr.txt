@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 8 January 2027                                   J. Beshay, Ed.
+Expires: 4 February 2027                                  J. Beshay, Ed.
                                                                     Meta
-                                                             7 July 2026
+                                                           3 August 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 January 2027.
+   This Internet-Draft will expire on 4 February 2027.
 
 Copyright Notice
 
@@ -1560,6 +1560,16 @@ Table of Contents
    guide its decisions, and the control parameters to enact its
    decisions.
 
+   The state machine and associated pseudocode defined in this section
+   through Section 5.6 define the BBRv3 algorithm and MUST be included
+   in any BBRv3 implementation.  This includes the state machine
+   described in Section 5.1.1 to Section 5.3.4 and the pseudocode in
+   Section 5.3.3.9, Section 5.5, and Section 5.6, except where
+   explicitly marked as optional (MAY) or recommended (SHOULD/
+   RECOMMENDED) or described as outside BBR's scope.  Lower-case
+   descriptive text in those sections is intended as normative
+   description of required BBRv3 behavior.
+
 5.1.1.  State Transition Diagram
 
    The following state transition diagram summarizes the flow of control
@@ -2084,12 +2094,12 @@ Table of Contents
 
    Increasing a flow's sending rate is essential for ensuring proper
    bandwidth utilization, but raises risks for excessive queuing or
-   packet loss.  To mitigate these risks, ProbeBW_UP uses a
-   "precautionary bandwidth probing" mechanism.  With this mechanism,
-   flows only persist in ProbeBW_UP if the most recent ProbeBW_UP phase
-   did not result in excess loss.  If ProbeBW_UP exits due to excess
-   loss, then the following ProbeBW_UP phase is a brief "precautionary
-   bandwidth probing" phase that lasts only until C.inflight reaches
+   packet loss.  These risks are mitigated by the "precautionary
+   bandwidth probing" mechanism.  It allows flows to persist in
+   ProbeBW_UP only if the most recent ProbeBW_UP phase did not result in
+   excess loss.  If ProbeBW_UP exits due to excess loss, then the
+   following ProbeBW_UP phase is a brief "precautionary bandwidth
+   probing" phase that lasts only until C.inflight reaches
    BBR.inflight_longterm.  If the "precautionary bandwidth probing"
    phase succeeds (there is no excess loss) then the flow immediately
    returns to ProbeBW_REFILL and then ProbeBW_UP, and persists in
@@ -2106,12 +2116,11 @@ Table of Contents
    holding a bottleneck buffer at full or near-full for that entire
    round trip.
 
-   To manage this trade-off and mitigate the risks, the "precautionary
-   bandwidth probing" mechanism ensures the flow only maintains
-   C.inflight at the BBR.inflight_longterm level for a full round trip
-   when this has recently been measured to be "safe" (in the sense of
-   not causing excess loss).  To do this, it uses the following two
-   aspects:
+   The "precautionary bandwidth probing" mechanism manages this trade-
+   off and mitigates the risks by maintaining C.inflight at the
+   BBR.inflight_longterm level for a full round trip only when this has
+   recently been measured to be "safe" (in the sense of not causing
+   excess loss).  To do this, it uses the following two aspects:
 
    *  Precautionary Bandwidth Probing: Deceleration: after
       BBR.inflight_longterm is set due to observing excess loss in
@@ -4053,9 +4062,9 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    [I-D.draft-ietf-quic-receive-ts]
               Swett, I. and J. Beshay, "QUIC Extended Acknowledgement
               for Reporting Packet Receive Timestamps", Work in
-              Progress, Internet-Draft, draft-ietf-quic-receive-ts-02,
-              16 March 2026, <https://datatracker.ietf.org/doc/html/
-              draft-ietf-quic-receive-ts-02>.
+              Progress, Internet-Draft, draft-ietf-quic-receive-ts-03,
+              20 July 2026, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-quic-receive-ts-03>.
 
    [I-D.draft-ietf-tcpm-ack-rate-request]
               Gomez, C., Crowcroft, J., and M. Tüxen, "TCP ACK Rate

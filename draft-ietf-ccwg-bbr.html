@@ -36,7 +36,7 @@ specifies version 3 of the BBR algorithm, BBRv3.
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.10.0
+    platformdirs 4.11.0
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
@@ -76,7 +76,6 @@ specifies version 3 of the BBR algorithm, BBRv3.
   src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: italic;
@@ -125,7 +124,6 @@ specifies version 3 of the BBR algorithm, BBRv3.
   src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: normal;
@@ -190,7 +188,6 @@ specifies version 3 of the BBR algorithm, BBRv3.
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 }
 
 @font-face {
@@ -1059,11 +1056,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">July 2026</td>
+<td class="right">August 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 8 January 2027</td>
+<td class="center">Expires 4 February 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1073,12 @@ svg {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-07-07" class="published">7 July 2026</time>
+<time datetime="2026-08-03" class="published">3 August 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-01-08">8 January 2027</time></dd>
+<dd class="expires"><time datetime="2027-02-04">4 February 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1150,7 +1147,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 4 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -3014,6 +3011,15 @@ as follows:<a href="#section-4.2-2" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-5.1-1">BBR implements a state machine that uses the network path model to guide
 its decisions, and the control parameters to enact its decisions.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">The state machine and associated pseudocode defined in this section through
+<a href="#updating-control-parameters" class="auto internal xref">Section 5.6</a> define the BBRv3 algorithm and MUST be
+included in any BBRv3 implementation. This includes the state machine
+described in <a href="#state-transition-diagram" class="auto internal xref">Section 5.1.1</a> to <a href="#probertt" class="auto internal xref">Section 5.3.4</a> and the pseudocode
+in <a href="#probebw-algorithm-details" class="auto internal xref">Section 5.3.3.9</a>, <a href="#updating-network-path-model-parameters" class="auto internal xref">Section 5.5</a>,
+and <a href="#updating-control-parameters" class="auto internal xref">Section 5.6</a>, except where explicitly marked as optional
+(MAY) or recommended (SHOULD/RECOMMENDED) or described as outside BBR's scope.
+Lower-case descriptive text in those sections is intended as normative
+description of required BBRv3 behavior.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
 <div id="state-transition-diagram">
 <section id="section-5.1.1">
           <h4 id="name-state-transition-diagram">
@@ -3623,9 +3629,9 @@ bandwidth.<a href="#section-5.3.3.5-3" class="pilcrow">¶</a></p>
 <a href="#section-5.3.3.6" class="section-number selfRef">5.3.3.6. </a><a href="#name-precautionary-bandwidth-pro" class="section-name selfRef">Precautionary Bandwidth Probing</a>
             </h5>
 <p id="section-5.3.3.6-1">Increasing a flow's sending rate is essential for ensuring proper bandwidth
-utilization, but raises risks for excessive queuing or packet loss. To mitigate
-these risks, ProbeBW_UP uses a "precautionary bandwidth probing"
-mechanism. With this mechanism, flows only persist in ProbeBW_UP if the most
+utilization, but raises risks for excessive queuing or packet loss. These risks
+are mitigated by the "precautionary bandwidth probing"
+mechanism. It allows flows to persist in ProbeBW_UP only if the most
 recent ProbeBW_UP phase did not result in excess loss. If ProbeBW_UP exits due
 to excess loss, then the following ProbeBW_UP phase is a brief "precautionary
 bandwidth probing" phase that lasts only until C.inflight reaches
@@ -3640,9 +3646,9 @@ lowest level of C.inflight that was associated with excess loss. Thus
 maintaining C.inflight at BBR.inflight_longterm for a full round trip, while
 necessary to safely raise BBR.inflight_longterm, runs a significant risk of
 holding a bottleneck buffer at full or near-full for that entire round trip.<a href="#section-5.3.3.6-2" class="pilcrow">¶</a></p>
-<p id="section-5.3.3.6-3">To manage this trade-off and mitigate the risks, the "precautionary bandwidth
-probing" mechanism ensures the flow only maintains C.inflight at the
-BBR.inflight_longterm level for a full round trip when this has recently been
+<p id="section-5.3.3.6-3">The "precautionary bandwidth probing" mechanism manages this trade-off and
+mitigates the risks by maintaining C.inflight at the BBR.inflight_longterm
+level for a full round trip only when this has recently been
 measured to be "safe" (in the sense of not causing excess loss). To do this, it
 uses the following two aspects:<a href="#section-5.3.3.6-3" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -5857,7 +5863,7 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dd class="break"></dd>
 <dt id="I-D.draft-ietf-quic-receive-ts">[I-D.draft-ietf-quic-receive-ts]</dt>
         <dd>
-<span class="refAuthor">Swett, I.</span> and <span class="refAuthor">J. Beshay</span>, <span class="refTitle">"QUIC Extended Acknowledgement for Reporting Packet Receive Timestamps"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-receive-ts-02</span>, <time datetime="2026-03-16" class="refDate">16 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-02">https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-02</a>&gt;</span>. </dd>
+<span class="refAuthor">Swett, I.</span> and <span class="refAuthor">J. Beshay</span>, <span class="refTitle">"QUIC Extended Acknowledgement for Reporting Packet Receive Timestamps"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-receive-ts-03</span>, <time datetime="2026-07-20" class="refDate">20 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-03">https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-03</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.draft-ietf-tcpm-ack-rate-request">[I-D.draft-ietf-tcpm-ack-rate-request]</dt>
         <dd>
