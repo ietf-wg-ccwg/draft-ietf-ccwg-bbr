@@ -1583,6 +1583,16 @@ as follows:
 BBR implements a state machine that uses the network path model to guide
 its decisions, and the control parameters to enact its decisions.
 
+The state machine and associated pseudocode defined in this section through
+{{updating-control-parameters}} define the BBRv3 algorithm and MUST be
+included in any BBRv3 implementation. This includes the state machine
+described in {{state-transition-diagram}} to {{probertt}} and the pseudocode
+in {{probebw-algorithm-details}}, {{updating-network-path-model-parameters}},
+and {{updating-control-parameters}}, except where explicitly marked as optional
+(MAY) or recommended (SHOULD/RECOMMENDED) or described as outside BBR's scope.
+Lower-case descriptive text in those sections is intended as normative
+description of required BBRv3 behavior.
+
 ### State Transition Diagram {#state-transition-diagram}
 
 The following state transition diagram summarizes the flow of control and
