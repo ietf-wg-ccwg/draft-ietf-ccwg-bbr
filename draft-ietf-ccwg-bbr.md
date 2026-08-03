@@ -1583,6 +1583,16 @@ as follows:
 BBR implements a state machine that uses the network path model to guide
 its decisions, and the control parameters to enact its decisions.
 
+The state machine and associated pseudocode defined in this section through
+{{updating-control-parameters}} define the BBRv3 algorithm and MUST be
+included in any BBRv3 implementation. This includes the state machine
+described in {{state-transition-diagram}} to {{probertt}} and the pseudocode
+in {{probebw-algorithm-details}}, {{updating-network-path-model-parameters}},
+and {{updating-control-parameters}}, except where explicitly marked as optional
+(MAY) or recommended (SHOULD/RECOMMENDED) or described as outside BBR's scope.
+Lower-case descriptive text in those sections is intended as normative
+description of required BBRv3 behavior.
+
 ### State Transition Diagram {#state-transition-diagram}
 
 The following state transition diagram summarizes the flow of control and
@@ -2103,9 +2113,9 @@ bandwidth.
 #### Precautionary Bandwidth Probing  {#bandwidth-probing-caution}
 
 Increasing a flow's sending rate is essential for ensuring proper bandwidth
-utilization, but raises risks for excessive queuing or packet loss. To mitigate
-these risks, ProbeBW_UP uses a "precautionary bandwidth probing"
-mechanism. With this mechanism, flows only persist in ProbeBW_UP if the most
+utilization, but raises risks for excessive queuing or packet loss. These risks
+are mitigated by the "precautionary bandwidth probing"
+mechanism. It allows flows to persist in ProbeBW_UP only if the most
 recent ProbeBW_UP phase did not result in excess loss. If ProbeBW_UP exits due
 to excess loss, then the following ProbeBW_UP phase is a brief "precautionary
 bandwidth probing" phase that lasts only until C.inflight reaches
@@ -2122,9 +2132,9 @@ maintaining C.inflight at BBR.inflight_longterm for a full round trip, while
 necessary to safely raise BBR.inflight_longterm, runs a significant risk of
 holding a bottleneck buffer at full or near-full for that entire round trip.
 
-To manage this trade-off and mitigate the risks, the "precautionary bandwidth
-probing" mechanism ensures the flow only maintains C.inflight at the
-BBR.inflight_longterm level for a full round trip when this has recently been
+The "precautionary bandwidth probing" mechanism manages this trade-off and
+mitigates the risks by maintaining C.inflight at the BBR.inflight_longterm
+level for a full round trip only when this has recently been
 measured to be "safe" (in the sense of not causing excess loss). To do this, it
 uses the following two aspects:
 
