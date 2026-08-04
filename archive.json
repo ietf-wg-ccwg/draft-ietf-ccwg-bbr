@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-28T02:35:45.810527+00:00",
+  "timestamp": "2026-08-04T02:36:37.575997+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1517,7 +1517,7 @@
       "id": "I_kwDOL3MllM8AAAABJmHjrg",
       "title": "Use BCP 14 MUST language for mandatory Precautionary Bandwidth Probing behavior",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/121",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "altanai",
       "authorAssociation": "NONE",
       "assignees": [
@@ -1526,8 +1526,8 @@
       "labels": [],
       "body": "`draft-ietf-ccwg-bbr-06` describes Precautionary Bandwidth Probing in Section 5.3.3.6, but the current text uses descriptive language such as \u201cuses\u201d and \u201censures\u201d rather than BCP 14 requirement language.\n\nIMO current text can be read as algorithm description rather than a conformance requirement. If Precautionary Bandwidth Probing is mandatory behavior for BBRv3, the draft should say so explicitly with `MUST` language.\n( I asked there congestion during IETF 126 and learned it is infact mandatory) ..\n\nSuggested clarification:\n- Section 5.3.3.6 should state that BBRv3 implementations `MUST` use Precautionary Bandwidth Probing during `ProbeBW_UP`.\n- Section 5.3.3.7 should state that when `BBR.prev_probe_too_high` is true and `C.inflight >= BBR.inflight_longterm`, the flow `MUST` stop the bandwidth probe early, set `BBR.prev_probe_precautionary` to true, and transition to `ProbeBW_DOWN`.\n",
       "createdAt": "2026-07-21T12:38:16Z",
-      "updatedAt": "2026-07-27T20:41:52Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-03T20:42:28Z",
+      "closedAt": "2026-08-03T20:42:28Z",
       "comments": []
     }
   ],
@@ -8773,6 +8773,61 @@
           "body": "",
           "createdAt": "2026-07-07T15:58:24Z",
           "updatedAt": "2026-07-07T15:58:24Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 122,
+      "id": "PR_kwDOL3MllM76NBM5",
+      "title": "Clarify that algorithm description defines required behavior ",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/122",
+      "state": "MERGED",
+      "author": "jbeshay",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Clarify that Precautionary Bandwidth Probing description along with all the algorithms description is required BBRv3 behavior, unless explicitly stated otherwise. This is a cleaner approach than peppering the description prose with MUST everywhere.\r\n\r\nCloses https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/121",
+      "createdAt": "2026-08-03T20:12:19Z",
+      "updatedAt": "2026-08-03T20:42:34Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "4b5923db823cf5cd999e1fffd4325334ba622041",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "jb_bcp14",
+      "headRefOid": "69100004fb8cbb20f8b5052f9f9d4eaea4f42020",
+      "closedAt": "2026-08-03T20:42:27Z",
+      "mergedAt": "2026-08-03T20:42:27Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "4ce5e87d5f58c34c8fae283367b41913d110b73a"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABIPwmBA",
+          "commit": {
+            "abbreviatedOid": "6910000"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "LGTM, thanks!\n",
+          "createdAt": "2026-08-03T20:39:55Z",
+          "updatedAt": "2026-08-03T20:39:55Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABIPxX3Q",
+          "commit": {
+            "abbreviatedOid": "6910000"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-08-03T20:41:11Z",
+          "updatedAt": "2026-08-03T20:41:11Z",
           "comments": []
         }
       ]
