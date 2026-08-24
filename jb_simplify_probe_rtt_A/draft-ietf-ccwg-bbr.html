@@ -29,14 +29,14 @@ specifies version 3 of the BBR algorithm, BBRv3.
 <meta content="draft-ietf-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.34.0
-    Python 3.14.5
+    Python 3.14.7
     ConfigArgParse 1.7.5
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.10.0
+    platformdirs 4.11.3
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
@@ -76,7 +76,6 @@ specifies version 3 of the BBR algorithm, BBRv3.
   src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: italic;
@@ -125,7 +124,6 @@ specifies version 3 of the BBR algorithm, BBRv3.
   src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: normal;
@@ -190,7 +188,6 @@ specifies version 3 of the BBR algorithm, BBRv3.
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 }
 
 @font-face {
@@ -1059,11 +1056,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">July 2026</td>
+<td class="right">August 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 7 January 2027</td>
+<td class="center">Expires 25 February 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1073,12 @@ svg {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-07-06" class="published">6 July 2026</time>
+<time datetime="2026-08-24" class="published">24 August 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-01-07">7 January 2027</time></dd>
+<dd class="expires"><time datetime="2027-02-25">25 February 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1150,7 +1147,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 7 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 25 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1977,7 +1974,8 @@ detected in the current round trip.<a href="#section-2.14-4" class="pilcrow">¶<
 <a href="#section-2.16.1" class="section-number selfRef">2.16.1. </a><a href="#name-parameters-for-estimating-b" class="section-name selfRef">Parameters for Estimating BBR.min_rtt</a>
           </h4>
 <p id="section-2.16.1-1">BBR.min_rtt_stamp: The wall clock time at which the current BBR.min_rtt sample
-was obtained.<a href="#section-2.16.1-1" class="pilcrow">¶</a></p>
+was obtained, or at which the most recent ProbeRTT completed and revalidated
+the estimate.<a href="#section-2.16.1-1" class="pilcrow">¶</a></p>
 <p id="section-2.16.1-2">BBR.MinRTTFilterLen: A constant specifying the length of the BBR.min_rtt min
 filter window, BBR.MinRTTFilterLen is 10 secs.<a href="#section-2.16.1-2" class="pilcrow">¶</a></p>
 </section>
@@ -1990,20 +1988,17 @@ filter window, BBR.MinRTTFilterLen is 10 secs.<a href="#section-2.16.1-2" class=
 <p id="section-2.16.2-1">BBR.ProbeRTTCwndGain: A constant specifying the gain value for calculating
 C.cwnd during ProbeRTT: 0.5 (meaning that ProbeRTT attempts to reduce in-flight
 data to 50% of the estimated BDP).<a href="#section-2.16.2-1" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-2">BBR.ProbeRTTDuration: A constant specifying the minimum duration for which ProbeRTT
-state holds C.inflight to BBR.MinPipeCwnd or fewer packets: 200 ms.<a href="#section-2.16.2-2" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-2">BBR.ProbeRTTDuration: A constant specifying the minimum duration for which
+ProbeRTT holds C.inflight at or below BBR.probe_rtt_cwnd: 200 ms.<a href="#section-2.16.2-2" class="pilcrow">¶</a></p>
 <p id="section-2.16.2-3">BBR.ProbeRTTInterval: A constant specifying the minimum time interval between
-ProbeRTT states: 5 secs.<a href="#section-2.16.2-3" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-4">BBR.probe_rtt_min_delay: The minimum RTT sample recorded in the last
-BBR.ProbeRTTInterval.<a href="#section-2.16.2-4" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-5">BBR.probe_rtt_min_stamp: The wall clock time at which the current
-BBR.probe_rtt_min_delay sample was obtained.<a href="#section-2.16.2-5" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-6">BBR.probe_rtt_expired: A boolean recording whether the BBR.probe_rtt_min_delay
-has expired and is due for a refresh with an application idle period or a
-transition into ProbeRTT state.<a href="#section-2.16.2-6" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-7">The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+ProbeRTT states: 10 secs. This is equal to BBR.MinRTTFilterLen.<a href="#section-2.16.2-3" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-4">BBR.probe_rtt_cwnd: The C.cwnd cap used during ProbeRTT. Upon entering
+ProbeRTT, BBR calculates this value from the current BBR.bw and the
+pre-expiration BBR.min_rtt, and holds it constant throughout the ProbeRTT
+episode.<a href="#section-2.16.2-4" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-5">The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to
-be interpreted as described in <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span>.<a href="#section-2.16.2-7" class="pilcrow">¶</a></p>
+be interpreted as described in <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span>.<a href="#section-2.16.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2263,7 +2258,7 @@ algorithm improvements, as described below.<a href="#section-3.8-1" class="pilcr
 specify a specific response to ECN, and instead leaves it as an area for
 future work.<a href="#section-3.8-2" class="pilcrow">¶</a></p>
 <p id="section-3.8-3">The design of ProbeRTT in <a href="#probertt-design-rationale" class="auto internal xref">Section 5.3.4.2</a> specifies a ProbeRTT
-interval that sacrifices no more than roughly 2% of a flow's available
+interval that sacrifices no more than roughly 1% of a flow's available
 bandwidth. The impact of using a different interval or making adjustments
 for triggering ProbeRTT on specific link types is a subject of
 further experimentation.<a href="#section-3.8-3" class="pilcrow">¶</a></p>
@@ -3014,6 +3009,15 @@ as follows:<a href="#section-4.2-2" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-5.1-1">BBR implements a state machine that uses the network path model to guide
 its decisions, and the control parameters to enact its decisions.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">The state machine and associated pseudocode defined in this section through
+<a href="#updating-control-parameters" class="auto internal xref">Section 5.6</a> define the BBRv3 algorithm and MUST be
+included in any BBRv3 implementation. This includes the state machine
+described in <a href="#state-transition-diagram" class="auto internal xref">Section 5.1.1</a> to <a href="#probertt" class="auto internal xref">Section 5.3.4</a> and the pseudocode
+in <a href="#probebw-algorithm-details" class="auto internal xref">Section 5.3.3.9</a>, <a href="#updating-network-path-model-parameters" class="auto internal xref">Section 5.5</a>,
+and <a href="#updating-control-parameters" class="auto internal xref">Section 5.6</a>, except where explicitly marked as optional
+(MAY) or recommended (SHOULD/RECOMMENDED) or described as outside BBR's scope.
+Lower-case descriptive text in those sections is intended as normative
+description of required BBRv3 behavior.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
 <div id="state-transition-diagram">
 <section id="section-5.1.1">
           <h4 id="name-state-transition-diagram">
@@ -3168,6 +3172,7 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
     InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
     BBR.min_rtt = C.srtt ? C.srtt : Infinity
     BBR.min_rtt_stamp = Now()
+    BBR.probe_rtt_cwnd = 0
     BBR.probe_rtt_done_stamp = 0
     BBR.probe_rtt_round_done = false
     BBR.prior_cwnd = 0
@@ -3239,7 +3244,6 @@ adjust its control parameters to adapt to the updated model:<a href="#section-5.
     CheckDrainDone()
     UpdateProbeBWCyclePhase()
     UpdateMinRTT()
-    CheckProbeRTT()
     AdvanceLatestDeliverySignals()
     BoundBWForModel()
 
@@ -3623,9 +3627,9 @@ bandwidth.<a href="#section-5.3.3.5-3" class="pilcrow">¶</a></p>
 <a href="#section-5.3.3.6" class="section-number selfRef">5.3.3.6. </a><a href="#name-precautionary-bandwidth-pro" class="section-name selfRef">Precautionary Bandwidth Probing</a>
             </h5>
 <p id="section-5.3.3.6-1">Increasing a flow's sending rate is essential for ensuring proper bandwidth
-utilization, but raises risks for excessive queuing or packet loss. To mitigate
-these risks, ProbeBW_UP uses a "precautionary bandwidth probing"
-mechanism. With this mechanism, flows only persist in ProbeBW_UP if the most
+utilization, but raises risks for excessive queuing or packet loss. These risks
+are mitigated by the "precautionary bandwidth probing"
+mechanism. It allows flows to persist in ProbeBW_UP only if the most
 recent ProbeBW_UP phase did not result in excess loss. If ProbeBW_UP exits due
 to excess loss, then the following ProbeBW_UP phase is a brief "precautionary
 bandwidth probing" phase that lasts only until C.inflight reaches
@@ -3640,9 +3644,9 @@ lowest level of C.inflight that was associated with excess loss. Thus
 maintaining C.inflight at BBR.inflight_longterm for a full round trip, while
 necessary to safely raise BBR.inflight_longterm, runs a significant risk of
 holding a bottleneck buffer at full or near-full for that entire round trip.<a href="#section-5.3.3.6-2" class="pilcrow">¶</a></p>
-<p id="section-5.3.3.6-3">To manage this trade-off and mitigate the risks, the "precautionary bandwidth
-probing" mechanism ensures the flow only maintains C.inflight at the
-BBR.inflight_longterm level for a full round trip when this has recently been
+<p id="section-5.3.3.6-3">The "precautionary bandwidth probing" mechanism manages this trade-off and
+mitigates the risks by maintaining C.inflight at the BBR.inflight_longterm
+level for a full round trip only when this has recently been
 measured to be "safe" (in the sense of not causing excess loss). To do this, it
 uses the following two aspects:<a href="#section-5.3.3.6-3" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -4110,27 +4114,26 @@ the bottleneck queue and make a robust BBR.min_rtt measurement. This allows the
 BBR.min_rtt estimates of ensembles of BBR flows to converge, avoiding feedback
 loops of ever-increasing queues and RTT samples.<a href="#section-5.3.4.1-2" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-3">The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
-every BBR.ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
+every BBR.ProbeRTTInterval = 10 seconds, the flow enters ProbeRTT, decelerating
 by setting its cwnd_gain to BBR.ProbeRTTCwndGain = 0.5 to reduce
 C.inflight to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.<a href="#section-5.3.4.1-3" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.1-4">There are two main motivations for making the BBR.MinRTTFilterLen roughly twice
-the BBR.ProbeRTTInterval. First, this ensures that during a ProbeRTT episode
-the flow will "remember" the BBR.min_rtt value it measured during the previous
-ProbeRTT episode, providing a robust BDP estimate for the C.cwnd = 0.5*BDP
-calculation, increasing the likelihood of fully draining the bottleneck
-queue. Second, this allows the flow's BBR.min_rtt filter window to generally
-include RTT samples from two ProbeRTT episodes, providing a more robust
-estimate.<a href="#section-5.3.4.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.1-4">BBR uses the same 10-second interval for BBR.MinRTTFilterLen and
+BBR.ProbeRTTInterval. When this interval expires, BBR calculates and saves the
+ProbeRTT cwnd cap using the previous BBR.min_rtt before replacing the expired
+BBR.min_rtt with a new sample. This provides a robust BDP estimate for the
+C.cwnd = 0.5*BDP calculation even if the RTT sample that triggers ProbeRTT is
+inflated by queuing. BBR holds this cwnd cap constant throughout the ProbeRTT
+episode, increasing the likelihood of fully draining the bottleneck queue.<a href="#section-5.3.4.1-4" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-5">The algorithm for ProbeRTT is as follows:<a href="#section-5.3.4.1-5" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.1-6">Entry conditions: In any state other than ProbeRTT itself, if the
-BBR.probe_rtt_min_delay estimate has not been updated (i.e., by getting a
-lower RTT measurement) for more than BBR.ProbeRTTInterval = 5 seconds, then BBR
-enters ProbeRTT and reduces the BBR.cwnd_gain to BBR.ProbeRTTCwndGain = 0.5.<a href="#section-5.3.4.1-6" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.1-7">Exit conditions: After maintaining C.inflight at
-BBR.ProbeRTTCwndGain*BBR.bdp for at least BBR.ProbeRTTDuration (200 ms) and at
-least one packet-timed round trip, BBR leaves ProbeRTT and transitions to
-ProbeBW if it estimates the pipe was filled already, or Startup otherwise.<a href="#section-5.3.4.1-7" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.1-6">Entry conditions: In any state other than ProbeRTT itself, if the BBR.min_rtt
+estimate has not been updated or revalidated for more than
+BBR.ProbeRTTInterval = 10 seconds, then BBR enters ProbeRTT and reduces the
+BBR.cwnd_gain to BBR.ProbeRTTCwndGain = 0.5.<a href="#section-5.3.4.1-6" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.1-7">Exit conditions: After maintaining C.inflight at BBR.probe_rtt_cwnd for at
+least BBR.ProbeRTTDuration (200 ms) and at least one packet-timed round trip,
+BBR leaves ProbeRTT and transitions to ProbeBW if it estimates the pipe was
+filled already, or Startup otherwise.<a href="#section-5.3.4.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probertt-design-rationale">
@@ -4138,39 +4141,38 @@ ProbeBW if it estimates the pipe was filled already, or Startup otherwise.<a hre
             <h5 id="name-probertt-design-rationale">
 <a href="#section-5.3.4.2" class="section-number selfRef">5.3.4.2. </a><a href="#name-probertt-design-rationale" class="section-name selfRef">ProbeRTT Design Rationale</a>
             </h5>
-<p id="section-5.3.4.2-1">BBR is designed to have ProbeRTT sacrifice no more than roughly 2% of a flow's
+<p id="section-5.3.4.2-1">BBR is designed to have ProbeRTT sacrifice no more than roughly 1% of a flow's
 available bandwidth. It is also designed to spend the vast majority of its
-time (at least roughly 96 percent) in ProbeBW and the rest in ProbeRTT, based
+time (at least roughly 98 percent) in ProbeBW and the rest in ProbeRTT, based
 on a set of tradeoffs. ProbeRTT lasts long enough (at least BBR.ProbeRTTDuration
 = 200 ms) to allow diverse flows (e.g., flows with different RTTs or lower
 rates and thus longer inter-packet gaps) to have overlapping ProbeRTT states,
 while still being short enough to bound the throughput penalty of ProbeRTT's
-cwnd capping to roughly 2%, with the average throughput targeted at:<a href="#section-5.3.4.2-1" class="pilcrow">¶</a></p>
+cwnd capping to roughly 1%, with the average throughput targeted at:<a href="#section-5.3.4.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.4.2-2">
 <pre>
-  throughput = (200ms*0.5*BBR.bw + (5s - 200ms)*BBR.bw) / 5s
-             = (.1s + 4.8s)/5s * BBR.bw = 0.98 * BBR.bw
+  throughput = (200ms*0.5*BBR.bw + (10s - 200ms)*BBR.bw) / 10s
+             = (.1s + 9.8s)/10s * BBR.bw = 0.99 * BBR.bw
 </pre><a href="#section-5.3.4.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-5.3.4.2-3">As discussed above, BBR's BBR.min_rtt filter window, BBR.MinRTTFilterLen, and
 time interval between ProbeRTT states, BBR.ProbeRTTInterval, work in concert.
-BBR uses a BBR.MinRTTFilterLen equal to or longer than BBR.ProbeRTTInterval to allow
-the filter window to include at least one ProbeRTT.<a href="#section-5.3.4.2-3" class="pilcrow">¶</a></p>
+BBR uses a BBR.MinRTTFilterLen equal to BBR.ProbeRTTInterval, so that expiration
+of the BBR.min_rtt estimate also schedules the next ProbeRTT.<a href="#section-5.3.4.2-3" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.2-4">To allow coordination with other BBR flows, each BBR flow MUST use the
-standard BBR.ProbeRTTInterval of 5 secs.<a href="#section-5.3.4.2-4" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.2-5">A BBR.ProbeRTTInterval of 5 secs is short enough to allow quick convergence if
-traffic levels or routes change, but long enough so that interactive
+standard BBR.ProbeRTTInterval of 10 secs.<a href="#section-5.3.4.2-4" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.2-5">A BBR.ProbeRTTInterval of 10 secs is short enough to allow timely convergence
+if traffic levels or routes change, but long enough so that interactive
 applications (e.g., Web, remote procedure calls, video chunks) often have
 natural silences or low-rate periods within the window where the flow's rate
-is low enough for long enough to drain its queue in the bottleneck. Then the
-BBR.probe_rtt_min_delay filter opportunistically picks up these measurements,
-and the BBR.probe_rtt_min_delay estimate refreshes without requiring
-ProbeRTT. This way, flows typically need only pay the 2 percent throughput
-penalty if there are multiple bulk flows busy sending over the entire
-BBR.ProbeRTTInterval window.<a href="#section-5.3.4.2-5" class="pilcrow">¶</a></p>
+is low enough for long enough to drain its queue in the bottleneck. Such a
+period can produce a lower RTT sample that refreshes BBR.min_rtt without
+requiring ProbeRTT. This way, flows typically need only pay the 1 percent
+throughput penalty if there are multiple bulk flows busy sending over the
+entire BBR.ProbeRTTInterval window.<a href="#section-5.3.4.2-5" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.2-6">As an optimization, when restarting from idle and finding that the
-BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the idleness
-is deemed a sufficient attempt to coordinate to drain the queue.<a href="#section-5.3.4.2-6" class="pilcrow">¶</a></p>
+BBR.min_rtt estimate has expired, BBR does not enter ProbeRTT; the idleness is
+deemed a sufficient attempt to coordinate to drain the queue.<a href="#section-5.3.4.2-6" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.2-7">The frequency of triggering ProbeRTT involves a tradeoff between the speed of
 convergence and the throughput penalty of applying a cwnd cap during ProbeRTT.
 The interval between ProbeRTTs is a subject of further experimentation.
@@ -4189,50 +4191,40 @@ has increased.<a href="#section-5.3.4.2-7" class="pilcrow">¶</a></p>
             <h5 id="name-probertt-logic">
 <a href="#section-5.3.4.3" class="section-number selfRef">5.3.4.3. </a><a href="#name-probertt-logic" class="section-name selfRef">ProbeRTT Logic</a>
             </h5>
-<p id="section-5.3.4.3-1">On every ACK BBR executes UpdateMinRTT() to update its ProbeRTT scheduling
-state (BBR.probe_rtt_min_delay and BBR.probe_rtt_min_stamp) and its BBR.min_rtt
-estimate:<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.3-1">On every ACK BBR executes UpdateMinRTT() to update its BBR.min_rtt estimate and
+handle the steps related to the ProbeRTT state. If BBR.min_rtt has expired,
+BBR first enters ProbeRTT and calculates BBR.probe_rtt_cwnd using the old,
+pre-expiration BBR.min_rtt. BBR then updates BBR.min_rtt using the latest RTT
+sample. Thus, an inflated RTT sample that triggers ProbeRTT cannot inflate the
+cwnd cap used to drain the bottleneck queue.<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.4.3-2">
 <pre>
   UpdateMinRTT()
-    BBR.probe_rtt_expired =
-      Now() &gt; BBR.probe_rtt_min_stamp + BBR.ProbeRTTInterval
-    if (RS.rtt &gt;= 0 &amp;&amp;
-        (RS.rtt &lt; BBR.probe_rtt_min_delay ||
-         BBR.probe_rtt_expired))
-       BBR.probe_rtt_min_delay = RS.rtt
-       BBR.probe_rtt_min_stamp = Now()
-
     min_rtt_expired =
       Now() &gt; BBR.min_rtt_stamp + BBR.MinRTTFilterLen
-    if (BBR.probe_rtt_min_delay &lt; BBR.min_rtt ||
-        min_rtt_expired)
-      BBR.min_rtt       = BBR.probe_rtt_min_delay
-      BBR.min_rtt_stamp = BBR.probe_rtt_min_stamp
-</pre><a href="#section-5.3.4.3-2" class="pilcrow">¶</a>
-</div>
-<p id="section-5.3.4.3-3">Here BBR.probe_rtt_expired is a boolean recording whether the
-BBR.probe_rtt_min_delay has expired and is due for a refresh, via either
-an application idle period or a transition into ProbeRTT state.<a href="#section-5.3.4.3-3" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.3-4">On every ACK BBR executes CheckProbeRTT() to handle the steps related
-to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.3.4.3-5">
-<pre>
-  CheckProbeRTT():
     if (BBR.state != ProbeRTT &amp;&amp;
-        BBR.probe_rtt_expired &amp;&amp;
+        min_rtt_expired &amp;&amp;
         !BBR.idle_restart)
       EnterProbeRTT()
       SaveCwnd()
       BBR.probe_rtt_done_stamp = 0
       BBR.ack_phase = ACKS_PROBE_STOPPING
       StartRound()
+
+    if (RS.rtt &gt;= 0 &amp;&amp;
+        (RS.rtt &lt; BBR.min_rtt ||
+         min_rtt_expired))
+      BBR.min_rtt = RS.rtt
+      BBR.min_rtt_stamp = Now()
+
     if (BBR.state == ProbeRTT)
       HandleProbeRTT()
     if (RS.delivered &gt; 0)
       BBR.idle_restart = false
 
   EnterProbeRTT():
+    BBR.probe_rtt_cwnd =
+      max(BDPMultiple(BBR.ProbeRTTCwndGain), BBR.MinPipeCwnd)
     BBR.state = ProbeRTT
     BBR.pacing_gain = 1
     BBR.cwnd_gain = BBR.ProbeRTTCwndGain  /* 0.5 */
@@ -4241,7 +4233,7 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
     if (BBR.probe_rtt_done_stamp == 0 &amp;&amp;
-        C.inflight &lt;= ProbeRTTCwnd())
+        C.inflight &lt;= BBR.probe_rtt_cwnd)
       /* Wait for at least BBR.ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
         Now() + BBR.ProbeRTTDuration
@@ -4258,10 +4250,10 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
     if (BBR.probe_rtt_done_stamp != 0 &amp;&amp;
         Now() &gt; BBR.probe_rtt_done_stamp)
       /* schedule next ProbeRTT: */
-      BBR.probe_rtt_min_stamp = Now()
+      BBR.min_rtt_stamp = Now()
       RestoreCwnd()
       ExitProbeRTT()
-</pre><a href="#section-5.3.4.3-5" class="pilcrow">¶</a>
+</pre><a href="#section-5.3.4.3-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -4616,13 +4608,11 @@ is the complement of its max-filtering approach for delivery rates.)<a href="#se
 This is driven by trade-offs among several considerations:<a href="#section-5.5.7.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.5.7.2-3.1">
-                <p id="section-5.5.7.2-3.1.1">The BBR.MinRTTFilterLen is longer than BBR.ProbeRTTInterval, so that it covers an
-entire ProbeRTT cycle (see the "ProbeRTT" section below). This helps ensure
-that the window can contain RTT samples that are the result of data
-transmitted with C.inflight below the estimated BDP of the flow. Such RTT
-samples are important for helping to reveal the path's underlying two-way
-propagation delay even when the aforementioned "noise" effects can often
-obscure it.<a href="#section-5.5.7.2-3.1.1" class="pilcrow">¶</a></p>
+                <p id="section-5.5.7.2-3.1.1">The BBR.MinRTTFilterLen is equal to BBR.ProbeRTTInterval, so expiration of
+BBR.min_rtt schedules a ProbeRTT (see the "ProbeRTT" section below). Before
+replacing an expired BBR.min_rtt, BBR saves a ProbeRTT cwnd cap based on the
+previous estimate. This helps ProbeRTT reduce C.inflight below the estimated
+BDP even if the RTT sample that triggers ProbeRTT is inflated by queuing.<a href="#section-5.5.7.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.5.7.2-3.2">
                 <p id="section-5.5.7.2-3.2.1">The BBR.MinRTTFilterLen aims to be long enough to avoid needing to reduce in-flight
@@ -5422,19 +5412,16 @@ ProbeRTT), and is defined as follows:<a href="#section-5.6.4.4-13" class="pilcro
             </h5>
 <p id="section-5.6.4.5-1">If BBR decides it needs to enter the ProbeRTT state (see the "ProbeRTT" section
 below), its goal is to quickly reduce C.inflight and drain
-the bottleneck queue, thereby allowing measurement of BBR.min_rtt. To implement
-this mode, BBR bounds C.cwnd to BBR.MinPipeCwnd, the minimal value that
-allows pipelining (see the "Minimum cwnd for Pipelining" section, above):<a href="#section-5.6.4.5-1" class="pilcrow">¶</a></p>
+the bottleneck queue, thereby allowing measurement of BBR.min_rtt. Upon entry,
+BBR calculates BBR.probe_rtt_cwnd from the current BBR.bw and the
+pre-expiration BBR.min_rtt. Throughout the ProbeRTT episode, BBR bounds C.cwnd
+to this saved value, which has a floor of BBR.MinPipeCwnd to allow pipelining
+(see the "Minimum cwnd for Pipelining" section, above):<a href="#section-5.6.4.5-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.5-2">
 <pre>
-  ProbeRTTCwnd():
-    probe_rtt_cwnd = BDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)
-    probe_rtt_cwnd = max(probe_rtt_cwnd, BBR.MinPipeCwnd)
-    return probe_rtt_cwnd
-
   BoundCwndForProbeRTT():
     if (BBR.state == ProbeRTT)
-      C.cwnd = min(C.cwnd, ProbeRTTCwnd())
+      C.cwnd = min(C.cwnd, BBR.probe_rtt_cwnd)
 </pre><a href="#section-5.6.4.5-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -5857,7 +5844,7 @@ for feedback, suggestions, and edits on earlier versions of this document.<a hre
 <dd class="break"></dd>
 <dt id="I-D.draft-ietf-quic-receive-ts">[I-D.draft-ietf-quic-receive-ts]</dt>
         <dd>
-<span class="refAuthor">Swett, I.</span> and <span class="refAuthor">J. Beshay</span>, <span class="refTitle">"QUIC Extended Acknowledgement for Reporting Packet Receive Timestamps"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-receive-ts-02</span>, <time datetime="2026-03-16" class="refDate">16 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-02">https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-02</a>&gt;</span>. </dd>
+<span class="refAuthor">Swett, I.</span> and <span class="refAuthor">J. Beshay</span>, <span class="refTitle">"QUIC Extended Acknowledgement for Reporting Packet Receive Timestamps"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-quic-receive-ts-03</span>, <time datetime="2026-07-20" class="refDate">20 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-03">https://datatracker.ietf.org/doc/html/draft-ietf-quic-receive-ts-03</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.draft-ietf-tcpm-ack-rate-request">[I-D.draft-ietf-tcpm-ack-rate-request]</dt>
         <dd>
@@ -6159,19 +6146,25 @@ PROBE_CRUISE.<a href="#appendix-A.9-1.4.1" class="pilcrow">¶</a></p>
             <p id="appendix-A.10-1.1.1">Wait until the connection transitions to PROBE_BW.<a href="#appendix-A.10-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.2">
-            <p id="appendix-A.10-1.2.1">Wait for <code>BBR.ProbeRTTInterval</code> (5 seconds) without updating
-<code>BBR.probe_rtt_min_delay</code>.<a href="#appendix-A.10-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.2.1">Record <code>BBR.bw</code> and <code>BBR.min_rtt</code>, and calculate the expected
+<code>BBR.probe_rtt_cwnd</code> as the maximum of <code>BBR.ProbeRTTCwndGain * BBR.bw *
+BBR.min_rtt</code> and <code>BBR.MinPipeCwnd</code>.<a href="#appendix-A.10-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.3">
-            <p id="appendix-A.10-1.3.1">Verify the connection enters PROBE_RTT and sets <code>BBR.cwnd_gain</code> to
-<code>BBR.ProbeRTTCwndGain</code> (0.5).<a href="#appendix-A.10-1.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.3.1">Wait for <code>BBR.ProbeRTTInterval</code> (10 seconds) without updating
+<code>BBR.min_rtt</code>, and provide an inflated RTT sample when the interval expires.<a href="#appendix-A.10-1.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.4">
-            <p id="appendix-A.10-1.4.1">Wait for at least <code>BBR.ProbeRTTDuration</code> (200 ms) and one round trip.<a href="#appendix-A.10-1.4.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.4.1">Verify the connection enters PROBE_RTT, sets <code>BBR.cwnd_gain</code> to
+<code>BBR.ProbeRTTCwndGain</code> (0.5), and sets <code>BBR.probe_rtt_cwnd</code> to the expected
+value calculated from the pre-expiration BBR.min_rtt.<a href="#appendix-A.10-1.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.5">
-            <p id="appendix-A.10-1.5.1">Verify the connection correctly exits PROBE_RTT, transitions back to PROBE_BW
-(since <code>BBR.full_bw_reached</code> is <code>true</code>), and resumes sending.<a href="#appendix-A.10-1.5.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.5.1">Wait for at least <code>BBR.ProbeRTTDuration</code> (200 ms) and one round trip.<a href="#appendix-A.10-1.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="appendix-A.10-1.6">
+            <p id="appendix-A.10-1.6.1">Verify the connection correctly exits PROBE_RTT, transitions back to PROBE_BW
+(since <code>BBR.full_bw_reached</code> is <code>true</code>), and resumes sending.<a href="#appendix-A.10-1.6.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
@@ -6190,7 +6183,7 @@ PROBE_CRUISE.<a href="#appendix-A.9-1.4.1" class="pilcrow">¶</a></p>
 idle and causing <code>C.inflight</code> to drop to 0.<a href="#appendix-A.11-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.11-1.3">
-            <p id="appendix-A.11-1.3.1">Allow <code>BBR.ProbeRTTInterval</code> (5 seconds) to elapse during this idle period.<a href="#appendix-A.11-1.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.11-1.3.1">Allow <code>BBR.ProbeRTTInterval</code> (10 seconds) to elapse during this idle period.<a href="#appendix-A.11-1.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.11-1.4">
             <p id="appendix-A.11-1.4.1">Verify that upon sending new data, <code>BBRHandleRestartFromIdle()</code> sets
