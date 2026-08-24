@@ -686,6 +686,10 @@ was obtained.
 BBR.MinRTTFilterLen: A constant specifying the length of the BBR.min_rtt min
 filter window, BBR.MinRTTFilterLen is 10 secs.
 
+BBR.min_rtt_expired: A boolean recording whether the BBR.min_rtt estimate has
+expired and is due for a refresh, via either an application idle period or a
+transition into ProbeRTT state.
+
 
 ### Parameters for Scheduling ProbeRTT {#parameters-for-scheduling-probertt}
 
@@ -694,20 +698,15 @@ C.cwnd during ProbeRTT: 0.5 (meaning that ProbeRTT attempts to reduce in-flight
 data to 50% of the estimated BDP).
 
 BBR.ProbeRTTDuration: A constant specifying the minimum duration for which ProbeRTT
-state holds C.inflight to BBR.MinPipeCwnd or fewer packets: 200 ms.
+state holds C.inflight to BBR.probe_rtt_cwnd or fewer packets: 200 ms.
 
 BBR.ProbeRTTInterval: A constant specifying the minimum time interval between
-ProbeRTT states: 5 secs.
+ProbeRTT states: 10 secs. BBR schedules ProbeRTT based on the expiration of the
+BBR.min_rtt filter, so BBR.ProbeRTTInterval is equal to BBR.MinRTTFilterLen.
 
-BBR.probe_rtt_min_delay: The minimum RTT sample recorded in the last
-BBR.ProbeRTTInterval.
-
-BBR.probe_rtt_min_stamp: The wall clock time at which the current
-BBR.probe_rtt_min_delay sample was obtained.
-
-BBR.probe_rtt_expired: A boolean recording whether the BBR.probe_rtt_min_delay
-has expired and is due for a refresh with an application idle period or a
-transition into ProbeRTT state.
+BBR.probe_rtt_cwnd: The C.cwnd value that ProbeRTT targets, computed from the
+BBR.min_rtt estimate that was in effect immediately before that estimate
+expired, and held fixed for the duration of a ProbeRTT episode.
 
 The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to
@@ -905,7 +904,7 @@ specify a specific response to ECN, and instead leaves it as an area for
 future work.
 
 The design of ProbeRTT in {{probertt-design-rationale}} specifies a ProbeRTT
-interval that sacrifices no more than roughly 2% of a flow's available
+interval that sacrifices no more than roughly 1% of a flow's available
 bandwidth. The impact of using a different interval or making adjustments
 for triggering ProbeRTT on specific link types is a subject of
 further experimentation.
@@ -1716,8 +1715,10 @@ steps:
     InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
     BBR.min_rtt = C.srtt ? C.srtt : Infinity
     BBR.min_rtt_stamp = Now()
+    BBR.min_rtt_expired = false
     BBR.probe_rtt_done_stamp = 0
     BBR.probe_rtt_round_done = false
+    BBR.probe_rtt_cwnd = C.InitialCwnd
     BBR.prior_cwnd = 0
     BBR.undo_state = None
     BBR.undo_bw_shortterm = 0
@@ -2537,72 +2538,92 @@ the bottleneck queue and make a robust BBR.min_rtt measurement. This allows the
 BBR.min_rtt estimates of ensembles of BBR flows to converge, avoiding feedback
 loops of ever-increasing queues and RTT samples.
 
-The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
-every BBR.ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
-by setting its cwnd_gain to BBR.ProbeRTTCwndGain = 0.5 to reduce
+The ProbeRTT state works in concert with BBR.min_rtt estimation. BBR schedules
+ProbeRTT directly from the expiration of its BBR.min_rtt min filter: when the
+BBR.min_rtt estimate has not been refreshed by a lower RTT sample for
+BBR.MinRTTFilterLen = 10 seconds, the estimate is stale, and BBR enters
+ProbeRTT before it allows a higher RTT sample to raise BBR.min_rtt. Thus, up to
+once every BBR.ProbeRTTInterval = 10 seconds, the flow enters ProbeRTT,
+decelerating by setting its cwnd_gain to BBR.ProbeRTTCwndGain = 0.5 to reduce
 C.inflight to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.
 
-There are two main motivations for making the BBR.MinRTTFilterLen roughly twice
-the BBR.ProbeRTTInterval. First, this ensures that during a ProbeRTT episode
-the flow will "remember" the BBR.min_rtt value it measured during the previous
-ProbeRTT episode, providing a robust BDP estimate for the C.cwnd = 0.5\*BDP
-calculation, increasing the likelihood of fully draining the bottleneck
-queue. Second, this allows the flow's BBR.min_rtt filter window to generally
-include RTT samples from two ProbeRTT episodes, providing a more robust
-estimate.
+Deriving the ProbeRTT schedule from the freshness of BBR.min_rtt, rather than
+from an independent timer, means a flow attempts a coordinated drain precisely
+when, and only when, its estimate of the two-way propagation delay is about to
+go stale. But it also means that the BBR.min_rtt estimate is, by definition,
+about to be replaced at the moment ProbeRTT begins, and its replacement is
+likely to be an inflated RTT sample taken while the bottleneck queue is still
+full. Sizing the ProbeRTT congestion window from such a sample would defeat the
+purpose of ProbeRTT: with a standing queue of roughly one BDP, the inflated
+sample is roughly twice the true two-way propagation delay, so a target of
+BBR.ProbeRTTCwndGain\*BBR.bdp would be roughly a full BDP and would drain
+nothing. Worse, the failure is self-reinforcing, since a ProbeRTT episode that
+drains nothing yields no lower RTT sample with which to correct the estimate.
+
+To avoid this, immediately before the stale BBR.min_rtt estimate is replaced,
+BBR snapshots the ProbeRTT congestion window target, BBR.probe_rtt_cwnd,
+computed from the pre-expiration BBR.min_rtt, and holds it fixed for the
+duration of the ProbeRTT episode. This provides a robust BDP estimate for the
+C.cwnd = 0.5\*BDP calculation, increasing the likelihood of fully draining the
+bottleneck queue, and ensures the target cannot move while the flow is trying
+to reach it.
 
 The algorithm for ProbeRTT is as follows:
 
-Entry conditions: In any state other than ProbeRTT itself, if the
-BBR.probe_rtt_min_delay estimate has not been updated (i.e., by getting a
-lower RTT measurement) for more than BBR.ProbeRTTInterval = 5 seconds, then BBR
-enters ProbeRTT and reduces the BBR.cwnd_gain to BBR.ProbeRTTCwndGain = 0.5.
+Entry conditions: In any state other than ProbeRTT itself, if the BBR.min_rtt
+estimate has not been updated (i.e., by getting a lower RTT measurement) for
+more than BBR.MinRTTFilterLen = 10 seconds, then BBR enters ProbeRTT and
+reduces the BBR.cwnd_gain to BBR.ProbeRTTCwndGain = 0.5.
 
-Exit conditions: After maintaining C.inflight at
-BBR.ProbeRTTCwndGain\*BBR.bdp for at least BBR.ProbeRTTDuration (200 ms) and at
-least one packet-timed round trip, BBR leaves ProbeRTT and transitions to
-ProbeBW if it estimates the pipe was filled already, or Startup otherwise.
+Exit conditions: After maintaining C.inflight at BBR.probe_rtt_cwnd for at
+least BBR.ProbeRTTDuration (200 ms) and at least one packet-timed round trip,
+BBR leaves ProbeRTT and transitions to ProbeBW if it estimates the pipe was
+filled already, or Startup otherwise.
 
 
 #### ProbeRTT Design Rationale {#probertt-design-rationale}
 
-BBR is designed to have ProbeRTT sacrifice no more than roughly 2% of a flow's
+BBR is designed to have ProbeRTT sacrifice no more than roughly 1% of a flow's
 available bandwidth. It is also designed to spend the vast majority of its
-time (at least roughly 96 percent) in ProbeBW and the rest in ProbeRTT, based
+time (at least roughly 98 percent) in ProbeBW and the rest in ProbeRTT, based
 on a set of tradeoffs. ProbeRTT lasts long enough (at least BBR.ProbeRTTDuration
 = 200 ms) to allow diverse flows (e.g., flows with different RTTs or lower
 rates and thus longer inter-packet gaps) to have overlapping ProbeRTT states,
 while still being short enough to bound the throughput penalty of ProbeRTT's
-cwnd capping to roughly 2%, with the average throughput targeted at:
+cwnd capping to roughly 1%, with the average throughput targeted at:
 
 ~~~~
-  throughput = (200ms*0.5*BBR.bw + (5s - 200ms)*BBR.bw) / 5s
-             = (.1s + 4.8s)/5s * BBR.bw = 0.98 * BBR.bw
+  throughput = (200ms*0.5*BBR.bw + (10s - 200ms)*BBR.bw) / 10s
+             = (.1s + 9.8s)/10s * BBR.bw = 0.99 * BBR.bw
 ~~~~
 
 As discussed above, BBR's BBR.min_rtt filter window, BBR.MinRTTFilterLen, and
-time interval between ProbeRTT states, BBR.ProbeRTTInterval, work in concert.
-BBR uses a BBR.MinRTTFilterLen equal to or longer than BBR.ProbeRTTInterval to allow
-the filter window to include at least one ProbeRTT.
+the time interval between ProbeRTT states, BBR.ProbeRTTInterval, are one and
+the same: BBR enters ProbeRTT exactly when the BBR.min_rtt filter expires. This
+guarantees that a flow attempts to drain the bottleneck queue before it raises
+BBR.min_rtt, without relying on a particular ratio between two independently
+chosen time constants.
 
 To allow coordination with other BBR flows, each BBR flow MUST use the
-standard BBR.ProbeRTTInterval of 5 secs.
+standard BBR.ProbeRTTInterval of 10 secs.
 
-A BBR.ProbeRTTInterval of 5 secs is short enough to allow quick convergence if
+A BBR.ProbeRTTInterval of 10 secs is short enough to allow quick convergence if
 traffic levels or routes change, but long enough so that interactive
 applications (e.g., Web, remote procedure calls, video chunks) often have
 natural silences or low-rate periods within the window where the flow's rate
 is low enough for long enough to drain its queue in the bottleneck. Then the
-BBR.probe_rtt_min_delay filter opportunistically picks up these measurements,
-and the BBR.probe_rtt_min_delay estimate refreshes without requiring
-ProbeRTT. This way, flows typically need only pay the 2 percent throughput
-penalty if there are multiple bulk flows busy sending over the entire
-BBR.ProbeRTTInterval window.
+BBR.min_rtt filter opportunistically picks up these measurements, and the
+BBR.min_rtt estimate refreshes without requiring ProbeRTT. This way, flows
+typically need only pay the 1 percent throughput penalty if there are multiple
+bulk flows busy sending over the entire BBR.ProbeRTTInterval window.
 
-As an optimization, when restarting from idle and finding that the
-BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the idleness
-is deemed a sufficient attempt to coordinate to drain the queue.
+As an optimization, when restarting from idle and finding that the BBR.min_rtt
+estimate has expired, BBR does not enter ProbeRTT; the idleness is deemed a
+sufficient attempt to coordinate to drain the queue. This also means that a
+flow resuming after an idle period longer than BBR.MinRTTFilterLen does not
+enter ProbeRTT with a BBR.min_rtt estimate inherited from before the idle
+period.
 
 The frequency of triggering ProbeRTT involves a tradeoff between the speed of
 convergence and the throughput penalty of applying a cwnd cap during ProbeRTT.
@@ -2618,31 +2639,33 @@ has increased.
 
 #### ProbeRTT Logic {#probertt-logic}
 
-On every ACK BBR executes UpdateMinRTT() to update its ProbeRTT scheduling
-state (BBR.probe_rtt_min_delay and BBR.probe_rtt_min_stamp) and its BBR.min_rtt
-estimate:
+On every ACK BBR executes UpdateMinRTT() to update its BBR.min_rtt estimate and
+its ProbeRTT scheduling state:
 
 ~~~~
   UpdateMinRTT()
-    BBR.probe_rtt_expired =
-      Now() > BBR.probe_rtt_min_stamp + BBR.ProbeRTTInterval
-    if (RS.rtt >= 0 &&
-        (RS.rtt < BBR.probe_rtt_min_delay ||
-         BBR.probe_rtt_expired))
-       BBR.probe_rtt_min_delay = RS.rtt
-       BBR.probe_rtt_min_stamp = Now()
-
-    min_rtt_expired =
+    BBR.min_rtt_expired =
       Now() > BBR.min_rtt_stamp + BBR.MinRTTFilterLen
-    if (BBR.probe_rtt_min_delay < BBR.min_rtt ||
-        min_rtt_expired)
-      BBR.min_rtt       = BBR.probe_rtt_min_delay
-      BBR.min_rtt_stamp = BBR.probe_rtt_min_stamp
+    if (BBR.min_rtt_expired &&
+        BBR.state != ProbeRTT)
+      /* Snapshot the ProbeRTT cwnd target from the pre-expiration
+         BBR.min_rtt, before a possibly inflated sample replaces it: */
+      SaveProbeRTTCwnd()
+    if (RS.rtt >= 0 &&
+        (RS.rtt < BBR.min_rtt ||
+         BBR.min_rtt_expired))
+      BBR.min_rtt       = RS.rtt
+      BBR.min_rtt_stamp = Now()
 ~~~~
 
-Here BBR.probe_rtt_expired is a boolean recording whether the
-BBR.probe_rtt_min_delay has expired and is due for a refresh, via either
-an application idle period or a transition into ProbeRTT state.
+Here BBR.min_rtt_expired is a boolean recording whether the BBR.min_rtt
+estimate has expired and is due for a refresh, via either an application idle
+period or a transition into ProbeRTT state.
+
+The BBR.state != ProbeRTT condition ensures that BBR.probe_rtt_cwnd is
+snapshotted once, at the moment ProbeRTT is scheduled, and then held fixed for
+the rest of the episode, even in the rare case where a ProbeRTT episode lasts
+long enough for the BBR.min_rtt filter to expire again.
 
 On every ACK BBR executes CheckProbeRTT() to handle the steps related
 to the ProbeRTT state as follows:
@@ -2650,7 +2673,7 @@ to the ProbeRTT state as follows:
 ~~~~
   CheckProbeRTT():
     if (BBR.state != ProbeRTT &&
-        BBR.probe_rtt_expired &&
+        BBR.min_rtt_expired &&
         !BBR.idle_restart)
       EnterProbeRTT()
       SaveCwnd()
@@ -2671,7 +2694,7 @@ to the ProbeRTT state as follows:
     /* Ignore low rate samples during ProbeRTT: */
     MarkConnectionAppLimited()
     if (BBR.probe_rtt_done_stamp == 0 &&
-        C.inflight <= ProbeRTTCwnd())
+        C.inflight <= BBR.probe_rtt_cwnd)
       /* Wait for at least BBR.ProbeRTTDuration to elapse: */
       BBR.probe_rtt_done_stamp =
         Now() + BBR.ProbeRTTDuration
@@ -2688,7 +2711,7 @@ to the ProbeRTT state as follows:
     if (BBR.probe_rtt_done_stamp != 0 &&
         Now() > BBR.probe_rtt_done_stamp)
       /* schedule next ProbeRTT: */
-      BBR.probe_rtt_min_stamp = Now()
+      BBR.min_rtt_stamp = Now()
       RestoreCwnd()
       ExitProbeRTT()
 ~~~~
@@ -2994,9 +3017,9 @@ is the complement of its max-filtering approach for delivery rates.)
 The length of the BBR.min_rtt min filter window is BBR.MinRTTFilterLen = 10 secs.
 This is driven by trade-offs among several considerations:
 
-* The BBR.MinRTTFilterLen is longer than BBR.ProbeRTTInterval, so that it covers an
-  entire ProbeRTT cycle (see the "ProbeRTT" section below). This helps ensure
-  that the window can contain RTT samples that are the result of data
+* The BBR.MinRTTFilterLen determines the interval between ProbeRTT states, since
+  BBR enters ProbeRTT when this filter expires (see {{probertt}}). This helps
+  ensure that the window can contain RTT samples that are the result of data
   transmitted with C.inflight below the estimated BDP of the flow. Such RTT
   samples are important for helping to reveal the path's underlying two-way
   propagation delay even when the aforementioned "noise" effects can often
@@ -3722,21 +3745,27 @@ ProbeRTT), and is defined as follows:
 
 #### Modulating cwnd in ProbeRTT {#modulating-cwnd-in-probertt}
 
-If BBR decides it needs to enter the ProbeRTT state (see the "ProbeRTT" section
-below), its goal is to quickly reduce C.inflight and drain
-the bottleneck queue, thereby allowing measurement of BBR.min_rtt. To implement
-this mode, BBR bounds C.cwnd to BBR.MinPipeCwnd, the minimal value that
-allows pipelining (see the "Minimum cwnd for Pipelining" section, above):
+If BBR decides it needs to enter the ProbeRTT state (see {{probertt}}), its
+goal is to quickly reduce C.inflight and drain the bottleneck queue, thereby
+allowing measurement of BBR.min_rtt. To implement
+this mode, BBR bounds C.cwnd to BBR.probe_rtt_cwnd, which is
+BBR.ProbeRTTCwndGain (0.5) times the estimated BDP, with a floor of
+BBR.MinPipeCwnd, the minimal value that allows pipelining (see the
+"Minimum cwnd for Pipelining" section, above).
+
+BBR computes BBR.probe_rtt_cwnd once per ProbeRTT episode, in
+SaveProbeRTTCwnd(), at the moment the BBR.min_rtt filter expires and ProbeRTT
+is scheduled, and holds it fixed for the duration of the episode (see
+{{probertt-logic}}):
 
 ~~~~
-  ProbeRTTCwnd():
-    probe_rtt_cwnd = BDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)
-    probe_rtt_cwnd = max(probe_rtt_cwnd, BBR.MinPipeCwnd)
-    return probe_rtt_cwnd
+  SaveProbeRTTCwnd():
+    probe_rtt_cwnd = BDPMultiple(BBR.ProbeRTTCwndGain)
+    BBR.probe_rtt_cwnd = max(probe_rtt_cwnd, BBR.MinPipeCwnd)
 
   BoundCwndForProbeRTT():
     if (BBR.state == ProbeRTT)
-      C.cwnd = min(C.cwnd, ProbeRTTCwnd())
+      C.cwnd = min(C.cwnd, BBR.probe_rtt_cwnd)
 ~~~~
 
 
@@ -4030,12 +4059,17 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 ## Entering and Exiting PROBE_RTT
 
 1. Wait until the connection transitions to PROBE_BW.
-2. Wait for `BBR.ProbeRTTInterval` (5 seconds) without updating
-   `BBR.probe_rtt_min_delay`.
+2. Wait for `BBR.MinRTTFilterLen` (10 seconds) without updating
+   `BBR.min_rtt`, while maintaining a standing queue so that the RTT samples
+   arriving at the end of that interval are inflated.
 3. Verify the connection enters PROBE_RTT and sets `BBR.cwnd_gain` to
    `BBR.ProbeRTTCwndGain` (0.5).
-4. Wait for at least `BBR.ProbeRTTDuration` (200 ms) and one round trip.
-5. Verify the connection correctly exits PROBE_RTT, transitions back to PROBE_BW
+4. Verify that `BBR.probe_rtt_cwnd` was computed from the `BBR.min_rtt` value
+   in effect before the filter expired, rather than from the inflated RTT
+   sample that refreshes the filter, and that it stays fixed for the rest of
+   the episode.
+5. Wait for at least `BBR.ProbeRTTDuration` (200 ms) and one round trip.
+6. Verify the connection correctly exits PROBE_RTT, transitions back to PROBE_BW
    (since `BBR.full_bw_reached` is `true`), and resumes sending.
 
 ## Skipping PROBE_RTT Due to Application-Limited Sending
@@ -4043,7 +4077,7 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 1. Wait until the connection transitions to PROBE_BW.
 2. Pause the application from sending data for a period, making the connection
    idle and causing `C.inflight` to drop to 0.
-3. Allow `BBR.ProbeRTTInterval` (5 seconds) to elapse during this idle period.
+3. Allow `BBR.ProbeRTTInterval` (10 seconds) to elapse during this idle period.
 4. Verify that upon sending new data, `BBRHandleRestartFromIdle()` sets
    `BBR.idle_restart` to `true`.
 5. Verify the connection skips entering PROBE_RTT because `BBR.idle_restart` is
