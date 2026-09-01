@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-27T07:59:45.422843+00:00",
+  "timestamp": "2026-09-01T03:59:37.575107+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -8837,25 +8837,33 @@
       "id": "PR_kwDOL3MllM8AAAABA25JwQ",
       "title": "Simplify ProbeRTT and min_rtt logic (Option A)",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/123",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Option A",
       "createdAt": "2026-08-24T21:27:57Z",
-      "updatedAt": "2026-08-24T21:58:20Z",
+      "updatedAt": "2026-08-31T23:34:35Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_simplify_probe_rtt_A",
       "headRefOid": "4b0441c496227fc64a08ef444f6d96bb629e1a34",
-      "closedAt": null,
+      "closedAt": "2026-08-31T23:34:34Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Closing in favor of https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/125",
+          "createdAt": "2026-08-31T23:34:34Z",
+          "updatedAt": "2026-08-31T23:34:34Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM8AAAABKshpqA",
@@ -8927,25 +8935,33 @@
       "id": "PR_kwDOL3MllM8AAAABA25KhQ",
       "title": " Schedule ProbeRTT on min_rtt expiry and snapshot the ProbeRTT cwnd target (Option B)",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/124",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Option B",
       "createdAt": "2026-08-24T21:27:58Z",
-      "updatedAt": "2026-08-24T21:48:08Z",
+      "updatedAt": "2026-08-31T23:34:50Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "jb_simplify_probe_rtt_B",
       "headRefOid": "007dbe1fd5915300666132b570ca6d8bf0127571",
-      "closedAt": null,
+      "closedAt": "2026-08-31T23:34:50Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Closing in favor of https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/125",
+          "createdAt": "2026-08-31T23:34:50Z",
+          "updatedAt": "2026-08-31T23:34:50Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -8960,7 +8976,7 @@
       "labels": [],
       "body": "Simplify ProbeRTT min_rtt filtering and state handling to align with BBRv1:\n\n- Remove obsolete ProbeRTT state variables and constants:\n  - BBR.probe_rtt_min_delay\n  - BBR.probe_rtt_min_stamp\n  - BBR.probe_rtt_expired\n  - BBR.ProbeRTTInterval\n- Update min_rtt filter window length to 10 seconds (BBR.MinRTTFilterLen)\n  and use it as the single filter window governing min_rtt expiration and\n  ProbeRTT scheduling.\n- Introduce BBR.probe_rtt_cwnd state variable to store 0.5 * estimated_BDP\n  computed from the pre-expiration BBR.min_rtt before expiring the sample\n  in UpdateMinRTT().\n- Update UpdateMinRTT() upon min_rtt expiration to assign BBR.min_rtt = RS.rtt\n  and BBR.min_rtt_stamp = Now().\n- Update CheckProbeRTT(), CheckProbeRTTDone(), and ProbeRTTCwnd() to align\n  with the updated state variables and expiration logic.\n- Update related prose discussions, design rationale, parameter definitions,\n  and Appendix B test scenarios.\n",
       "createdAt": "2026-08-24T22:13:23Z",
-      "updatedAt": "2026-08-25T15:34:38Z",
+      "updatedAt": "2026-08-31T16:27:08Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
@@ -9002,6 +9018,66 @@
               "body": "```suggestion\n* The BBR.MinRTTFilterLen (10 seconds) is long enough to cover a ProbeRTT cycle\n  (see {{probertt}}). This helps ensure that the window can\n```",
               "createdAt": "2026-08-25T15:33:39Z",
               "updatedAt": "2026-08-25T15:34:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABLh7yGA",
+          "commit": {
+            "abbreviatedOid": "4f1eb98"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-31T16:23:13Z",
+          "updatedAt": "2026-08-31T16:23:13Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "Good catch! We had this but it looks like it wasn't defined before",
+              "createdAt": "2026-08-31T16:23:13Z",
+              "updatedAt": "2026-08-31T16:23:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABLh8sOg",
+          "commit": {
+            "abbreviatedOid": "4f1eb98"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-31T16:25:00Z",
+          "updatedAt": "2026-08-31T16:25:00Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "```suggestion\ncomputed as 0.5 * estimated_BDP based on the BBR.min_rtt  sample before\nit is expired.\n```",
+              "createdAt": "2026-08-31T16:25:00Z",
+              "updatedAt": "2026-08-31T16:25:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABLh9xJA",
+          "commit": {
+            "abbreviatedOid": "4f1eb98"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-31T16:27:08Z",
+          "updatedAt": "2026-08-31T16:27:08Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "Using \"Before expiring\" and \"pre-expiration\" in the same sentence feels a bit clunky to me. \n```suggestion\nBefore expiring the BBR.min_rtt filter and entering ProbeRTT, BBR saves\nBBR.probe_rtt_cwnd as 0.5 * estimated_BDP based on the old\nBBR.min_rtt. This ensures that during ProbeRTT the flow will\n```",
+              "createdAt": "2026-08-31T16:27:08Z",
+              "updatedAt": "2026-08-31T16:27:08Z"
             }
           ]
         }
