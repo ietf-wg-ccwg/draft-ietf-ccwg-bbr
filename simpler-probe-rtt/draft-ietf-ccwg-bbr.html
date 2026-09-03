@@ -36,11 +36,11 @@ specifies version 3 of the BBR algorithm, BBRv3.
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.11.3
+    platformdirs 4.11.7
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.2
+    wcwidth 0.8.3
 -->
 <link href="draft-ietf-ccwg-bbr.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1056,11 +1056,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">August 2026</td>
+<td class="right">September 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 25 February 2027</td>
+<td class="center">Expires 7 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1073,12 +1073,12 @@ svg {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-08-24" class="published">24 August 2026</time>
+<time datetime="2026-09-03" class="published">3 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-02-25">25 February 2027</time></dd>
+<dd class="expires"><time datetime="2027-03-07">7 March 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1147,7 +1147,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 25 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1976,8 +1976,7 @@ detected in the current round trip.<a href="#section-2.14-4" class="pilcrow">¶<
 <p id="section-2.16.1-1">BBR.min_rtt_stamp: The wall clock time at which the current BBR.min_rtt sample
 was obtained.<a href="#section-2.16.1-1" class="pilcrow">¶</a></p>
 <p id="section-2.16.1-2">BBR.min_rtt_expired: A boolean recording whether the BBR.min_rtt
-has expired and is due for a refresh with an application idle period or a
-transition into ProbeRTT state.<a href="#section-2.16.1-2" class="pilcrow">¶</a></p>
+has expired and is due for a refresh.<a href="#section-2.16.1-2" class="pilcrow">¶</a></p>
 <p id="section-2.16.1-3">BBR.MinRTTFilterLen: A constant specifying the length of the BBR.min_rtt min
 filter window, BBR.MinRTTFilterLen is 10 secs.<a href="#section-2.16.1-3" class="pilcrow">¶</a></p>
 </section>
@@ -1997,8 +1996,8 @@ state.<a href="#section-2.16.2-3" class="pilcrow">¶</a></p>
 <p id="section-2.16.2-4">BBR.probe_rtt_round_done: A boolean recording whether the connection has
 completed a round trip in ProbeRTT state.<a href="#section-2.16.2-4" class="pilcrow">¶</a></p>
 <p id="section-2.16.2-5">BBR.probe_rtt_cwnd: The maximum congestion window allowed in ProbeRTT state,
-computed as 0.5 * estimated_BDP based on the pre-expiration BBR.min_rtt before
-expiring the min_rtt sample.<a href="#section-2.16.2-5" class="pilcrow">¶</a></p>
+computed as 0.5 * estimated_BDP based on the BBR.min_rtt sample before
+it is expired.<a href="#section-2.16.2-5" class="pilcrow">¶</a></p>
 <p id="section-2.16.2-6">The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to
 be interpreted as described in <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span>.<a href="#section-2.16.2-6" class="pilcrow">¶</a></p>
@@ -4124,8 +4123,8 @@ by setting its cwnd_gain to BBR.ProbeRTTCwndGain = 0.5 to reduce
 C.inflight to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.<a href="#section-5.3.4.1-3" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-4">Before expiring the BBR.min_rtt filter and entering ProbeRTT, BBR saves
-BBR.probe_rtt_cwnd as 0.5 * estimated_BDP based on the old, pre-expiration
-BBR.min_rtt. This ensures that during a ProbeRTT episode the flow will
+BBR.probe_rtt_cwnd as 0.5 * estimated_BDP based on the old
+BBR.min_rtt. This ensures that during ProbeRTT the flow will
 "remember" the BBR.min_rtt value it measured during the previous filter window,
 providing a robust BDP estimate for the C.cwnd = 0.5*BDP calculation,
 increasing the likelihood of fully draining the bottleneck queue.<a href="#section-5.3.4.1-4" class="pilcrow">¶</a></p>
@@ -4611,7 +4610,7 @@ is the complement of its max-filtering approach for delivery rates.)<a href="#se
 This is driven by trade-offs among several considerations:<a href="#section-5.5.7.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.5.7.2-3.1">
-                <p id="section-5.5.7.2-3.1.1">The BBR.MinRTTFilterLen (10 seconds) is long enough to cover ProbeRTT cycles
+                <p id="section-5.5.7.2-3.1.1">The BBR.MinRTTFilterLen (10 seconds) is long enough to cover a ProbeRTT cycle
 (see <a href="#probertt" class="auto internal xref">Section 5.3.4</a>). This helps ensure that the window can
 contain RTT samples that are the result of data transmitted with C.inflight
 below the estimated BDP of the flow. Such RTT samples are important for
@@ -5417,12 +5416,14 @@ ProbeRTT), and is defined as follows:<a href="#section-5.6.4.4-13" class="pilcro
 <p id="section-5.6.4.5-1">If BBR decides it needs to enter the ProbeRTT state (see <a href="#probertt" class="auto internal xref">Section 5.3.4</a>), its
 goal is to quickly reduce C.inflight and drain the bottleneck queue, thereby
 allowing measurement of BBR.min_rtt. To implement this mode, BBR bounds C.cwnd
-to the greater of BBR.probe_rtt_cwnd and BBR.MinPipeCwnd, the minimal value that
-allows pipelining (see <a href="#minimum-cwnd-for-pipelining" class="auto internal xref">Section 5.6.4.3</a>):<a href="#section-5.6.4.5-1" class="pilcrow">¶</a></p>
+to be no larger than BBR.probe_rtt_cwnd and no smaller than BBR.MinPipeCwnd,
+the minimal value that allows pipelining (see <a href="#minimum-cwnd-for-pipelining" class="auto internal xref">Section 5.6.4.3</a>):<a href="#section-5.6.4.5-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.5-2">
 <pre>
   ProbeRTTCwnd():
-    probe_rtt_cwnd = max(BBR.probe_rtt_cwnd, BBR.MinPipeCwnd)
+    probe_rtt_cwnd = BDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)
+    probe_rtt_cwnd = min(probe_rtt_cwnd, BBR.probe_rtt_cwnd)
+    probe_rtt_cwnd = max(probe_rtt_cwnd, BBR.MinPipeCwnd)
     return probe_rtt_cwnd
 
   BoundCwndForProbeRTT():

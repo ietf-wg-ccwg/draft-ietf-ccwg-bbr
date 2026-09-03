@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 25 February 2027                                 J. Beshay, Ed.
+Expires: 7 March 2027                                     J. Beshay, Ed.
                                                                     Meta
-                                                          24 August 2026
+                                                        3 September 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 February 2027.
+   This Internet-Draft will expire on 7 March 2027.
 
 Copyright Notice
 
@@ -661,8 +661,7 @@ Table of Contents
    BBR.min_rtt sample was obtained.
 
    BBR.min_rtt_expired: A boolean recording whether the BBR.min_rtt has
-   expired and is due for a refresh with an application idle period or a
-   transition into ProbeRTT state.
+   expired and is due for a refresh.
 
    BBR.MinRTTFilterLen: A constant specifying the length of the
    BBR.min_rtt min filter window, BBR.MinRTTFilterLen is 10 secs.
@@ -684,8 +683,8 @@ Table of Contents
    has completed a round trip in ProbeRTT state.
 
    BBR.probe_rtt_cwnd: The maximum congestion window allowed in ProbeRTT
-   state, computed as 0.5 * estimated_BDP based on the pre-expiration
-   BBR.min_rtt before expiring the min_rtt sample.
+   state, computed as 0.5 * estimated_BDP based on the BBR.min_rtt
+   sample before it is expired.
 
    The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
@@ -2525,12 +2524,12 @@ Table of Contents
    delay.
 
    Before expiring the BBR.min_rtt filter and entering ProbeRTT, BBR
-   saves BBR.probe_rtt_cwnd as 0.5 * estimated_BDP based on the old,
-   pre-expiration BBR.min_rtt.  This ensures that during a ProbeRTT
-   episode the flow will "remember" the BBR.min_rtt value it measured
-   during the previous filter window, providing a robust BDP estimate
-   for the C.cwnd = 0.5*BDP calculation, increasing the likelihood of
-   fully draining the bottleneck queue.
+   saves BBR.probe_rtt_cwnd as 0.5 * estimated_BDP based on the old
+   BBR.min_rtt.  This ensures that during ProbeRTT the flow will
+   "remember" the BBR.min_rtt value it measured during the previous
+   filter window, providing a robust BDP estimate for the C.cwnd =
+   0.5*BDP calculation, increasing the likelihood of fully draining the
+   bottleneck queue.
 
    The algorithm for ProbeRTT is as follows:
 
@@ -2951,8 +2950,8 @@ Table of Contents
    BBR.MinRTTFilterLen = 10 secs.  This is driven by trade-offs among
    several considerations:
 
-   *  The BBR.MinRTTFilterLen (10 seconds) is long enough to cover
-      ProbeRTT cycles (see Section 5.3.4).  This helps ensure that the
+   *  The BBR.MinRTTFilterLen (10 seconds) is long enough to cover a
+      ProbeRTT cycle (see Section 5.3.4).  This helps ensure that the
       window can contain RTT samples that are the result of data
       transmitted with C.inflight below the estimated BDP of the flow.
       Such RTT samples are important for helping to reveal the path's
@@ -3661,12 +3660,14 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    If BBR decides it needs to enter the ProbeRTT state (see
    Section 5.3.4), its goal is to quickly reduce C.inflight and drain
    the bottleneck queue, thereby allowing measurement of BBR.min_rtt.
-   To implement this mode, BBR bounds C.cwnd to the greater of
-   BBR.probe_rtt_cwnd and BBR.MinPipeCwnd, the minimal value that allows
-   pipelining (see Section 5.6.4.3):
+   To implement this mode, BBR bounds C.cwnd to be no larger than
+   BBR.probe_rtt_cwnd and no smaller than BBR.MinPipeCwnd, the minimal
+   value that allows pipelining (see Section 5.6.4.3):
 
      ProbeRTTCwnd():
-       probe_rtt_cwnd = max(BBR.probe_rtt_cwnd, BBR.MinPipeCwnd)
+       probe_rtt_cwnd = BDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)
+       probe_rtt_cwnd = min(probe_rtt_cwnd, BBR.probe_rtt_cwnd)
+       probe_rtt_cwnd = max(probe_rtt_cwnd, BBR.MinPipeCwnd)
        return probe_rtt_cwnd
 
      BoundCwndForProbeRTT():
