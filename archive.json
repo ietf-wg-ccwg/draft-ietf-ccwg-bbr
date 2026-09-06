@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-01T03:59:37.575107+00:00",
+  "timestamp": "2026-09-06T03:23:14.385600+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -8976,18 +8976,26 @@
       "labels": [],
       "body": "Simplify ProbeRTT min_rtt filtering and state handling to align with BBRv1:\n\n- Remove obsolete ProbeRTT state variables and constants:\n  - BBR.probe_rtt_min_delay\n  - BBR.probe_rtt_min_stamp\n  - BBR.probe_rtt_expired\n  - BBR.ProbeRTTInterval\n- Update min_rtt filter window length to 10 seconds (BBR.MinRTTFilterLen)\n  and use it as the single filter window governing min_rtt expiration and\n  ProbeRTT scheduling.\n- Introduce BBR.probe_rtt_cwnd state variable to store 0.5 * estimated_BDP\n  computed from the pre-expiration BBR.min_rtt before expiring the sample\n  in UpdateMinRTT().\n- Update UpdateMinRTT() upon min_rtt expiration to assign BBR.min_rtt = RS.rtt\n  and BBR.min_rtt_stamp = Now().\n- Update CheckProbeRTT(), CheckProbeRTTDone(), and ProbeRTTCwnd() to align\n  with the updated state variables and expiration logic.\n- Update related prose discussions, design rationale, parameter definitions,\n  and Appendix B test scenarios.\n",
       "createdAt": "2026-08-24T22:13:23Z",
-      "updatedAt": "2026-08-31T16:27:08Z",
+      "updatedAt": "2026-09-04T16:06:47Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "simpler-probe-rtt",
-      "headRefOid": "4f1eb989df24595e4fbb017eb1da546bd9d1c88b",
+      "headRefOid": "fe9a2c9cd06c46cf92d19ee275e22d06f7f413b4",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thank you both for the great review comments! I've incorporated all your suggestions.\r\n\r\nI also updated the ProbeRTTCwnd() a bit to make it more conservative (in a simple way), to allow the cwnd to fall in ProbeRTT mode if the queue is drained further and a lower min_rtt is discovered, causing the 0.5*estimated_BDP to fall during ProbeRTT. I also updated the prose describing the function.\r\n\r\nReady for another look. Thanks!\r\n",
+          "createdAt": "2026-09-03T15:58:08Z",
+          "updatedAt": "2026-09-03T15:58:08Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM8AAAABK0MnoA",
@@ -9080,6 +9088,119 @@
               "updatedAt": "2026-08-31T16:27:08Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABMDkZWQ",
+          "commit": {
+            "abbreviatedOid": "4f1eb98"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-03T15:53:29Z",
+          "updatedAt": "2026-09-03T15:53:29Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Thanks! Incorporated...",
+              "createdAt": "2026-09-03T15:53:29Z",
+              "updatedAt": "2026-09-03T15:54:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABMDkcGA",
+          "commit": {
+            "abbreviatedOid": "4f1eb98"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-03T15:53:34Z",
+          "updatedAt": "2026-09-03T15:53:34Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "Thanks! Incorporated...",
+              "createdAt": "2026-09-03T15:53:34Z",
+              "updatedAt": "2026-09-03T15:54:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABMDkeiQ",
+          "commit": {
+            "abbreviatedOid": "4f1eb98"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-03T15:53:38Z",
+          "updatedAt": "2026-09-03T15:53:38Z",
+          "comments": [
+            {
+              "originalPosition": 240,
+              "body": "Thanks! Incorporated...",
+              "createdAt": "2026-09-03T15:53:38Z",
+              "updatedAt": "2026-09-03T15:54:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABMDkoxw",
+          "commit": {
+            "abbreviatedOid": "4f1eb98"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-03T15:53:54Z",
+          "updatedAt": "2026-09-03T15:53:55Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "Thanks! Incorporated...",
+              "createdAt": "2026-09-03T15:53:54Z",
+              "updatedAt": "2026-09-03T15:53:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABMDk9uw",
+          "commit": {
+            "abbreviatedOid": "4f1eb98"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-03T15:54:27Z",
+          "updatedAt": "2026-09-03T15:54:28Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "Thanks! Incorporated...",
+              "createdAt": "2026-09-03T15:54:28Z",
+              "updatedAt": "2026-09-03T15:54:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABMOVFIQ",
+          "commit": {
+            "abbreviatedOid": "fe9a2c9"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "lgtm!",
+          "createdAt": "2026-09-04T16:06:47Z",
+          "updatedAt": "2026-09-04T16:06:47Z",
+          "comments": []
         }
       ]
     }
