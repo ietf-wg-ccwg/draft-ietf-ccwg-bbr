@@ -2943,12 +2943,10 @@ UpdateMaxBw() to update the BBR.max_bw estimator as follows:
                       window_length=BBR.MaxBwFilterLen)
 ~~~~
 
-InitWindowedMaxFilter() and UpdateWindowedMaxFilter() can be implemented using
-Kathleen Nichols' algorithm for tracking the minimum/maximum value of a data
-stream over some measurement window. The description of the algorithm and a
-sample implementation are available in Linux {{KN_FILTER}}. InitWindowedMaxFilter()
-initializes the filter state, and UpdateWindowedMaxFilter() updates the filter
-with a new value and returns the current maximum.
+UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols' algorithm
+for tracking the minimum/maximum value of a data stream over some measurement
+window. The description of the algorithm and a sample implementation are
+available in Linux {{KN_FILTER}}.
 
 
 ### Tracking Time for the BBR.max_bw Max Filter {#tracking-time-for-the-bbrmaxbw-max-filter}
