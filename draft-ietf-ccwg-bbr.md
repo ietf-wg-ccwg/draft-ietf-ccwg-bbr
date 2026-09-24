@@ -411,9 +411,6 @@ RS.newly_acked: The volume of data cumulatively or selectively acknowledged
 upon the ACK that was just received. (This quantity is referred to as
 "DeliveredData" in {{RFC6937}}.)
 
-RS.newly_lost: The volume of data newly marked lost upon the ACK that was
-just received.
-
 RS.tx_in_flight: C.inflight at
 the time of the transmission of the packet that has just been ACKed (the
 most recently sent packet among packets ACKed by the ACK that was just
@@ -1937,6 +1934,25 @@ BBR.inflight_longterm to its estimate of a safe level of in-flight data suggeste
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
 BBR.inflight_latest is the max delivered volume of data (RS.delivered) over
 the last round trip. Finally, it exits Startup and enters Drain.
+
+~~~~
+  CheckStartupHighLoss():
+    if (!InLossRecovery())
+      return
+
+    if (C.has_selective_acks)
+      is_high_loss = (BBR.loss_round_delivered > 0 &&
+                      (BBR.loss_round_lost / BBR.loss_round_delivered) > BBR.LossThresh &&
+                      BBR.loss_round_discontiguous_lost >= BBRStartupFullLossCnt)
+    else
+      is_high_loss = true  /* Any loss exits Startup for Reno */
+
+    if (is_high_loss)
+      BBR.undo_state = Startup
+      BBR.full_bw_reached = true
+      BBR.inflight_longterm = max(BBR.bdp, BBR.inflight_latest)
+      EnterDrain()
+~~~~
 
 The algorithm waits until all three criteria are met to filter out noise
 from burst losses, and to try to ensure the bottleneck is fully utilized
@@ -3638,9 +3654,10 @@ utilize the estimated BDP of the path, by allowing the flow to send at BBR.bw
 for a duration of BBR.min_rtt. Scaling up the BDP by BBR.cwnd_gain bounds
 in-flight data to a small multiple of the BDP, to handle common network and
 receiver behavior, such as delayed, stretched, or aggregated ACKs {{A15}}.
-The "quanta" term allows enough quanta in flight on the sending and
-receiving hosts to reach high throughput even in environments using
-offload mechanisms.
+QuantizationBudget() calculates a "quanta" term that allows enough
+in flight on the sending and receiving hosts to reach high throughput even in
+environments using offload mechanisms. It ensures the inflight limit accommodates
+the offload budget and the minimum cwnd for pipelining.
 
 #### Minimum cwnd for Pipelining {#minimum-cwnd-for-pipelining}
 
