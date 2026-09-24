@@ -3654,7 +3654,7 @@ utilize the estimated BDP of the path, by allowing the flow to send at BBR.bw
 for a duration of BBR.min_rtt. Scaling up the BDP by BBR.cwnd_gain bounds
 in-flight data to a small multiple of the BDP, to handle common network and
 receiver behavior, such as delayed, stretched, or aggregated ACKs {{A15}}.
-QuantizationBudget() is used to add a "quanta" term that allows enough quanta in
+QuantizationBudget() is used to add a "quanta" term that allows enough in
 flight on the sending and receiving hosts to reach high throughput even in
 environments using offload mechanisms. It ensures the inflight limit accommodates
 the offload budget and the minimum cwnd for pipelining.
