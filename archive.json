@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-10T03:30:27.441515+00:00",
+  "timestamp": "2026-09-27T04:08:29.780506+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -9219,6 +9219,113 @@
               "body": "I think this might be a bit clearer, but feel free to ignore.\n\n```suggestion\ncomputed as 0.5 * estimated_BDP based on the BBR.min_rtt sample when\nentering ProbeRTT, before it has expired.\n```",
               "createdAt": "2026-09-09T17:45:41Z",
               "updatedAt": "2026-09-09T17:48:59Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 126,
+      "id": "PR_kwDOL3MllM8AAAABE_swMA",
+      "title": "Define undefined variables and methods",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/126",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR defines undefined variables and methods. \r\nSpecifically:\r\n- Adds pseudocode block for `CheckStartupHighLoss()` based on the surrounding prose description.\r\n- Modifies prose to explicitly define `QuantizationBudget()` in terms of the \"quanta\" logic it handles.\r\n- Removes the defined but entirely unused variable `RS.newly_lost`.\r\n\r\n---\r\n*PR created automatically by Jules for task [2443050235493050813](https://jules.google.com/task/2443050235493050813) started by @ianswett*",
+      "createdAt": "2026-09-24T19:33:09Z",
+      "updatedAt": "2026-09-24T19:40:54Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "add-missing-definitions-2443050235493050813",
+      "headRefOid": "4093ad723edf3d0f2063d15db0cdb15b793a45ae",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPHSslA",
+          "commit": {
+            "abbreviatedOid": "c436dec"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-24T19:34:59Z",
+          "updatedAt": "2026-09-24T19:34:59Z",
+          "comments": [
+            {
+              "originalPosition": 49,
+              "body": "```suggestion\nUpdateWindowedMaxFilter() can be implemented using Kathleen Nichols' algorithm\nfor tracking the minimum/maximum value of a data stream over some measurement\nwindow. The description of the algorithm and a sample implementation are\navailable in Linux {{KN_FILTER}}.\n```",
+              "createdAt": "2026-09-24T19:34:59Z",
+              "updatedAt": "2026-09-24T19:34:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPHUHzg",
+          "commit": {
+            "abbreviatedOid": "94f684b"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-24T19:36:55Z",
+          "updatedAt": "2026-09-24T19:36:56Z",
+          "comments": [
+            {
+              "originalPosition": 46,
+              "body": "```suggestion\nQuantizationBudget() is used to add a \"quanta\" term that allows enough in\nflight on the sending and receiving hosts to reach high throughput even in\nenvironments using offload mechanisms. It ensures the inflight limit accommodates\nthe offload budget and the minimum cwnd for pipelining.\n```",
+              "createdAt": "2026-09-24T19:36:55Z",
+              "updatedAt": "2026-09-24T19:36:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPHVVWg",
+          "commit": {
+            "abbreviatedOid": "79e0b0c"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-24T19:38:55Z",
+          "updatedAt": "2026-09-24T19:38:55Z",
+          "comments": [
+            {
+              "originalPosition": 44,
+              "body": "```suggestion\nQuantizationBudget() calculates a \"quanta\" term that allows enough\nin flight on the sending and receiving hosts to reach high throughput even in\n```",
+              "createdAt": "2026-09-24T19:38:55Z",
+              "updatedAt": "2026-09-24T19:38:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPHVyxQ",
+          "commit": {
+            "abbreviatedOid": "4093ad7"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-24T19:39:43Z",
+          "updatedAt": "2026-09-24T19:39:43Z",
+          "comments": [
+            {
+              "originalPosition": 44,
+              "body": "I think we can drop \"on the sending and receiving hosts\" here?\n\n```suggestion\nin flight to reach high throughput even in\n```",
+              "createdAt": "2026-09-24T19:39:43Z",
+              "updatedAt": "2026-09-24T19:39:43Z"
             }
           ]
         }
