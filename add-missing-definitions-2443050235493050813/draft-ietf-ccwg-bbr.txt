@@ -1905,6 +1905,9 @@ Table of Contents
   CheckStartupDone():
     if (BBR.state != Startup)
       return
+    if (BBR.full_bw_reached)
+      EnterDrain()
+      return
     if (!InLossRecovery())
       return
 
