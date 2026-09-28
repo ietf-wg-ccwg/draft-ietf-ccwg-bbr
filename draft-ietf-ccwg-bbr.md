@@ -1887,7 +1887,6 @@ new data, and when the delivery rate sample is not application-limited
     BBR.full_bw_now = (BBR.full_bw_count >= 3)
     if (BBR.full_bw_now)
       BBR.full_bw_reached = true
-      EnterDrain()
 ~~~~
 
 BBR waits three packet-timed round trips to have reasonable evidence that the
