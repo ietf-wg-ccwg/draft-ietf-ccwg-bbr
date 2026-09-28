@@ -1813,11 +1813,6 @@ Table of Contents
    estimate.  The second looks for packet loss.  The following
    subsections discuss these estimators.
 
-     CheckStartupDone():
-       CheckStartupHighLoss()
-       if (BBR.state == Startup && BBR.full_bw_reached)
-         EnterDrain()
-
 5.3.1.2.  Exiting Acceleration Based on Bandwidth Plateau
 
    In phases where BBR is accelerating to probe the available bandwidth
@@ -1865,6 +1860,7 @@ Table of Contents
        BBR.full_bw_now = (BBR.full_bw_count >= 3)
        if (BBR.full_bw_now)
          BBR.full_bw_reached = true
+         EnterDrain()
 
    BBR waits three packet-timed round trips to have reasonable evidence
    that the sender is not detecting a delivery-rate plateau that was
@@ -1896,17 +1892,19 @@ Table of Contents
    CheckStartupHighLoss() exits Startup based on packet loss if any
    packet loss is detected during fast recovery.
 
-   If CheckStartupHighLoss() exits Startup based on packet loss, it
-   takes the following steps.  First, it sets BBR.undo_state = Startup
-   (to enable an undo of this step if the loss recovery is later
-   detected to be spurious).  Second, it sets BBR.full_bw_reached =
-   true.  Then it sets BBR.inflight_longterm to its estimate of a safe
-   level of in-flight data suggested by these losses, which is
-   max(BBR.bdp, BBR.inflight_latest), where BBR.inflight_latest is the
-   max delivered volume of data (RS.delivered) over the last round trip.
-   Finally, it exits Startup and enters Drain.
+   If CheckStartupDone() exits Startup based on packet loss, it takes
+   the following steps.  First, it sets BBR.undo_state = Startup (to
+   enable an undo of this step if the loss recovery is later detected to
+   be spurious).  Second, it sets BBR.full_bw_reached = true.  Then it
+   sets BBR.inflight_longterm to its estimate of a safe level of in-
+   flight data suggested by these losses, which is max(BBR.bdp,
+   BBR.inflight_latest), where BBR.inflight_latest is the max delivered
+   volume of data (RS.delivered) over the last round trip.  Finally, it
+   exits Startup and enters Drain.
 
-  CheckStartupHighLoss():
+  CheckStartupDone():
+    if (BBR.state != Startup)
+      return
     if (!InLossRecovery())
       return
 
