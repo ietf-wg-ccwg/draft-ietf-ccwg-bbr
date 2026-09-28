@@ -1945,7 +1945,7 @@ the last round trip. Finally, it exits Startup and enters Drain.
                       (BBR.loss_round_lost / BBR.loss_round_delivered) > BBR.LossThresh &&
                       BBR.loss_round_discontiguous_lost >= BBRStartupFullLossCnt)
     else
-      is_high_loss = true  /* Any loss exits Startup for Reno */
+      is_high_loss = true  /* Any loss exits Startup */
 
     if (is_high_loss)
       BBR.undo_state = Startup
