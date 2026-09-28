@@ -1933,6 +1933,9 @@ the last round trip. Finally, it exits Startup and enters Drain.
   CheckStartupDone():
     if (BBR.state != Startup)
       return
+    if (BBR.full_bw_reached)
+      EnterDrain()
+      return
     if (!InLossRecovery())
       return
 
