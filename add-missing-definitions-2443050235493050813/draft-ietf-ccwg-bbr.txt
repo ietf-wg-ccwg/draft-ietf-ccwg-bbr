@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 28 March 2027                                    J. Beshay, Ed.
+Expires: 1 April 2027                                     J. Beshay, Ed.
                                                                     Meta
-                                                       24 September 2026
+                                                       28 September 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 28 March 2027.
+   This Internet-Draft will expire on 1 April 2027.
 
 Copyright Notice
 
@@ -1915,7 +1915,7 @@ Table of Contents
                       (BBR.loss_round_lost / BBR.loss_round_delivered) > BBR.LossThresh &&
                       BBR.loss_round_discontiguous_lost >= BBRStartupFullLossCnt)
     else
-      is_high_loss = true  /* Any loss exits Startup for Reno */
+      is_high_loss = true  /* Any loss exits Startup */
 
     if (is_high_loss)
       BBR.undo_state = Startup
