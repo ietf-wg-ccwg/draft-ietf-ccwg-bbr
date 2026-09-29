@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 1 April 2027                                     J. Beshay, Ed.
+Expires: 2 April 2027                                     J. Beshay, Ed.
                                                                     Meta
-                                                       28 September 2026
+                                                       29 September 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 April 2027.
+   This Internet-Draft will expire on 2 April 2027.
 
 Copyright Notice
 
@@ -3610,10 +3610,10 @@ ProbeRTT       | decel  | 1.0    | 0.5  | bw_shortterm | 0.85*inflight_longterm
    BBR.cwnd_gain bounds in-flight data to a small multiple of the BDP,
    to handle common network and receiver behavior, such as delayed,
    stretched, or aggregated ACKs [A15].  QuantizationBudget() calculates
-   a "quanta" term that allows enough in flight on the sending and
-   receiving hosts to reach high throughput even in environments using
-   offload mechanisms.  It ensures the inflight limit accommodates the
-   offload budget and the minimum cwnd for pipelining.
+   a "quanta" term that allows enough in flight to reach high throughput
+   even in environments using offload mechanisms.  It ensures the
+   inflight limit accommodates the offload budget and the minimum cwnd
+   for pipelining.
 
 5.6.4.3.  Minimum cwnd for Pipelining
 
