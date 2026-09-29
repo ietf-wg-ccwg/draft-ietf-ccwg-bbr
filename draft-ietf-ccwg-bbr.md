@@ -1935,7 +1935,7 @@ the last round trip. Finally, it exits Startup and enters Drain.
     if (BBR.full_bw_reached)
       EnterDrain()
       return
-    if (!InLossRecovery())
+    if (!InLossRecovery() || !BBR.loss_round_start)
       return
 
     if (C.has_selective_acks)
