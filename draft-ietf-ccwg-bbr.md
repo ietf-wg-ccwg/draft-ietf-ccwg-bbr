@@ -411,9 +411,6 @@ RS.newly_acked: The volume of data cumulatively or selectively acknowledged
 upon the ACK that was just received. (This quantity is referred to as
 "DeliveredData" in {{RFC6937}}.)
 
-RS.newly_lost: The volume of data newly marked lost upon the ACK that was
-just received.
-
 RS.tx_in_flight: C.inflight at
 the time of the transmission of the packet that has just been ACKed (the
 most recently sent packet among packets ACKed by the ACK that was just
@@ -3638,9 +3635,10 @@ utilize the estimated BDP of the path, by allowing the flow to send at BBR.bw
 for a duration of BBR.min_rtt. Scaling up the BDP by BBR.cwnd_gain bounds
 in-flight data to a small multiple of the BDP, to handle common network and
 receiver behavior, such as delayed, stretched, or aggregated ACKs {{A15}}.
-The "quanta" term allows enough quanta in flight on the sending and
-receiving hosts to reach high throughput even in environments using
-offload mechanisms.
+QuantizationBudget() calculates a "quanta" term that allows enough
+in flight to reach high throughput even in
+environments using offload mechanisms. It ensures the inflight limit accommodates
+the offload budget and the minimum cwnd for pipelining.
 
 #### Minimum cwnd for Pipelining {#minimum-cwnd-for-pipelining}
 
