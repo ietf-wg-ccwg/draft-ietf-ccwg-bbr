@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-27T04:08:29.780506+00:00",
+  "timestamp": "2026-09-29T04:41:58.924891+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -9234,15 +9234,15 @@
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
-      "body": "This PR defines undefined variables and methods. \r\nSpecifically:\r\n- Adds pseudocode block for `CheckStartupHighLoss()` based on the surrounding prose description.\r\n- Modifies prose to explicitly define `QuantizationBudget()` in terms of the \"quanta\" logic it handles.\r\n- Removes the defined but entirely unused variable `RS.newly_lost`.\r\n\r\n---\r\n*PR created automatically by Jules for task [2443050235493050813](https://jules.google.com/task/2443050235493050813) started by @ianswett*",
+      "body": "This PR defines undefined variables and methods. \r\nSpecifically:\r\n- Adds pseudocode block for `CheckStartupHighLoss()` based on the surrounding prose description.\r\n\r\n---\r\n*PR created automatically by Jules for task [2443050235493050813](https://jules.google.com/task/2443050235493050813) started by @ianswett*",
       "createdAt": "2026-09-24T19:33:09Z",
-      "updatedAt": "2026-09-24T19:40:54Z",
+      "updatedAt": "2026-09-29T01:20:00Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-missing-definitions-2443050235493050813",
-      "headRefOid": "4093ad723edf3d0f2063d15db0cdb15b793a45ae",
+      "headRefOid": "2d4de23808f10ca831dd08ff6b5be7cdde7d4426",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -9328,8 +9328,253 @@
               "updatedAt": "2026-09-24T19:39:43Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPntzuw",
+          "commit": {
+            "abbreviatedOid": "4093ad7"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-28T18:53:26Z",
+          "updatedAt": "2026-09-28T18:53:27Z",
+          "comments": [
+            {
+              "originalPosition": 24,
+              "body": "Avoid mentioning Reno?\n```suggestion\n      is_high_loss = true  /* Any loss exits Startup */\n```",
+              "createdAt": "2026-09-28T18:53:26Z",
+              "updatedAt": "2026-09-28T18:53:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPnvRbQ",
+          "commit": {
+            "abbreviatedOid": "4093ad7"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-28T18:55:30Z",
+          "updatedAt": "2026-09-28T18:55:30Z",
+          "comments": [
+            {
+              "originalPosition": 30,
+              "body": "This EnterDrain() duplicates the logic in CheckStartupDone:\n```\n  CheckStartupDone():\n    CheckStartupHighLoss()\n    if (BBR.state == Startup && BBR.full_bw_reached)\n      EnterDrain()\n```\n```suggestion\n```",
+              "createdAt": "2026-09-28T18:55:30Z",
+              "updatedAt": "2026-09-28T18:55:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPo1XBg",
+          "commit": {
+            "abbreviatedOid": "07d4546"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-28T20:45:12Z",
+          "updatedAt": "2026-09-28T20:49:45Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "This would trigger out of ProbeBW_Up too. I think the only EnterDrain() should be in CheckStartupDone based upon high_loss or full_bw_reached",
+              "createdAt": "2026-09-28T20:45:13Z",
+              "updatedAt": "2026-09-28T20:49:45Z"
+            },
+            {
+              "originalPosition": 50,
+              "body": "Instead of the EnterDrain() above.\r\n```suggestion\r\n    if (BBR.state != Startup)\r\n      return\r\n    if (BBR.full_bw_reached)\r\n      EnterDrain()\r\n      return\r\n    if (!InLossRecovery())\r\n      return\r\n```",
+              "createdAt": "2026-09-28T20:49:38Z",
+              "updatedAt": "2026-09-28T20:50:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPo69Zg",
+          "commit": {
+            "abbreviatedOid": "420992f"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-28T20:53:34Z",
+          "updatedAt": "2026-09-28T20:53:34Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\n```",
+              "createdAt": "2026-09-28T20:53:34Z",
+              "updatedAt": "2026-09-28T20:53:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPo8DWw",
+          "commit": {
+            "abbreviatedOid": "967f5dd"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-28T20:55:10Z",
+          "updatedAt": "2026-09-28T20:55:11Z",
+          "comments": [
+            {
+              "originalPosition": 44,
+              "body": "The suggestion sounds reasonable to me.",
+              "createdAt": "2026-09-28T20:55:11Z",
+              "updatedAt": "2026-09-28T20:55:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPo8H0w",
+          "commit": {
+            "abbreviatedOid": "967f5dd"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "lgtm",
+          "createdAt": "2026-09-28T20:55:17Z",
+          "updatedAt": "2026-09-28T20:55:17Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPo8INg",
+          "commit": {
+            "abbreviatedOid": "967f5dd"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-28T20:55:18Z",
+          "updatedAt": "2026-09-28T20:55:18Z",
+          "comments": [
+            {
+              "originalPosition": 44,
+              "body": "Should I be checking !BBR.round_start as well?  I believe we only evaluate this at the end of a round?",
+              "createdAt": "2026-09-28T20:55:18Z",
+              "updatedAt": "2026-09-28T20:55:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPpL8tQ",
+          "commit": {
+            "abbreviatedOid": "967f5dd"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Nice clean-up. Thank you! Had a few suggestions.\n",
+          "createdAt": "2026-09-28T21:19:54Z",
+          "updatedAt": "2026-09-28T23:06:18Z",
+          "comments": [
+            {
+              "originalPosition": 37,
+              "body": "IMHO placing the pseudocode here is a little confusing. This places all the startup exit pseudocode inside a section entitled:\n\n     #### Exiting Startup Based on Packet Loss {#exiting-startup-based-on-packet-loss}\n\nBut this CheckStartupDone() code exits Startup based on either bandwidth plateau or packet loss.\n\nSo, for a home for the CheckStartupDone() pseudocode I would suggest creating a new subsection here called something more general, like:\n\n```\n#### Exiting Startup\n```\n",
+              "createdAt": "2026-09-28T21:19:54Z",
+              "updatedAt": "2026-09-28T23:06:18Z"
+            },
+            {
+              "originalPosition": 61,
+              "body": "The phrase \"The algorithm waits until all three criteria are met\" is referring narrowly to the loss-based exit of startup. But now with the full CheckStartupDone() code above this point, which handles both bandwidth plateau exit and loss-based exit, the phrase feels a little confusing.\n\nHow about rewording this phase along the lines:\n\n\"The algorithm waits until all three criteria are met to filter out noise...\" -> \"Overall, the algorithm for exiting Startup aims to filter out noise...\"\n",
+              "createdAt": "2026-09-28T22:54:55Z",
+              "updatedAt": "2026-09-28T23:06:18Z"
+            },
+            {
+              "originalPosition": 44,
+              "body": "Yes, exactly.\n\n````\n    if (!InLossRecovery() || !BBR.loss_round_start)\n        return\n````\n",
+              "createdAt": "2026-09-28T22:56:19Z",
+              "updatedAt": "2026-09-28T23:06:19Z"
+            },
+            {
+              "originalPosition": 50,
+              "body": "BBR.loss_round_discontiguous_lost does not seem defined yet?\n\nI guess this PR should define it.\n\nIt can be zeroed in OnInit() and incremented in NoteLoss().\n\nIt also needs to be zeroed each round trip during loss recovery. i.e., when BBR.loss_round_start is true. But we have to be careful about the ordering, so that it's zeroed after it is checked here.\n",
+              "createdAt": "2026-09-28T23:03:15Z",
+              "updatedAt": "2026-09-28T23:06:19Z"
+            },
+            {
+              "originalPosition": 50,
+              "body": "Here's how it's handled in Linux TCP BBRv3, for what it's worth:\n\nhttps://github.com/google/bbr/blob/90210de4b779d40496dee0b89081780eeddf2a60/net/ipv4/tcp_bbr.c#L1890\n",
+              "createdAt": "2026-09-28T23:04:27Z",
+              "updatedAt": "2026-09-28T23:06:19Z"
+            },
+            {
+              "originalPosition": 44,
+              "body": "Agreed. Good idea. Thanks!\n",
+              "createdAt": "2026-09-28T23:05:36Z",
+              "updatedAt": "2026-09-28T23:06:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPq19sA",
+          "commit": {
+            "abbreviatedOid": "3f2dd42"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Thanks for the review, I created #127 to split off the easy parts of this PR.",
+          "createdAt": "2026-09-29T01:11:43Z",
+          "updatedAt": "2026-09-29T01:19:31Z",
+          "comments": [
+            {
+              "originalPosition": 37,
+              "body": "This is already very indended, so I would like to avoid more nesting, but maybe we can put that at ###?",
+              "createdAt": "2026-09-29T01:11:43Z",
+              "updatedAt": "2026-09-29T01:19:31Z"
+            },
+            {
+              "originalPosition": 44,
+              "body": "```suggestion\n    if (!InLossRecovery() || !BBR.loss_round_start)\n```",
+              "createdAt": "2026-09-29T01:12:09Z",
+              "updatedAt": "2026-09-29T01:19:31Z"
+            }
+          ]
         }
       ]
+    },
+    {
+      "number": 127,
+      "id": "PR_kwDOL3MllM8AAAABFm3IlQ",
+      "title": "Define QuantizationBudget() and remove unused RS.newly_lost",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/127",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [
+        "ianswett"
+      ],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "Split from PR #126",
+      "createdAt": "2026-09-29T01:17:55Z",
+      "updatedAt": "2026-09-29T01:18:04Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-quantization",
+      "headRefOid": "a27fa4fd9c216207b4b003f097bd7347ac2e5b72",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
