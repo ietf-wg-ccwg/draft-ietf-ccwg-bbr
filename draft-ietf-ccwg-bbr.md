@@ -1839,13 +1839,6 @@ During Startup, BBR estimates whether the pipe is full using two estimators.
 The first looks for a plateau in the BBR.max_bw estimate. The second looks
 for packet loss. The following subsections discuss these estimators.
 
-~~~~
-  CheckStartupDone():
-    CheckStartupHighLoss()
-    if (BBR.state == Startup && BBR.full_bw_reached)
-      EnterDrain()
-~~~~
-
 
 #### Exiting Acceleration Based on Bandwidth Plateau {#exiting-acceleration-based-on-bandwidth-plateau}
 
@@ -1926,7 +1919,7 @@ can only detect one packet loss per round trip, CheckStartupHighLoss() exits
 Startup based on packet loss if any packet loss is detected during fast
 recovery.
 
-If CheckStartupHighLoss() exits Startup based on packet loss, it takes the
+If CheckStartupDone() exits Startup based on packet loss, it takes the
 following steps. First, it sets BBR.undo_state = Startup (to enable an
 undo of this step if the loss recovery is later detected to be spurious).
 Second, it sets BBR.full_bw_reached = true. Then it sets
@@ -1934,6 +1927,30 @@ BBR.inflight_longterm to its estimate of a safe level of in-flight data suggeste
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
 BBR.inflight_latest is the max delivered volume of data (RS.delivered) over
 the last round trip. Finally, it exits Startup and enters Drain.
+
+~~~~
+  CheckStartupDone():
+    if (BBR.state != Startup)
+      return
+    if (BBR.full_bw_reached)
+      EnterDrain()
+      return
+    if (!InLossRecovery() || !BBR.loss_round_start)
+      return
+
+    if (C.has_selective_acks)
+      is_high_loss = (BBR.loss_round_delivered > 0 &&
+                      (BBR.loss_round_lost / BBR.loss_round_delivered) > BBR.LossThresh &&
+                      BBR.loss_round_discontiguous_lost >= BBRStartupFullLossCnt)
+    else
+      is_high_loss = true  /* Any loss exits Startup */
+
+    if (is_high_loss)
+      BBR.undo_state = Startup
+      BBR.full_bw_reached = true
+      BBR.inflight_longterm = max(BBR.bdp, BBR.inflight_latest)
+      EnterDrain()
+~~~~
 
 The algorithm waits until all three criteria are met to filter out noise
 from burst losses, and to try to ensure the bottleneck is fully utilized
