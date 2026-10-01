@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-29T04:41:58.924891+00:00",
+  "timestamp": "2026-10-01T04:38:09.708247+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -9236,7 +9236,7 @@
       "labels": [],
       "body": "This PR defines undefined variables and methods. \r\nSpecifically:\r\n- Adds pseudocode block for `CheckStartupHighLoss()` based on the surrounding prose description.\r\n\r\n---\r\n*PR created automatically by Jules for task [2443050235493050813](https://jules.google.com/task/2443050235493050813) started by @ianswett*",
       "createdAt": "2026-09-24T19:33:09Z",
-      "updatedAt": "2026-09-29T01:20:00Z",
+      "updatedAt": "2026-09-29T15:13:27Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
@@ -9543,6 +9543,26 @@
               "updatedAt": "2026-09-29T01:19:31Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPyiCvg",
+          "commit": {
+            "abbreviatedOid": "2d4de23"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-09-29T15:13:27Z",
+          "updatedAt": "2026-09-29T15:13:27Z",
+          "comments": [
+            {
+              "originalPosition": 37,
+              "body": "Here I am proposing an \"Exiting Startup\" subsection at the \"4 hash mark\" indentation level, which is the same indentation level as the preceding \"Exiting Startup Based on Packet Loss\" level. :-)\n\nThis is all in a  \"3 hash mark\" level subsection called \"Startup\". IMHO it would be confusing to have a \"3 hash mark\" level subsection called \"Exiting Startup\", if I understand your proposal correctly.\n\nTo try to clarify my proposal, what I'm proposing is a structure something like:\n\n```\n### Startup ...\n\n...\n\nDuring Startup, BBR estimates whether the pipe is full using two estimators.\nThe first looks for a plateau in the BBR.max_bw estimate. The second looks\nfor packet loss. The following subsections discuss these estimators.\n\n#### Startup Dynamics ...\n\n#### Exiting Acceleration Based on Bandwidth Plateau ...\n\n#### Exiting Startup Based on Packet Loss ...\n\n#### Overall Logic for Exiting Startup ...\n\n### ProbeBW ...\n```\n\nWDYT?\n\n",
+              "createdAt": "2026-09-29T15:13:27Z",
+              "updatedAt": "2026-09-29T15:13:27Z"
+            }
+          ]
         }
       ]
     },
@@ -9551,7 +9571,7 @@
       "id": "PR_kwDOL3MllM8AAAABFm3IlQ",
       "title": "Define QuantizationBudget() and remove unused RS.newly_lost",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/127",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -9562,19 +9582,35 @@
       ],
       "body": "Split from PR #126",
       "createdAt": "2026-09-29T01:17:55Z",
-      "updatedAt": "2026-09-29T01:18:04Z",
+      "updatedAt": "2026-09-30T20:29:51Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-quantization",
       "headRefOid": "a27fa4fd9c216207b4b003f097bd7347ac2e5b72",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-09-30T20:29:51Z",
+      "mergedAt": "2026-09-30T20:29:51Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "d5551da13a436992f12694ee17660e5955b05e56"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABPywIKw",
+          "commit": {
+            "abbreviatedOid": "a27fa4f"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-09-29T15:31:37Z",
+          "updatedAt": "2026-09-29T15:31:37Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
