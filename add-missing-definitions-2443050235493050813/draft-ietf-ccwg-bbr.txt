@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 2 April 2027                                     J. Beshay, Ed.
+Expires: 8 April 2027                                     J. Beshay, Ed.
                                                                     Meta
-                                                       29 September 2026
+                                                          5 October 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 April 2027.
+   This Internet-Draft will expire on 8 April 2027.
 
 Copyright Notice
 
@@ -1813,6 +1813,28 @@ Table of Contents
    estimate.  The second looks for packet loss.  The following
    subsections discuss these estimators.
 
+  CheckStartupDone():
+    if (BBR.state != Startup)
+      return
+    if (BBR.full_bw_reached)
+      EnterDrain()
+      return
+    if (!InLossRecovery() || !BBR.loss_round_start)
+      return
+
+    if (C.has_selective_acks)
+      is_high_loss = (BBR.loss_round_delivered > 0 &&
+                      (BBR.loss_round_lost / BBR.loss_round_delivered) > BBR.LossThresh &&
+                      BBR.loss_round_discontiguous_lost >= BBRStartupFullLossCnt)
+    else
+      is_high_loss = true  /* Any loss exits Startup */
+
+    if (is_high_loss)
+      BBR.undo_state = Startup
+      BBR.full_bw_reached = true
+      BBR.inflight_longterm = max(BBR.bdp, BBR.inflight_latest)
+      EnterDrain()
+
 5.3.1.2.  Exiting Acceleration Based on Bandwidth Plateau
 
    In phases where BBR is accelerating to probe the available bandwidth
@@ -1900,28 +1922,6 @@ Table of Contents
    BBR.inflight_latest), where BBR.inflight_latest is the max delivered
    volume of data (RS.delivered) over the last round trip.  Finally, it
    exits Startup and enters Drain.
-
-  CheckStartupDone():
-    if (BBR.state != Startup)
-      return
-    if (BBR.full_bw_reached)
-      EnterDrain()
-      return
-    if (!InLossRecovery() || !BBR.loss_round_start)
-      return
-
-    if (C.has_selective_acks)
-      is_high_loss = (BBR.loss_round_delivered > 0 &&
-                      (BBR.loss_round_lost / BBR.loss_round_delivered) > BBR.LossThresh &&
-                      BBR.loss_round_discontiguous_lost >= BBRStartupFullLossCnt)
-    else
-      is_high_loss = true  /* Any loss exits Startup */
-
-    if (is_high_loss)
-      BBR.undo_state = Startup
-      BBR.full_bw_reached = true
-      BBR.inflight_longterm = max(BBR.bdp, BBR.inflight_latest)
-      EnterDrain()
 
    The algorithm waits until all three criteria are met to filter out
    noise from burst losses, and to try to ensure the bottleneck is fully
