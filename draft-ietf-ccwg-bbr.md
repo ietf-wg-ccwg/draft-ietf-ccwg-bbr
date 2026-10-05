@@ -706,8 +706,8 @@ BBR.probe_rtt_round_done: A boolean recording whether the connection has
 completed a round trip in ProbeRTT state.
 
 BBR.probe_rtt_cwnd: The maximum congestion window allowed in ProbeRTT state,
-computed as 0.5 * estimated_BDP based on the BBR.min_rtt sample before
-it is expired.
+computed as 0.5 * estimated_BDP based on the BBR.min_rtt sample when
+entering ProbeRTT, before it has expired.
 
 The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to
