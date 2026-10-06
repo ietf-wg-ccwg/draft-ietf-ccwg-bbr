@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-01T04:38:09.708247+00:00",
+  "timestamp": "2026-10-06T05:18:33.579445+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -8976,13 +8976,13 @@
       "labels": [],
       "body": "Simplify ProbeRTT min_rtt filtering and state handling to align with BBRv1:\n\n- Remove obsolete ProbeRTT state variables and constants:\n  - BBR.probe_rtt_min_delay\n  - BBR.probe_rtt_min_stamp\n  - BBR.probe_rtt_expired\n  - BBR.ProbeRTTInterval\n- Update min_rtt filter window length to 10 seconds (BBR.MinRTTFilterLen)\n  and use it as the single filter window governing min_rtt expiration and\n  ProbeRTT scheduling.\n- Introduce BBR.probe_rtt_cwnd state variable to store 0.5 * estimated_BDP\n  computed from the pre-expiration BBR.min_rtt before expiring the sample\n  in UpdateMinRTT().\n- Update UpdateMinRTT() upon min_rtt expiration to assign BBR.min_rtt = RS.rtt\n  and BBR.min_rtt_stamp = Now().\n- Update CheckProbeRTT(), CheckProbeRTTDone(), and ProbeRTTCwnd() to align\n  with the updated state variables and expiration logic.\n- Update related prose discussions, design rationale, parameter definitions,\n  and Appendix B test scenarios.\n",
       "createdAt": "2026-08-24T22:13:23Z",
-      "updatedAt": "2026-09-09T17:48:59Z",
+      "updatedAt": "2026-10-05T21:00:53Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "simpler-probe-rtt",
-      "headRefOid": "fe9a2c9cd06c46cf92d19ee275e22d06f7f413b4",
+      "headRefOid": "6243d8719193c3973fc6327a7c8424a260a211ed",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -8994,6 +8994,13 @@
           "body": "Thank you both for the great review comments! I've incorporated all your suggestions.\r\n\r\nI also updated the ProbeRTTCwnd() a bit to make it more conservative (in a simple way), to allow the cwnd to fall in ProbeRTT mode if the queue is drained further and a lower min_rtt is discovered, causing the 0.5*estimated_BDP to fall during ProbeRTT. I also updated the prose describing the function.\r\n\r\nReady for another look. Thanks!\r\n",
           "createdAt": "2026-09-03T15:58:08Z",
           "updatedAt": "2026-09-03T15:58:08Z"
+        },
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Incorporated Ian's last suggestion. Waiting for checks to complete, but it says: \"Queued \u2014 Waiting to run this check...\r\n\"...\r\n",
+          "createdAt": "2026-10-05T21:00:53Z",
+          "updatedAt": "2026-10-05T21:00:53Z"
         }
       ],
       "reviews": [
@@ -9227,22 +9234,24 @@
     {
       "number": 126,
       "id": "PR_kwDOL3MllM8AAAABE_swMA",
-      "title": "Define undefined variables and methods",
+      "title": "Define CheckStartupHighLoss() / Update CheckStartupDone()",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/126",
       "state": "OPEN",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
-      "labels": [],
-      "body": "This PR defines undefined variables and methods. \r\nSpecifically:\r\n- Adds pseudocode block for `CheckStartupHighLoss()` based on the surrounding prose description.\r\n\r\n---\r\n*PR created automatically by Jules for task [2443050235493050813](https://jules.google.com/task/2443050235493050813) started by @ianswett*",
+      "labels": [
+        "Editorial"
+      ],
+      "body": "Started as defining CheckStartupHighLoss(), but now there's a slightly wider question of how to structure the pseudocode.\r\n\r\n---\r\n*PR created automatically by Jules for task [2443050235493050813](https://jules.google.com/task/2443050235493050813) started by @ianswett*",
       "createdAt": "2026-09-24T19:33:09Z",
-      "updatedAt": "2026-09-29T15:13:27Z",
+      "updatedAt": "2026-10-05T20:48:00Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-missing-definitions-2443050235493050813",
-      "headRefOid": "2d4de23808f10ca831dd08ff6b5be7cdde7d4426",
+      "headRefOid": "b5986b846ad183ada119ca8dc96473980b044268",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -9582,7 +9591,7 @@
       ],
       "body": "Split from PR #126",
       "createdAt": "2026-09-29T01:17:55Z",
-      "updatedAt": "2026-09-30T20:29:51Z",
+      "updatedAt": "2026-10-05T20:40:02Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
