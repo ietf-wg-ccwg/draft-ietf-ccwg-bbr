@@ -629,20 +629,11 @@ increases in BBR.full_bw.
 
 ## ProbeBW State {#probe-bw-state}
 
-BBR.ack_phase: The current phase in a state machine that tracks the meaning of
-the ACK feedback the connection is receiving, with respect to the bandwidth
-probing. The phases are as follows:
+BBR.is_bw_probe_stopping: A boolean tracking whether the flow has stopped
+bandwidth probing but is still receiving ACK feedback from it.
 
-~~~~
-  ACKS_INIT: not probing bandwidth; not getting probe feedback
-  ACKS_REFILLING: sending at estimated bandwidth to fill pipe
-  ACKS_PROBE_STARTING: inflight rising to probe bandwidth
-  ACKS_PROBE_FEEDBACK: getting feedback from bandwidth probing
-  ACKS_PROBE_STOPPING: stopped bandwidth probing; still getting feedback
-~~~~
-
-
-BBR.is_bw_probe_sample: A boolean tracking whether the connection is receiving rate samples from a bandwidth-probing phase.
+BBR.check_probe_loss: A boolean tracking whether BBR checks packet losses as
+feedback from a bandwidth-probing phase.
 
 BBR.is_loss_in_round: A boolean tracking whether there was a packet loss
 detected in the current round trip.
@@ -1729,10 +1720,10 @@ steps:
     BBR.bw_probe_up_acked = 0
     BBR.bw_probe_up_rounds = 0
     BBR.rounds_since_probe_up = 0
-    BBR.is_bw_probe_sample = false
+    BBR.check_probe_loss = false
     BBR.prev_probe_too_high = false
     BBR.prev_probe_precautionary = false
-    BBR.ack_phase = ACKS_INIT
+    BBR.is_bw_probe_stopping = false
     BBR.cycle_stamp = 0
     BBR.bw_probe_wait = 0
     ResetCongestionSignals()
@@ -2356,7 +2347,7 @@ The core logic for entering each state:
     BBR.probe_up_acked_per_inc = Infinity /* not growing BBR.inflight_longterm */
     PickProbeWait()
     BBR.cycle_stamp = Now()  /* start wall clock */
-    BBR.ack_phase  = ACKS_PROBE_STOPPING
+    BBR.is_bw_probe_stopping = true
     StartRound()
     BBR.state = ProbeBW_DOWN
 
@@ -2368,12 +2359,11 @@ The core logic for entering each state:
     BBR.bw_probe_up_rounds = 0
     BBR.bw_probe_up_acked = 0
     BBR.prev_probe_precautionary = false
-    BBR.ack_phase = ACKS_REFILLING
+    BBR.is_bw_probe_stopping = false
     StartRound()
     BBR.state = ProbeBW_REFILL
 
   StartProbeBW_UP():
-    BBR.ack_phase = ACKS_PROBE_STARTING
     StartRound()
     ResetFullBW()
     BBR.full_bw = RS.delivery_rate
@@ -2409,7 +2399,7 @@ that acknowledges new data, to advance the ProbeBW state machine:
     ProbeBW_REFILL:
       /* After one round of REFILL, start UP */
       if (BBR.round_start)
-        BBR.is_bw_probe_sample = true
+        BBR.check_probe_loss = true
         StartProbeBW_UP()
 
     ProbeBW_UP:
@@ -2490,13 +2480,10 @@ The ancillary logic to implement the ProbeBW state machine:
    * BBR.inflight_longterm.
    * Returns true if it decided a state transition, false otherwise. */
   AdaptLongTermModel():
-    if (BBR.ack_phase == ACKS_PROBE_STARTING && BBR.round_start)
-      /* starting to get bw probing samples */
-      BBR.ack_phase = ACKS_PROBE_FEEDBACK
-    if (BBR.ack_phase == ACKS_PROBE_STOPPING && BBR.round_start)
+    if (BBR.is_bw_probe_stopping && BBR.round_start)
       /* end of samples from bw probing phase */
-      BBR.is_bw_probe_sample = false
-      BBR.ack_phase = ACKS_INIT
+      BBR.check_probe_loss = false
+      BBR.is_bw_probe_stopping = false
       if (IsInAProbeBWState() && !RS.is_app_limited)
         AdvanceMaxBwFilter()
       /* Precautionary Bandwidth Probing: Acceleration */
@@ -2652,7 +2639,7 @@ to the ProbeRTT state as follows:
       EnterProbeRTT()
       SaveCwnd()
       BBR.probe_rtt_done_stamp = 0
-      BBR.ack_phase = ACKS_PROBE_STOPPING
+      BBR.is_bw_probe_stopping = true
       StartRound()
     if (BBR.state == ProbeRTT)
       HandleProbeRTT()
@@ -3157,7 +3144,7 @@ reduces BBR.inflight_longterm:
 
   HandleInflightTooHigh():
     BBR.prev_probe_too_high = true
-    BBR.is_bw_probe_sample = false  /* only react once per bw probe */
+    BBR.check_probe_loss = false  /* only react once per bw probe */
     if (!RS.is_app_limited)
       BBR.inflight_longterm = max(RS.tx_in_flight,
                             TargetInflight() * BBR.Beta)
@@ -3218,7 +3205,7 @@ In pseudocode:
 
   HandleLostPacket(Packet P):
     NoteLoss()
-    if (!BBR.is_bw_probe_sample)
+    if (!BBR.check_probe_loss)
       return /* not a packet sent while probing bandwidth */
     RS.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
     RS.lost = C.lost - P.lost /* data lost since transmit */
