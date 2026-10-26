@@ -627,6 +627,14 @@ the pipe" in Startup.
 BBR.full_bw_count: The number of non-app-limited round trips without large
 increases in BBR.full_bw.
 
+BBR.StartupFullLossCnt: A constant specifying the minimum number of
+discontiguous sequence ranges that must be lost in a round trip in Startup
+for a connection with selective acknowledgments to exit Startup due to loss
+(the default is 6).
+
+BBR.loss_events_in_round: The number of loss events (discontiguous lost
+sequence ranges) detected in the current loss round trip.
+
 ## ProbeBW State {#probe-bw-state}
 
 BBR.ack_phase: The current phase in a state machine that tracks the meaning of
@@ -1918,7 +1926,7 @@ criteria are all met:
 * The loss rate over the time scale of a single full round trip exceeds
   BBR.LossThresh (2%).
 
-* There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges
+* There are at least BBR.StartupFullLossCnt=6 discontiguous sequence ranges
   lost in that round trip.
 
 For connections for which C.has_selective_acks is false and thus the connection
@@ -1933,7 +1941,22 @@ Second, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
 BBR.inflight_latest is the max delivered volume of data (RS.delivered) over
-the last round trip. Finally, it exits Startup and enters Drain.
+the last round trip. Finally, because BBR.full_bw_reached is now true,
+CheckStartupDone() exits Startup and enters Drain:
+
+~~~~
+  CheckStartupHighLoss():
+    if (BBR.full_bw_reached || !BBR.loss_round_start || !InLossRecovery())
+      return
+    if (BBR.loss_events_in_round < BBR.StartupFullLossCnt &&
+        C.has_selective_acks)
+      return
+    if (!IsInflightTooHigh())
+      return
+    BBR.undo_state = Startup
+    BBR.full_bw_reached = true
+    BBR.inflight_longterm = max(BBR.bdp, BBR.inflight_latest)
+~~~~
 
 The algorithm waits until all three criteria are met to filter out noise
 from burst losses, and to try to ensure the bottleneck is fully utilized
@@ -3215,6 +3238,7 @@ In pseudocode:
       BBR.loss_round_delivered = C.delivered
       SaveStateUponLoss()
     BBR.is_loss_in_round = true
+    BBR.loss_events_in_round++
 
   HandleLostPacket(Packet P):
     NoteLoss()
@@ -3293,11 +3317,13 @@ This logic can be represented as follows:
   /* Near end of ACK processing: */
   AdvanceLatestDeliverySignals():
     if (BBR.loss_round_start)
-      BBR.bw_latest       = RS.delivery_rate
-      BBR.inflight_latest = RS.delivered
+      BBR.bw_latest            = RS.delivery_rate
+      BBR.inflight_latest      = RS.delivered
+      BBR.loss_events_in_round = 0
 
   ResetCongestionSignals():
     BBR.is_loss_in_round = false
+    BBR.loss_events_in_round = 0
     BBR.bw_latest = 0
     BBR.inflight_latest = 0
 
@@ -3391,6 +3417,7 @@ phase to restart the bandwidth probe):
   HandleSpuriousLossDetection():
     RestoreCwnd()
     BBR.is_loss_in_round = false
+    BBR.loss_events_in_round = 0
     ResetFullBW()
     BBR.bw_shortterm       = max(BBR.bw_shortterm,
                                  BBR.undo_bw_shortterm)
