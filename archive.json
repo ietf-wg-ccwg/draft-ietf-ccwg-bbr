@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-06T05:18:33.579445+00:00",
+  "timestamp": "2026-10-27T04:02:50.384228+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1910,22 +1910,22 @@
     {
       "number": 5,
       "id": "PR_kwDOL3MllM5_WnhG",
-      "title": "Remove BBR.ack_phase from pseudocode",
+      "title": "Replace BBR.ack_phase with a boolean",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/5",
       "state": "OPEN",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
-      "body": "We don't need to explicitly track the ack_phase in order to advance MaxBWFilter. Instead, we can advance it when entering ProbeBW_Down.\r\n\r\nThis logic is currently used in Mvfst. ",
+      "body": "Only the `ACKS_PROBE_STOPPING` value of `BBR.ack_phase` affects behavior. The other values only clear it, and `ACKS_PROBE_FEEDBACK` is never read. This PR replaces `ack_phase` with `BBR.is_bw_probe_stopping`, which is set and cleared exactly where `ack_phase` entered and left `ACKS_PROBE_STOPPING`: entering ProbeBW_DOWN or ProbeRTT sets it, and entering ProbeBW_REFILL or the end of the feedback round clears it. Behavior is unchanged.\n\nIt also renames `BBR.is_bw_probe_sample` to `BBR.check_probe_loss`, since that flag controls whether losses are checked as bandwidth probe feedback rather than tracking rate samples.\n\nAn earlier version of this PR advanced the `max_bw` filter on entering ProbeBW_DOWN, as mvfst does. That changed behavior, so this version keeps the existing timing.\n",
       "createdAt": "2024-10-21T17:14:29Z",
-      "updatedAt": "2025-11-05T15:13:57Z",
+      "updatedAt": "2026-10-26T21:40:21Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
-      "baseRefOid": "871539f6c9e8561fc77578c37f6f33e890797c8f",
+      "baseRefOid": "d5551da13a436992f12694ee17660e5955b05e56",
       "headRepository": "jbeshay/draft-ietf-ccwg-bbr",
       "headRefName": "remove_ack_phase",
-      "headRefOid": "ee98c12ad6f0e93153656218a7df1b1ef92618d7",
+      "headRefOid": "c8d9061d8985b47973d29a62435c26de9c536857",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -1939,7 +1939,34 @@
           "updatedAt": "2025-11-05T15:13:57Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABUULH3Q",
+          "commit": {
+            "abbreviatedOid": "9cec805"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Wow, this is much simpler.  I'm having a hard time reasoning through whether it's functionally equivalent, but it looks good.",
+          "createdAt": "2026-10-26T20:09:11Z",
+          "updatedAt": "2026-10-26T20:09:11Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABUVS_Yw",
+          "commit": {
+            "abbreviatedOid": "c8d9061"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-10-26T21:40:21Z",
+          "updatedAt": "2026-10-26T21:40:21Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 6,
@@ -8976,7 +9003,7 @@
       "labels": [],
       "body": "Simplify ProbeRTT min_rtt filtering and state handling to align with BBRv1:\n\n- Remove obsolete ProbeRTT state variables and constants:\n  - BBR.probe_rtt_min_delay\n  - BBR.probe_rtt_min_stamp\n  - BBR.probe_rtt_expired\n  - BBR.ProbeRTTInterval\n- Update min_rtt filter window length to 10 seconds (BBR.MinRTTFilterLen)\n  and use it as the single filter window governing min_rtt expiration and\n  ProbeRTT scheduling.\n- Introduce BBR.probe_rtt_cwnd state variable to store 0.5 * estimated_BDP\n  computed from the pre-expiration BBR.min_rtt before expiring the sample\n  in UpdateMinRTT().\n- Update UpdateMinRTT() upon min_rtt expiration to assign BBR.min_rtt = RS.rtt\n  and BBR.min_rtt_stamp = Now().\n- Update CheckProbeRTT(), CheckProbeRTTDone(), and ProbeRTTCwnd() to align\n  with the updated state variables and expiration logic.\n- Update related prose discussions, design rationale, parameter definitions,\n  and Appendix B test scenarios.\n",
       "createdAt": "2026-08-24T22:13:23Z",
-      "updatedAt": "2026-10-05T21:00:53Z",
+      "updatedAt": "2026-10-26T21:09:06Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
@@ -9228,6 +9255,38 @@
               "updatedAt": "2026-09-09T17:48:59Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABUUzzGg",
+          "commit": {
+            "abbreviatedOid": "6243d87"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Some potential suggestions, feel free to ignore.",
+          "createdAt": "2026-10-26T21:03:13Z",
+          "updatedAt": "2026-10-26T21:09:06Z",
+          "comments": [
+            {
+              "originalPosition": 179,
+              "body": "```suggestion\n        BBR.probe_rtt_cwnd = BDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)\n```",
+              "createdAt": "2026-10-26T21:03:13Z",
+              "updatedAt": "2026-10-26T21:09:06Z"
+            },
+            {
+              "originalPosition": 18,
+              "body": "```suggestion\nstate holds C.inflight to at most ProbeRTTCwnd(): 200 ms.\n```",
+              "createdAt": "2026-10-26T21:05:00Z",
+              "updatedAt": "2026-10-26T21:09:06Z"
+            },
+            {
+              "originalPosition": 176,
+              "body": "Do we want to early return for invalid RTT samples?  Otherwise we could set min_rtt_expired to true when we're basically ignoring the sample.\n\n```suggestion\n        if (RS.rtt < 0)\n          return\n        BBR.min_rtt_expired =\nNow() > BBR.min_rtt_stamp + BBR.MinRTTFilterLen\n    if (\n```",
+              "createdAt": "2026-10-26T21:07:52Z",
+              "updatedAt": "2026-10-26T21:09:06Z"
+            }
+          ]
         }
       ]
     },
@@ -9236,7 +9295,7 @@
       "id": "PR_kwDOL3MllM8AAAABE_swMA",
       "title": "Define CheckStartupHighLoss() / Update CheckStartupDone()",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/126",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -9245,18 +9304,26 @@
       ],
       "body": "Started as defining CheckStartupHighLoss(), but now there's a slightly wider question of how to structure the pseudocode.\r\n\r\n---\r\n*PR created automatically by Jules for task [2443050235493050813](https://jules.google.com/task/2443050235493050813) started by @ianswett*",
       "createdAt": "2026-09-24T19:33:09Z",
-      "updatedAt": "2026-10-05T20:48:00Z",
+      "updatedAt": "2026-10-26T21:38:33Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "add-missing-definitions-2443050235493050813",
       "headRefOid": "b5986b846ad183ada119ca8dc96473980b044268",
-      "closedAt": null,
+      "closedAt": "2026-10-26T21:38:33Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Closing in favor of #128 ",
+          "createdAt": "2026-10-26T21:38:33Z",
+          "updatedAt": "2026-10-26T21:38:33Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOL3MllM8AAAABPHSslA",
@@ -9618,6 +9685,55 @@
           "createdAt": "2026-09-29T15:31:37Z",
           "updatedAt": "2026-09-29T15:31:37Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 128,
+      "id": "PR_kwDOL3MllM8AAAABK4O5AA",
+      "title": "Define CheckStartupHighLoss() and BBR.loss_events_in_round",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/128",
+      "state": "OPEN",
+      "author": "ianswett",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "Editorial"
+      ],
+      "body": "Redo of #126",
+      "createdAt": "2026-10-26T21:36:35Z",
+      "updatedAt": "2026-10-26T22:25:16Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "d5551da13a436992f12694ee17660e5955b05e56",
+      "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "headRefName": "ianswett-define-checkstartuphighloss",
+      "headRefOid": "fdb88c8f86aed4a20d85e925066919929417bfd6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABUVu4Fg",
+          "commit": {
+            "abbreviatedOid": "fdb88c8"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-26T22:25:06Z",
+          "updatedAt": "2026-10-26T22:25:16Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "This isn't enforcing the discontinuity in ranges since it's called on each packet loss. ",
+              "createdAt": "2026-10-26T22:25:06Z",
+              "updatedAt": "2026-10-26T22:25:16Z"
+            }
+          ]
         }
       ]
     }
