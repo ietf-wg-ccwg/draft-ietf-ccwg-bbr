@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-27T04:02:50.384228+00:00",
+  "timestamp": "2026-10-29T04:45:24.317022+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -9702,7 +9702,7 @@
       ],
       "body": "Redo of #126",
       "createdAt": "2026-10-26T21:36:35Z",
-      "updatedAt": "2026-10-26T22:25:16Z",
+      "updatedAt": "2026-10-27T21:05:39Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "d5551da13a436992f12694ee17660e5955b05e56",
@@ -9732,6 +9732,46 @@
               "body": "This isn't enforcing the discontinuity in ranges since it's called on each packet loss. ",
               "createdAt": "2026-10-26T22:25:06Z",
               "updatedAt": "2026-10-26T22:25:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABUjaGEw",
+          "commit": {
+            "abbreviatedOid": "fdb88c8"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-27T21:02:19Z",
+          "updatedAt": "2026-10-27T21:02:19Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "Good point, I'm going to remove this variable from this CL, since I think we can get by without it.",
+              "createdAt": "2026-10-27T21:02:19Z",
+              "updatedAt": "2026-10-27T21:02:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABUjcqeA",
+          "commit": {
+            "abbreviatedOid": "fdb88c8"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-27T21:05:39Z",
+          "updatedAt": "2026-10-27T21:05:39Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "Actually, maybe we should add this, but if so, I'm not sure exactly what the logic should be?  I don't really want to add the pseudocode for the discontinuous ranges.",
+              "createdAt": "2026-10-27T21:05:39Z",
+              "updatedAt": "2026-10-27T21:05:39Z"
             }
           ]
         }
