@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 29 April 2027                                    J. Beshay, Ed.
+Expires: 6 May 2027                                       J. Beshay, Ed.
                                                                     Meta
-                                                         26 October 2026
+                                                         2 November 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 29 April 2027.
+   This Internet-Draft will expire on 6 May 2027.
 
 Copyright Notice
 
@@ -585,12 +585,12 @@ Table of Contents
    large increases in BBR.full_bw.
 
    BBR.StartupFullLossCnt: A constant specifying the minimum number of
-   discontiguous sequence ranges that must be lost in a round trip in
-   Startup for a connection with selective acknowledgments to exit
-   Startup due to loss (the default is 6).
+   Fast Recovery loss events that must occur in a round trip in Startup
+   for a connection with selective acknowledgments to exit Startup due
+   to loss (the default is 6).
 
-   BBR.loss_events_in_round: The number of loss events (discontiguous
-   lost sequence ranges) detected in the current loss round trip.
+   BBR.loss_events_in_round: The number of Fast Recovery loss events in
+   the current loss round trip.
 
 2.14.  ProbeBW State
 
@@ -1896,8 +1896,8 @@ Table of Contents
    *  The loss rate over the time scale of a single full round trip
       exceeds BBR.LossThresh (2%).
 
-   *  There are at least BBR.StartupFullLossCnt=6 discontiguous sequence
-      ranges lost in that round trip.
+   *  There are at least BBR.StartupFullLossCnt=6 Fast Recovery loss
+      events in that round trip.
 
    For connections for which C.has_selective_acks is false and thus the
    connection can only detect one packet loss per round trip,
