@@ -628,12 +628,12 @@ BBR.full_bw_count: The number of non-app-limited round trips without large
 increases in BBR.full_bw.
 
 BBR.StartupFullLossCnt: A constant specifying the minimum number of
-discontiguous sequence ranges that must be lost in a round trip in Startup
+Fast Recovery loss events that must occur in a round trip in Startup
 for a connection with selective acknowledgments to exit Startup due to loss
 (the default is 6).
 
-BBR.loss_events_in_round: The number of loss events (discontiguous lost
-sequence ranges) detected in the current loss round trip.
+BBR.loss_events_in_round: The number of Fast Recovery loss events
+in the current loss round trip.
 
 ## ProbeBW State {#probe-bw-state}
 
@@ -1926,8 +1926,8 @@ criteria are all met:
 * The loss rate over the time scale of a single full round trip exceeds
   BBR.LossThresh (2%).
 
-* There are at least BBR.StartupFullLossCnt=6 discontiguous sequence ranges
-  lost in that round trip.
+* There are at least BBR.StartupFullLossCnt=6 Fast Recovery loss events
+in that round trip.
 
 For connections for which C.has_selective_acks is false and thus the connection
 can only detect one packet loss per round trip, CheckStartupHighLoss() exits
