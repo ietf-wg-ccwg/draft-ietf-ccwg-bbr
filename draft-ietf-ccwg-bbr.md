@@ -694,7 +694,7 @@ C.cwnd during ProbeRTT: 0.5 (meaning that ProbeRTT attempts to reduce in-flight
 data to 50% of the estimated BDP).
 
 BBR.ProbeRTTDuration: A constant specifying the minimum duration for which ProbeRTT
-state holds C.inflight to ProbeRTTCwnd() or fewer packets: 200 ms.
+state holds C.inflight to at most ProbeRTTCwnd(): 200 ms.
 
 BBR.probe_rtt_done_stamp: The wall clock time at which BBR can exit ProbeRTT
 state.
@@ -3714,7 +3714,7 @@ the minimal value that allows pipelining (see {{minimum-cwnd-for-pipelining}}):
 
 ~~~~
   ProbeRTTCwnd():
-    probe_rtt_cwnd = BDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)
+    probe_rtt_cwnd = BDPMultiple(BBR.ProbeRTTCwndGain)
     probe_rtt_cwnd = min(probe_rtt_cwnd, BBR.probe_rtt_cwnd)
     probe_rtt_cwnd = max(probe_rtt_cwnd, BBR.MinPipeCwnd)
     return probe_rtt_cwnd
