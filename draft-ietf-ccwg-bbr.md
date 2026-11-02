@@ -680,7 +680,7 @@ BBR.undo_inflight_longterm: the value of BBR.inflight_longterm saved at the star
 BBR.min_rtt_stamp: The wall clock time at which the current BBR.min_rtt sample
 was obtained.
 
-BBR.min_rtt_expired: A boolean recording whether the BBR.min_rtt
+BBR.min_rtt_expired: A boolean recording whether the BBR.min_rtt estimate
 has expired and is due for a refresh.
 
 BBR.MinRTTFilterLen: A constant specifying the length of the BBR.min_rtt min
@@ -702,9 +702,9 @@ state.
 BBR.probe_rtt_round_done: A boolean recording whether the connection has
 completed a round trip in ProbeRTT state.
 
-BBR.probe_rtt_cwnd: The maximum congestion window allowed in ProbeRTT state,
-computed as 0.5 * estimated_BDP based on the BBR.min_rtt sample when
-entering ProbeRTT, before it has expired.
+BBR.probe_rtt_cwnd: The target congestion window cap for ProbeRTT state (prior
+to applying the BBR.MinPipeCwnd floor), computed as 0.5 \* estimated_BDP based
+on the BBR.min_rtt sample when entering ProbeRTT, before it has expired.
 
 The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to
@@ -1716,7 +1716,7 @@ steps:
     BBR.min_rtt_expired = false
     BBR.probe_rtt_done_stamp = 0
     BBR.probe_rtt_round_done = false
-    BBR.probe_rtt_cwnd = 0
+    BBR.probe_rtt_cwnd = Infinity
     BBR.prior_cwnd = 0
     BBR.undo_state = None
     BBR.undo_bw_shortterm = 0
@@ -2543,7 +2543,7 @@ C.inflight to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.
 
 Before expiring the BBR.min_rtt filter and entering ProbeRTT, BBR saves
-BBR.probe_rtt_cwnd as 0.5 * estimated_BDP based on the old
+BBR.probe_rtt_cwnd as 0.5 \* estimated_BDP based on the old
 BBR.min_rtt. This ensures that during ProbeRTT the flow will
 "remember" the BBR.min_rtt value it measured during the previous filter window,
 providing a robust BDP estimate for the C.cwnd = 0.5\*BDP calculation,
@@ -2556,10 +2556,10 @@ BBR.min_rtt estimate has not been updated (i.e., by getting a
 lower RTT measurement) for more than BBR.MinRTTFilterLen = 10 seconds, then BBR
 enters ProbeRTT and reduces the BBR.cwnd_gain to BBR.ProbeRTTCwndGain = 0.5.
 
-Exit conditions: After maintaining C.inflight at
-BBR.ProbeRTTCwndGain\*BBR.bdp for at least BBR.ProbeRTTDuration (200 ms) and at
-least one packet-timed round trip, BBR leaves ProbeRTT and transitions to
-ProbeBW if it estimates the pipe was filled already, or Startup otherwise.
+Exit conditions: After holding C.inflight to at most ProbeRTTCwnd() for at
+least BBR.ProbeRTTDuration (200 ms) and at least one packet-timed round trip,
+BBR leaves ProbeRTT and transitions to ProbeBW if it estimates the pipe was
+filled already, or Startup otherwise.
 
 
 #### ProbeRTT Design Rationale {#probertt-design-rationale}
@@ -2616,16 +2616,16 @@ and its ProbeRTT scheduling state:
   UpdateMinRTT():
     BBR.min_rtt_expired =
       Now() > BBR.min_rtt_stamp + BBR.MinRTTFilterLen
+    if (BBR.min_rtt_expired)
+      BBR.probe_rtt_cwnd = BDPMultiple(BBR.ProbeRTTCwndGain)
     if (RS.rtt >= 0 &&
-        (RS.rtt <= BBR.min_rtt || BBR.min_rtt_expired))
-      if (BBR.min_rtt_expired)
-        BBR.probe_rtt_cwnd = BDPMultiple(BBR.ProbeRTTCwndGain)
+        (RS.rtt < BBR.min_rtt || BBR.min_rtt_expired))
       BBR.min_rtt       = RS.rtt
       BBR.min_rtt_stamp = Now()
 ~~~~
 
 Here BBR.min_rtt_expired is a boolean recording whether the
-BBR.min_rtt has expired and is due for a refresh, via either
+BBR.min_rtt estimate has expired and is due for a refresh, via either
 an application idle period or a transition into ProbeRTT state.
 
 On every ACK BBR executes CheckProbeRTT() to handle the steps related
@@ -2636,8 +2636,8 @@ to the ProbeRTT state as follows:
     if (BBR.state != ProbeRTT &&
         BBR.min_rtt_expired &&
         !BBR.idle_restart)
-      EnterProbeRTT()
       SaveCwnd()
+      EnterProbeRTT()
       BBR.probe_rtt_done_stamp = 0
       BBR.ack_phase = ACKS_PROBE_STOPPING
       StartRound()
@@ -3709,8 +3709,9 @@ ProbeRTT), and is defined as follows:
 If BBR decides it needs to enter the ProbeRTT state (see {{probertt}}), its
 goal is to quickly reduce C.inflight and drain the bottleneck queue, thereby
 allowing measurement of BBR.min_rtt. To implement this mode, BBR bounds C.cwnd
-to be no larger than BBR.probe_rtt_cwnd and no smaller than BBR.MinPipeCwnd,
-the minimal value that allows pipelining (see {{minimum-cwnd-for-pipelining}}):
+to ProbeRTTCwnd(), which takes the smaller of BDPMultiple(BBR.ProbeRTTCwndGain)
+and BBR.probe_rtt_cwnd, and then applies a floor of BBR.MinPipeCwnd, the minimal
+value that allows pipelining (see {{minimum-cwnd-for-pipelining}}):
 
 ~~~~
   ProbeRTTCwnd():
@@ -4017,11 +4018,14 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 1. Wait until the connection transitions to PROBE_BW.
 2. Wait for `BBR.MinRTTFilterLen` (10 seconds) without updating
    `BBR.min_rtt`.
-3. Verify the connection enters PROBE_RTT and sets `BBR.cwnd_gain` to
-   `BBR.ProbeRTTCwndGain` (0.5).
-4. Wait for at least `BBR.ProbeRTTDuration` (200 ms) and one round trip.
-5. Verify the connection correctly exits PROBE_RTT, transitions back to PROBE_BW
-   (since `BBR.full_bw_reached` is `true`), and resumes sending.
+3. Verify the connection enters PROBE_RTT, sets `BBR.cwnd_gain` to
+   `BBR.ProbeRTTCwndGain` (0.5), and bounds `C.cwnd` to `ProbeRTTCwnd()`.
+4. Once `C.inflight <= ProbeRTTCwnd()`, wait for at least `BBR.ProbeRTTDuration`
+   (200 ms) and one round trip.
+5. Verify the connection correctly exits PROBE_RTT, restores `BBR.cwnd_gain` to
+   `BBR.DefaultCwndGain` (2), transitions back to PROBE_BW (since
+   `BBR.full_bw_reached` is `true`), and resumes sending.
+
 
 ## Skipping PROBE_RTT Due to Application-Limited Sending
 
