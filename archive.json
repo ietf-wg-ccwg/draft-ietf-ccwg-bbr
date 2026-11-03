@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-29T04:45:24.317022+00:00",
+  "timestamp": "2026-11-03T05:41:06.108777+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1912,24 +1912,26 @@
       "id": "PR_kwDOL3MllM5_WnhG",
       "title": "Replace BBR.ack_phase with a boolean",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/5",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "jbeshay",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Only the `ACKS_PROBE_STOPPING` value of `BBR.ack_phase` affects behavior. The other values only clear it, and `ACKS_PROBE_FEEDBACK` is never read. This PR replaces `ack_phase` with `BBR.is_bw_probe_stopping`, which is set and cleared exactly where `ack_phase` entered and left `ACKS_PROBE_STOPPING`: entering ProbeBW_DOWN or ProbeRTT sets it, and entering ProbeBW_REFILL or the end of the feedback round clears it. Behavior is unchanged.\n\nIt also renames `BBR.is_bw_probe_sample` to `BBR.check_probe_loss`, since that flag controls whether losses are checked as bandwidth probe feedback rather than tracking rate samples.\n\nAn earlier version of this PR advanced the `max_bw` filter on entering ProbeBW_DOWN, as mvfst does. That changed behavior, so this version keeps the existing timing.\n",
       "createdAt": "2024-10-21T17:14:29Z",
-      "updatedAt": "2026-10-26T21:40:21Z",
+      "updatedAt": "2026-11-02T22:17:45Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "d5551da13a436992f12694ee17660e5955b05e56",
-      "headRepository": "jbeshay/draft-ietf-ccwg-bbr",
+      "headRepository": null,
       "headRefName": "remove_ack_phase",
       "headRefOid": "c8d9061d8985b47973d29a62435c26de9c536857",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-11-02T22:17:38Z",
+      "mergedAt": "2026-11-02T22:17:38Z",
+      "mergedBy": "jbeshay",
+      "mergeCommit": {
+        "oid": "bc468e591170aaf1961c2b5d2656118ecfb1496c"
+      },
       "comments": [
         {
           "author": "renghardt",
@@ -1964,6 +1966,19 @@
           "body": "",
           "createdAt": "2026-10-26T21:40:21Z",
           "updatedAt": "2026-10-26T21:40:21Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVmFqMQ",
+          "commit": {
+            "abbreviatedOid": "c8d9061"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-11-02T22:17:30Z",
+          "updatedAt": "2026-11-02T22:17:30Z",
           "comments": []
         }
       ]
@@ -8996,24 +9011,26 @@
       "id": "PR_kwDOL3MllM8AAAABA3KrNw",
       "title": "Simplify ProbeRTT min_rtt filtering and state handling",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/125",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "nealcardwell",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Simplify ProbeRTT min_rtt filtering and state handling to align with BBRv1:\n\n- Remove obsolete ProbeRTT state variables and constants:\n  - BBR.probe_rtt_min_delay\n  - BBR.probe_rtt_min_stamp\n  - BBR.probe_rtt_expired\n  - BBR.ProbeRTTInterval\n- Update min_rtt filter window length to 10 seconds (BBR.MinRTTFilterLen)\n  and use it as the single filter window governing min_rtt expiration and\n  ProbeRTT scheduling.\n- Introduce BBR.probe_rtt_cwnd state variable to store 0.5 * estimated_BDP\n  computed from the pre-expiration BBR.min_rtt before expiring the sample\n  in UpdateMinRTT().\n- Update UpdateMinRTT() upon min_rtt expiration to assign BBR.min_rtt = RS.rtt\n  and BBR.min_rtt_stamp = Now().\n- Update CheckProbeRTT(), CheckProbeRTTDone(), and ProbeRTTCwnd() to align\n  with the updated state variables and expiration logic.\n- Update related prose discussions, design rationale, parameter definitions,\n  and Appendix B test scenarios.\n",
       "createdAt": "2026-08-24T22:13:23Z",
-      "updatedAt": "2026-10-26T21:09:06Z",
+      "updatedAt": "2026-11-02T22:08:55Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
-      "baseRefOid": "4ce5e87d5f58c34c8fae283367b41913d110b73a",
+      "baseRefOid": "d5551da13a436992f12694ee17660e5955b05e56",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "simpler-probe-rtt",
-      "headRefOid": "6243d8719193c3973fc6327a7c8424a260a211ed",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "661132623a26bcc08268dd6bc13967902ee38d80",
+      "closedAt": "2026-11-02T22:08:55Z",
+      "mergedAt": "2026-11-02T22:08:55Z",
+      "mergedBy": "nealcardwell",
+      "mergeCommit": {
+        "oid": "e9f76ba57c6f7de6f68e515daeb35e2e922505b7"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -9287,6 +9304,145 @@
               "updatedAt": "2026-10-26T21:09:06Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVk8XYw",
+          "commit": {
+            "abbreviatedOid": "6243d87"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T20:38:17Z",
+          "updatedAt": "2026-11-02T20:38:17Z",
+          "comments": [
+            {
+              "originalPosition": 179,
+              "body": "Thanks. Looks to me like the existing `BBR.probe_rtt_cwnd = BDPMultiple(BBR.ProbeRTTCwndGain)` version is correct.  :-)\r\n\r\nThis comment may be based on looking at the other line (in ProbeRTTCwnd()) that says `probe_rtt_cwnd = BDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)`. But that line is incorrect, since BDPMultiple() only takes one paramter. I'll fix that other line in ProbeRTTCwnd().",
+              "createdAt": "2026-11-02T20:38:17Z",
+              "updatedAt": "2026-11-02T20:38:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVk9UTQ",
+          "commit": {
+            "abbreviatedOid": "6243d87"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T20:39:38Z",
+          "updatedAt": "2026-11-02T20:39:38Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "SGTM. Incorporated.\r\n",
+              "createdAt": "2026-11-02T20:39:38Z",
+              "updatedAt": "2026-11-02T20:39:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVlLeYQ",
+          "commit": {
+            "abbreviatedOid": "6243d87"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T20:58:33Z",
+          "updatedAt": "2026-11-02T20:58:33Z",
+          "comments": [
+            {
+              "originalPosition": 176,
+              "body": "AFAICT it's OK to keep the logic as-is, without the early return if RS.rtt < 0.\n\nI'd rather keep it without that early return, to keep it simpler and closer to what we've had in Linux TCP BBR for the past 10 years, to avoid surprises. :-)\n\nThis PR 125 basically returns the logic to be super-close to what we've had in Linux TCP BBR since TCP BBRv1.\n\nIn the Linux TCP BBRv1 code the part of BBR.min_rtt_expired is played by the local variable filter_expired:\n\nhttps://github.com/torvalds/linux/blob/6628e7d4c6b25c8d18f1345e3a20d21829aae7e4/net/ipv4/tcp_bbr.c#L949\n\n```\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  949) static void bbr_update_min_rtt(struct sock *sk, const struct rate_sample *rs)\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  950) {\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  951)  struct tcp_sock *tp = tcp_sk(sk);\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  952)  struct bbr *bbr = inet_csk_ca(sk);\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  953)  bool filter_expired;\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  954) \n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  955)  /* Track min RTT seen in the min_rtt_win_sec filter window: */\n2660bfa84e923 (Eric Dumazet            2017-05-16 14:00:05 -0700  956)  filter_expired = after(tcp_jiffies32,\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  957)                         bbr->min_rtt_stamp + bbr_min_rtt_win_sec * HZ);\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  958)  if (rs->rtt_us >= 0 &&\n1b9e2a8c99a5c (Ryan Sharpelletti       2020-11-16 17:44:13 +0000  959)      (rs->rtt_us < bbr->min_rtt_us ||\ne42866031ff03 (Yuchung Cheng           2018-01-17 12:11:01 -0800  960)       (filter_expired && !rs->is_ack_delayed))) {\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  961)          bbr->min_rtt_us = rs->rtt_us;\n2660bfa84e923 (Eric Dumazet            2017-05-16 14:00:05 -0700  962)          bbr->min_rtt_stamp = tcp_jiffies32;\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  963)  }\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  964) \n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  965)  if (bbr_probe_rtt_mode_ms > 0 && filter_expired &&\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  966)      !bbr->idle_restart && bbr->mode != BBR_PROBE_RTT) {\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  967)          bbr->mode = BBR_PROBE_RTT;  /* dip, drain queue */\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  968)          bbr_save_cwnd(sk);  /* note cwnd so we can restore it */\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  969)          bbr->probe_rtt_done_stamp = 0;\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  970)  }\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  971) \n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  972)  if (bbr->mode == BBR_PROBE_RTT) {\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  973)          /* Ignore low rate samples during this mode. */\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  974)          tp->app_limited =\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  975)                  (tp->delivered + tcp_packets_in_flight(tp)) ? : 1;\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  976)          /* Maintain min packets in flight for max(200 ms, 1 round). */\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  977)          if (!bbr->probe_rtt_done_stamp &&\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  978)              tcp_packets_in_flight(tp) <= bbr_cwnd_min_target) {\n2660bfa84e923 (Eric Dumazet            2017-05-16 14:00:05 -0700  979)                  bbr->probe_rtt_done_stamp = tcp_jiffies32 +\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  980)                          msecs_to_jiffies(bbr_probe_rtt_mode_ms);\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  981)                  bbr->probe_rtt_round_done = 0;\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  982)                  bbr->next_rtt_delivered = tp->delivered;\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  983)          } else if (bbr->probe_rtt_done_stamp) {\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  984)                  if (bbr->round_start)\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  985)                          bbr->probe_rtt_round_done = 1;\nfb99886224294 (Kevin Yang              2018-08-22 17:43:14 -0400  986)                  if (bbr->probe_rtt_round_done)\nfb99886224294 (Kevin Yang              2018-08-22 17:43:14 -0400  987)                          bbr_check_probe_rtt_done(sk);\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  988)          }\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  989)  }\ne6e6a278b1eaf (Neal Cardwell           2018-05-01 21:45:41 -0400  990)  /* Restart after idle ends only once we process a new S/ACK for data */\ne6e6a278b1eaf (Neal Cardwell           2018-05-01 21:45:41 -0400  991)  if (rs->delivered > 0)\ne6e6a278b1eaf (Neal Cardwell           2018-05-01 21:45:41 -0400  992)          bbr->idle_restart = 0;\n0f8782ea14974 (Neal Cardwell           2016-09-19 23:39:23 -0400  993) }\n```\n",
+              "createdAt": "2026-11-02T20:58:33Z",
+              "updatedAt": "2026-11-02T20:58:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVlMnoA",
+          "commit": {
+            "abbreviatedOid": "6243d87"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Thanks! Incorporated your feedback (see below) and will re-upload the new version...\n",
+          "createdAt": "2026-11-02T20:59:43Z",
+          "updatedAt": "2026-11-02T20:59:43Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVl2GRA",
+          "commit": {
+            "abbreviatedOid": "89612f9"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T21:54:01Z",
+          "updatedAt": "2026-11-02T21:54:01Z",
+          "comments": [
+            {
+              "originalPosition": 183,
+              "body": "```suggestion\n  UpdateMinRTT():\n    BBR.min_rtt_expired =\nNow() > BBR.min_rtt_stamp + BBR.MinRTTFilterLen\n    if (BBR.min_rtt_expired)\n      BBR.probe_rtt_cwnd = BDPMultiple(BBR.ProbeRTTCwndGain)\n    if (RS.rtt >= 0 &&\n        (RS.rtt <= BBR.min_rtt || BBR.min_rtt_expired))\n      BBR.min_rtt       = RS.rtt\n      BBR.min_rtt_stamp = Now()\n~~~~\n\n```",
+              "createdAt": "2026-11-02T21:54:01Z",
+              "updatedAt": "2026-11-02T21:54:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVl2fXA",
+          "commit": {
+            "abbreviatedOid": "89612f9"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T21:54:35Z",
+          "updatedAt": "2026-11-02T21:54:35Z",
+          "comments": [
+            {
+              "originalPosition": 183,
+              "body": "Thanks! I'll incorporate that!\n",
+              "createdAt": "2026-11-02T21:54:35Z",
+              "updatedAt": "2026-11-02T21:54:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVl2kkA",
+          "commit": {
+            "abbreviatedOid": "89612f9"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Thanks!\n",
+          "createdAt": "2026-11-02T21:54:43Z",
+          "updatedAt": "2026-11-02T21:54:43Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVl_BAA",
+          "commit": {
+            "abbreviatedOid": "6611326"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-11-02T22:08:00Z",
+          "updatedAt": "2026-11-02T22:08:00Z",
+          "comments": []
         }
       ]
     },
@@ -9693,7 +9849,7 @@
       "id": "PR_kwDOL3MllM8AAAABK4O5AA",
       "title": "Define CheckStartupHighLoss() and BBR.loss_events_in_round",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/128",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "ianswett",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -9702,17 +9858,19 @@
       ],
       "body": "Redo of #126",
       "createdAt": "2026-10-26T21:36:35Z",
-      "updatedAt": "2026-10-27T21:05:39Z",
+      "updatedAt": "2026-11-02T22:22:03Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "d5551da13a436992f12694ee17660e5955b05e56",
       "headRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "headRefName": "ianswett-define-checkstartuphighloss",
-      "headRefOid": "fdb88c8f86aed4a20d85e925066919929417bfd6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "ca83e665336062f09c1a51ec07172d504157ec67",
+      "closedAt": "2026-11-02T22:21:58Z",
+      "mergedAt": "2026-11-02T22:21:58Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "db2f34fe96707c17d1d5ba4666d40c8f93f5e853"
+      },
       "comments": [],
       "reviews": [
         {
@@ -9774,6 +9932,84 @@
               "updatedAt": "2026-10-27T21:05:39Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVhOKgQ",
+          "commit": {
+            "abbreviatedOid": "fdb88c8"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T15:38:04Z",
+          "updatedAt": "2026-11-02T15:38:04Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "Good point, Joseph. I'm realizing now that the \"discontiguous sequence ranges\" text is my bug in the text, which goes back at least to 9525f2c in October 2024:\n\n9525f2c (Neal Cardwell               2024-10-17 04:15:15 +0000 1096) * There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges\n9525f2c (Neal Cardwell               2024-10-17 04:15:15 +0000 1097)   lost in that round trip.\n\nThe Linux TCP BBRv2/v3 code actually just counts loss events, where an event is marking a particular TSO or GSO offload \"burst\" (\"skb\" in Linux) as lost. It does not count discontiguous loss events, which is harder.\n\nI think we can get rid of the \"discontiguous\" language. I'll suggest tweaks above in the text.\n",
+              "createdAt": "2026-11-02T15:38:04Z",
+              "updatedAt": "2026-11-02T15:38:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVhPnig",
+          "commit": {
+            "abbreviatedOid": "fdb88c8"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T15:39:50Z",
+          "updatedAt": "2026-11-02T15:50:56Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\nFast Recovery loss events that must occur in a round trip in Startup\n```",
+              "createdAt": "2026-11-02T15:39:50Z",
+              "updatedAt": "2026-11-02T15:50:56Z"
+            },
+            {
+              "originalPosition": 10,
+              "body": "```suggestion\nBBR.loss_events_in_round: The number of Fast Recovery loss events\nin the current loss round trip.\n```\n",
+              "createdAt": "2026-11-02T15:43:44Z",
+              "updatedAt": "2026-11-02T15:50:56Z"
+            },
+            {
+              "originalPosition": 21,
+              "body": "```suggestion\n* There are at least BBR.StartupFullLossCnt=6 Fast Recovery loss events\nin that round trip.\n```",
+              "createdAt": "2026-11-02T15:48:37Z",
+              "updatedAt": "2026-11-02T15:50:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVmIO8w",
+          "commit": {
+            "abbreviatedOid": "ca83e66"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-11-02T22:21:13Z",
+          "updatedAt": "2026-11-02T22:21:13Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABVmIx9g",
+          "commit": {
+            "abbreviatedOid": "ca83e66"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-11-02T22:21:49Z",
+          "updatedAt": "2026-11-02T22:21:49Z",
+          "comments": []
         }
       ]
     }
