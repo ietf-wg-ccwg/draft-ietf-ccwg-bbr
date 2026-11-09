@@ -2564,7 +2564,7 @@ sending host at layers lower than the transport layer (i.e. network layer,
 traffic shaping layer, network device layer).<a href="#section-4.1.2.1.1-6" class="pilcrow">¶</a></p>
 <p id="section-4.1.2.1.1-7">C.unacked: The amount of data that has been sent and not yet acknowledged,
 including data marked as lost. For TCP, this is SND.NXT - SND.UNA. For QUIC,
-this is the data in sent packets that the sender is still tracking for
+this includes sent packets that the sender is still tracking for
 acknowledgment, including packets declared lost.<a href="#section-4.1.2.1.1-7" class="pilcrow">¶</a></p>
 <p id="section-4.1.2.1.1-8">C.lost_out: The amount of data in the current outstanding window that
 is marked as lost.<a href="#section-4.1.2.1.1-8" class="pilcrow">¶</a></p>
