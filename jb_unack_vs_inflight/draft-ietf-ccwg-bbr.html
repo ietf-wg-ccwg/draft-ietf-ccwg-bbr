@@ -24,23 +24,23 @@ acknowledgment. Thus far, open source implementations are available
 for TCP   and QUIC  . This document
 specifies version 3 of the BBR algorithm, BBRv3. 
     " name="description">
-<meta content="xml2rfc 3.34.1" name="generator">
+<meta content="xml2rfc 3.35.0" name="generator">
 <meta content="Congestion Control" name="keyword">
 <meta content="draft-ietf-ccwg-bbr-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.1
-    Python 3.14.8
-    ConfigArgParse 1.8.0
+  xml2rfc 3.35.0
+    Python 3.14.10
+    ConfigArgParse 1.9.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.12.2
+    platformdirs 4.14.3
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.9.1
+    wcwidth 0.9.4
 -->
 <link href="draft-ietf-ccwg-bbr.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1041,7 +1041,7 @@ svg {
   & :is([stroke="white"], [stroke^="#fff"]) {
     stroke: var(--background-color);
   }
-  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+  & :is([fill="black"], [fill^="#000"], :not([fill], [fill] *)) {
     fill: var(--text-color);
   }
   & :is([fill="white"], [fill^="#fff"]) {
@@ -1056,11 +1056,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">BBR</td>
-<td class="right">October 2026</td>
+<td class="right">November 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Cardwell, et al.</td>
-<td class="center">Expires 8 April 2027</td>
+<td class="center">Expires 13 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1073,12 +1073,12 @@ svg {
 <dd class="internet-draft">draft-ietf-ccwg-bbr-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-10-05" class="published">5 October 2026</time>
+<time datetime="2026-11-09" class="published">9 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-04-08">8 April 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-13">13 May 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1147,7 +1147,7 @@ specifies version 3 of the BBR algorithm, BBRv3.<a href="#section-abstract-1" cl
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 13 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1918,6 +1918,12 @@ fully utilized its available bandwidth since it most recently started looking.<a
 the pipe" in Startup.<a href="#section-2.13-3" class="pilcrow">¶</a></p>
 <p id="section-2.13-4">BBR.full_bw_count: The number of non-app-limited round trips without large
 increases in BBR.full_bw.<a href="#section-2.13-4" class="pilcrow">¶</a></p>
+<p id="section-2.13-5">BBR.StartupFullLossCnt: A constant specifying the minimum number of
+Fast Recovery loss events that must occur in a round trip in Startup
+for a connection with selective acknowledgments to exit Startup due to loss
+(the default is 6).<a href="#section-2.13-5" class="pilcrow">¶</a></p>
+<p id="section-2.13-6">BBR.loss_events_in_round: The number of Fast Recovery loss events
+in the current loss round trip.<a href="#section-2.13-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probe-bw-state">
@@ -1925,29 +1931,20 @@ increases in BBR.full_bw.<a href="#section-2.13-4" class="pilcrow">¶</a></p>
         <h3 id="name-probebw-state">
 <a href="#section-2.14" class="section-number selfRef">2.14. </a><a href="#name-probebw-state" class="section-name selfRef">ProbeBW State</a>
         </h3>
-<p id="section-2.14-1">BBR.ack_phase: The current phase in a state machine that tracks the meaning of
-the ACK feedback the connection is receiving, with respect to the bandwidth
-probing. The phases are as follows:<a href="#section-2.14-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-2.14-2">
-<pre>
-  ACKS_INIT: not probing bandwidth; not getting probe feedback
-  ACKS_REFILLING: sending at estimated bandwidth to fill pipe
-  ACKS_PROBE_STARTING: inflight rising to probe bandwidth
-  ACKS_PROBE_FEEDBACK: getting feedback from bandwidth probing
-  ACKS_PROBE_STOPPING: stopped bandwidth probing; still getting feedback
-</pre><a href="#section-2.14-2" class="pilcrow">¶</a>
-</div>
-<p id="section-2.14-3">BBR.is_bw_probe_sample: A boolean tracking whether the connection is receiving rate samples from a bandwidth-probing phase.<a href="#section-2.14-3" class="pilcrow">¶</a></p>
-<p id="section-2.14-4">BBR.is_loss_in_round: A boolean tracking whether there was a packet loss
-detected in the current round trip.<a href="#section-2.14-4" class="pilcrow">¶</a></p>
-<p id="section-2.14-5">BBR.bw_probe_up_acked: The volume of data ACKed since increasing BBR.inflight_longterm.<a href="#section-2.14-5" class="pilcrow">¶</a></p>
-<p id="section-2.14-6">BBR.probe_up_acked_per_inc: The volume of data that must be ACKed before BBR.inflight_longterm is increased by C.SMSS.<a href="#section-2.14-6" class="pilcrow">¶</a></p>
-<p id="section-2.14-7">BBR.bw_probe_up_rounds: The number of round trips over which BBR.inflight_longterm has been grown in the current ProbeBW_UP episode.<a href="#section-2.14-7" class="pilcrow">¶</a></p>
-<p id="section-2.14-8">BBR.rounds_since_probe_up: The number of round trips elapsed since the last ProbeBW_UP bandwidth probe phase.<a href="#section-2.14-8" class="pilcrow">¶</a></p>
-<p id="section-2.14-9">BBR.bw_probe_wait: The maximum wall clock time duration BBR waits before probing bandwidth again.<a href="#section-2.14-9" class="pilcrow">¶</a></p>
-<p id="section-2.14-10">BBR.cycle_stamp: The wall clock time at which the current ProbeBW cycle started.<a href="#section-2.14-10" class="pilcrow">¶</a></p>
-<p id="section-2.14-11">BBR.prev_probe_too_high: A boolean recording whether the most recent bandwidth probe went too high (i.e., experienced a packet loss rate exceeding BBR.LossThresh). See "Precautionary Bandwidth Probing" in <a href="#bandwidth-probing-caution" class="auto internal xref">Section 5.3.3.6</a> for how this is used.<a href="#section-2.14-11" class="pilcrow">¶</a></p>
-<p id="section-2.14-12">BBR.prev_probe_precautionary: A boolean recording whether the most recent ProbeBW_UP phase was stopped early because it reached the BBR.inflight_longterm threshold from the previous probe that went too high. See "Precautionary Bandwidth Probing" in <a href="#bandwidth-probing-caution" class="auto internal xref">Section 5.3.3.6</a> for how this is used.<a href="#section-2.14-12" class="pilcrow">¶</a></p>
+<p id="section-2.14-1">BBR.is_bw_probe_stopping: A boolean tracking whether the flow has stopped
+bandwidth probing but is still receiving ACK feedback from it.<a href="#section-2.14-1" class="pilcrow">¶</a></p>
+<p id="section-2.14-2">BBR.check_probe_loss: A boolean tracking whether BBR checks packet losses as
+feedback from a bandwidth-probing phase.<a href="#section-2.14-2" class="pilcrow">¶</a></p>
+<p id="section-2.14-3">BBR.is_loss_in_round: A boolean tracking whether there was a packet loss
+detected in the current round trip.<a href="#section-2.14-3" class="pilcrow">¶</a></p>
+<p id="section-2.14-4">BBR.bw_probe_up_acked: The volume of data ACKed since increasing BBR.inflight_longterm.<a href="#section-2.14-4" class="pilcrow">¶</a></p>
+<p id="section-2.14-5">BBR.probe_up_acked_per_inc: The volume of data that must be ACKed before BBR.inflight_longterm is increased by C.SMSS.<a href="#section-2.14-5" class="pilcrow">¶</a></p>
+<p id="section-2.14-6">BBR.bw_probe_up_rounds: The number of round trips over which BBR.inflight_longterm has been grown in the current ProbeBW_UP episode.<a href="#section-2.14-6" class="pilcrow">¶</a></p>
+<p id="section-2.14-7">BBR.rounds_since_probe_up: The number of round trips elapsed since the last ProbeBW_UP bandwidth probe phase.<a href="#section-2.14-7" class="pilcrow">¶</a></p>
+<p id="section-2.14-8">BBR.bw_probe_wait: The maximum wall clock time duration BBR waits before probing bandwidth again.<a href="#section-2.14-8" class="pilcrow">¶</a></p>
+<p id="section-2.14-9">BBR.cycle_stamp: The wall clock time at which the current ProbeBW cycle started.<a href="#section-2.14-9" class="pilcrow">¶</a></p>
+<p id="section-2.14-10">BBR.prev_probe_too_high: A boolean recording whether the most recent bandwidth probe went too high (i.e., experienced a packet loss rate exceeding BBR.LossThresh). See "Precautionary Bandwidth Probing" in <a href="#bandwidth-probing-caution" class="auto internal xref">Section 5.3.3.6</a> for how this is used.<a href="#section-2.14-10" class="pilcrow">¶</a></p>
+<p id="section-2.14-11">BBR.prev_probe_precautionary: A boolean recording whether the most recent ProbeBW_UP phase was stopped early because it reached the BBR.inflight_longterm threshold from the previous probe that went too high. See "Precautionary Bandwidth Probing" in <a href="#bandwidth-probing-caution" class="auto internal xref">Section 5.3.3.6</a> for how this is used.<a href="#section-2.14-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="undo-state">
@@ -1973,8 +1970,10 @@ detected in the current round trip.<a href="#section-2.14-4" class="pilcrow">¶<
           </h4>
 <p id="section-2.16.1-1">BBR.min_rtt_stamp: The wall clock time at which the current BBR.min_rtt sample
 was obtained.<a href="#section-2.16.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.16.1-2">BBR.MinRTTFilterLen: A constant specifying the length of the BBR.min_rtt min
-filter window, BBR.MinRTTFilterLen is 10 secs.<a href="#section-2.16.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.16.1-2">BBR.min_rtt_expired: A boolean recording whether the BBR.min_rtt estimate
+has expired and is due for a refresh.<a href="#section-2.16.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.16.1-3">BBR.MinRTTFilterLen: A constant specifying the length of the BBR.min_rtt min
+filter window, BBR.MinRTTFilterLen is 10 secs.<a href="#section-2.16.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="parameters-for-scheduling-probertt">
@@ -1986,19 +1985,17 @@ filter window, BBR.MinRTTFilterLen is 10 secs.<a href="#section-2.16.1-2" class=
 C.cwnd during ProbeRTT: 0.5 (meaning that ProbeRTT attempts to reduce in-flight
 data to 50% of the estimated BDP).<a href="#section-2.16.2-1" class="pilcrow">¶</a></p>
 <p id="section-2.16.2-2">BBR.ProbeRTTDuration: A constant specifying the minimum duration for which ProbeRTT
-state holds C.inflight to BBR.MinPipeCwnd or fewer packets: 200 ms.<a href="#section-2.16.2-2" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-3">BBR.ProbeRTTInterval: A constant specifying the minimum time interval between
-ProbeRTT states: 5 secs.<a href="#section-2.16.2-3" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-4">BBR.probe_rtt_min_delay: The minimum RTT sample recorded in the last
-BBR.ProbeRTTInterval.<a href="#section-2.16.2-4" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-5">BBR.probe_rtt_min_stamp: The wall clock time at which the current
-BBR.probe_rtt_min_delay sample was obtained.<a href="#section-2.16.2-5" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-6">BBR.probe_rtt_expired: A boolean recording whether the BBR.probe_rtt_min_delay
-has expired and is due for a refresh with an application idle period or a
-transition into ProbeRTT state.<a href="#section-2.16.2-6" class="pilcrow">¶</a></p>
-<p id="section-2.16.2-7">The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+state holds C.inflight to at most ProbeRTTCwnd(): 200 ms.<a href="#section-2.16.2-2" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-3">BBR.probe_rtt_done_stamp: The wall clock time at which BBR can exit ProbeRTT
+state.<a href="#section-2.16.2-3" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-4">BBR.probe_rtt_round_done: A boolean recording whether the connection has
+completed a round trip in ProbeRTT state.<a href="#section-2.16.2-4" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-5">BBR.probe_rtt_cwnd: The target congestion window cap for ProbeRTT state (prior
+to applying the BBR.MinPipeCwnd floor), computed as 0.5 * estimated_BDP based
+on the BBR.min_rtt sample when entering ProbeRTT, before it has expired.<a href="#section-2.16.2-5" class="pilcrow">¶</a></p>
+<p id="section-2.16.2-6">The keywords "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to
-be interpreted as described in <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span>.<a href="#section-2.16.2-7" class="pilcrow">¶</a></p>
+be interpreted as described in <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span>.<a href="#section-2.16.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2258,7 +2255,7 @@ algorithm improvements, as described below.<a href="#section-3.8-1" class="pilcr
 specify a specific response to ECN, and instead leaves it as an area for
 future work.<a href="#section-3.8-2" class="pilcrow">¶</a></p>
 <p id="section-3.8-3">The design of ProbeRTT in <a href="#probertt-design-rationale" class="auto internal xref">Section 5.3.4.2</a> specifies a ProbeRTT
-interval that sacrifices no more than roughly 2% of a flow's available
+interval that sacrifices no more than roughly 1% of a flow's available
 bandwidth. The impact of using a different interval or making adjustments
 for triggering ProbeRTT on specific link types is a subject of
 further experimentation.<a href="#section-3.8-3" class="pilcrow">¶</a></p>
@@ -2565,13 +2562,17 @@ be tracked to implement this algorithm:<a href="#section-4.1.2.1.1-5" class="pil
 <p id="section-4.1.2.1.1-6">C.pending_transmissions: The number of bytes queued for transmission on the
 sending host at layers lower than the transport layer (i.e. network layer,
 traffic shaping layer, network device layer).<a href="#section-4.1.2.1.1-6" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-7">C.lost_out: The amount of data in the current outstanding window that
-is marked as lost.<a href="#section-4.1.2.1.1-7" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-8">C.retrans_out: The amount of data in the current outstanding window that
-are being retransmitted.<a href="#section-4.1.2.1.1-8" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-9">C.min_rtt: The minimum observed RTT over the lifetime of the connection.<a href="#section-4.1.2.1.1-9" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.1.1-10">C.srtt: The smoothed RTT, an exponentially weighted moving average of the
-observed RTT of the connection.<a href="#section-4.1.2.1.1-10" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-7">C.unacked: The amount of data that has been sent and not yet acknowledged,
+including data marked as lost. For TCP, this is SND.NXT - SND.UNA. For QUIC,
+this is the data in sent packets that the sender is still tracking for
+acknowledgment, including packets declared lost.<a href="#section-4.1.2.1.1-7" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-8">C.lost_out: The amount of data in the current outstanding window that
+is marked as lost.<a href="#section-4.1.2.1.1-8" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-9">C.retrans_out: The amount of data in the current outstanding window that
+are being retransmitted.<a href="#section-4.1.2.1.1-9" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-10">C.min_rtt: The minimum observed RTT over the lifetime of the connection.<a href="#section-4.1.2.1.1-10" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.1.1-11">C.srtt: The smoothed RTT, an exponentially weighted moving average of the
+observed RTT of the connection.<a href="#section-4.1.2.1.1-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="per-packet-p-state">
@@ -2634,18 +2635,23 @@ delivered (see the "ACK Rate" section above).<a href="#section-4.1.2.1.3-9" clas
 information in per-packet state. This will allow the sender
 to generate a rate sample later, in the UpdateRateSample() step, when the
 packet is (S)ACKed.<a href="#section-4.1.2.2-1" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.2-2">If there are packets already in flight, then we need to start delivery rate
+<p id="section-4.1.2.2-2">If there is already unacknowledged data, then we need to start delivery rate
 samples from the time we received the most recent ACK, to try to ensure that
 we include the full time the network needs to deliver all in-flight data.
-If there is no data in flight yet, then we can start the delivery rate
+If there is no unacknowledged data, then we can start the delivery rate
 interval at the current time, since we know that any ACKs after now indicate
 that the network was able to deliver that data completely in the sampling
 interval between now and the next ACK.<a href="#section-4.1.2.2-2" class="pilcrow">¶</a></p>
-<p id="section-4.1.2.2-3">After each packet transmission, the sender executes the following steps:<a href="#section-4.1.2.2-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.1.2.2-4">
+<p id="section-4.1.2.2-3">Note that this logic uses C.unacked rather than C.inflight
+because C.inflight is an estimate based on loss detection heuristics.
+It is important to avoid having spurious loss detection episodes cause
+a spuriously small time interval, causing spuriously high
+delivery rate samples.<a href="#section-4.1.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.1.2.2-4">After each packet transmission, the sender executes the following steps:<a href="#section-4.1.2.2-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.1.2.2-5">
 <pre>
   OnPacketSent(Packet P):
-    if (C.inflight == 0)
+    if (C.unacked == 0)
       C.first_send_time  = C.delivered_time = P.send_time
 
     P.first_send_time = C.first_send_time
@@ -2654,7 +2660,7 @@ interval between now and the next ACK.<a href="#section-4.1.2.2-2" class="pilcro
     P.is_app_limited  = (C.app_limited != 0)
     P.tx_in_flight    = C.inflight    /* includes data in P */
     P.lost            = C.lost
-</pre><a href="#section-4.1.2.2-4" class="pilcrow">¶</a>
+</pre><a href="#section-4.1.2.2-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -3172,8 +3178,10 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
     InitWindowedMaxFilter(filter=BBR.max_bw_filter, value=0, time=0)
     BBR.min_rtt = C.srtt ? C.srtt : Infinity
     BBR.min_rtt_stamp = Now()
+    BBR.min_rtt_expired = false
     BBR.probe_rtt_done_stamp = 0
     BBR.probe_rtt_round_done = false
+    BBR.probe_rtt_cwnd = Infinity
     BBR.prior_cwnd = 0
     BBR.undo_state = None
     BBR.undo_bw_shortterm = 0
@@ -3188,10 +3196,10 @@ steps:<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
     BBR.bw_probe_up_acked = 0
     BBR.bw_probe_up_rounds = 0
     BBR.rounds_since_probe_up = 0
-    BBR.is_bw_probe_sample = false
+    BBR.check_probe_loss = false
     BBR.prev_probe_too_high = false
     BBR.prev_probe_precautionary = false
-    BBR.ack_phase = ACKS_INIT
+    BBR.is_bw_probe_stopping = false
     BBR.cycle_stamp = 0
     BBR.bw_probe_wait = 0
     ResetCongestionSignals()
@@ -3325,25 +3333,8 @@ for packet loss. The following subsections discuss these estimators.<a href="#se
 <div class="alignLeft art-text artwork" id="section-5.3.1.1-7">
 <pre>
   CheckStartupDone():
-    if (BBR.state != Startup)
-      return
-    if (BBR.full_bw_reached)
-      EnterDrain()
-      return
-    if (!InLossRecovery() || !BBR.loss_round_start)
-      return
-
-    if (C.has_selective_acks)
-      is_high_loss = (BBR.loss_round_delivered &gt; 0 &amp;&amp;
-                      (BBR.loss_round_lost / BBR.loss_round_delivered) &gt; BBR.LossThresh &amp;&amp;
-                      BBR.loss_round_discontiguous_lost &gt;= BBRStartupFullLossCnt)
-    else
-      is_high_loss = true  /* Any loss exits Startup */
-
-    if (is_high_loss)
-      BBR.undo_state = Startup
-      BBR.full_bw_reached = true
-      BBR.inflight_longterm = max(BBR.bdp, BBR.inflight_latest)
+    CheckStartupHighLoss()
+    if (BBR.state == Startup &amp;&amp; BBR.full_bw_reached)
       EnterDrain()
 </pre><a href="#section-5.3.1.1-7" class="pilcrow">¶</a>
 </div>
@@ -3426,26 +3417,42 @@ round trip.<a href="#section-5.3.1.3-3.1.1" class="pilcrow">¶</a></p>
 BBR.LossThresh (2%).<a href="#section-5.3.1.3-3.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.3.1.3-3.3">
-                <p id="section-5.3.1.3-3.3.1">There are at least BBRStartupFullLossCnt=6 discontiguous sequence ranges
-lost in that round trip.<a href="#section-5.3.1.3-3.3.1" class="pilcrow">¶</a></p>
+                <p id="section-5.3.1.3-3.3.1">There are at least BBR.StartupFullLossCnt=6 Fast Recovery loss events
+in that round trip.<a href="#section-5.3.1.3-3.3.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 <p id="section-5.3.1.3-4">For connections for which C.has_selective_acks is false and thus the connection
 can only detect one packet loss per round trip, CheckStartupHighLoss() exits
 Startup based on packet loss if any packet loss is detected during fast
 recovery.<a href="#section-5.3.1.3-4" class="pilcrow">¶</a></p>
-<p id="section-5.3.1.3-5">If CheckStartupDone() exits Startup based on packet loss, it takes the
+<p id="section-5.3.1.3-5">If CheckStartupHighLoss() exits Startup based on packet loss, it takes the
 following steps. First, it sets BBR.undo_state = Startup (to enable an
 undo of this step if the loss recovery is later detected to be spurious).
 Second, it sets BBR.full_bw_reached = true. Then it sets
 BBR.inflight_longterm to its estimate of a safe level of in-flight data suggested
 by these losses, which is max(BBR.bdp, BBR.inflight_latest), where
 BBR.inflight_latest is the max delivered volume of data (RS.delivered) over
-the last round trip. Finally, it exits Startup and enters Drain.<a href="#section-5.3.1.3-5" class="pilcrow">¶</a></p>
-<p id="section-5.3.1.3-6">The algorithm waits until all three criteria are met to filter out noise
+the last round trip. Finally, because BBR.full_bw_reached is now true,
+CheckStartupDone() exits Startup and enters Drain:<a href="#section-5.3.1.3-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3.1.3-6">
+<pre>
+  CheckStartupHighLoss():
+    if (BBR.full_bw_reached || !BBR.loss_round_start || !InLossRecovery())
+      return
+    if (BBR.loss_events_in_round &lt; BBR.StartupFullLossCnt &amp;&amp;
+        C.has_selective_acks)
+      return
+    if (!IsInflightTooHigh())
+      return
+    BBR.undo_state = Startup
+    BBR.full_bw_reached = true
+    BBR.inflight_longterm = max(BBR.bdp, BBR.inflight_latest)
+</pre><a href="#section-5.3.1.3-6" class="pilcrow">¶</a>
+</div>
+<p id="section-5.3.1.3-7">The algorithm waits until all three criteria are met to filter out noise
 from burst losses, and to try to ensure the bottleneck is fully utilized
 on a sustained basis, and the full bottleneck bandwidth has been measured,
-before attempting to drain the level of in-flight data to the estimated BDP.<a href="#section-5.3.1.3-6" class="pilcrow">¶</a></p>
+before attempting to drain the level of in-flight data to the estimated BDP.<a href="#section-5.3.1.3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3945,7 +3952,7 @@ as follows:<a href="#section-5.3.3.8.3-6" class="pilcrow">¶</a></p>
     BBR.probe_up_acked_per_inc = Infinity /* not growing BBR.inflight_longterm */
     PickProbeWait()
     BBR.cycle_stamp = Now()  /* start wall clock */
-    BBR.ack_phase  = ACKS_PROBE_STOPPING
+    BBR.is_bw_probe_stopping = true
     StartRound()
     BBR.state = ProbeBW_DOWN
 
@@ -3957,12 +3964,11 @@ as follows:<a href="#section-5.3.3.8.3-6" class="pilcrow">¶</a></p>
     BBR.bw_probe_up_rounds = 0
     BBR.bw_probe_up_acked = 0
     BBR.prev_probe_precautionary = false
-    BBR.ack_phase = ACKS_REFILLING
+    BBR.is_bw_probe_stopping = false
     StartRound()
     BBR.state = ProbeBW_REFILL
 
   StartProbeBW_UP():
-    BBR.ack_phase = ACKS_PROBE_STARTING
     StartRound()
     ResetFullBW()
     BBR.full_bw = RS.delivery_rate
@@ -3998,7 +4004,7 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
     ProbeBW_REFILL:
       /* After one round of REFILL, start UP */
       if (BBR.round_start)
-        BBR.is_bw_probe_sample = true
+        BBR.check_probe_loss = true
         StartProbeBW_UP()
 
     ProbeBW_UP:
@@ -4079,13 +4085,10 @@ that acknowledges new data, to advance the ProbeBW state machine:<a href="#secti
    * BBR.inflight_longterm.
    * Returns true if it decided a state transition, false otherwise. */
   AdaptLongTermModel():
-    if (BBR.ack_phase == ACKS_PROBE_STARTING &amp;&amp; BBR.round_start)
-      /* starting to get bw probing samples */
-      BBR.ack_phase = ACKS_PROBE_FEEDBACK
-    if (BBR.ack_phase == ACKS_PROBE_STOPPING &amp;&amp; BBR.round_start)
+    if (BBR.is_bw_probe_stopping &amp;&amp; BBR.round_start)
       /* end of samples from bw probing phase */
-      BBR.is_bw_probe_sample = false
-      BBR.ack_phase = ACKS_INIT
+      BBR.check_probe_loss = false
+      BBR.is_bw_probe_stopping = false
       if (IsInAProbeBWState() &amp;&amp; !RS.is_app_limited)
         AdvanceMaxBwFilter()
       /* Precautionary Bandwidth Probing: Acceleration */
@@ -4131,27 +4134,25 @@ the bottleneck queue and make a robust BBR.min_rtt measurement. This allows the
 BBR.min_rtt estimates of ensembles of BBR flows to converge, avoiding feedback
 loops of ever-increasing queues and RTT samples.<a href="#section-5.3.4.1-2" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-3">The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
-every BBR.ProbeRTTInterval = 5 seconds, the flow enters ProbeRTT, decelerating
+every BBR.MinRTTFilterLen = 10 seconds, the flow enters ProbeRTT, decelerating
 by setting its cwnd_gain to BBR.ProbeRTTCwndGain = 0.5 to reduce
 C.inflight to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.<a href="#section-5.3.4.1-3" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.1-4">There are two main motivations for making the BBR.MinRTTFilterLen roughly twice
-the BBR.ProbeRTTInterval. First, this ensures that during a ProbeRTT episode
-the flow will "remember" the BBR.min_rtt value it measured during the previous
-ProbeRTT episode, providing a robust BDP estimate for the C.cwnd = 0.5*BDP
-calculation, increasing the likelihood of fully draining the bottleneck
-queue. Second, this allows the flow's BBR.min_rtt filter window to generally
-include RTT samples from two ProbeRTT episodes, providing a more robust
-estimate.<a href="#section-5.3.4.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.1-4">Before expiring the BBR.min_rtt filter and entering ProbeRTT, BBR saves
+BBR.probe_rtt_cwnd as 0.5 * estimated_BDP based on the old
+BBR.min_rtt. This ensures that during ProbeRTT the flow will
+"remember" the BBR.min_rtt value it measured during the previous filter window,
+providing a robust BDP estimate for the C.cwnd = 0.5*BDP calculation,
+increasing the likelihood of fully draining the bottleneck queue.<a href="#section-5.3.4.1-4" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-5">The algorithm for ProbeRTT is as follows:<a href="#section-5.3.4.1-5" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-6">Entry conditions: In any state other than ProbeRTT itself, if the
-BBR.probe_rtt_min_delay estimate has not been updated (i.e., by getting a
-lower RTT measurement) for more than BBR.ProbeRTTInterval = 5 seconds, then BBR
+BBR.min_rtt estimate has not been updated (i.e., by getting a
+lower RTT measurement) for more than BBR.MinRTTFilterLen = 10 seconds, then BBR
 enters ProbeRTT and reduces the BBR.cwnd_gain to BBR.ProbeRTTCwndGain = 0.5.<a href="#section-5.3.4.1-6" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.1-7">Exit conditions: After maintaining C.inflight at
-BBR.ProbeRTTCwndGain*BBR.bdp for at least BBR.ProbeRTTDuration (200 ms) and at
-least one packet-timed round trip, BBR leaves ProbeRTT and transitions to
-ProbeBW if it estimates the pipe was filled already, or Startup otherwise.<a href="#section-5.3.4.1-7" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.1-7">Exit conditions: After holding C.inflight to at most ProbeRTTCwnd() for at
+least BBR.ProbeRTTDuration (200 ms) and at least one packet-timed round trip,
+BBR leaves ProbeRTT and transitions to ProbeBW if it estimates the pipe was
+filled already, or Startup otherwise.<a href="#section-5.3.4.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probertt-design-rationale">
@@ -4159,40 +4160,35 @@ ProbeBW if it estimates the pipe was filled already, or Startup otherwise.<a hre
             <h5 id="name-probertt-design-rationale">
 <a href="#section-5.3.4.2" class="section-number selfRef">5.3.4.2. </a><a href="#name-probertt-design-rationale" class="section-name selfRef">ProbeRTT Design Rationale</a>
             </h5>
-<p id="section-5.3.4.2-1">BBR is designed to have ProbeRTT sacrifice no more than roughly 2% of a flow's
+<p id="section-5.3.4.2-1">BBR is designed to have ProbeRTT sacrifice no more than roughly 1% of a flow's
 available bandwidth. It is also designed to spend the vast majority of its
-time (at least roughly 96 percent) in ProbeBW and the rest in ProbeRTT, based
+time (at least roughly 98 percent) in ProbeBW and the rest in ProbeRTT, based
 on a set of tradeoffs. ProbeRTT lasts long enough (at least BBR.ProbeRTTDuration
 = 200 ms) to allow diverse flows (e.g., flows with different RTTs or lower
 rates and thus longer inter-packet gaps) to have overlapping ProbeRTT states,
 while still being short enough to bound the throughput penalty of ProbeRTT's
-cwnd capping to roughly 2%, with the average throughput targeted at:<a href="#section-5.3.4.2-1" class="pilcrow">¶</a></p>
+cwnd capping to roughly 1%, with the average throughput targeted at:<a href="#section-5.3.4.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.4.2-2">
 <pre>
-  throughput = (200ms*0.5*BBR.bw + (5s - 200ms)*BBR.bw) / 5s
-             = (.1s + 4.8s)/5s * BBR.bw = 0.98 * BBR.bw
+  throughput = (200ms*0.5*BBR.bw + (10s - 200ms)*BBR.bw) / 10s
+             = (.1s + 9.8s)/10s * BBR.bw = 0.99 * BBR.bw
 </pre><a href="#section-5.3.4.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-5.3.4.2-3">As discussed above, BBR's BBR.min_rtt filter window, BBR.MinRTTFilterLen, and
-time interval between ProbeRTT states, BBR.ProbeRTTInterval, work in concert.
-BBR uses a BBR.MinRTTFilterLen equal to or longer than BBR.ProbeRTTInterval to allow
-the filter window to include at least one ProbeRTT.<a href="#section-5.3.4.2-3" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.2-4">To allow coordination with other BBR flows, each BBR flow MUST use the
-standard BBR.ProbeRTTInterval of 5 secs.<a href="#section-5.3.4.2-4" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.2-5">A BBR.ProbeRTTInterval of 5 secs is short enough to allow quick convergence if
+<p id="section-5.3.4.2-3">To allow coordination with other BBR flows, each BBR flow MUST use the
+standard BBR.MinRTTFilterLen of 10 secs.<a href="#section-5.3.4.2-3" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.2-4">A BBR.MinRTTFilterLen of 10 secs is short enough to allow quick convergence if
 traffic levels or routes change, but long enough so that interactive
 applications (e.g., Web, remote procedure calls, video chunks) often have
 natural silences or low-rate periods within the window where the flow's rate
 is low enough for long enough to drain its queue in the bottleneck. Then the
-BBR.probe_rtt_min_delay filter opportunistically picks up these measurements,
-and the BBR.probe_rtt_min_delay estimate refreshes without requiring
-ProbeRTT. This way, flows typically need only pay the 2 percent throughput
-penalty if there are multiple bulk flows busy sending over the entire
-BBR.ProbeRTTInterval window.<a href="#section-5.3.4.2-5" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.2-6">As an optimization, when restarting from idle and finding that the
-BBR.probe_rtt_min_delay has expired, BBR does not enter ProbeRTT; the idleness
-is deemed a sufficient attempt to coordinate to drain the queue.<a href="#section-5.3.4.2-6" class="pilcrow">¶</a></p>
-<p id="section-5.3.4.2-7">The frequency of triggering ProbeRTT involves a tradeoff between the speed of
+BBR.min_rtt filter opportunistically picks up these measurements, and the
+BBR.min_rtt estimate refreshes without requiring ProbeRTT. This way, flows
+typically need only pay the throughput penalty if there are multiple bulk
+flows busy sending over the entire BBR.MinRTTFilterLen window.<a href="#section-5.3.4.2-4" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.2-5">As an optimization, when restarting from idle and finding that the
+BBR.min_rtt has expired, BBR does not enter ProbeRTT; the idleness
+is deemed a sufficient attempt to coordinate to drain the queue.<a href="#section-5.3.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.2-6">The frequency of triggering ProbeRTT involves a tradeoff between the speed of
 convergence and the throughput penalty of applying a cwnd cap during ProbeRTT.
 The interval between ProbeRTTs is a subject of further experimentation.
 A longer duration between ProbeRTT would reduce the throughput penalty for bulk
@@ -4202,7 +4198,7 @@ of links can switch between paths of significantly different base
 RTT (e.g. LEO satellite or cellular handoff). If these path changes can be
 predicted or detected, initiating a ProbeRTT immediately could conceivably
 speed up the convergence to an accurate BBR.min_rtt, especially when it
-has increased.<a href="#section-5.3.4.2-7" class="pilcrow">¶</a></p>
+has increased.<a href="#section-5.3.4.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="probertt-logic">
@@ -4210,30 +4206,23 @@ has increased.<a href="#section-5.3.4.2-7" class="pilcrow">¶</a></p>
             <h5 id="name-probertt-logic">
 <a href="#section-5.3.4.3" class="section-number selfRef">5.3.4.3. </a><a href="#name-probertt-logic" class="section-name selfRef">ProbeRTT Logic</a>
             </h5>
-<p id="section-5.3.4.3-1">On every ACK BBR executes UpdateMinRTT() to update its ProbeRTT scheduling
-state (BBR.probe_rtt_min_delay and BBR.probe_rtt_min_stamp) and its BBR.min_rtt
-estimate:<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.4.3-1">On every ACK BBR executes UpdateMinRTT() to update its BBR.min_rtt estimate
+and its ProbeRTT scheduling state:<a href="#section-5.3.4.3-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.3.4.3-2">
 <pre>
-  UpdateMinRTT()
-    BBR.probe_rtt_expired =
-      Now() &gt; BBR.probe_rtt_min_stamp + BBR.ProbeRTTInterval
-    if (RS.rtt &gt;= 0 &amp;&amp;
-        (RS.rtt &lt; BBR.probe_rtt_min_delay ||
-         BBR.probe_rtt_expired))
-       BBR.probe_rtt_min_delay = RS.rtt
-       BBR.probe_rtt_min_stamp = Now()
-
-    min_rtt_expired =
+  UpdateMinRTT():
+    BBR.min_rtt_expired =
       Now() &gt; BBR.min_rtt_stamp + BBR.MinRTTFilterLen
-    if (BBR.probe_rtt_min_delay &lt; BBR.min_rtt ||
-        min_rtt_expired)
-      BBR.min_rtt       = BBR.probe_rtt_min_delay
-      BBR.min_rtt_stamp = BBR.probe_rtt_min_stamp
+    if (BBR.min_rtt_expired)
+      BBR.probe_rtt_cwnd = BDPMultiple(BBR.ProbeRTTCwndGain)
+    if (RS.rtt &gt;= 0 &amp;&amp;
+        (RS.rtt &lt; BBR.min_rtt || BBR.min_rtt_expired))
+      BBR.min_rtt       = RS.rtt
+      BBR.min_rtt_stamp = Now()
 </pre><a href="#section-5.3.4.3-2" class="pilcrow">¶</a>
 </div>
-<p id="section-5.3.4.3-3">Here BBR.probe_rtt_expired is a boolean recording whether the
-BBR.probe_rtt_min_delay has expired and is due for a refresh, via either
+<p id="section-5.3.4.3-3">Here BBR.min_rtt_expired is a boolean recording whether the
+BBR.min_rtt estimate has expired and is due for a refresh, via either
 an application idle period or a transition into ProbeRTT state.<a href="#section-5.3.4.3-3" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.3-4">On every ACK BBR executes CheckProbeRTT() to handle the steps related
 to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶</a></p>
@@ -4241,12 +4230,12 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
 <pre>
   CheckProbeRTT():
     if (BBR.state != ProbeRTT &amp;&amp;
-        BBR.probe_rtt_expired &amp;&amp;
+        BBR.min_rtt_expired &amp;&amp;
         !BBR.idle_restart)
-      EnterProbeRTT()
       SaveCwnd()
+      EnterProbeRTT()
       BBR.probe_rtt_done_stamp = 0
-      BBR.ack_phase = ACKS_PROBE_STOPPING
+      BBR.is_bw_probe_stopping = true
       StartRound()
     if (BBR.state == ProbeRTT)
       HandleProbeRTT()
@@ -4279,7 +4268,7 @@ to the ProbeRTT state as follows:<a href="#section-5.3.4.3-4" class="pilcrow">¶
     if (BBR.probe_rtt_done_stamp != 0 &amp;&amp;
         Now() &gt; BBR.probe_rtt_done_stamp)
       /* schedule next ProbeRTT: */
-      BBR.probe_rtt_min_stamp = Now()
+      BBR.min_rtt_stamp = Now()
       RestoreCwnd()
       ExitProbeRTT()
 </pre><a href="#section-5.3.4.3-5" class="pilcrow">¶</a>
@@ -4299,7 +4288,7 @@ it far below the capacity of the path.<a href="#section-5.3.4.4-2" class="pilcro
 <p id="section-5.3.4.4-3">But the algorithm is cautious in timing the next bandwidth probe: raising
 C.inflight after ProbeRTT may cause loss, so the algorithm resets the
 bandwidth-probing clock by starting the cycle at ProbeBW_DOWN(). But then as an
-optimization, since the connection is exiting ProbeRTT, we know that infligh is
+optimization, since the connection is exiting ProbeRTT, we know that inflight is
 already below the estimated BDP, so the connection can proceed immediately to
 ProbeBW_CRUISE.<a href="#section-5.3.4.4-3" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.4-4">To summarize, the logic for exiting ProbeRTT is as follows:<a href="#section-5.3.4.4-4" class="pilcrow">¶</a></p>
@@ -4629,7 +4618,7 @@ due to "noise" introduced by random variation in physical transmission processes
 (e.g. radio link layer noise), queues along the network path, the receiver's
 delayed ack strategy, ack aggregation, etc. Thus to filter out these effects
 BBR uses a min filter: BBR estimates BBR.min_rtt using the minimum recent
-RTT sample seen by the connection over that past BBR.MinRTTFilterLen seconds.
+RTT sample seen by the connection over the past BBR.MinRTTFilterLen seconds.
 (Many of the same network effects that can decrease delivery rate measurements
 can increase RTT samples, which is why BBR's min-filtering approach for RTTs
 is the complement of its max-filtering approach for delivery rates.)<a href="#section-5.5.7.2-1" class="pilcrow">¶</a></p>
@@ -4637,13 +4626,12 @@ is the complement of its max-filtering approach for delivery rates.)<a href="#se
 This is driven by trade-offs among several considerations:<a href="#section-5.5.7.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.5.7.2-3.1">
-                <p id="section-5.5.7.2-3.1.1">The BBR.MinRTTFilterLen is longer than BBR.ProbeRTTInterval, so that it covers an
-entire ProbeRTT cycle (see the "ProbeRTT" section below). This helps ensure
-that the window can contain RTT samples that are the result of data
-transmitted with C.inflight below the estimated BDP of the flow. Such RTT
-samples are important for helping to reveal the path's underlying two-way
-propagation delay even when the aforementioned "noise" effects can often
-obscure it.<a href="#section-5.5.7.2-3.1.1" class="pilcrow">¶</a></p>
+                <p id="section-5.5.7.2-3.1.1">The BBR.MinRTTFilterLen (10 seconds) is long enough to cover a ProbeRTT cycle
+(see <a href="#probertt" class="auto internal xref">Section 5.3.4</a>). This helps ensure that the window can
+contain RTT samples that are the result of data transmitted with C.inflight
+below the estimated BDP of the flow. Such RTT samples are important for
+helping to reveal the path's underlying two-way propagation delay even when
+the aforementioned "noise" effects can often obscure it.<a href="#section-5.5.7.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.5.7.2-3.2">
                 <p id="section-5.5.7.2-3.2.1">The BBR.MinRTTFilterLen aims to be long enough to avoid needing to reduce in-flight
@@ -4831,7 +4819,7 @@ reduces BBR.inflight_longterm:<a href="#section-5.5.10.2-1" class="pilcrow">¶</
 
   HandleInflightTooHigh():
     BBR.prev_probe_too_high = true
-    BBR.is_bw_probe_sample = false  /* only react once per bw probe */
+    BBR.check_probe_loss = false  /* only react once per bw probe */
     if (!RS.is_app_limited)
       BBR.inflight_longterm = max(RS.tx_in_flight,
                             TargetInflight() * BBR.Beta)
@@ -4887,10 +4875,11 @@ represents the data lost among that previous in-flight data.<a href="#section-5.
       BBR.loss_round_delivered = C.delivered
       SaveStateUponLoss()
     BBR.is_loss_in_round = true
+    BBR.loss_events_in_round++
 
   HandleLostPacket(Packet P):
     NoteLoss()
-    if (!BBR.is_bw_probe_sample)
+    if (!BBR.check_probe_loss)
       return /* not a packet sent while probing bandwidth */
     RS.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
     RS.lost = C.lost - P.lost /* data lost since transmit */
@@ -4964,11 +4953,13 @@ inflight_shortterm = max( inflight_latest, BBR.Beta * BBR.inflight_shortterm )
   /* Near end of ACK processing: */
   AdvanceLatestDeliverySignals():
     if (BBR.loss_round_start)
-      BBR.bw_latest       = RS.delivery_rate
-      BBR.inflight_latest = RS.delivered
+      BBR.bw_latest            = RS.delivery_rate
+      BBR.inflight_latest      = RS.delivered
+      BBR.loss_events_in_round = 0
 
   ResetCongestionSignals():
     BBR.is_loss_in_round = false
+    BBR.loss_events_in_round = 0
     BBR.bw_latest = 0
     BBR.inflight_latest = 0
 
@@ -5074,6 +5065,7 @@ phase to restart the bandwidth probe):<a href="#section-5.5.11.2-2" class="pilcr
   HandleSpuriousLossDetection():
     RestoreCwnd()
     BBR.is_loss_in_round = false
+    BBR.loss_events_in_round = 0
     ResetFullBW()
     BBR.bw_shortterm       = max(BBR.bw_shortterm,
                                  BBR.undo_bw_shortterm)
@@ -5442,15 +5434,17 @@ ProbeRTT), and is defined as follows:<a href="#section-5.6.4.4-13" class="pilcro
             <h5 id="name-modulating-cwnd-in-probertt">
 <a href="#section-5.6.4.5" class="section-number selfRef">5.6.4.5. </a><a href="#name-modulating-cwnd-in-probertt" class="section-name selfRef">Modulating cwnd in ProbeRTT</a>
             </h5>
-<p id="section-5.6.4.5-1">If BBR decides it needs to enter the ProbeRTT state (see the "ProbeRTT" section
-below), its goal is to quickly reduce C.inflight and drain
-the bottleneck queue, thereby allowing measurement of BBR.min_rtt. To implement
-this mode, BBR bounds C.cwnd to BBR.MinPipeCwnd, the minimal value that
-allows pipelining (see the "Minimum cwnd for Pipelining" section, above):<a href="#section-5.6.4.5-1" class="pilcrow">¶</a></p>
+<p id="section-5.6.4.5-1">If BBR decides it needs to enter the ProbeRTT state (see <a href="#probertt" class="auto internal xref">Section 5.3.4</a>), its
+goal is to quickly reduce C.inflight and drain the bottleneck queue, thereby
+allowing measurement of BBR.min_rtt. To implement this mode, BBR bounds C.cwnd
+to ProbeRTTCwnd(), which takes the smaller of BDPMultiple(BBR.ProbeRTTCwndGain)
+and BBR.probe_rtt_cwnd, and then applies a floor of BBR.MinPipeCwnd, the minimal
+value that allows pipelining (see <a href="#minimum-cwnd-for-pipelining" class="auto internal xref">Section 5.6.4.3</a>):<a href="#section-5.6.4.5-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.6.4.5-2">
 <pre>
   ProbeRTTCwnd():
-    probe_rtt_cwnd = BDPMultiple(BBR.bw, BBR.ProbeRTTCwndGain)
+    probe_rtt_cwnd = BDPMultiple(BBR.ProbeRTTCwndGain)
+    probe_rtt_cwnd = min(probe_rtt_cwnd, BBR.probe_rtt_cwnd)
     probe_rtt_cwnd = max(probe_rtt_cwnd, BBR.MinPipeCwnd)
     return probe_rtt_cwnd
 
@@ -6181,19 +6175,21 @@ PROBE_CRUISE.<a href="#appendix-A.9-1.4.1" class="pilcrow">¶</a></p>
             <p id="appendix-A.10-1.1.1">Wait until the connection transitions to PROBE_BW.<a href="#appendix-A.10-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.2">
-            <p id="appendix-A.10-1.2.1">Wait for <code>BBR.ProbeRTTInterval</code> (5 seconds) without updating
-<code>BBR.probe_rtt_min_delay</code>.<a href="#appendix-A.10-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.2.1">Wait for <code>BBR.MinRTTFilterLen</code> (10 seconds) without updating
+<code>BBR.min_rtt</code>.<a href="#appendix-A.10-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.3">
-            <p id="appendix-A.10-1.3.1">Verify the connection enters PROBE_RTT and sets <code>BBR.cwnd_gain</code> to
-<code>BBR.ProbeRTTCwndGain</code> (0.5).<a href="#appendix-A.10-1.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.3.1">Verify the connection enters PROBE_RTT, sets <code>BBR.cwnd_gain</code> to
+<code>BBR.ProbeRTTCwndGain</code> (0.5), and bounds <code>C.cwnd</code> to <code>ProbeRTTCwnd()</code>.<a href="#appendix-A.10-1.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.4">
-            <p id="appendix-A.10-1.4.1">Wait for at least <code>BBR.ProbeRTTDuration</code> (200 ms) and one round trip.<a href="#appendix-A.10-1.4.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.4.1">Once <code>C.inflight &lt;= ProbeRTTCwnd()</code>, wait for at least <code>BBR.ProbeRTTDuration</code>
+(200 ms) and one round trip.<a href="#appendix-A.10-1.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.10-1.5">
-            <p id="appendix-A.10-1.5.1">Verify the connection correctly exits PROBE_RTT, transitions back to PROBE_BW
-(since <code>BBR.full_bw_reached</code> is <code>true</code>), and resumes sending.<a href="#appendix-A.10-1.5.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.10-1.5.1">Verify the connection correctly exits PROBE_RTT, restores <code>BBR.cwnd_gain</code> to
+<code>BBR.DefaultCwndGain</code> (2), transitions back to PROBE_BW (since
+<code>BBR.full_bw_reached</code> is <code>true</code>), and resumes sending.<a href="#appendix-A.10-1.5.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
@@ -6212,7 +6208,7 @@ PROBE_CRUISE.<a href="#appendix-A.9-1.4.1" class="pilcrow">¶</a></p>
 idle and causing <code>C.inflight</code> to drop to 0.<a href="#appendix-A.11-1.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.11-1.3">
-            <p id="appendix-A.11-1.3.1">Allow <code>BBR.ProbeRTTInterval</code> (5 seconds) to elapse during this idle period.<a href="#appendix-A.11-1.3.1" class="pilcrow">¶</a></p>
+            <p id="appendix-A.11-1.3.1">Allow <code>BBR.MinRTTFilterLen</code> (10 seconds) to elapse during this idle period.<a href="#appendix-A.11-1.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.11-1.4">
             <p id="appendix-A.11-1.4.1">Verify that upon sending new data, <code>BBRHandleRestartFromIdle()</code> sets
@@ -6427,7 +6423,7 @@ PROBE_UP).<a href="#appendix-A.19-1.4.1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="appendix-A.20-1">
 <li id="appendix-A.20-1.1">
             <p id="appendix-A.20-1.1.1">Start a flow and artificially trigger PROBE_RTT before <code>BBR.full_bw_reached</code>
-becomes <code>true</code> (e.g., by ensuring <code>BBR.ProbeRTTInterval</code> expires during an
+becomes <code>true</code> (e.g., by ensuring <code>BBR.MinRTTFilterLen</code> expires during an
 extended, slow STARTUP phase).<a href="#appendix-A.20-1.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="appendix-A.20-1.2">
