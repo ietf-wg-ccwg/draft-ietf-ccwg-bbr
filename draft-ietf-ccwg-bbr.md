@@ -1179,7 +1179,7 @@ traffic shaping layer, network device layer).
 
 C.unacked: The amount of data that has been sent and not yet acknowledged,
 including data marked as lost. For TCP, this is SND.NXT - SND.UNA. For QUIC,
-this is the data in sent packets that the sender is still tracking for
+this includes sent packets that the sender is still tracking for
 acknowledgment, including packets declared lost.
 
 C.lost_out: The amount of data in the current outstanding window that
