@@ -2564,10 +2564,9 @@ C.inflight to half of its estimated BDP, to try to measure the unloaded
 two-way propagation delay.
 
 Before expiring the BBR.min_rtt filter and entering ProbeRTT, BBR saves
-BBR.probe_rtt_cwnd as 0.5 \* estimated_BDP based on the old
-BBR.min_rtt. This ensures that during ProbeRTT the flow will
-"remember" the BBR.min_rtt value it measured during the previous filter window,
-providing a robust BDP estimate for the C.cwnd = 0.5\*BDP calculation,
+BBR.probe_rtt_cwnd as 0.5 \* estimated_BDP based on the old (pre-expiration)
+BBR.min_rtt. This ensures that during ProbeRTT the cwnd is based on a BDP
+estimate using the BBR.min_rtt value from the previous filter window,
 increasing the likelihood of fully draining the bottleneck queue.
 
 The algorithm for ProbeRTT is as follows:
