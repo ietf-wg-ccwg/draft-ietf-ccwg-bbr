@@ -4141,8 +4141,8 @@ two-way propagation delay.<a href="#section-5.3.4.1-3" class="pilcrow">¶</a></p
 <p id="section-5.3.4.1-4">Before expiring the BBR.min_rtt filter and entering ProbeRTT, BBR saves
 BBR.probe_rtt_cwnd as 0.5 * estimated_BDP based on the old (pre-expiration)
 BBR.min_rtt. This ensures that during ProbeRTT the cwnd is based on a BDP
-estimate using the BBR.min_rtt value it measured during the previous filter
-window, increasing the likelihood of fully draining the bottleneck queue.<a href="#section-5.3.4.1-4" class="pilcrow">¶</a></p>
+estimate using the BBR.min_rtt value from the previous filter window,
+increasing the likelihood of fully draining the bottleneck queue.<a href="#section-5.3.4.1-4" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-5">The algorithm for ProbeRTT is as follows:<a href="#section-5.3.4.1-5" class="pilcrow">¶</a></p>
 <p id="section-5.3.4.1-6">Entry conditions: In any state other than ProbeRTT itself, if the
 BBR.min_rtt estimate has not been updated (i.e., by getting a
