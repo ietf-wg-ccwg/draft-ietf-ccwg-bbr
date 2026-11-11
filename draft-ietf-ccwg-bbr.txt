@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 13 May 2027                                      J. Beshay, Ed.
+Expires: 15 May 2027                                      J. Beshay, Ed.
                                                                     Meta
-                                                         9 November 2026
+                                                        11 November 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 May 2027.
+   This Internet-Draft will expire on 15 May 2027.
 
 Copyright Notice
 
@@ -2546,11 +2546,10 @@ Table of Contents
 
    Before expiring the BBR.min_rtt filter and entering ProbeRTT, BBR
    saves BBR.probe_rtt_cwnd as 0.5 * estimated_BDP based on the old
-   BBR.min_rtt.  This ensures that during ProbeRTT the flow will
-   "remember" the BBR.min_rtt value it measured during the previous
-   filter window, providing a robust BDP estimate for the C.cwnd =
-   0.5*BDP calculation, increasing the likelihood of fully draining the
-   bottleneck queue.
+   (pre-expiration) BBR.min_rtt.  This ensures that during ProbeRTT the
+   cwnd is based on a BDP estimate using the BBR.min_rtt value from the
+   previous filter window, increasing the likelihood of fully draining
+   the bottleneck queue.
 
    The algorithm for ProbeRTT is as follows:
 
