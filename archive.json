@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-12T06:07:12.637262+00:00",
+  "timestamp": "2026-11-15T05:16:21.599798+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1535,6 +1535,38 @@
       "createdAt": "2026-07-21T12:38:16Z",
       "updatedAt": "2026-08-03T20:42:28Z",
       "closedAt": "2026-08-03T20:42:28Z",
+      "comments": []
+    },
+    {
+      "number": 130,
+      "id": "I_kwDOL3MllM8AAAABfPCc6g",
+      "title": "NoteLoss() re-saves the undo state in the middle of a loss recovery episode",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/130",
+      "state": "OPEN",
+      "author": "adios-404",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In the editor's copy and in -07, `NoteLoss()` calls `SaveStateUponLoss()` on the first loss of each round, and `SaveStateUponLoss()` sets `BBR.undo_state = None`. That loses the undo information in the middle of one loss recovery episode:\n\n1. In ProbeBW_UP, the first lost packet saves the state.\n2. A later lost packet crosses `BBR.LossThresh`. `HandleInflightTooHigh()` lowers `BBR.inflight_longterm`, sets `BBR.undo_state = ProbeBW_UP` and calls `StartProbeBW_DOWN()`, whose `ResetCongestionSignals()` clears `BBR.is_loss_in_round`.\n3. The next lost packet is a \"first loss in this round\" again. `NoteLoss()` saves again: `BBR.undo_state` is `None` and `BBR.undo_inflight_longterm` is the lowered value.\n\nIf the episode is then declared spurious, `HandleSpuriousLossDetection()` restores nothing and does not return to ProbeBW_UP, so A.18 and A.19 fail for a burst of several packets. I saw this running Appendix A against an implementation of the draft.\n\nSuggestion: save only when a loss recovery episode starts, before its first `HandleLostPacket()`, and drop the save from `NoteLoss()`.\n",
+      "createdAt": "2026-11-14T14:16:39Z",
+      "updatedAt": "2026-11-14T14:16:39Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 132,
+      "id": "I_kwDOL3MllM8AAAABfUK4mg",
+      "title": "HandleRestartFromIdle() restarts the ACK aggregation interval but keeps extra_acked_delivered",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/132",
+      "state": "OPEN",
+      "author": "adios-404",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In the editor's copy and in -07, `HandleRestartFromIdle()` sets `BBR.extra_acked_interval_start = Now()` but leaves `BBR.extra_acked_delivered` unchanged.\n\n`UpdateACKAggregation()` starts a new interval only when `BBR.extra_acked_delivered <= expected_delivered`. After a restart from idle the interval is short, so `expected_delivered` is small, while the count still holds the data delivered before the idle period. The test fails, the count keeps growing, and `extra` is limited only by `C.cwnd`, whose own limit in `UpdateMaxInflight()` includes `BBR.extra_acked`.\n\nA flow that restarts from idle often, for example an application-limited flow on a path whose round trip is shorter than the gap between its flights, ratchets `BBR.extra_acked` and `C.cwnd` upward without bound. I saw this in an implementation of the draft on a host-local link: `extra_acked_delivered` was 97 MB over a 0.5 ms interval.\n\nLinux TCP BBRv3 clears both in [`bbr3_cwnd_event_tx_start()`](https://github.com/google/bbr/blob/674859761ded9f32690c7bdaf22ef585531452ed/net/ipv4/tcp_bbr3.c#L482-L491).\n\nSuggestion: also set `BBR.extra_acked_delivered = 0` there.\n",
+      "createdAt": "2026-11-14T22:00:36Z",
+      "updatedAt": "2026-11-14T22:00:36Z",
+      "closedAt": null,
       "comments": []
     }
   ],
@@ -10129,6 +10161,58 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 131,
+      "id": "PR_kwDOL3MllM8AAAABPKfTMg",
+      "title": "Save the undo state once per loss recovery episode",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/131",
+      "state": "OPEN",
+      "author": "adios-404",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #130.\n\n`NoteLoss()` saves the undo state on the first loss of each round trip, so one loss recovery episode can save more than once: after `StartProbeBW_DOWN()` resets `BBR.is_loss_in_round`, or in a later round. The later save resets `BBR.undo_state` and stores parameters the episode's losses already lowered. `OnEnterRTO()` and `OnEnterFastRecovery()` can overwrite the same way when packets are marked lost before recovery is entered, or on a second RTO.\n\nThis saves once per episode, before its first loss is processed:\n\n- `SaveStateUponLoss()` returns early if `BBR.is_undo_saved` is set; the flag is reset upon exiting loss recovery.\n- `HandleLostPacket()` calls it directly; `NoteLoss()` no longer does.\n\nLinux TCP BBRv3 does the same with `loss_yet_in_recovery` in [`bbr3_skb_marked_lost()`](https://github.com/google/bbr/blob/674859761ded9f32690c7bdaf22ef585531452ed/net/ipv4/tcp_bbr3.c#L1993-L2004). I kept the calls in `OnEnterRTO()` and `OnEnterFastRecovery()`; with the guard they are harmless, and can go if you prefer the Linux shape.\n\nI could not run the draft build locally.\n",
+      "createdAt": "2026-11-14T14:57:22Z",
+      "updatedAt": "2026-11-14T14:57:23Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "8add09f80541907a7ce6a4f1833ee7119d231134",
+      "headRepository": "adios-404/draft-ietf-ccwg-bbr",
+      "headRefName": "save-undo-state-once-per-episode",
+      "headRefOid": "7b842c94a9f0ea4f78917a2ce6a86a8f8f5d7bf7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 133,
+      "id": "PR_kwDOL3MllM8AAAABPOUzwQ",
+      "title": "Clear extra_acked_delivered when restarting from idle",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/133",
+      "state": "OPEN",
+      "author": "adios-404",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #132.\n\n`HandleRestartFromIdle()` starts a new ACK aggregation interval by setting `BBR.extra_acked_interval_start`, but keeps `BBR.extra_acked_delivered`. The data delivered before the idle period is then compared with what `BBR.bw` would deliver in the time since the restart, so `UpdateACKAggregation()` does not start a new interval and the excess keeps growing.\n\nThis clears the count along with the start time, as `UpdateACKAggregation()` does when it starts an interval, and as Linux TCP BBRv3 does in [`bbr3_cwnd_event_tx_start()`](https://github.com/google/bbr/blob/674859761ded9f32690c7bdaf22ef585531452ed/net/ipv4/tcp_bbr3.c#L482-L491).\n\nOne line of pseudocode; no text changes.\n\nI could not run the draft build locally.\n",
+      "createdAt": "2026-11-14T22:00:57Z",
+      "updatedAt": "2026-11-14T22:00:58Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "8add09f80541907a7ce6a4f1833ee7119d231134",
+      "headRepository": "adios-404/draft-ietf-ccwg-bbr",
+      "headRefName": "clear-extra-acked-delivered-on-idle-restart",
+      "headRefOid": "640fb92042b610c3676cb08a4a48da33f8813630",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
