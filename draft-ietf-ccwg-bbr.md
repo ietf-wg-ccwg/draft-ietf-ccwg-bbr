@@ -3963,7 +3963,7 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 2. Limit the application sending rate so bandwidth samples are application-limited.
 3. Introduce packet loss exceeding `BBR.LossThresh` (2%) and sequence range
    criteria over the time scale of a single full round trip.
-4. Verify that `BBRCheckStartupHighLoss()` observes the high loss rate.
+4. Verify that `CheckStartupHighLoss()` observes the high loss rate.
 5. Verify the connection sets `BBR.full_bw_now` and `BBR.full_bw_reached` to `true`, exits STARTUP,
    and transitions to DRAIN, demonstrating that loss triggers the end of STARTUP
    even when bandwidth samples are application-limited.
@@ -3973,8 +3973,8 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 1. Start a flow and transition it from STARTUP to DRAIN.
 2. Verify `BBR.pacing_gain` is set to `BBR.DrainPacingGain` (0.5).
 3. Allow the connection to send, tracking `C.inflight` and the estimated BDP
-   (`BBRInflight(1.0)`).
-4. Verify that when `C.inflight` drops below or equal to `BBRInflight(1.0)`, the
+   (`Inflight(1.0)`).
+4. Verify that when `C.inflight` drops below or equal to `Inflight(1.0)`, the
    connection exits DRAIN and transitions to PROBE_BW.
 
 ## Exiting DRAIN Based on Time
@@ -3982,7 +3982,7 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 1. Start a flow and transition it from STARTUP to DRAIN.
 2. Decrease the available bandwidth by 10% upon entering DRAIN to simulate
    an over-estimation of the available bandwidth.
-3. Ensure `C.inflight` remains higher than `BBRInflight(1.0)` for several
+3. Ensure `C.inflight` remains higher than `Inflight(1.0)` for several
    round trips.
 4. Track `BBR.drain_start_round` and current `BBR.round_count`.
 5. Verify that after 3 round trips in DRAIN, the connection exits DRAIN and
@@ -3995,7 +3995,7 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 2. Ensure the connection is fully utilizing `BBR.inflight_longterm` or cwnd
    without packet loss.
 3. Observe that the delivery rate plateaus.
-4. Verify that `BBRIsTimeToGoDown()` triggers when `BBR.full_bw_now` is set to
+4. Verify that `IsTimeToGoDown()` triggers when `BBR.full_bw_now` is set to
    `true` after 3 consecutive rounds where the delivery rate grows by less than 25%
    (i.e., when BBR.full_bw_count reaches 3).
 5. Verify the connection transitions to PROBE_DOWN.
@@ -4006,10 +4006,11 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 2. Limit the application sending rate so bandwidth samples are application-limited.
 3. Introduce packet loss exceeding `BBR.LossThresh` (2%) over the last round
    trip.
-4. Verify that the loss is detected and `BBRIsTimeToGoDown()` is triggered due
-   to the high loss rate.
-5. Verify the connection transitions to PROBE_DOWN and `BBR.inflight_longterm`
-   is updated appropriately, regardless of the application-limited state.
+4. Verify that the loss is detected and `HandleInflightTooHigh()` is triggered
+   due to the high loss rate.
+5. Verify the connection transitions to PROBE_DOWN regardless of the
+   application-limited state, and `BBR.inflight_longterm` is left unchanged
+   because the rate sample is application-limited.
 
 ## Never Exiting PROBE_UP (or STARTUP) When Application-Limited With No Loss
 
@@ -4022,17 +4023,17 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 
 1. Wait until the connection transitions to PROBE_DOWN.
 2. Verify that `BBR.pacing_gain` is set to `BBR.ProbeDownPacingGain` (0.90).
-3. Track `C.inflight` and `BBRInflightWithHeadroom()`.
+3. Track `C.inflight` and `InflightWithHeadroom()`.
 4. Wait for the queue to drain and `C.inflight` to fall below or equal to
-   both `BBRInflightWithHeadroom()` and `BBRInflight(1.0)`.
+   both `InflightWithHeadroom()` and `Inflight(1.0)`.
 5. Verify the connection transitions to PROBE_CRUISE.
 
 ## Exiting PROBE_DOWN After Max Time
 
 1. Wait until the connection transitions to PROBE_DOWN.
-2. Prevent `C.inflight` from dropping below `BBRInflightWithHeadroom()` by
+2. Prevent `C.inflight` from dropping below `InflightWithHeadroom()` by
    decreasing the available bandwidth by 10% upon entering PROBE_DOWN.
-3. Verify that after `BBR.bw_probe_wait` time elapses, `BBRIsTimeToProbeBW()`
+3. Verify that after `BBR.bw_probe_wait` time elapses, `IsTimeToProbeBW()`
    returns `true`.
 4. Verify the connection transitions directly to PROBE_REFILL, bypassing
    PROBE_CRUISE.
@@ -4057,7 +4058,7 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 2. Pause the application from sending data for a period, making the connection
    idle and causing `C.inflight` to drop to 0.
 3. Allow `BBR.MinRTTFilterLen` (10 seconds) to elapse during this idle period.
-4. Verify that upon sending new data, `BBRHandleRestartFromIdle()` sets
+4. Verify that upon sending new data, `HandleRestartFromIdle()` sets
    `BBR.idle_restart` to `true`.
 5. Verify the connection skips entering PROBE_RTT because `BBR.idle_restart` is
    `true` and idleness is deemed a sufficient attempt to drain the queue.
@@ -4126,10 +4127,11 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 
 1. Introduce packet reordering on the network path that triggers a spurious Fast
    Recovery.
-2. Verify `BBRSaveStateUponLoss()` saves the current `BBR.state`,
-   `BBR.bw_shortterm`, `BBR.inflight_shortterm` (to `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to `BBR.undo_inflight_longterm`).
+2. Verify `SaveStateUponLoss()` saves `BBR.bw_shortterm` (to `BBR.undo_bw_shortterm`),
+   `BBR.inflight_shortterm` (to `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to `BBR.undo_inflight_longterm`),
+   and, if the loss causes BBR to exit PROBE_UP or STARTUP, that state is saved in `BBR.undo_state`.
 3. Once the transport protocol detects the loss was spurious (e.g., via TCP DSACK or QUIC packet numbers indicating the original packet was delivered and the retransmission was spurious), verify
-   `BBRHandleSpuriousLossDetection()` restores the saved parameters.
+   `HandleSpuriousLossDetection()` restores the saved parameters.
 4. Ensure the connection seamlessly returns to its previous state (e.g.,
    PROBE_UP).
 
@@ -4137,10 +4139,11 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 
 1. Introduce packet reordering on the network path that triggers a spurious RTO
    Recovery.
-2. Verify `BBRSaveStateUponLoss()` saves the current `BBR.state`,
-   `BBR.bw_shortterm`, `BBR.inflight_shortterm` (to `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to `BBR.undo_inflight_longterm`).
+2. Verify `SaveStateUponLoss()` saves `BBR.bw_shortterm` (to `BBR.undo_bw_shortterm`),
+   `BBR.inflight_shortterm` (to `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to `BBR.undo_inflight_longterm`),
+   and, if the loss causes BBR to exit PROBE_UP or STARTUP, that state is saved in `BBR.undo_state`.
 3. Once the transport protocol detects the loss was spurious (e.g., via TCP DSACK or QUIC packet numbers indicating the original packet was delivered and the retransmission was spurious), verify
-   `BBRHandleSpuriousLossDetection()` restores the saved parameters.
+   `HandleSpuriousLossDetection()` restores the saved parameters.
 4. Ensure the connection seamlessly returns to its previous state (e.g.,
    PROBE_UP).
 
@@ -4159,9 +4162,9 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 1. Ensure the connection is in PROBE_BW and has an established
    `BBR.inflight_longterm`.
 2. Transition the connection into PROBE_UP.
-3. Introduce packet loss before `BBRIsTimeToGoDown()` triggers on a bandwidth
+3. Introduce packet loss before `IsTimeToGoDown()` triggers on a bandwidth
    plateau.
-4. Verify that the loss causes `BBRHandleInflightTooHigh()` to execute, scaling
+4. Verify that the loss causes `HandleInflightTooHigh()` to execute, scaling
    down `BBR.inflight_longterm` based on `BBR.Beta`.
 5. Verify the connection aborts PROBE_UP and immediately transitions to
    PROBE_DOWN.
