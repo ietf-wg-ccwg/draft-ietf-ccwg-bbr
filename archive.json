@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-15T05:16:21.599798+00:00",
+  "timestamp": "2026-11-17T06:56:55.289144+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1566,6 +1566,22 @@
       "body": "In the editor's copy and in -07, `HandleRestartFromIdle()` sets `BBR.extra_acked_interval_start = Now()` but leaves `BBR.extra_acked_delivered` unchanged.\n\n`UpdateACKAggregation()` starts a new interval only when `BBR.extra_acked_delivered <= expected_delivered`. After a restart from idle the interval is short, so `expected_delivered` is small, while the count still holds the data delivered before the idle period. The test fails, the count keeps growing, and `extra` is limited only by `C.cwnd`, whose own limit in `UpdateMaxInflight()` includes `BBR.extra_acked`.\n\nA flow that restarts from idle often, for example an application-limited flow on a path whose round trip is shorter than the gap between its flights, ratchets `BBR.extra_acked` and `C.cwnd` upward without bound. I saw this in an implementation of the draft on a host-local link: `extra_acked_delivered` was 97 MB over a 0.5 ms interval.\n\nLinux TCP BBRv3 clears both in [`bbr3_cwnd_event_tx_start()`](https://github.com/google/bbr/blob/674859761ded9f32690c7bdaf22ef585531452ed/net/ipv4/tcp_bbr3.c#L482-L491).\n\nSuggestion: also set `BBR.extra_acked_delivered = 0` there.\n",
       "createdAt": "2026-11-14T22:00:36Z",
       "updatedAt": "2026-11-14T22:00:36Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 134,
+      "id": "I_kwDOL3MllM8AAAABfZG4CA",
+      "title": "Example test cases: three steps that differ from the pseudocode",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/134",
+      "state": "OPEN",
+      "author": "adios-404",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Three places in the example test cases (editor's copy and -07) describe something the pseudocode does differently. All editorial.\n\n1. A.18 and A.19, step 2: \"`BBRSaveStateUponLoss()` saves the current `BBR.state`\". `SaveStateUponLoss()` sets `BBR.undo_state = None`; the state is recorded later, by `CheckStartupHighLoss()` or `HandleInflightTooHigh()`.\n\n2. A.6, \"Exiting PROBE_UP on Loss When Application-Limited\". Step 4 says `BBRIsTimeToGoDown()` is triggered by the high loss rate, but the exit on loss comes from `HandleInflightTooHigh()` calling `StartProbeBW_DOWN()`. Step 5 says `BBR.inflight_longterm` \"is updated appropriately, regardless of the application-limited state\", but `HandleInflightTooHigh()` updates it only `if (!RS.is_app_limited)`, so in this case it stays unchanged.\n\n3. The appendix names functions with a `BBR` prefix (`BBRIsTimeToGoDown()`, `BBRSaveStateUponLoss()` and six more); the pseudocode has none.\n\nI can send a PR for these if that helps.\n",
+      "createdAt": "2026-11-15T08:09:41Z",
+      "updatedAt": "2026-11-15T08:09:41Z",
       "closedAt": null,
       "comments": []
     }
@@ -10207,6 +10223,32 @@
       "headRepository": "adios-404/draft-ietf-ccwg-bbr",
       "headRefName": "clear-extra-acked-delivered-on-idle-restart",
       "headRefOid": "640fb92042b610c3676cb08a4a48da33f8813630",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 135,
+      "id": "PR_kwDOL3MllM8AAAABPSYo-A",
+      "title": "Align the example test cases with the pseudocode",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/135",
+      "state": "OPEN",
+      "author": "adios-404",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Three editorial changes to the example test cases, so that they describe what the pseudocode does. No pseudocode changes.\n\n1. A.18 and A.19, step 2: `SaveStateUponLoss()` saves the model parameters and sets `BBR.undo_state = None`. The state is saved by `HandleInflightTooHigh()` or `CheckStartupHighLoss()` when the loss ends PROBE_UP or STARTUP, and the step now says so.\n\n2. A.6: step 4 names `HandleInflightTooHigh()`, which is what ends PROBE_UP on loss. Step 5 says `BBR.inflight_longterm` is left unchanged, because the update is guarded by `if (!RS.is_app_limited)`.\n\n3. Function names lose the `BBR` prefix, which the pseudocode does not use (nine names).\n\nFixes #134.\n\nI could not run the draft build locally.\n",
+      "createdAt": "2026-11-15T08:15:48Z",
+      "updatedAt": "2026-11-15T08:15:49Z",
+      "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
+      "baseRefName": "main",
+      "baseRefOid": "8add09f80541907a7ce6a4f1833ee7119d231134",
+      "headRepository": "adios-404/draft-ietf-ccwg-bbr",
+      "headRefName": "align-test-cases-with-pseudocode",
+      "headRefOid": "7de79ad3c11e8a36e6e5d617078db33101d8c0f9",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
