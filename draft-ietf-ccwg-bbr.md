@@ -4127,9 +4127,12 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 
 1. Introduce packet reordering on the network path that triggers a spurious Fast
    Recovery.
-2. Verify `SaveStateUponLoss()` saves `BBR.bw_shortterm` (to `BBR.undo_bw_shortterm`),
-   `BBR.inflight_shortterm` (to `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to `BBR.undo_inflight_longterm`),
-   and, if the loss causes BBR to exit PROBE_UP or STARTUP, that state is saved in `BBR.undo_state`.
+2. Verify `SaveStateUponLoss()` saves `C.cwnd` (via `SaveCwnd()`), resets
+   `BBR.undo_state` to `None`, and saves `BBR.bw_shortterm` (to
+   `BBR.undo_bw_shortterm`), `BBR.inflight_shortterm` (to
+   `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to
+   `BBR.undo_inflight_longterm`); if loss triggers an exit from `Startup` or
+   `ProbeBW_UP`, verify `BBR.undo_state` records that prior state.
 3. Once the transport protocol detects the loss was spurious (e.g., via TCP DSACK or QUIC packet numbers indicating the original packet was delivered and the retransmission was spurious), verify
    `HandleSpuriousLossDetection()` restores the saved parameters.
 4. Ensure the connection seamlessly returns to its previous state (e.g.,
@@ -4139,9 +4142,12 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 
 1. Introduce packet reordering on the network path that triggers a spurious RTO
    Recovery.
-2. Verify `SaveStateUponLoss()` saves `BBR.bw_shortterm` (to `BBR.undo_bw_shortterm`),
-   `BBR.inflight_shortterm` (to `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to `BBR.undo_inflight_longterm`),
-   and, if the loss causes BBR to exit PROBE_UP or STARTUP, that state is saved in `BBR.undo_state`.
+2. Verify `SaveStateUponLoss()` saves `C.cwnd` (via `SaveCwnd()`), resets
+   `BBR.undo_state` to `None`, and saves `BBR.bw_shortterm` (to
+   `BBR.undo_bw_shortterm`), `BBR.inflight_shortterm` (to
+   `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to
+   `BBR.undo_inflight_longterm`); if loss triggers an exit from `Startup` or
+   `ProbeBW_UP`, verify `BBR.undo_state` records that prior state.
 3. Once the transport protocol detects the loss was spurious (e.g., via TCP DSACK or QUIC packet numbers indicating the original packet was delivered and the retransmission was spurious), verify
    `HandleSpuriousLossDetection()` restores the saved parameters.
 4. Ensure the connection seamlessly returns to its previous state (e.g.,
