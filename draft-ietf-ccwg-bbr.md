@@ -3997,7 +3997,7 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 3. Observe that the delivery rate plateaus.
 4. Verify that `IsTimeToGoDown()` triggers when `BBR.full_bw_now` is set to
    `true` after 3 consecutive rounds where the delivery rate grows by less than 25%
-   (i.e., when BBR.full_bw_count reaches 3).
+   (i.e., when `BBR.full_bw_count` reaches 3).
 5. Verify the connection transitions to PROBE_DOWN.
 
 ## Exiting PROBE_UP on Loss When Application-Limited
