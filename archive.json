@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-17T06:56:55.289144+00:00",
+  "timestamp": "2026-11-19T06:20:13.707419+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1582,6 +1582,38 @@
       "body": "Three places in the example test cases (editor's copy and -07) describe something the pseudocode does differently. All editorial.\n\n1. A.18 and A.19, step 2: \"`BBRSaveStateUponLoss()` saves the current `BBR.state`\". `SaveStateUponLoss()` sets `BBR.undo_state = None`; the state is recorded later, by `CheckStartupHighLoss()` or `HandleInflightTooHigh()`.\n\n2. A.6, \"Exiting PROBE_UP on Loss When Application-Limited\". Step 4 says `BBRIsTimeToGoDown()` is triggered by the high loss rate, but the exit on loss comes from `HandleInflightTooHigh()` calling `StartProbeBW_DOWN()`. Step 5 says `BBR.inflight_longterm` \"is updated appropriately, regardless of the application-limited state\", but `HandleInflightTooHigh()` updates it only `if (!RS.is_app_limited)`, so in this case it stays unchanged.\n\n3. The appendix names functions with a `BBR` prefix (`BBRIsTimeToGoDown()`, `BBRSaveStateUponLoss()` and six more); the pseudocode has none.\n\nI can send a PR for these if that helps.\n",
       "createdAt": "2026-11-15T08:09:41Z",
       "updatedAt": "2026-11-15T08:09:41Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 136,
+      "id": "I_kwDOL3MllM8AAAABgMNbOA",
+      "title": "Guidance on correct pacing rate after initial ACK",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/136",
+      "state": "OPEN",
+      "author": "antoniovicente",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "There is inconsistency between the initial pacing rate described in the latest draft vs what implementations do.  The behavior in the draft of not reducing the pacing rate after initial ACK in cases where the initial pacing rate is calculated from the default initial RTT of \"1 msec\" diverges significantly from what implementations do, and seems too high: I think that the intent is to have the pacing rate be a constant factor above the best guess on available bandwidth.\n\nAlso, some implementations like Google QUICHE pace too slowly during the first RTT after processing of the first ACK which can result in the implementations not being able to consume the full cwnd during the 2nd RTT because the `firstAckPacingRate * minRTT` is significantly lower than initCwnd * 2 (in fact, firstAckPacingRate * minRTT == initCwnd).\n\n**Comparison table**\n\n| Implementation | Before any RTT sample | After first ACK | Can first ACK lower it? | Example: before \u2192 after (IW 12 KB, RTT 100 ms) |\n|---|---|---|---|---|\n| **Draft-07** | `2.77 \u00d7 InitialCwnd / (srtt ? srtt : 1ms)`, no margin | Pseudocode never re-initialises; `2.77 \u00d7 0.99 \u00d7 bw` applied only if higher. Prose says to use \"the initial srtt after the first non-zero RTT sample\". | No (literal reading) | 33.2 MB/s \u2192 unchanged |\n| **Linux BBRv1** | `2.885 \u00d7 0.99 \u00d7 cwnd / (srtt or 1 ms)` | **Re-init once** (`has_seen_rtt`): `2.885 \u00d7 0.99 \u00d7 cwnd / srtt`, then the bw rate if higher | Yes | ~34 MB/s \u2192 343 kB/s |\n| **Linux BBRv3** | same with 2.77 | same re-init with 2.77 | Yes | ~33 MB/s \u2192 329 kB/s |\n| **Google BBR2** | `2.885 \u00d7 cwnd / SmoothedOrInitialRtt` (initial_rtt 100 ms, IW uses 1460 B MSS) | `cwnd / MinRtt`, **gain 1.0** | Yes (or up if RTT is small) | 346 \u2192 120 kB/s |\n| **Google BBR1** | `2.885 \u00d7 IW / MinOrInitialRtt` (fallback, `pacing_rate_` = 0) | `IW / min_rtt`, gain 1.0 | Yes | 346 \u2192 120 kB/s |\n| **Cloudflare quiche** | `2.885 \u00d7 cwnd / initial_rtt` (333 ms), or `initial_pacing_rate_bytes_per_second` | `cwnd / min_rtt`, gain 1.0, capped at `initial_pacing_rate_bytes_per_second` if set | Yes, or up | 104 \u2192 120 kB/s |\n| **mvfst BBR2/BBR1** | **Unpaced** (only cwnd limits) | `max(2.885\u00b7bw\u00b7minRtt, IW)` window over minRtt/2 (startupRttFactor {1,2}), so \u2248 2 \u00d7 IW/minRtt; margin 0 | n/a | unpaced \u2192 ~240 kB/s |\n| **ngtcp2** | `2.77 \u00d7 IW / 1 ms` (the srtt branch is dead) | No re-init; `max(prev, 2.77\u00b70.99\u00b7bw)` | No | 33 MB/s \u2192 33 MB/s |\n| **picoquic** | BBR state: `2.77 \u00d7 15360 / 250 ms`; the sender is actually unpaced until the first ACK | `max(init, 2.77\u00b70.99\u00b7bw)` | No | unpaced \u2192 \u2265170 kB/s |\n| **s2n-quic** | `2.77 \u00d7 0.99 \u00d7 IW / 1 ms` | **Reset** to `2.77\u00b70.99\u00b7cwnd/srtt`, then max with the bw rate | Yes | 33 MB/s \u2192 329 kB/s |\n| **xquic** | `2.885 \u00d7 cwnd / 1 ms` (cwnd 32 \u00d7 1436) | **Reset** to `2.885\u00b7cwnd/srtt`, then max with the bw rate | Yes | 35 MB/s \u2192 346 kB/s |\n| **lsquic v1** | `2.885 \u00d7 init_cwnd / 25 ms` (init_cwnd 32 \u00d7 1460) | `init_cwnd / min_rtt`, gain 1.0 (if there is a bw sample) | Yes | 1.39 MB/s \u2192 120 kB/s |\n| **tquic** | `2.77 \u00d7 IW / initial_rtt` (333 ms) | No re-init; max with the bw rate | No | 100 \u2192 100\u2013329 kB/s |\n| **quinn** | BBR rate unused by the pacer; pacer = `1.25 \u00d7 cwnd / srtt` (333 ms) | `1.25 \u00d7 cwnd / first RTT` | n/a | 45 \u2192 150\u2013300 kB/s |\n| **msquic** | No pacing | No rate variable; allowance per send capped at cwnd/4 | n/a | \u2014 |",
+      "createdAt": "2026-11-17T22:14:46Z",
+      "updatedAt": "2026-11-18T06:58:02Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 137,
+      "id": "I_kwDOL3MllM8AAAABgPbYZw",
+      "title": "minor editorial issues in the Appendix A test cases text",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/137",
+      "state": "OPEN",
+      "author": "nealcardwell",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "An LLM review found the following minor editorial issues in the Appendix A test cases text, while reviewing #135 :\n\nPlaces where the test cases still differ from the pseudocode, in lines that neither the PR nor those suggestions change.\n\n+ A.18 and A.19, step 4 expects the connection to return \"to its previous state (e.g., PROBE_UP)\". When the loss ended ProbeBW_UP, HandleSpuriousLossDetection() calls /StartProbeBW_REFILL() ([L3417\u20133420](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L3417-L3420); the prose at L3395 says the same). The state right after the undo is therefore PROBE_REFILL, with PROBE_UP a round trip later, and a literal check for PROBE_UP fails against the pseudocode. Possible wording:\n\n```\n  4.  Ensure the connection returns to probing for bandwidth: to \n   STARTUP if  the loss ended STARTUP, or to PROBE_REFILL\n  (followed by PROBE_UP after one round trip) if the loss ended PROBE_UP.\n```\n\n+ A.2, step 5 says the connection sets both BBR.full_bw_now and BBR.full_bw_reached. CheckStartupHighLoss() sets only BBR.full_bw_reached ([L1961](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L1952-L1962)). BBR.full_bw_now is set only in CheckFullBWReached(), which returns early on application-limited samples ([L1899](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L1898-L1908)), and those are this test's scenario. Dropping BBR.full_bw_now from the step fixes it.\n\n+ A.8, step 2 names BBR.ProbeDownPacingGain, which the draft never defines. The 0.90 value appears only in prose (L2024) and in the state table ([L3466](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L3466)), and no pseudocode assigns BBR.pacing_gain in the ProbeBW phases.\n\n+ A.8, step 4 uses Inflight(1.0), which matches the definition Inflight(gain) ([L3633](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L3633-L3635)). But IsTimeToCruise(), the function this step exercises, calls Inflight(BBR.max_bw, 1.0) ([L2461](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L2458-L2463)). The pseudocode has to settle which is intended before the step can match it.\n\nA minor companion to dc0f9ef: A.1 still has three identifiers without code formatting (L3953, L3954, and the same BBR.full_bw_count phrase at L3957).",
+      "createdAt": "2026-11-18T02:32:03Z",
+      "updatedAt": "2026-11-18T02:32:03Z",
       "closedAt": null,
       "comments": []
     }
@@ -10190,18 +10222,33 @@
       "labels": [],
       "body": "Fixes #130.\n\n`NoteLoss()` saves the undo state on the first loss of each round trip, so one loss recovery episode can save more than once: after `StartProbeBW_DOWN()` resets `BBR.is_loss_in_round`, or in a later round. The later save resets `BBR.undo_state` and stores parameters the episode's losses already lowered. `OnEnterRTO()` and `OnEnterFastRecovery()` can overwrite the same way when packets are marked lost before recovery is entered, or on a second RTO.\n\nThis saves once per episode, before its first loss is processed:\n\n- `SaveStateUponLoss()` returns early if `BBR.is_undo_saved` is set; the flag is reset upon exiting loss recovery.\n- `HandleLostPacket()` calls it directly; `NoteLoss()` no longer does.\n\nLinux TCP BBRv3 does the same with `loss_yet_in_recovery` in [`bbr3_skb_marked_lost()`](https://github.com/google/bbr/blob/674859761ded9f32690c7bdaf22ef585531452ed/net/ipv4/tcp_bbr3.c#L1993-L2004). I kept the calls in `OnEnterRTO()` and `OnEnterFastRecovery()`; with the guard they are harmless, and can go if you prefer the Linux shape.\n\nI could not run the draft build locally.\n",
       "createdAt": "2026-11-14T14:57:22Z",
-      "updatedAt": "2026-11-14T14:57:23Z",
+      "updatedAt": "2026-11-18T10:14:44Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "8add09f80541907a7ce6a4f1833ee7119d231134",
       "headRepository": "adios-404/draft-ietf-ccwg-bbr",
       "headRefName": "save-undo-state-once-per-episode",
-      "headRefOid": "7b842c94a9f0ea4f78917a2ce6a86a8f8f5d7bf7",
+      "headRefOid": "6f937067a07b14a54001eb1d507cdcbcc448c479",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "HandleSpuriousLossDetection() sets undo_state = None but doesn't clear is_undo_saved.\n  - TCP: an undo also ends recovery, so the flag is cleared by the \"upon exiting loss recovery\" step. Linux behaves the same way.\n  - QUIC: a packet can be found spuriously lost while the recovery period continues. Later real losses in that period then don't take a new snapshot, and a second undo would restore the older values. Since HandleSpuriousLossDetection() restores the model with max(), that could restore the model to values above what it should be.\n\nSuggestion: also set BBR.is_undo_saved = false at the end of HandleSpuriousLossDetection(). It makes the behavior independent of the transport.",
+          "createdAt": "2026-11-18T02:04:09Z",
+          "updatedAt": "2026-11-18T02:04:09Z"
+        },
+        {
+          "author": "adios-404",
+          "authorAssociation": "NONE",
+          "body": "Agreed, thanks. I've added it: `HandleSpuriousLossDetection()` now ends with `BBR.is_undo_saved = false`, and the text of both sections says so.\n\nAfter an undo, the next loss saves the state again, whether or not the transport has left recovery. Nothing changes for TCP, where the undo already ends recovery and the flag is cleared there.\n",
+          "createdAt": "2026-11-18T10:14:44Z",
+          "updatedAt": "2026-11-18T10:14:44Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -10216,7 +10263,7 @@
       "labels": [],
       "body": "Fixes #132.\n\n`HandleRestartFromIdle()` starts a new ACK aggregation interval by setting `BBR.extra_acked_interval_start`, but keeps `BBR.extra_acked_delivered`. The data delivered before the idle period is then compared with what `BBR.bw` would deliver in the time since the restart, so `UpdateACKAggregation()` does not start a new interval and the excess keeps growing.\n\nThis clears the count along with the start time, as `UpdateACKAggregation()` does when it starts an interval, and as Linux TCP BBRv3 does in [`bbr3_cwnd_event_tx_start()`](https://github.com/google/bbr/blob/674859761ded9f32690c7bdaf22ef585531452ed/net/ipv4/tcp_bbr3.c#L482-L491).\n\nOne line of pseudocode; no text changes.\n\nI could not run the draft build locally.\n",
       "createdAt": "2026-11-14T22:00:57Z",
-      "updatedAt": "2026-11-14T22:00:58Z",
+      "updatedAt": "2026-11-18T01:27:58Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "8add09f80541907a7ce6a4f1833ee7119d231134",
@@ -10228,7 +10275,47 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABYp2eLg",
+          "commit": {
+            "abbreviatedOid": "640fb92"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-11-18T01:27:09Z",
+          "updatedAt": "2026-11-18T01:27:09Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABYp23Lw",
+          "commit": {
+            "abbreviatedOid": "640fb92"
+          },
+          "author": "jbeshay",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-11-18T01:27:57Z",
+          "updatedAt": "2026-11-18T01:27:57Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABYp237A",
+          "commit": {
+            "abbreviatedOid": "640fb92"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-11-18T01:27:59Z",
+          "updatedAt": "2026-11-18T01:27:59Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 135,
@@ -10242,19 +10329,139 @@
       "labels": [],
       "body": "Three editorial changes to the example test cases, so that they describe what the pseudocode does. No pseudocode changes.\n\n1. A.18 and A.19, step 2: `SaveStateUponLoss()` saves the model parameters and sets `BBR.undo_state = None`. The state is saved by `HandleInflightTooHigh()` or `CheckStartupHighLoss()` when the loss ends PROBE_UP or STARTUP, and the step now says so.\n\n2. A.6: step 4 names `HandleInflightTooHigh()`, which is what ends PROBE_UP on loss. Step 5 says `BBR.inflight_longterm` is left unchanged, because the update is guarded by `if (!RS.is_app_limited)`.\n\n3. Function names lose the `BBR` prefix, which the pseudocode does not use (nine names).\n\nFixes #134.\n\nI could not run the draft build locally.\n",
       "createdAt": "2026-11-15T08:15:48Z",
-      "updatedAt": "2026-11-15T08:15:49Z",
+      "updatedAt": "2026-11-18T20:36:41Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "8add09f80541907a7ce6a4f1833ee7119d231134",
       "headRepository": "adios-404/draft-ietf-ccwg-bbr",
       "headRefName": "align-test-cases-with-pseudocode",
-      "headRefOid": "7de79ad3c11e8a36e6e5d617078db33101d8c0f9",
+      "headRefOid": "6b9640eb8acd7395d739b94066ed2d07536027a9",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "comments": [
+        {
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "body": "6b9640eb8acd7395d739b94066ed2d07536027a9 Looks good to me. @ianswett and @jbeshay WDYT?\n",
+          "createdAt": "2026-11-18T20:36:41Z",
+          "updatedAt": "2026-11-18T20:36:41Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOL3MllM8AAAABYp50ww",
+          "commit": {
+            "abbreviatedOid": "7de79ad"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-11-18T01:33:18Z",
+          "updatedAt": "2026-11-18T01:33:18Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABYp8_7w",
+          "commit": {
+            "abbreviatedOid": "7de79ad"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Some small suggestions, but overall looks good.",
+          "createdAt": "2026-11-18T01:40:10Z",
+          "updatedAt": "2026-11-18T01:41:30Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "```suggestion\n   (i.e., when `BBR.full_bw_count` reaches 3).\n```",
+              "createdAt": "2026-11-18T01:40:10Z",
+              "updatedAt": "2026-11-18T01:41:30Z"
+            },
+            {
+              "originalPosition": 93,
+              "body": "```suggestion\n2. Verify `SaveStateUponLoss()` saves `C.cwnd` (via `SaveCwnd()`), resets\n   `BBR.undo_state` to `None`, and saves `BBR.bw_shortterm` (to\n   `BBR.undo_bw_shortterm`), `BBR.inflight_shortterm` (to\n   `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to\n   `BBR.undo_inflight_longterm`); if loss triggers an exit from `Startup` or\n   `ProbeBW_UP`, verify `BBR.undo_state` records that prior state.\n```",
+              "createdAt": "2026-11-18T01:40:47Z",
+              "updatedAt": "2026-11-18T01:41:30Z"
+            },
+            {
+              "originalPosition": 108,
+              "body": "```suggestion\n2. Verify `SaveStateUponLoss()` saves `C.cwnd` (via `SaveCwnd()`), resets\n   `BBR.undo_state` to `None`, and saves `BBR.bw_shortterm` (to\n   `BBR.undo_bw_shortterm`), `BBR.inflight_shortterm` (to\n   `BBR.undo_inflight_shortterm`), and `BBR.inflight_longterm` (to\n   `BBR.undo_inflight_longterm`); if loss triggers an exit from `Startup` or\n   `ProbeBW_UP`, verify `BBR.undo_state` records that prior state.\n```",
+              "createdAt": "2026-11-18T01:41:15Z",
+              "updatedAt": "2026-11-18T01:41:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABYqXN9Q",
+          "commit": {
+            "abbreviatedOid": "dc0f9ef"
+          },
+          "author": "nealcardwell",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-18T02:35:51Z",
+          "updatedAt": "2026-11-18T02:36:04Z",
+          "comments": [
+            {
+              "originalPosition": 93,
+              "body": "Thanks, @ianswett; I agree. @adios-404, can you please made this change, or something like it?",
+              "createdAt": "2026-11-18T02:35:51Z",
+              "updatedAt": "2026-11-18T02:36:04Z"
+            },
+            {
+              "originalPosition": 108,
+              "body": "Thanks, @ianswett; I agree. @adios-404, can you please made this change, or something like it?",
+              "createdAt": "2026-11-18T02:35:56Z",
+              "updatedAt": "2026-11-18T02:36:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABYuvJVA",
+          "commit": {
+            "abbreviatedOid": "6b9640e"
+          },
+          "author": "adios-404",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-18T10:14:38Z",
+          "updatedAt": "2026-11-18T10:14:39Z",
+          "comments": [
+            {
+              "originalPosition": 93,
+              "body": "Done in 6b9640e, with Ian's wording as is, for both test cases.",
+              "createdAt": "2026-11-18T10:14:38Z",
+              "updatedAt": "2026-11-18T10:14:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABYuvL3g",
+          "commit": {
+            "abbreviatedOid": "6b9640e"
+          },
+          "author": "adios-404",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-18T10:14:41Z",
+          "updatedAt": "2026-11-18T10:14:41Z",
+          "comments": [
+            {
+              "originalPosition": 108,
+              "body": "Done in 6b9640e as well.",
+              "createdAt": "2026-11-18T10:14:41Z",
+              "updatedAt": "2026-11-18T10:14:41Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
