@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-19T06:20:13.707419+00:00",
+  "timestamp": "2026-11-22T05:31:44.931719+00:00",
   "repo": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
   "labels": [
     {
@@ -1574,15 +1574,15 @@
       "id": "I_kwDOL3MllM8AAAABfZG4CA",
       "title": "Example test cases: three steps that differ from the pseudocode",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/134",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "adios-404",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Three places in the example test cases (editor's copy and -07) describe something the pseudocode does differently. All editorial.\n\n1. A.18 and A.19, step 2: \"`BBRSaveStateUponLoss()` saves the current `BBR.state`\". `SaveStateUponLoss()` sets `BBR.undo_state = None`; the state is recorded later, by `CheckStartupHighLoss()` or `HandleInflightTooHigh()`.\n\n2. A.6, \"Exiting PROBE_UP on Loss When Application-Limited\". Step 4 says `BBRIsTimeToGoDown()` is triggered by the high loss rate, but the exit on loss comes from `HandleInflightTooHigh()` calling `StartProbeBW_DOWN()`. Step 5 says `BBR.inflight_longterm` \"is updated appropriately, regardless of the application-limited state\", but `HandleInflightTooHigh()` updates it only `if (!RS.is_app_limited)`, so in this case it stays unchanged.\n\n3. The appendix names functions with a `BBR` prefix (`BBRIsTimeToGoDown()`, `BBRSaveStateUponLoss()` and six more); the pseudocode has none.\n\nI can send a PR for these if that helps.\n",
       "createdAt": "2026-11-15T08:09:41Z",
-      "updatedAt": "2026-11-15T08:09:41Z",
-      "closedAt": null,
+      "updatedAt": "2026-11-19T08:48:49Z",
+      "closedAt": "2026-11-19T08:48:49Z",
       "comments": []
     },
     {
@@ -1614,6 +1614,22 @@
       "body": "An LLM review found the following minor editorial issues in the Appendix A test cases text, while reviewing #135 :\n\nPlaces where the test cases still differ from the pseudocode, in lines that neither the PR nor those suggestions change.\n\n+ A.18 and A.19, step 4 expects the connection to return \"to its previous state (e.g., PROBE_UP)\". When the loss ended ProbeBW_UP, HandleSpuriousLossDetection() calls /StartProbeBW_REFILL() ([L3417\u20133420](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L3417-L3420); the prose at L3395 says the same). The state right after the undo is therefore PROBE_REFILL, with PROBE_UP a round trip later, and a literal check for PROBE_UP fails against the pseudocode. Possible wording:\n\n```\n  4.  Ensure the connection returns to probing for bandwidth: to \n   STARTUP if  the loss ended STARTUP, or to PROBE_REFILL\n  (followed by PROBE_UP after one round trip) if the loss ended PROBE_UP.\n```\n\n+ A.2, step 5 says the connection sets both BBR.full_bw_now and BBR.full_bw_reached. CheckStartupHighLoss() sets only BBR.full_bw_reached ([L1961](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L1952-L1962)). BBR.full_bw_now is set only in CheckFullBWReached(), which returns early on application-limited samples ([L1899](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L1898-L1908)), and those are this test's scenario. Dropping BBR.full_bw_now from the step fixes it.\n\n+ A.8, step 2 names BBR.ProbeDownPacingGain, which the draft never defines. The 0.90 value appears only in prose (L2024) and in the state table ([L3466](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L3466)), and no pseudocode assigns BBR.pacing_gain in the ProbeBW phases.\n\n+ A.8, step 4 uses Inflight(1.0), which matches the definition Inflight(gain) ([L3633](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L3633-L3635)). But IsTimeToCruise(), the function this step exercises, calls Inflight(BBR.max_bw, 1.0) ([L2461](https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/blob/dc0f9ef5fcc7b8fa4cf1058fc382a6e171fc727e/draft-ietf-ccwg-bbr.md?plain=1#L2458-L2463)). The pseudocode has to settle which is intended before the step can match it.\n\nA minor companion to dc0f9ef: A.1 still has three identifiers without code formatting (L3953, L3954, and the same BBR.full_bw_count phrase at L3957).",
       "createdAt": "2026-11-18T02:32:03Z",
       "updatedAt": "2026-11-18T02:32:03Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 138,
+      "id": "I_kwDOL3MllM8AAAABgx3_Rw",
+      "title": "Better explanation of extra_acked during startup",
+      "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/issues/138",
+      "state": "OPEN",
+      "author": "antoniovicente",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The explanations of extra acked in the draft talk about ack aggregation, but my recent investigations suggest that even in networks with no ack aggregation extra acked does very heavy lifting towards increasing the target cwnd during early rounds of BBR startup.  Extra acked seems to be about handling of burst traffic as it is common before the network has had time to spread the packets and smooth out transmissions so that the BBR 2x pacing analysis applies.\n\nDuring early rounds of startup, packets are not fully spread out and that creates some problems.  The analysis behind BBR's pacing constant `4 * ln(2)` assumes that the pacing growth curve is smooth, but during startup the effective pacing rate increases in steps.  Implementations I'm familiar with start with a cwnd of 10 packets and use a pacer with an initial burst size of 10.\n- After 1 RTT, bw is roughly initcwnd / minRTT, pacing 2.773 * initcwnd / minRTT and cwnd = 2 * initialcwnd due to the initial target cwnd in the spec.\n- After the 2nd RTT, bw grows to `(2 * initcwnd) / (1 + 2 / 2.773)` since the 2nd flight is sent over `2 / 2.773` minRTT due to pacing.  The cwnd target from 2 * BDP is roughly 23 packets.  Extra acked adds another ~12 packets for a total target cwnd of 35-36 packets.\n- Pacing during the 3rd RTT starts at the same rate used during the 2nd RTT but eventually grows to a rate that would allow 32 packets to be sent during the RTT, but that's not fast enough to consume the full cwnd of ~35 packets.\n\nSo after 3 RTTs BBR only manages to send 30-32 packets while traditional slow start sends 40.  Wondering what adjustments could be considered to at least ensure that the ~35 packet window from 2*BDP+extra_acked is fully consumed during the 3rd RTT and ensure that BBR spreads out packets over a full RTT as soon as possible in order to slowly shift to continuous pacing increase behavior instead of the step wise increase seen during startup.",
+      "createdAt": "2026-11-19T16:56:58Z",
+      "updatedAt": "2026-11-19T16:56:58Z",
       "closedAt": null,
       "comments": []
     }
@@ -10322,24 +10338,26 @@
       "id": "PR_kwDOL3MllM8AAAABPSYo-A",
       "title": "Align the example test cases with the pseudocode",
       "url": "https://github.com/ietf-wg-ccwg/draft-ietf-ccwg-bbr/pull/135",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "adios-404",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Three editorial changes to the example test cases, so that they describe what the pseudocode does. No pseudocode changes.\n\n1. A.18 and A.19, step 2: `SaveStateUponLoss()` saves the model parameters and sets `BBR.undo_state = None`. The state is saved by `HandleInflightTooHigh()` or `CheckStartupHighLoss()` when the loss ends PROBE_UP or STARTUP, and the step now says so.\n\n2. A.6: step 4 names `HandleInflightTooHigh()`, which is what ends PROBE_UP on loss. Step 5 says `BBR.inflight_longterm` is left unchanged, because the update is guarded by `if (!RS.is_app_limited)`.\n\n3. Function names lose the `BBR` prefix, which the pseudocode does not use (nine names).\n\nFixes #134.\n\nI could not run the draft build locally.\n",
       "createdAt": "2026-11-15T08:15:48Z",
-      "updatedAt": "2026-11-18T20:36:41Z",
+      "updatedAt": "2026-11-19T08:48:47Z",
       "baseRepository": "ietf-wg-ccwg/draft-ietf-ccwg-bbr",
       "baseRefName": "main",
       "baseRefOid": "8add09f80541907a7ce6a4f1833ee7119d231134",
       "headRepository": "adios-404/draft-ietf-ccwg-bbr",
       "headRefName": "align-test-cases-with-pseudocode",
       "headRefOid": "6b9640eb8acd7395d739b94066ed2d07536027a9",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-11-19T08:48:47Z",
+      "mergedAt": "2026-11-19T08:48:47Z",
+      "mergedBy": "ianswett",
+      "mergeCommit": {
+        "oid": "3ccf53482b7b069407366942089f984e79404dd8"
+      },
       "comments": [
         {
           "author": "nealcardwell",
@@ -10427,7 +10445,7 @@
             "abbreviatedOid": "6b9640e"
           },
           "author": "adios-404",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-11-18T10:14:38Z",
@@ -10447,7 +10465,7 @@
             "abbreviatedOid": "6b9640e"
           },
           "author": "adios-404",
-          "authorAssociation": "NONE",
+          "authorAssociation": "CONTRIBUTOR",
           "state": "COMMENTED",
           "body": "",
           "createdAt": "2026-11-18T10:14:41Z",
@@ -10460,6 +10478,19 @@
               "updatedAt": "2026-11-18T10:14:41Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOL3MllM8AAAABY_OU-w",
+          "commit": {
+            "abbreviatedOid": "6b9640e"
+          },
+          "author": "ianswett",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-11-19T08:48:18Z",
+          "updatedAt": "2026-11-19T08:48:18Z",
+          "comments": []
         }
       ]
     }
