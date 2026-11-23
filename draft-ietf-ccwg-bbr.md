@@ -672,6 +672,8 @@ BBR.undo_inflight_shortterm: the value of BBR.inflight_shortterm saved at the st
 
 BBR.undo_inflight_longterm: the value of BBR.inflight_longterm saved at the start of loss recovery, to later restore if the loss recovery is detected to be spurious.
 
+BBR.is_undo_saved: A boolean tracking whether BBR has already saved the state above for the current loss recovery episode.
+
 ## ProbeRTT and min_rtt Parameters and State {#probertt-and-minrtt-parameters-and-state}
 
 ### Parameters for Estimating BBR.min_rtt {#parameters-for-estimating-bbrminrtt}
@@ -1732,6 +1734,7 @@ steps:
     BBR.undo_bw_shortterm = 0
     BBR.undo_inflight_shortterm = 0
     BBR.undo_inflight_longterm = 0
+    BBR.is_undo_saved = false
     BBR.idle_restart = false
     BBR.extra_acked_interval_start = Now()
     BBR.extra_acked_delivered = 0
@@ -3220,11 +3223,11 @@ In pseudocode:
   NoteLoss()
     if (!BBR.is_loss_in_round)   /* first loss in this round trip? */
       BBR.loss_round_delivered = C.delivered
-      SaveStateUponLoss()
     BBR.is_loss_in_round = true
     BBR.loss_events_in_round++
 
   HandleLostPacket(Packet P):
+    SaveStateUponLoss()  /* before this loss changes any state */
     NoteLoss()
     if (!BBR.check_probe_loss)
       return /* not a packet sent while probing bandwidth */
@@ -3370,11 +3373,24 @@ later be declared spurious (including possibly fast recovery or RTO recovery,
 depending on the transport protocol), BBR saves information about its current
 state. It saves the current congestion window, the short-term and long-term
 model parameters, and initializes the undo state to indicate no state restoration
-is yet needed:
+is yet needed.
+
+BBR saves this state once per loss recovery episode, before the first packet
+loss of the episode is processed. A later packet loss, round trip or
+retransmission timeout in the same episode does not save again: by then the
+losses of the episode may have lowered the model parameters or set
+BBR.undo_state, and saving again would replace the values to restore with
+those. BBR.is_undo_saved records that the state has been saved. It is reset
+upon exiting loss recovery, and when a spurious loss recovery is handled
+({{handling-spurious-loss-recovery}}), so that the next packet loss after
+either saves the state again:
 
 ~~~~
   /* Save state in case a loss episode is later declared spurious */
   SaveStateUponLoss():
+    if (BBR.is_undo_saved)
+      return  /* already saved for this loss recovery episode */
+    BBR.is_undo_saved = true
     SaveCwnd()
     BBR.undo_state              = None
     BBR.undo_bw_shortterm       = BBR.bw_shortterm
@@ -3394,7 +3410,13 @@ Furthermore, if the connection transitioned out of Startup or ProbeBW_UP
 due to the loss recovery episode, and the connection is not currently in
 ProbeRTT, BBR returns to the state it was in before the loss recovery
 episode (returning to Startup, or returning to ProbeBW by starting a refill
-phase to restart the bandwidth probe):
+phase to restart the bandwidth probe).
+
+Finally, BBR resets BBR.is_undo_saved, so that the next packet loss saves the
+state again. In a transport protocol that can declare a loss spurious while
+the loss recovery episode continues, later losses in that episode would
+otherwise not save the state, and a second spurious loss detection would
+restore the values saved before the first one:
 
 ~~~~
   /* Handle a declaration of a spurious loss episode */
@@ -3420,6 +3442,7 @@ phase to restart the bandwidth probe):
       if (BBR.state != ProbeRTT)
         StartProbeBW_REFILL()
     BBR.undo_state = None
+    BBR.is_undo_saved = false
 ~~~~
 
 ## Updating Control Parameters {#updating-control-parameters}
@@ -3702,10 +3725,12 @@ Upon entering Fast Recovery:
 
 Upon exiting loss recovery (RTO recovery or Fast Recovery), either by repairing
 all losses or undoing recovery, BBR restores the best-known cwnd value we
-had upon entering loss recovery:
+had upon entering loss recovery, and notes that the next loss recovery episode
+needs to save its state:
 
 ~~~~
   RestoreCwnd()
+  BBR.is_undo_saved = false
 ~~~~
 
 Note that exiting loss recovery happens during ACK processing, and at the
