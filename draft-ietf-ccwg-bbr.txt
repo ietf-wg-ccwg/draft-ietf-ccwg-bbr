@@ -5,9 +5,9 @@
 CCWG                                                    N. Cardwell, Ed.
 Internet-Draft                                             I. Swett, Ed.
 Intended status: Experimental                                     Google
-Expires: 23 May 2027                                      J. Beshay, Ed.
+Expires: 27 May 2027                                      J. Beshay, Ed.
                                                                     Meta
-                                                        19 November 2026
+                                                        23 November 2026
 
 
                          BBR Congestion Control
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 May 2027.
+   This Internet-Draft will expire on 27 May 2027.
 
 Copyright Notice
 
@@ -2729,6 +2729,7 @@ Table of Contents
        if (C.inflight == 0 && C.app_limited)
          BBR.idle_restart = true
          BBR.extra_acked_interval_start = Now()
+         BBR.extra_acked_delivered = 0
          if (IsInAProbeBWState())
            SetPacingRateWithGain(1)
          else if (BBR.state == ProbeRTT)
