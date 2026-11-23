@@ -2752,6 +2752,7 @@ HandleRestartFromIdle() before sending a packet for a flow:
     if (C.inflight == 0 && C.app_limited)
       BBR.idle_restart = true
       BBR.extra_acked_interval_start = Now()
+      BBR.extra_acked_delivered = 0
       if (IsInAProbeBWState())
         SetPacingRateWithGain(1)
       else if (BBR.state == ProbeRTT)
