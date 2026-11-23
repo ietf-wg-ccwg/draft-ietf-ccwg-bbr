@@ -4085,6 +4085,19 @@ data so that it exits STARTUP and naturally gets to the specified phase.
    connection from stalling during inter-ACK silences and maintaining full
    utilization.
 
+## Restarting From Idle on a Link With Aggregation
+
+1. Wait until the connection transitions to PROBE_BW.
+2. Simulate ACK aggregation on the path such that ACKs for more than one
+   BDP of data arrive in a single burst.
+3. Make the sender application-limited, sending flights smaller than
+  `C.cwnd`, separated by idle periods in which `C.inflight` drops to 0.
+4. Verify that on each restart `HandleRestartFromIdle()` sets
+   BBR.extra_acked_interval_start to Now() and sets
+  `BBR.extra_acked_delivered` to 0.
+5. Verify that `BBR.extra_acked` does not grow from one flight
+   to the next.
+
 ## Correctly Managing Sub-Packet BDPs
 
 1. Configure a bottleneck with a very low BDP (e.g., < 1 packet).
