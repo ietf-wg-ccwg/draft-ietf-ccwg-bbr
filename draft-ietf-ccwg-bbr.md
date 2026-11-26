@@ -1273,11 +1273,13 @@ It is important to avoid having spurious loss detection episodes cause
 a spuriously small time interval, causing spuriously high
 delivery rate samples.
 
-After each packet transmission, the sender executes the following steps:
+When the sender transmits a packet P, it executes the following steps.
+The C.unacked check uses the value before P is counted, while P.tx_in_flight
+includes P:
 
 ~~~~
   OnPacketSent(Packet P):
-    if (C.unacked == 0)
+    if (C.unacked == 0)  /* not counting P */
       C.first_send_time  = C.delivered_time = P.send_time
 
     P.first_send_time = C.first_send_time
@@ -1303,6 +1305,9 @@ the per-ACK RateSample RS:
     RS.prior_time    = 0
     RS.interval      = 0
     RS.delivery_rate = 0
+    RS.delivered     = 0
+    RS.tx_in_flight  = 0
+    RS.lost          = 0
 ~~~~
 
 Next, for each newly acknowledged packet, the connection calls
@@ -1327,6 +1332,8 @@ information from the most recently sent packet to update the rate sample:
       RS.prior_delivered  = P.delivered
       RS.prior_time       = P.delivered_time
       RS.is_app_limited   = P.is_app_limited
+      RS.tx_in_flight     = P.tx_in_flight
+      RS.lost             = C.lost - P.lost
       RS.send_elapsed     = P.send_time - P.first_send_time
       RS.ack_elapsed      = C.delivered_time - P.delivered_time
       RS.last_acked_packet_id = P.packet_id
@@ -1955,7 +1962,7 @@ CheckStartupDone() exits Startup and enters Drain:
     if (BBR.loss_events_in_round < BBR.StartupFullLossCnt &&
         C.has_selective_acks)
       return
-    if (!IsInflightTooHigh())
+    if (!IsInflightTooHigh(RS))
       return
     BBR.undo_state = Startup
     BBR.full_bw_reached = true
@@ -2529,7 +2536,7 @@ The ancillary logic to implement the ProbeBW state machine:
         StartProbeBW_REFILL()
         return true
 
-    if (!IsInflightTooHigh())
+    if (!IsInflightTooHigh(RS))
       /* Loss rate is safe. Adjust upper bounds upward. */
       if (BBR.inflight_longterm == Infinity)
         return false /* no upper bounds to raise */
@@ -2829,13 +2836,13 @@ acknowledged as delivered:
     C.delivered += P.size
 ~~~~
 
-Upon receiving an ACK for a given data packet, the BBR algorithm first executes
+On each ACK that delivers data, the BBR algorithm first executes
 the following logic to see if a round trip has elapsed, and if so, increment
 the count of such round trips elapsed:
 
 ~~~~
   UpdateRound():
-    if (P.delivered >= BBR.next_round_delivered)
+    if (RS.has_data && RS.prior_delivered >= BBR.next_round_delivered)
       StartRound()
       BBR.round_count++
       BBR.rounds_since_probe_up++
@@ -3158,25 +3165,27 @@ reduces BBR.inflight_longterm:
 
 ~~~~
   /* Do loss signals suggest C.inflight was too high? */
-  IsInflightTooHigh():
-    return ((RS.lost > RS.tx_in_flight * BBR.LossThresh) ||
-            (RS.lost > 0 && !C.has_selective_acks))
+  IsInflightTooHigh(rs):
+    return ((rs.lost > rs.tx_in_flight * BBR.LossThresh) ||
+            (rs.lost > 0 && !C.has_selective_acks))
 
-  HandleInflightTooHigh():
+  HandleInflightTooHigh(rs):
     BBR.prev_probe_too_high = true
     BBR.check_probe_loss = false  /* only react once per bw probe */
-    if (!RS.is_app_limited)
-      BBR.inflight_longterm = max(RS.tx_in_flight,
+    if (!rs.is_app_limited)
+      BBR.inflight_longterm = max(rs.tx_in_flight,
                             TargetInflight() * BBR.Beta)
     if (BBR.state == ProbeBW_UP)
       BBR.undo_state = ProbeBW_UP
       StartProbeBW_DOWN()
 ~~~~
 
-Here RS.tx_in_flight is the C.inflight value
-when the most recently ACKed packet was sent. And the BBR.Beta (0.7x) bound
-is to try to ensure that BBR does not react more dramatically than CUBIC's
-0.7x multiplicative decrease factor.
+Here rs is the rate sample being checked: either the RS of the ACK being
+processed, or a sample built from a lost packet in HandleLostPacket().
+rs.tx_in_flight is the C.inflight value when that packet was sent. The
+BBR.Beta (0.7x) floor keeps BBR.inflight_longterm at no less than 0.7 times the
+target inflight (the estimated BDP, or C.cwnd if lower), so BBR does not react
+more dramatically than CUBIC's 0.7x multiplicative decrease factor.
 
 Some loss detection algorithms, including RACK {{RFC8985}} or QUIC loss
 detection {{RFC9002}}, delay loss marking to wait for potential
@@ -3228,24 +3237,25 @@ In pseudocode:
     NoteLoss()
     if (!BBR.check_probe_loss)
       return /* not a packet sent while probing bandwidth */
-    RS.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
-    RS.lost = C.lost - P.lost /* data lost since transmit */
-    RS.is_app_limited = P.is_app_limited
-    if (IsInflightTooHigh())
-      RS.tx_in_flight = InflightAtLoss(P)
-      HandleInflightTooHigh()
+    /* Build a sample for P, without touching the ACK's RS: */
+    rs.tx_in_flight = P.tx_in_flight /* C.inflight at transmit */
+    rs.lost = C.lost - P.lost /* data lost since transmit */
+    rs.is_app_limited = P.is_app_limited
+    if (IsInflightTooHigh(rs))
+      rs.tx_in_flight = InflightAtLoss(rs, P)
+      HandleInflightTooHigh(rs)
 
   /* At what prefix of "packet" P did losses exceed BBR.LossThresh?
      We perform this computation because P may be an offload burst
      containing many packets, and it's important to estimate which
      fraction of that burst fits safely in the network path.
    */
-  InflightAtLoss(Packet P):
+  InflightAtLoss(rs, Packet P):
     size = P.size
     /* What was in flight before this packet? */
-    inflight_prev = RS.tx_in_flight - size
+    inflight_prev = rs.tx_in_flight - size
     /* What was lost before this packet? */
-    lost_prev = RS.lost - size
+    lost_prev = rs.lost - size
     lost_prefix = (BBR.LossThresh * inflight_prev - lost_prev) /
                   (1 - BBR.LossThresh)
     /* At what C.inflight value did losses cross BBR.LossThresh? */
