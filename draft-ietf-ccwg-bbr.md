@@ -449,6 +449,12 @@ value at or below 1 / BBRStartupCwndGain = 1 / 2 = 0.5 will theoretically
 achieve this. BBR uses the value 0.5, which has been shown to offer good
 performance when compared with other alternatives.
 
+BBR.ProbeBWDownPacingGain: A constant specifying the pacing gain value used
+in ProbeBW_DOWN (0.90).
+
+BBR.ProbeBWUpPacingGain: A constant specifying the pacing gain value used
+in ProbeBW_UP (1.25).
+
 BBR.PacingMarginPercent: The static discount factor of 1% used to scale BBR.bw
 to produce C.pacing_rate.
 
@@ -461,6 +467,9 @@ produce a congestion window (C.cwnd).
 BBR.DefaultCwndGain: A constant specifying the minimum gain value that allows
 the sending rate to double each round (2) {{BBRStartupCwndGain}}.
 Used by default in most phases for BBR.cwnd_gain.
+
+BBR.ProbeBWUpCwndGain: A constant specifying the cwnd gain value used
+in ProbeBW_UP (2.25).
 
 
 ## General Algorithm State {#general-algorithm-state}
@@ -2371,7 +2380,6 @@ Upon entering ProbeBW, BBR executes:
 
 ~~~~
   EnterProbeBW():
-    BBR.cwnd_gain = BBR.DefaultCwndGain
     StartProbeBW_DOWN()
 ~~~~
 
@@ -2386,9 +2394,13 @@ The core logic for entering each state:
     BBR.is_bw_probe_stopping = true
     StartRound()
     BBR.state = ProbeBW_DOWN
+    BBR.pacing_gain = BBR.ProbeBWDownPacingGain
+    BBR.cwnd_gain = BBR.DefaultCwndGain
 
   StartProbeBW_CRUISE():
     BBR.state = ProbeBW_CRUISE
+    BBR.pacing_gain = 1
+    BBR.cwnd_gain = BBR.DefaultCwndGain
 
   StartProbeBW_REFILL():
     ResetShortTermModel()
@@ -2398,12 +2410,16 @@ The core logic for entering each state:
     BBR.is_bw_probe_stopping = false
     StartRound()
     BBR.state = ProbeBW_REFILL
+    BBR.pacing_gain = 1
+    BBR.cwnd_gain = BBR.DefaultCwndGain
 
   StartProbeBW_UP():
     StartRound()
     ResetFullBW()
     BBR.full_bw = RS.delivery_rate
     BBR.state = ProbeBW_UP
+    BBR.pacing_gain = BBR.ProbeBWUpPacingGain
+    BBR.cwnd_gain = BBR.ProbeBWUpCwndGain
     RaiseInflightLongtermSlope()
 ~~~~
 
