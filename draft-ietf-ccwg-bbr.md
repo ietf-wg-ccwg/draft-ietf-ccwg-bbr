@@ -3951,11 +3951,11 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 
 1. Start a flow in the STARTUP phase.
 2. Ensure the sender has enough data to send and is not application-limited.
-3. Verify that BBR measures delivery rate samples (RS.delivery_rate) that plateau,
-   and ensure the estimated bandwidth (BBR.max_bw) is close (i.e., within 2%) to
+3. Verify that BBR measures delivery rate samples (`RS.delivery_rate`) that plateau,
+   and ensure the estimated bandwidth (`BBR.max_bw`) is close (i.e., within 2%) to
    the simulated bandwidth.
 4. Verify that after 3 consecutive rounds where the delivery rate grows by less
-   than 25% (i.e., when BBR.full_bw_count reaches 3), `BBR.full_bw_now` and `BBR.full_bw_reached` are set to `true`.
+   than 25% (i.e., when `BBR.full_bw_count` reaches 3), `BBR.full_bw_now` and `BBR.full_bw_reached` are set to `true`.
 5. Verify the connection transitions from STARTUP to DRAIN.
 
 ## Exiting STARTUP on Loss When Application-Limited
@@ -3965,7 +3965,7 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 3. Introduce packet loss exceeding `BBR.LossThresh` (2%) and sequence range
    criteria over the time scale of a single full round trip.
 4. Verify that `CheckStartupHighLoss()` observes the high loss rate.
-5. Verify the connection sets `BBR.full_bw_now` and `BBR.full_bw_reached` to `true`, exits STARTUP,
+5. Verify the connection sets `BBR.full_bw_reached` to `true`, exits STARTUP,
    and transitions to DRAIN, demonstrating that loss triggers the end of STARTUP
    even when bandwidth samples are application-limited.
 
@@ -3981,12 +3981,13 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 ## Exiting DRAIN Based on Time
 
 1. Start a flow and transition it from STARTUP to DRAIN.
-2. Decrease the available bandwidth by 10% upon entering DRAIN to simulate
-   an over-estimation of the available bandwidth.
+2. Decrease the available bandwidth by a large enough amount (e.g., 50%) upon
+   entering DRAIN to simulate an over-estimation of the available bandwidth.
 3. Ensure `C.inflight` remains higher than `Inflight(1.0)` for several
    round trips.
 4. Track `BBR.drain_start_round` and current `BBR.round_count`.
-5. Verify that after 3 round trips in DRAIN, the connection exits DRAIN and
+5. Verify that after more than 3 round trips in DRAIN
+   (`BBR.round_count > BBR.drain_start_round + 3`), the connection exits DRAIN and
    transitions to PROBE_BW even though `C.inflight` has not reached the target
    BDP.
 
@@ -4018,22 +4019,25 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 1. Wait until the connection transitions to PROBE_UP (or STARTUP).
 2. Limit the application sending rate so bandwidth samples are application-limited.
 3. Verify that as long as there is no loss and the rounds are application-limited,
-   the connection stays in PROBE_UP (or STARTUP) indefinitely.
+   the connection stays in PROBE_UP (or STARTUP) until `BBR.min_rtt` expires
+   and the connection enters PROBE_RTT.
 
 ## Exiting PROBE_DOWN on Inflight
 
 1. Wait until the connection transitions to PROBE_DOWN.
-2. Verify that `BBR.pacing_gain` is set to `BBR.ProbeDownPacingGain` (0.90).
+2. Verify that `BBR.pacing_gain` is set to 0.90.
 3. Track `C.inflight` and `InflightWithHeadroom()`.
 4. Wait for the queue to drain and `C.inflight` to fall below or equal to
-   both `InflightWithHeadroom()` and `Inflight(1.0)`.
+   both `InflightWithHeadroom()` and the estimated BDP based on `BBR.max_bw`,
+   plus the quantization budget.
 5. Verify the connection transitions to PROBE_CRUISE.
 
 ## Exiting PROBE_DOWN After Max Time
 
 1. Wait until the connection transitions to PROBE_DOWN.
 2. Prevent `C.inflight` from dropping below `InflightWithHeadroom()` by
-   decreasing the available bandwidth by 10% upon entering PROBE_DOWN.
+   decreasing the available bandwidth by a large enough amount (e.g., 50%)
+   upon entering PROBE_DOWN.
 3. Verify that after `BBR.bw_probe_wait` time elapses, `IsTimeToProbeBW()`
    returns `true`.
 4. Verify the connection transitions directly to PROBE_REFILL, bypassing
@@ -4089,9 +4093,11 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 
 1. Configure a bottleneck with a very low BDP (e.g., < 1 packet).
 2. Wait until the connection transitions to PROBE_BW.
-3. Verify that `BBR.MinPipeCwnd` (4 packets) acts as a floor for `C.cwnd`.
-4. Ensure the pacing rate correctly matches the low bandwidth, while the
-   4-packet cwnd allows for delayed ACKs without stalling the pipeline.
+3. Verify that `C.cwnd` does not drop below the larger of `BBR.MinPipeCwnd`
+   (4 packets) and `BBR.offload_budget` (e.g., 6 packets for TCP, since
+   `C.send_quantum` is at least 2 packets).
+4. Ensure the pacing rate correctly matches the low bandwidth, while this
+   cwnd floor allows for delayed ACKs without stalling the pipeline.
 
 ## Increasing Bandwidth 10x and Ensuring Full Bandwidth is Reached
 
@@ -4136,8 +4142,9 @@ data so that it exits STARTUP and naturally gets to the specified phase.
    `ProbeBW_UP`, verify `BBR.undo_state` records that prior state.
 3. Once the transport protocol detects the loss was spurious (e.g., via TCP DSACK or QUIC packet numbers indicating the original packet was delivered and the retransmission was spurious), verify
    `HandleSpuriousLossDetection()` restores the saved parameters.
-4. Ensure the connection seamlessly returns to its previous state (e.g.,
-   PROBE_UP).
+4. Ensure the connection returns to probing for bandwidth: to STARTUP if
+   the loss ended STARTUP, or to PROBE_REFILL (followed by PROBE_UP after one
+   round trip) if the loss ended PROBE_UP.
 
 ## Handling Spurious RTO Recovery
 
@@ -4151,8 +4158,9 @@ data so that it exits STARTUP and naturally gets to the specified phase.
    `ProbeBW_UP`, verify `BBR.undo_state` records that prior state.
 3. Once the transport protocol detects the loss was spurious (e.g., via TCP DSACK or QUIC packet numbers indicating the original packet was delivered and the retransmission was spurious), verify
    `HandleSpuriousLossDetection()` restores the saved parameters.
-4. Ensure the connection seamlessly returns to its previous state (e.g.,
-   PROBE_UP).
+4. Ensure the connection returns to probing for bandwidth: to STARTUP if
+   the loss ended STARTUP, or to PROBE_REFILL (followed by PROBE_UP after one
+   round trip) if the loss ended PROBE_UP.
 
 ## Entering and Exiting PROBE_RTT During STARTUP
 
@@ -4171,8 +4179,9 @@ data so that it exits STARTUP and naturally gets to the specified phase.
 2. Transition the connection into PROBE_UP.
 3. Introduce packet loss before `IsTimeToGoDown()` triggers on a bandwidth
    plateau.
-4. Verify that the loss causes `HandleInflightTooHigh()` to execute, scaling
-   down `BBR.inflight_longterm` based on `BBR.Beta`.
+4. Verify that the loss causes `HandleInflightTooHigh()` to execute, setting
+   `BBR.inflight_longterm` to
+   `max(RS.tx_in_flight, BBR.Beta * TargetInflight())`.
 5. Verify the connection aborts PROBE_UP and immediately transitions to
    PROBE_DOWN.
 
