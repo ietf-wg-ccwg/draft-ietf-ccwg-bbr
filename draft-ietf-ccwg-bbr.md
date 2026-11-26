@@ -393,6 +393,9 @@ This MUST NOT include pure ACK packets.
 C.is_cwnd_limited: True if the connection has fully utilized C.cwnd at any
 point in the last packet-timed round trip.
 
+InLossRecovery(): True if the connection is currently in loss recovery,
+either fast recovery or RTO recovery.
+
 C.next_send_time: The earliest pacing departure time another packet can be
 sent.
 
@@ -445,7 +448,7 @@ Startup mode for BBR.pacing_gain.
 BBR.DrainPacingGain: A constant specifying the pacing gain value used in
 Drain mode, to attempt to drain the estimated queue at the bottleneck link
 in one round trip or less. As noted in {{BBRDrainPacingGain}}, any
-value at or below 1 / BBRStartupCwndGain = 1 / 2 = 0.5 will theoretically
+value at or below 1 / BBR.DefaultCwndGain = 1 / 2 = 0.5 will theoretically
 achieve this. BBR uses the value 0.5, which has been shown to offer good
 performance when compared with other alternatives.
 
@@ -2352,7 +2355,8 @@ as follows:
       2 + random_float_between(0.0, 1.0) /* 0..1 sec */
 
   IsRenoCoexistenceProbeTime():
-    reno_rounds = TargetInflight()
+    /* Estimated BDP, in packets: */
+    reno_rounds = min(Inflight(1.0), C.cwnd) / C.SMSS
     rounds = min(reno_rounds, 63)
     return BBR.rounds_since_probe_up >= rounds
 
@@ -2458,7 +2462,7 @@ The ancillary logic to implement the ProbeBW state machine:
   IsTimeToCruise():
     if (C.inflight > InflightWithHeadroom())
       return false /* not enough headroom */
-    if (C.inflight > Inflight(BBR.max_bw, 1.0))
+    if (C.inflight > QuantizationBudget(BBR.max_bw * BBR.min_rtt))
       return false /* C.inflight > estimated BDP */
     return true
 
@@ -3071,8 +3075,8 @@ for future transmissions by the pacing offload mechanism.
 Furthermore, QUIC receivers might acknowledge packets less often than
 {{RFC9000, Section 13.2}}, such as when using the ACK-FREQUENCY
 ({{?I-D.draft-ietf-quic-ack-frequency}}) extension. The offload budget can be
-increased by min(Ack-Eliciting Threshold, Requested Max Ack Delay * BBR.max_bw)
-to account for delayed acknowledgements.
+increased by min(Ack-Eliciting Threshold * C.SMSS,
+Requested Max Ack Delay * BBR.max_bw) to account for delayed acknowledgements.
 
 
 ### BBR.extra_acked {#bbrextraacked}
@@ -3527,12 +3531,12 @@ ACK by executing the SetPacingRate() step as follows:
 
 ~~~~
   SetPacingRateWithGain(pacing_gain):
-    rate = pacing_gain * bw * (100 - BBR.PacingMarginPercent) / 100
+    rate = pacing_gain * BBR.bw * (100 - BBR.PacingMarginPercent) / 100
     if (BBR.full_bw_reached || rate > C.pacing_rate)
       C.pacing_rate = rate
 
   SetPacingRate():
-    SetPacingRateWithGain(C.pacing_gain)
+    SetPacingRateWithGain(BBR.pacing_gain)
 ~~~~
 
 To help drive the network toward lower queues and low latency while maintaining
@@ -3689,7 +3693,7 @@ Upon retransmission timeout (RTO):
   OnEnterRTO():
     SaveCwnd()
     SaveStateUponLoss()
-    C.cwnd = C.inflight + 1
+    C.cwnd = C.inflight + C.SMSS
 ~~~~
 
 Upon entering Fast Recovery:
