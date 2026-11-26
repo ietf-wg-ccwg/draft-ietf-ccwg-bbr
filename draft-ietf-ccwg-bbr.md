@@ -590,10 +590,7 @@ BBR.MaxBwFilterLen: A constant specifying the filter window length for
 BBR.max_bw_filter = 2 (representing
 up to 2 ProbeBW cycles, the current cycle and the previous full cycle).
 
-BBR.cycle_count: The virtual time used by the BBR.max_bw filter window. Note
-that BBR.cycle_count only needs to be tracked with a single bit, since the
-BBR.max_bw_filter only needs to track samples from two time slots: the previous
-ProbeBW cycle and the current ProbeBW cycle.
+BBR.cycle_count: The virtual time used by the BBR.max_bw filter window.
 
 
 ## Estimating BBR.extra_acked {#estimating-bbrextraacked}
@@ -615,8 +612,8 @@ filter window in steady-state = 10 (in units of packet-timed round trips).
 ## Startup Parameters and State {#startup-parameters-and-state}
 
 BBR.full_bw_reached: A boolean that records whether BBR estimates that it
-has ever fully utilized its available bandwidth over the lifetime of the
-connection.
+has fully utilized its available bandwidth. Once set, it stays set unless an
+undo of a spurious loss recovery resets it.
 
 BBR.full_bw_now: A boolean that records whether BBR estimates that it has
 fully utilized its available bandwidth since it most recently started looking.
@@ -1158,14 +1155,16 @@ well in practice for congestion control and telemetry purposes.
 This algorithm requires the following new state variables for each transport
 connection:
 
-C.delivered_time: The wall clock time when C.delivered was last updated.
+C.delivered_time: The wall clock time when C.delivered was last updated. When
+a packet is sent with no unacknowledged data, this is reset to that packet's
+send time.
 
-C.first_send_time: If packets are in flight, then this holds the send time of
-the packet that was most recently marked as delivered. Else, if the connection
-was recently idle, then this holds the send time of most recently sent packet.
+C.first_send_time: The send time of the packet that was most recently marked
+as delivered. When a packet is sent with no unacknowledged data, this is reset
+to that packet's send time.
 
-C.app_limited: The index of the last transmitted packet marked as
-application-limited, or 0 if the connection is not currently
+C.app_limited: The value of C.delivered + C.inflight when the connection was
+last marked as application-limited, or 0 if the connection is not currently
 application-limited.
 
 We also assume that the transport protocol sender implementation tracks the
@@ -1630,6 +1629,17 @@ the relationship between the different states:
     +---- ProbeRTT <-----------+
 ~~~~
 
+For readability, the diagram omits the following transitions:
+
+* ProbeBW_DOWN to ProbeBW_REFILL, when it is time to probe for bandwidth
+  before ProbeBW_DOWN is done (see IsTimeToProbeBW()).
+
+* ProbeBW_DOWN or ProbeBW_CRUISE to ProbeBW_REFILL, for precautionary
+  bandwidth probing (see {{bandwidth-probing-caution}}).
+
+* Back to Startup or ProbeBW_REFILL, when undoing a spurious loss recovery
+  (see HandleSpuriousLossDetection()).
+
 
 ### State Machine Operation Overview {#state-machine-operation-overview}
 
@@ -1881,7 +1891,9 @@ then it estimates that it has fully utilized the per-flow available bandwidth,
 and sets both BBR.full_bw_now and BBR.full_bw_reached to true.
 
 Upon starting a full pipe detection process (either on startup or when probing
-for an increase in bandwidth), the following steps are taken:
+for an increase in bandwidth), the following steps are taken. When starting
+ProbeBW_UP, BBR then seeds BBR.full_bw with the current RS.delivery_rate, so
+the plateau check starts counting from the first round of ProbeBW_UP:
 
 ~~~~
   ResetFullBW():
@@ -1985,13 +1997,14 @@ than one round trip:
 ~~~~
 
 In Drain, when the amount of data in flight is less than or equal to the
-estimated BDP, meaning BBR estimates that the queue at the bottleneck link
-has been fully drained, then BBR exits Drain and enters ProbeBW. Normally, this
-condition should be met within one round trip of entering the drain state.
-However, it could take longer if the bandwidth was overestimated during Startup
-due to interactions with competing flows. In that case, BBR enters ProbeBW
-after 3 round trips, allowing the bandwidth max filter to advance during the
-next probing cycle. To implement this, upon every ACK BBR executes:
+estimated BDP plus the quantization budget (Inflight(1.0)), meaning BBR
+estimates that the queue at the bottleneck link has been fully drained, then BBR
+exits Drain and enters ProbeBW. Normally, this condition should be met within
+one round trip of entering the drain state. However, it could take longer if the
+bandwidth was overestimated during Startup due to interactions with competing
+flows. In that case, BBR enters ProbeBW after more than 3 round trips, allowing
+the bandwidth max filter to advance during the next probing cycle. To implement
+this, upon every ACK BBR executes:
 
 ~~~~
   CheckDrainDone():
@@ -2039,8 +2052,13 @@ met:
   buffer or free time slots in the bottleneck link) that can be used by
   cross traffic (both for convergence of bandwidth shares and for burst tolerance).
 
-* C.inflight is less than or equal to BBR.bdp, i.e. the flow
-  estimates that it has drained any queue at the bottleneck.
+* C.inflight is less than or equal to the estimated BDP based on BBR.max_bw,
+  plus the quantization budget, i.e. the flow estimates that it has drained
+  any queue at the bottleneck.
+
+If it is time to probe for bandwidth again (see
+{{time-scale-for-bandwidth-probing-}}) before these conditions are met, the flow
+goes directly from ProbeBW_DOWN to ProbeBW_REFILL.
 
 
 #### ProbeBW_CRUISE {#probebwcruise}
@@ -2107,12 +2125,12 @@ in flight.
 
 #### Accelerating to Probe for Bandwidth  {#bandwidth-probing-accel}
 
-After ProbeBW_REFILL refills the pipe, ProbeBW_UP probes for possible
-increases in available bandwidth by raising the sending rate, using a
-BBR.pacing_gain of 1.25, to send faster than the current estimated available
-bandwidth. It also raises BBR.cwnd_gain to 2.25, to ensure that the flow
-can send faster than it had been, even if C.cwnd was previously limiting the
-sending process.
+After ProbeBW_REFILL refills the pipe, ProbeBW_UP probes for possible increases
+in available bandwidth by raising the sending rate, using a BBR.pacing_gain of
+1.25, to send faster than the current estimated available bandwidth. It also
+raises BBR.cwnd_gain to 2.25, and allows an extra 2 \* C.SMSS in flight (see
+QuantizationBudget()), to ensure that the flow can send faster than it had been,
+even if C.cwnd was previously limiting the sending process.
 
 If the flow has not set BBR.inflight_longterm, it implicitly tries to raise
 C.inflight to at least BBR.pacing_gain \* BBR.bdp = 1.25 \*
@@ -2138,14 +2156,14 @@ bandwidth.
 
 Increasing a flow's sending rate is essential for ensuring proper bandwidth
 utilization, but raises risks for excessive queuing or packet loss. These risks
-are mitigated by the "precautionary bandwidth probing"
-mechanism. It allows flows to persist in ProbeBW_UP only if the most
-recent ProbeBW_UP phase did not result in excess loss. If ProbeBW_UP exits due
-to excess loss, then the following ProbeBW_UP phase is a brief "precautionary
-bandwidth probing" phase that lasts only until C.inflight reaches
-BBR.inflight_longterm. If the "precautionary bandwidth probing" phase succeeds
-(there is no excess loss) then the flow immediately returns to ProbeBW_REFILL
-and then ProbeBW_UP, and persists in ProbeBW_UP.
+are mitigated by the "precautionary bandwidth probing" mechanism. It allows
+flows to persist in ProbeBW_UP only if the most recent bandwidth probe did not
+result in excess loss. If the most recent probe saw excess loss (during
+ProbeBW_UP or the round trip after it), then the following ProbeBW_UP phase is a
+brief "precautionary bandwidth probing" phase that lasts only until C.inflight
+reaches BBR.inflight_longterm. If the "precautionary bandwidth probing" phase
+succeeds (there is no excess loss) then the flow immediately returns to
+ProbeBW_REFILL and then ProbeBW_UP, and persists in ProbeBW_UP.
 
 The "precautionary bandwidth probing" mechanism is motivated by the fact that a
 full round trip is required to receive feedback indicating the level of queuing
@@ -2257,11 +2275,9 @@ a BBR-native time scale, and a bounded Reno-conscious time scale:
 
 * T_reno: Reno-coexistence time scale
 
-  * T_reno_bound = pick_randomly_either({62, 63})
+  * reno_bdp = min(BBR.bdp, C.cwnd), in packets
 
-  * reno_bdp = min(BBR.bdp, C.cwnd)
-
-  * T_reno = min(reno_bdp, T_reno_bound) round trips
+  * T_reno = min(reno_bdp, 63) - pick_randomly_either({0, 1}) round trips
 
 
 * T_probe: The time between bandwidth probe UP phases:
@@ -2550,12 +2566,14 @@ ProbeRTT state to try to cooperate to periodically drain the bottleneck queue,
 and thus improve their BBR.min_rtt estimate of the unloaded two-way propagation
 delay.
 
-A critical point is that before BBR raises its BBR.min_rtt
-estimate (which would in turn raise its maximum permissible C.cwnd), it first
-enters ProbeRTT to try to make a concerted and coordinated effort to drain
-the bottleneck queue and make a robust BBR.min_rtt measurement. This allows the
-BBR.min_rtt estimates of ensembles of BBR flows to converge, avoiding feedback
-loops of ever-increasing queues and RTT samples.
+A critical point is that when the BBR.min_rtt estimate expires, BBR enters
+ProbeRTT at the same time as it accepts a new, possibly higher, BBR.min_rtt
+sample. While in ProbeRTT, C.cwnd stays capped based on the old BBR.min_rtt
+(BBR.probe_rtt_cwnd), so a higher BBR.min_rtt does not raise C.cwnd until
+ProbeRTT has made a concerted and coordinated effort to drain the bottleneck
+queue and make a robust BBR.min_rtt measurement. This allows the BBR.min_rtt
+estimates of ensembles of BBR flows to converge, avoiding feedback loops of
+ever-increasing queues and RTT samples.
 
 The ProbeRTT state works in concert with BBR.min_rtt estimation. Up to once
 every BBR.MinRTTFilterLen = 10 seconds, the flow enters ProbeRTT, decelerating
@@ -2604,12 +2622,13 @@ standard BBR.MinRTTFilterLen of 10 secs.
 A BBR.MinRTTFilterLen of 10 secs is short enough to allow quick convergence if
 traffic levels or routes change, but long enough so that interactive
 applications (e.g., Web, remote procedure calls, video chunks) often have
-natural silences or low-rate periods within the window where the flow's rate
-is low enough for long enough to drain its queue in the bottleneck. Then the
-BBR.min_rtt filter opportunistically picks up these measurements, and the
-BBR.min_rtt estimate refreshes without requiring ProbeRTT. This way, flows
-typically need only pay the throughput penalty if there are multiple bulk
-flows busy sending over the entire BBR.MinRTTFilterLen window.
+natural silences or low-rate periods within the window where the flow's rate is
+low enough for long enough to drain its queue in the bottleneck. Then the
+BBR.min_rtt filter opportunistically picks up a lower RTT sample, and the
+BBR.min_rtt estimate refreshes without requiring ProbeRTT. A sample equal to the
+current BBR.min_rtt does not refresh it. This way, flows typically need only pay
+the throughput penalty if there are multiple bulk flows busy sending over the
+entire BBR.MinRTTFilterLen window.
 
 As an optimization, when restarting from idle and finding that the
 BBR.min_rtt has expired, BBR does not enter ProbeRTT; the idleness
@@ -2645,8 +2664,7 @@ and its ProbeRTT scheduling state:
 ~~~~
 
 Here BBR.min_rtt_expired is a boolean recording whether the
-BBR.min_rtt estimate has expired and is due for a refresh, via either
-an application idle period or a transition into ProbeRTT state.
+BBR.min_rtt estimate has expired and is due for a refresh.
 
 On every ACK BBR executes CheckProbeRTT() to handle the steps related
 to the ProbeRTT state as follows:
@@ -2731,16 +2749,18 @@ To summarize, the logic for exiting ProbeRTT is as follows:
 
 ### Actions when Restarting from Idle {#actions-when-restarting-from-idle}
 
-When restarting from idle in ProbeBW states, BBR leaves C.cwnd as-is and
-paces packets at exactly BBR.bw, aiming to return as quickly as possible
-to its target operating point of rate balance and a full pipe. Specifically, if
-the flow's BBR.state is ProbeBW, and the flow is application-limited, and there
-are no packets in flight currently, then before the flow sends one or more
-packets BBR sets C.pacing_rate to exactly BBR.bw.
+When restarting from idle in ProbeBW states, BBR leaves C.cwnd as-is and paces
+packets at BBR.bw (less the pacing margin), aiming to return as quickly as
+possible to its target operating point of rate balance and a full pipe.
+Specifically, if the flow's BBR.state is ProbeBW, and the flow is
+application-limited, and there are no packets in flight currently, then before
+the flow sends one or more packets BBR sets C.pacing_rate using a pacing gain of
+1.
 
 Also, when restarting from idle BBR checks to see if the connection is in
-ProbeRTT and has met the exit conditions for ProbeRTT. If a connection goes
-idle during ProbeRTT then often it will have met those exit conditions by
+ProbeRTT and BBR.ProbeRTTDuration has elapsed. In this case BBR does not wait
+for a round trip to elapse, since nothing is in flight. If a connection goes
+idle during ProbeRTT then often BBR.ProbeRTTDuration will have elapsed by
 the time it restarts, so that the connection can restore C.cwnd to its full
 value before it starts transmitting a new flight of data.
 
@@ -2902,16 +2922,16 @@ by trade-offs among several considerations:
 ### BBR.max_bw and Application-limited Delivery Rate Samples {#bbrmaxbw-and-application-limited-delivery-rate-samples}
 
 Transmissions can be application-limited, meaning the transmission rate is
-limited by the application rather than the congestion control algorithm.  This
-is quite common because of request/response traffic. When there is a
-transmission opportunity but no data to send, the delivery rate sampler marks
-the corresponding bandwidth sample(s) as application-limited
-{{delivery-rate-samples}}.  The BBR.max_bw estimator carefully decides which
+limited by the application rather than the congestion control algorithm. This is
+quite common because of request/response traffic. When there is a transmission
+opportunity but no data to send, the delivery rate sampler marks the
+corresponding bandwidth sample(s) as application-limited
+{{delivery-rate-samples}}. The BBR.max_bw estimator carefully decides which
 samples to include in the bandwidth model to ensure that BBR.max_bw reflects
 network limits, not application limits. By default, the estimator discards
 application-limited samples, since by definition they reflect application
 limits. However, the estimator does use application-limited samples if the
-measured delivery rate happens to be larger than the current BBR.max_bw
+measured delivery rate happens to be at least as large as the current BBR.max_bw
 estimate, since this indicates the current BBR.max_bw estimate is too low.
 
 
@@ -2935,7 +2955,11 @@ UpdateMaxBw() to update the BBR.max_bw estimator as follows:
 UpdateWindowedMaxFilter() can be implemented using Kathleen Nichols' algorithm
 for tracking the minimum/maximum value of a data stream over some measurement
 window. The description of the algorithm and a sample implementation are
-available in Linux {{KN_FILTER}}.
+available in Linux {{KN_FILTER}}. Since BBR.MaxBwFilterLen is 2, a simpler
+option is to keep two slots, holding the max delivery rate in the previous
+and current ProbeBW cycles. BBR.max_bw is the larger of the two. When
+BBR.cycle_count advances, the previous slot takes the value of the current
+slot, and the current slot is reset to 0.
 
 
 ### Tracking Time for the BBR.max_bw Max Filter {#tracking-time-for-the-bbrmaxbw-max-filter}
@@ -2945,10 +2969,12 @@ BBR tracks time for the BBR.max_bw filter window using a virtual
 ProbeBW cycles.  Each time through the ProbeBW cycle, one round trip after
 exiting ProbeBW_UP (the point at which the flow has its best chance to measure
 the highest throughput of the cycle), BBR increments BBR.cycle_count, the
-virtual time used by the BBR.max_bw filter window. Note that BBR.cycle_count
-only needs to be tracked with a single bit, since the BBR.max_bw filter only
-needs to track samples from two time slots: the previous ProbeBW cycle and the
-current ProbeBW cycle:
+virtual time used by the BBR.max_bw filter window. BBR also increments it one
+round trip after entering ProbeBW_DOWN from Drain or ProbeRTT. In all these
+cases, BBR skips the increment if the delivery rate sample at that point is
+application-limited (see AdaptLongTermModel()). With the two-slot filter
+above, incrementing BBR.cycle_count just shifts the slots, so the counter
+itself does not need to be stored:
 
 ~~~~
   AdvanceMaxBwFilter():
@@ -3081,8 +3107,9 @@ BBR.extra_acked is a volume of data that is the estimate of the recent degree
 of aggregation in the network path. For each ACK, the algorithm computes
 a sample of the estimated extra ACKed data beyond the amount of data that
 the sender expected to be ACKed over the timescale of a round trip, given
-the BBR.bw. It then computes BBR.extra_acked as the windowed maximum over 1
-round trip during STARTUP and 10 round trips after exiting STARTUP. If the
+the BBR.bw, capped at C.cwnd. It then computes BBR.extra_acked as the
+windowed maximum over 1 round trip until BBR estimates it has filled the pipe
+(BBR.full_bw_reached), and over 10 round trips after that. If the
 ACK rate falls below the expected bandwidth, then the algorithm estimates
 an aggregation episode has terminated, and resets the sampling interval to
 start from the current time.
@@ -3145,16 +3172,16 @@ exits Startup and enters Drain (see {{exiting-startup-based-on-packet-loss}}).
 
 #### Probing for Bandwidth In ProbeBW {#probing-for-bandwidth-in-probebw}
 
-BBR searches for the maximum volume of data that can be sensibly placed
-in flight in the network. A key precondition is that the flow is actually
-trying robustly to find that operating point. To implement this, when a flow is
-in ProbeBW, and an ACK covers data sent in one of the accelerating phases
-(REFILL or UP), and the ACK indicates that the loss rate over the past round
-trip exceeds the queue pressure objective, and the flow is not application
-limited, and has not yet responded to congestion signals from the most recent
-REFILL or UP phase, then the flow estimates that the volume of data it allowed
-in flight exceeded what matches the current delivery process on the path, and
-reduces BBR.inflight_longterm:
+BBR searches for the maximum volume of data that can be sensibly placed in
+flight in the network. A key precondition is that the flow is actually trying
+robustly to find that operating point. To implement this, BBR checks losses from
+the start of ProbeBW_UP until one round trip after the probe ends (while
+BBR.check_probe_loss is true). When a flow is in this window, and the loss rate
+over the past round trip exceeds the queue pressure objective, and the flow is
+not application limited, and has not yet responded to congestion signals from
+the most recent probe, then the flow estimates that the volume of data it
+allowed in flight exceeded what matches the current delivery process on the
+path, and reduces BBR.inflight_longterm:
 
 ~~~~
   /* Do loss signals suggest C.inflight was too high? */
@@ -3278,8 +3305,13 @@ BBR.bw_latest: a 1-round-trip max of delivered bandwidth (RS.delivery_rate).
 BBR.inflight_latest: a 1-round-trip max of delivered volume of data
 (RS.delivered).
 
+Here a round trip starts at the first loss after the previous round trip
+ended (see NoteLoss()), rather than at BBR.next_round_delivered.
 Upon the ACK at the end of each round that encountered a newly-marked loss,
-the flow updates its model (BBR.bw_shortterm and BBR.inflight_shortterm) as follows:
+the flow updates its model (BBR.bw_shortterm and BBR.inflight_shortterm) as
+follows. The first time this happens after the model was reset,
+BBR.bw_shortterm starts from BBR.max_bw and BBR.inflight_shortterm starts
+from C.cwnd (see InitLowerBounds()):
 
 ~~~~
       bw_shortterm = max(       bw_latest, BBR.Beta *       BBR.bw_shortterm )
@@ -3447,7 +3479,8 @@ each state. In the table below, the semantics of the columns are as follows:
   to compute BBR.bw.
 
 * Volume Cap: the volume values applied as bounds on the BBR.max_inflight value
-  to compute C.cwnd.
+  to compute C.cwnd. Here 0.85\*inflight_longterm is the value returned by
+  InflightWithHeadroom().
 
 The control behavior can be summarized as follows. Upon processing each ACK,
 BBR uses the values in the table below to compute BBR.bw in
@@ -3461,8 +3494,8 @@ State          | Tactic | Pacing | Cwnd | Rate         | Volume
 Startup        | accel  | 2.77   | 2    | N/A          | N/A
                |        |        |      |              |
 ---------------+--------+--------+------+--------------+-----------------
-Drain          | decel  | 0.5    | 2    | bw_shortterm | inflight_longterm,
-               |        |        |      |              | inflight_shortterm
+Drain          | decel  | 0.5    | 2    | bw_shortterm | inflight_shortterm
+               |        |        |      |              |
 ---------------+--------+--------+------+--------------+-----------------
 ProbeBW_DOWN   | decel  | 0.90   | 2    | bw_shortterm | inflight_longterm,
                |        |        |      |              | inflight_shortterm
@@ -3607,11 +3640,11 @@ implementation's initial congestion window (e.g. from {{RFC6928}} for TCP).
 #### Computing BBR.max_inflight {#computing-bbrmaxinflight}
 
 The BBR BBR.max_inflight is the upper bound on the volume of data BBR allows in
-flight. This bound is always in place, and dominates when all other
-considerations have been satisfied: the flow is not in loss recovery, does not
-need to probe BBR.min_rtt, and has accumulated confidence in its model
-parameters by receiving enough ACKs to gradually grow the current C.cwnd to meet
-the BBR.max_inflight.
+flight. Once BBR estimates it has filled the pipe, this bound is always in
+place, and dominates when all other considerations have been satisfied: the flow
+is not in loss recovery, does not need to probe BBR.min_rtt, and has accumulated
+confidence in its model parameters by receiving enough ACKs to gradually grow
+the current C.cwnd to meet the BBR.max_inflight.
 
 On each ACK, BBR calculates the BBR.max_inflight in UpdateMaxInflight()
 as follows:
@@ -3753,13 +3786,14 @@ value that allows pipelining (see {{minimum-cwnd-for-pipelining}}):
 
 #### cwnd Adjustment Mechanism {#cwnd-adjustment-mechanism}
 
-The network path and traffic traveling over it can make sudden dramatic
-changes.  To adapt to these changes smoothly and robustly, and reduce packet
-losses in such cases, BBR uses a conservative strategy. When C.cwnd is above the
-BBR.max_inflight derived from BBR's path model, BBR cuts C.cwnd immediately
-to the BBR.max_inflight. When C.cwnd is below BBR.max_inflight, BBR raises
-C.cwnd gradually and cautiously, increasing C.cwnd by no more than the amount of
-data acknowledged (cumulatively or selectively) upon each ACK.
+The network path and traffic traveling over it can make sudden dramatic changes.
+To adapt to these changes smoothly and robustly, and reduce packet losses in
+such cases, BBR uses a conservative strategy. Once BBR estimates it has filled
+the pipe, when C.cwnd is above the BBR.max_inflight derived from BBR's path
+model, BBR cuts C.cwnd immediately to the BBR.max_inflight. When C.cwnd is below
+BBR.max_inflight, BBR raises C.cwnd gradually and cautiously, increasing C.cwnd
+by no more than the amount of data acknowledged (cumulatively or selectively)
+upon each ACK.
 
 Specifically, on each ACK that acknowledges "RS.newly_acked" packets as newly
 acknowledged, BBR runs the following SetCwnd() steps to update C.cwnd:
